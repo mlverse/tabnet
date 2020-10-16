@@ -53,7 +53,7 @@ tabnet_no_embedding <- torch::nn_module(
     if (self$n_shared > 0) {
       shared_feat_transform <- torch::nn_module_list()
 
-      for (i in seq_along(self$n_shared)) {
+      for (i in seq_len(self$n_shared)) {
         if (i == 1) {
           shared_feat_transform$append(torch::nn_linear(
             self$input_dim,
@@ -81,7 +81,7 @@ tabnet_no_embedding <- torch::nn_module(
     self$feat_transformers <- torch::nn_module_list()
     self$att_transformers <- torch::nn_module_list()
 
-    for (step in seq_along(n_steps)) {
+    for (step in seq_len(n_steps)) {
 
       transformer <- feat_transformer(self$input_dim, n_d+n_a, shared_feat_transform,
                                       n_glu_independent=self$n_independent,
@@ -97,7 +97,7 @@ tabnet_no_embedding <- torch::nn_module(
 
     }
 
-    self$final_mapping <- torch::nn_liner(n_d, output_dim, bias=FALSE)
+    self$final_mapping <- torch::nn_linear(n_d, output_dim, bias=FALSE)
     initialize_non_glu(self$final_mapping, n_d, output_dim)
 
   },
@@ -105,11 +105,12 @@ tabnet_no_embedding <- torch::nn_module(
     res <- 0
     x <- self$initial_bn(x)
 
-    prior <- torch::torch_ones(size = x$shape, device = x$device())
+    prior <- torch::torch_ones(size = x$shape, device = x$device)
     M_loss <- 0
-    att <- self$initial_splitter(x)[, self$n_d:N]
+    att <- self$initial_splitter(x)[, (self$n_d + 1):N]
 
-    for (step in seq_along(self$n_steps)) {
+    for (step in seq_len(self$n_steps)) {
+
       M <- self$att_transformers[[step]](prior, att)
       M_loss <- M_loss + torch::torch_mean(torch::torch_sum(
         torch::torch_mul(M, torch::torch_log(M + self$epsilon)),
@@ -122,10 +123,10 @@ tabnet_no_embedding <- torch::nn_module(
       # output
       masked_x <- torch::torch_mul(M, x)
       out <- self$feat_transformers[[step]](masked_x)
-      d <- torch::nnf_relu(out[,, 1:self$n_d])
+      d <- torch::nnf_relu(out[.., 1:(self$n_d)])
       res <- torch::torch_add(res, d)
       # update attention
-      att <- out[, self$n_d:N]
+      att <- out[, (self$n_d + 1):N]
 
     }
 
@@ -139,9 +140,9 @@ tabnet_no_embedding <- torch::nn_module(
 
     x <- self$initial_bn(x)
 
-    prior <- torch::torch_ones(x$shape, device = x$device())
-    M_explain <- torch::torch_zeros(x$shape, device = x$device())
-    att <- self$initial_splitter(x)[, self$n_d:N]
+    prior <- torch::torch_ones(x$shape, device = x$device)
+    M_explain <- torch::torch_zeros(x$shape, device = x$device)
+    att <- self$initial_splitter(x)[, (self$n_d+1):N]
     masks <- list()
 
     for (step in seq_along(self$n_steps)) {
@@ -233,8 +234,9 @@ attentive_transformer <- torch::nn_module(
     self$bn <- gbn(output_dim, virtual_batch_size=virtual_batch_size,
                   momentum=momentum)
 
+
     if (mask_type == "sparsemax")
-      self$selector <- Sparsemax(dim=-1)
+      self$selector <- sparsemax(dim=-1)
     else if (mask_type == "entmax")
       self$selector <- Entmax15(dim=-1)
     else
@@ -291,5 +293,167 @@ feat_transformer <- torch::nn_module(
     x <- self$shared(x)
     x <- self$specifics(x)
     x
+  }
+)
+
+glu_block <- torch::nn_module(
+  "glu_block",
+  initialize = function(input_dim, output_dim, n_glu=2, first=FALSE,
+                        shared_layers=NULL,
+                        virtual_batch_size=128, momentum=0.02) {
+
+    self$first <- first
+    self$shared_layers <- shared_layers
+    self$n_glu <- n_glu
+    self$glu_layers <- torch::nn_module_list()
+
+    params = list(
+      'virtual_batch_size'= virtual_batch_size,
+      'momentum'= momentum
+    )
+
+    if (length(shared_layers) > 0)
+      fc <- shared_layers[[1]]
+    else
+      fc <- NULL
+
+    self$glu_layers$append(do.call(glu_layer, append(
+      list(input_dim, output_dim, fc = fc),
+      params
+    )))
+
+    if (self$n_glu >= 2) {
+      for (glu_id in 2:(self$n_glu)) {
+
+        if (length(shared_layers) > 0)
+          fc <- shared_layers[[glu_id]]
+        else
+          fc <- NULL
+
+        self$glu_layers$append(do.call(glu_layer, append(
+          list(output_dim, output_dim, fc = fc),
+          params
+        )))
+
+      }
+    }
+
+  },
+  forward = function(x) {
+
+    scale <- torch::torch_sqrt(torch::torch_tensor(0.5, device = x$device))
+
+    if (self$first) {
+      x <- self$glu_layers[[1]](x)
+      layers_left <- seq_len(self$n_glu)[-1]
+    } else {
+      layers_left <- seq_len(self$n_glu)
+    }
+
+    for (glu_id in layers_left) {
+      x <- torch::torch_add(x, self$glu_layers[[glu_id]](x))
+      x <- x*scale
+    }
+
+    x
+  }
+)
+
+glu_layer <- torch::nn_module(
+  "glu_layer",
+  initialize = function(input_dim, output_dim, fc=NULL,
+                        virtual_batch_size=128, momentum=0.02) {
+    self$output_dim <- output_dim
+
+    if (!is.null(fc))
+      self$fc <- fc
+    else
+      self$fc <- torch::nn_linear(input_dim, 2*output_dim, bias = FALSE)
+
+    initialize_glu(self$fc, input_dim, 2*output_dim)
+
+    self$bn <- gbn(2*output_dim, virtual_batch_size=virtual_batch_size,
+                  momentum=momentum)
+  },
+  forward = function(x) {
+    x <- self$fc(x)
+    x <- self$bn(x)
+    out <- torch::torch_mul(
+      x[, 1:self$output_dim],
+      torch::torch_sigmoid(x[, (self$output_dim+1):N])
+    )
+    out
+  }
+)
+
+embedding_generator <- torch::nn_module(
+  "embedding_generator",
+  initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
+
+    if (length(cat_dims) == 0 || length(cat_idxs) == 0) {
+      self$skip_embedding <- TRUE
+      self$post_embed_dim <- input_dim
+      return(invisible(NULL))
+    }
+
+    self$skip_embedding <- FALSE
+
+    if (length(cat_emb_dim) == 1)
+      self$cat_emb_dims <- rep(cat_emb_dim, length(cat_idxs))
+    else
+      self$cat_emb_dims <- cat_emb_dim
+
+    # check that all embeddings are provided
+    if (length(self$cat_emb_dims) != length(cat_dims)){
+      msg = "cat_emb_dim and cat_dims must be lists of same length, got {length(self$cat_emb_dims)} and {length(cat_dims)}"
+      stop(msg)
+    }
+
+    self$post_embed_dim <- as.integer(input_dim + sum(self$cat_emb_dims) - length(self$cat_emb_dims))
+    self$embeddings <- torch::nn_module_list()
+
+    # Sort dims by cat_idx
+    sorted_idxs <- order(cat_idxs)
+    cat_dims <- cat_dims[sorted_idx]
+    self$cat_emb_dims <- self$cat_emb_dims[sorted_idx]
+
+    for (i in seq_along(cat_dims)) {
+      self$embeddings$append(
+        torch::nn_embedding(
+          cat_dims[i],
+          self$cat_emb_dims[i]
+        )
+      )
+    }
+
+    # record continuous indices
+    self$continuous_idx <- rep(TRUE, input_dim)
+    self$continuous_idx[cat_idxs] <- FALSE
+
+  },
+  forward = function(x) {
+
+    if (self$skip_embedding) {
+      # no embeddings required
+      return(x)
+    }
+
+    cols <- list()
+    cat_feat_counter <- 1
+
+    for (i in seq_along(self$continuous_idx)) {
+
+      if (self$continuous_idx[i]) {
+        cols[[i]] <- x[,i]$float()$view(-1, 1)
+      } else {
+        cols[[i]] <- self$embedding[[cat_feat_counter]](x[, i]$long())
+        cat_feat_counter <- cat_feat_counter + 1
+      }
+
+    }
+
+    # concat
+    post_embeddings <- torch::torch_cat(cols, dim=2)
+    post_embeddings
   }
 )
