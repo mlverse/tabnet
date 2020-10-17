@@ -48,7 +48,7 @@ tabnet_config <- function(...) {
   )
 }
 
-train_batch <- function(batch, config) {
+train_batch <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x)
   loss <- config$loss_fn(output[[1]], batch$y)
@@ -69,7 +69,7 @@ train_batch <- function(batch, config) {
   )
 }
 
-valid_batch <- function(batch, config) {
+valid_batch <- function(network, batch, config) {
   # forward pass
   output <- network(batch$x)
   loss <- config$loss_fn(output[[1]], batch$y)
@@ -80,6 +80,22 @@ valid_batch <- function(batch, config) {
   list(
     loss = loss$item()
   )
+}
+
+transpose_metrics <- function(metrics) {
+  nms <- names(metrics[1])
+  out <- vector(mode = "list", length = length(nms))
+  for (nm in nms) {
+    out[[nm]] <- vector("numeric", length = length(metrics))
+  }
+
+  for (i in seq_along(metrics)) {
+    for (nm in nms) {
+      out[[nm]][i] <- metrics[i][[nm]]
+    }
+  }
+
+  out
 }
 
 fit_tabnet <- function(x, y, valid_data = NULL, config = tabnet_config()) {
@@ -94,8 +110,8 @@ fit_tabnet <- function(x, y, valid_data = NULL, config = tabnet_config()) {
   )
 
   # validation data
-  has_valid <- TRUE
-  if (is.null(valid_data)) {
+  has_valid <- FALSE
+  if (!is.null(valid_data)) {
     valid_data <- resolve_data(valid_data$x, valid_data$y)
     valid_dl <- torch::dataloader(
       torch::tensor_dataset(x = valid_data$x, y = valid_data$y),
@@ -131,28 +147,27 @@ fit_tabnet <- function(x, y, valid_data = NULL, config = tabnet_config()) {
   metrics <- list()
   for (epoch in seq_len(config$epochs)) {
 
-    metrics[[epoch]] <- list()
+    metrics[[epoch]] <- list(train = NULL, valid = NULL)
     train_metrics <- c()
     valid_metrics <- c()
 
     network$train()
     for (batch in torch::enumerate(dl)) {
-      loss <- train_batch(batch)
-      losses <- c(losses, loss)
+      m <- train_batch(network, optimizer, batch, config)
+      train_metrics <- c(train_metrics, m)
     }
+    metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
 
     network$eval()
     if (has_valid) {
       for (batch in torch::enumerate(valid_dl)) {
-        metrics <- valid_batch(batch)
-        valid_metrics <- c(valid_metrics, metrics)
+        m <- valid_batch(network, batch, config)
+        valid_metrics <- c(valid_metrics, m)
       }
-      metrics[[epoch]][["valid"]] <- valid_metrics
+      metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
     }
 
-    metrics[[epoch]][["train"]] <- train_metrics
-
-    message(sprintf("[Epoch %03d] Loss: %3f", epoch, sqrt(mean(losses))))
+    message(sprintf("[Epoch %03d] Loss: %3f", epoch, sqrt(mean(metrics[[epoch]]$train$loss))))
   }
 
   list(
