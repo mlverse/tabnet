@@ -48,10 +48,44 @@ tabnet_config <- function(...) {
   )
 }
 
-fit_tabnet <- function(x, y, config = tabnet_config()) {
+train_batch <- function(batch, config) {
+  # forward pass
+  output <- network(batch$x)
+  loss <- config$loss_fn(output[[1]], batch$y)
 
+  # Add the overall sparsity loss
+  loss <- loss - config$lambda_sparse * output[[2]]
+
+  # step of the optimization
+  optimizer$zero_grad()
+  loss$backward()
+  if (!is.null(config$clip_value)) {
+    torch::nn_utils_clip_grad_norm_(network$parameters, config$clip_value)
+  }
+  optimizer$step()
+
+  list(
+    loss = loss$item()
+  )
+}
+
+valid_batch <- function(batch, config) {
+  # forward pass
+  output <- network(batch$x)
+  loss <- config$loss_fn(output[[1]], batch$y)
+
+  # Add the overall sparsity loss
+  loss <- loss - config$lambda_sparse * output[[2]]
+
+  list(
+    loss = loss$item()
+  )
+}
+
+fit_tabnet <- function(x, y, valid_data = NULL, config = tabnet_config()) {
+
+  # training data
   data <- resolve_data(x, y)
-
   dl <- torch::dataloader(
     torch::tensor_dataset(x = data$x, y = data$y),
     batch_size = config$batch_size,
@@ -59,40 +93,73 @@ fit_tabnet <- function(x, y, config = tabnet_config()) {
     shuffle = TRUE
   )
 
-  if (config$loss == "mse")
-    loss_fn <- torch::nn_mse_loss()
-  else if (config$loss %in% c("bce", "cross_entropy"))
-    loss_fn <- torch::nn_cross_entropy_loss()
-
-  network <- tabnet(data$input_dim, data$output_dim, cat_idxs = data$cat_idx,
-                    n_d = config$n_d, n_a = config$n_a, n_steps = config$n_steps,
-                    gamma = config$gamma,
-                    virtual_batch_size = config$virtual_batch_size)
-
-  optimizer <- torch::optim_adam(network$parameters, lr = 2e-2)
-
-  for (epoch in seq_len(config$epochs)) {
-    losses <- c()
-    for (batch in torch::enumerate(dl)) {
-      # forward pass
-      output <- network(batch$x)
-      loss <- torch::nnf_mse_loss(output[[1]], batch$y)
-      # Add the overall sparsity loss
-      loss <- loss - config$lambda_sparse * output[[2]]
-
-      optimizer$zero_grad()
-      loss$backward()
-
-      if (!is.null(config$clip_value)) {
-        torch::nn_utils_clip_grad_norm_(network$parameters, config$clip_value)
-      }
-
-      optimizer$step()
-      losses <- c(losses, loss$item())
-    }
-    cat(sprintf("[Epoch %03d] Loss: %3f\n", epoch, sqrt(mean(losses))))
+  # validation data
+  has_valid <- TRUE
+  if (is.null(valid_data)) {
+    valid_data <- resolve_data(valid_data$x, valid_data$y)
+    valid_dl <- torch::dataloader(
+      torch::tensor_dataset(x = valid_data$x, y = valid_data$y),
+      batch_size = config$batch_size,
+      drop_last = FALSE,
+      shuffle = FALSE
+    )
+    has_valid <- TRUE
   }
 
+  # resolve loss
+  if (config$loss == "mse")
+    config$loss_fn <- torch::nn_mse_loss()
+  else if (config$loss %in% c("bce", "cross_entropy"))
+    config$loss_fn <- torch::nn_cross_entropy_loss()
+
+  # create network
+  network <- tabnet(
+    input_dim = data$input_dim,
+    output_dim = data$output_dim,
+    cat_idxs = data$cat_idx,
+    n_d = config$n_d,
+    n_a = config$n_a,
+    n_steps = config$n_steps,
+    gamma = config$gamma,
+    virtual_batch_size = config$virtual_batch_size
+  )
+
+  # define optimizer
+  optimizer <- torch::optim_adam(network$parameters, lr = 2e-2)
+
+  # main loop
+  metrics <- list()
+  for (epoch in seq_len(config$epochs)) {
+
+    metrics[[epoch]] <- list()
+    train_metrics <- c()
+    valid_metrics <- c()
+
+    network$train()
+    for (batch in torch::enumerate(dl)) {
+      loss <- train_batch(batch)
+      losses <- c(losses, loss)
+    }
+
+    network$eval()
+    if (has_valid) {
+      for (batch in torch::enumerate(valid_dl)) {
+        metrics <- valid_batch(batch)
+        valid_metrics <- c(valid_metrics, metrics)
+      }
+      metrics[[epoch]][["valid"]] <- valid_metrics
+    }
+
+    metrics[[epoch]][["train"]] <- train_metrics
+
+    message(sprintf("[Epoch %03d] Loss: %3f", epoch, sqrt(mean(losses))))
+  }
+
+  list(
+    network = network,
+    metrics = metrics,
+    config = config
+  )
 }
 
 test <- function() {
