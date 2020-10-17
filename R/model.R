@@ -98,7 +98,7 @@ transpose_metrics <- function(metrics) {
   out
 }
 
-fit_tabnet <- function(x, y, valid_data = NULL, config = tabnet_config()) {
+tabnet_impl <- function(x, y, valid_data = NULL, config = tabnet_config()) {
 
   # training data
   data <- resolve_data(x, y)
@@ -181,28 +181,5 @@ test <- function() {
   data("ames", package = "modeldata")
   x <- dplyr::select(ames, -Sale_Price)
   y <- ames$Sale_Price
-  fit_tabnet(x, y)
+  tabnet_impl(x, y)
 }
-
-test_py <- function() {
-  data("ames", package = "modeldata")
-  x <- dplyr::select(ames, -Sale_Price)
-  y <- ames$Sale_Price
-
-
-  x_ <- x
-  for (v in seq_along(x_)) {
-    if (is.factor(x_[[v]]))
-      x_[[v]] <- as.numeric(x_[[v]])
-  }
-
-  cat_idx <- which(sapply(x, is.factor)) - 1
-  input_dim <- ncol(x)
-
-  tabnetpy <- reticulate::import("pytorch_tabnet.tab_model")
-  reg <- tabnetpy$TabNetRegressor(input_dim = input_dim, output_dim = 1, cat_idxs = cat_idx)
-  model <- reg$fit(as.matrix(x_), matrix(y, ncol = 1), max_epochs = 1000L, batch_size = 256L)
-
-}
-
-
