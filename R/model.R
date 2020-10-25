@@ -32,19 +32,50 @@ resolve_data <- function(x, y) {
        input_dim = input_dim)
 }
 
+#' Configuration for TabNet models
+#'
+#' @param batch_size (int) Number of examples per batch, large batch sizes are
+#'   recommended. (default: 1024)
+#' @param lambda_sparse This is the extra sparsity loss coefficient as proposed
+#'   in the original paper. The bigger this coefficient is, the sparser your model
+#'   will be in terms of feature selection. Depending on the difficulty of your
+#'   problem, reducing this value could help.
+#' @param clip_value (NULL) If a float is given this will clip the gradient at
+#'   clip_value.
+#' @param loss (character or function) Loss function for training (default to mse
+#'   for regression and cross entropy for classification)
+#' @param epochs (int) Number of training epochs.
+#' @param drop_last (bool) Whether to drop last batch if not complete during
+#'   training
+#' @param n_d (int) Width of the decision prediction layer. Bigger values gives
+#'   more capacity to the model with the risk of overfitting. Values typically
+#'   range from 8 to 64.
+#' @param n_a (int) Width of the attention embedding for each mask. According to
+#'   the paper n_d=n_a is usually a good choice. (default=8)
+#' @param n_steps (int) Number of steps in the architecture
+#'   (usually between 3 and 10)
+#' @param gamma (float) This is the coefficient for feature reusage in the masks.
+#'   A value close to 1 will make mask selection least correlated between layers.
+#'   Values range from 1.0 to 2.0.
+#' @param virtual_batch_size (int) Size of the mini batches used for
+#'   "Ghost Batch Normalization" (default=128)
+#' @param valid_split (float) The fraction of the dataset used for validation.
+#'
+#' @export
 tabnet_config <- function(...) {
   list(
     batch_size = 256,
     lambda_sparse = 1e-3,
     clip_value = 1,
     loss = "mse",
-    epochs = 1000,
+    epochs = 5,
     drop_last = FALSE,
     n_d = 8,
     n_a = 8,
     n_steps = 3,
     gamma = 1.3,
-    virtual_batch_size = 128
+    virtual_batch_size = 128,
+    valid_split = 0
   )
 }
 
@@ -98,7 +129,7 @@ transpose_metrics <- function(metrics) {
   out
 }
 
-tabnet_impl <- function(x, y, valid_data = NULL, config = tabnet_config()) {
+tabnet_impl <- function(x, y, config = tabnet_config()) {
 
   # training data
   data <- resolve_data(x, y)
@@ -110,8 +141,8 @@ tabnet_impl <- function(x, y, valid_data = NULL, config = tabnet_config()) {
   )
 
   # validation data
-  has_valid <- FALSE
-  if (!is.null(valid_data)) {
+  has_valid <- config$valid_split > 0
+  if (has_valid) {
     valid_data <- resolve_data(valid_data$x, valid_data$y)
     valid_dl <- torch::dataloader(
       torch::tensor_dataset(x = valid_data$x, y = valid_data$y),
@@ -167,7 +198,7 @@ tabnet_impl <- function(x, y, valid_data = NULL, config = tabnet_config()) {
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
     }
 
-    message(sprintf("[Epoch %03d] Loss: %3f", epoch, sqrt(mean(metrics[[epoch]]$train$loss))))
+    message(sprintf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss)))
   }
 
   list(
