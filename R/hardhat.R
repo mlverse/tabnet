@@ -29,7 +29,7 @@
 #'
 #' @export
 tabnet_fit <- function(x, ...) {
-  UseMethod("tabnet")
+  UseMethod("tabnet_fit")
 }
 
 #' @export
@@ -41,13 +41,13 @@ tabnet_fit.default <- function(x, ...) {
 }
 
 #' @export
-tabnet_fit.data.frame <- function(x, y, valid_data, ...) {
+tabnet_fit.data.frame <- function(x, y, ..., config) {
   processed <- hardhat::mold(x, y)
-  tabnet_bridge(processed, valid_data, config = list(...))
+  tabnet_bridge(processed, config = config)
 }
 
 #' @export
-tabnet_fit.formula <- function(formula, data, ...) {
+tabnet_fit.formula <- function(formula, data, ..., config) {
   processed <- mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -55,13 +55,13 @@ tabnet_fit.formula <- function(formula, data, ...) {
       intercept = FALSE
     )
   )
-  tabnet_bridge(processed)
+  tabnet_bridge(processed, config = config)
 }
 
 #' @export
-tabnet_fit.recipe <- function(x, data, ...) {
+tabnet_fit.recipe <- function(x, data, ..., config) {
   processed <- mold(x, data)
-  tabnet_bridge(processed)
+  tabnet_bridge(processed, config = config)
 }
 
 new_tabnet_fit <- function(fit, blueprint) {
@@ -75,6 +75,6 @@ new_tabnet_fit <- function(fit, blueprint) {
 tabnet_bridge <- function(processed, config = tabnet_config()) {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
-  fit <- tabnet_impl(predictor, outcomes, config)
+  fit <- tabnet_impl(predictors, outcomes, config = config)
   new_tabnet(fit, blueprint = processed$blueprint)
 }

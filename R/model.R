@@ -13,6 +13,9 @@ resolve_data <- function(x, y) {
   }
   x_tensor <- torch::torch_tensor(as.matrix(x_), dtype = torch::torch_float())
 
+  if (ncol(y) == 1)
+    y <- y[[1]]
+
   if (is.factor(y)) {
     y_tensor <- torch::torch_tensor(as.integer(y), dtype = torch::torch_int64())
   } else {
