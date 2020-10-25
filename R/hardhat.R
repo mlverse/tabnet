@@ -48,10 +48,10 @@ tabnet_fit.data.frame <- function(x, y, ..., config) {
 
 #' @export
 tabnet_fit.formula <- function(formula, data, ..., config) {
-  processed <- mold(
+  processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
-      indicators = FALSE,
+      indicators = "none",
       intercept = FALSE
     )
   )
@@ -76,5 +76,5 @@ tabnet_bridge <- function(processed, config = tabnet_config()) {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
   fit <- tabnet_impl(predictors, outcomes, config = config)
-  new_tabnet(fit, blueprint = processed$blueprint)
+  new_tabnet_fit(fit, blueprint = processed$blueprint)
 }

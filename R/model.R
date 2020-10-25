@@ -66,7 +66,7 @@ resolve_data <- function(x, y) {
 #'
 #' @export
 tabnet_config <- function(...) {
-  list(
+  default <- list(
     batch_size = 256,
     lambda_sparse = 1e-3,
     clip_value = 1,
@@ -80,6 +80,11 @@ tabnet_config <- function(...) {
     virtual_batch_size = 128,
     valid_split = 0
   )
+  args <- list(...)
+  for (arg_nm in names(args)) {
+    default[[arg_nm]] <- args[[arg_nm]]
+  }
+  default
 }
 
 train_batch <- function(network, optimizer, batch, config) {
