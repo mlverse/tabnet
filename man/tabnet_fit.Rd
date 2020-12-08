@@ -15,7 +15,12 @@ tabnet_fit(x, ...)
 created from \code{\link[recipes:recipe]{recipes::recipe()}}.
 }
 
-The predictor data should be standardized (e.g. centered or scaled).}
+The predictor data should be standardized (e.g. centered or scaled).
+The model treats categorical predictors internally thus, you don't need to
+make any treatment.}
+
+\item{...}{Model hyperparameters. See \code{\link[=tabnet_config]{tabnet_config()}} for a list of
+all possible hyperparameters.}
 
 \item{y}{When \code{x} is a \strong{data frame} or \strong{matrix}, \code{y} is the outcome
 specified as:
@@ -32,9 +37,13 @@ specified as:
 
 \item{formula}{A formula specifying the outcome terms on the left-hand side,
 and the predictor terms on the right-hand side.}
-
-\item{config}{The config parameters. See \code{\link[=tabnet_config]{tabnet_config()}}.}
 }
 \description{
 Fits the \href{https://arxiv.org/abs/1908.07442}{TabNet: Attentive Interpretable Tabular Learning} model
+}
+\examples{
+if (torch::torch_is_installed()) {
+data("ames", package = "modeldata")
+fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
+}
 }

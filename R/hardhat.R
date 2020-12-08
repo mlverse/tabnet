@@ -10,6 +10,8 @@
 #'     created from [recipes::recipe()].
 #'
 #'  The predictor data should be standardized (e.g. centered or scaled).
+#'  The model treats categorical predictors internally thus, you don't need to
+#'  make any treatment.
 #'
 #' @param y When `x` is a __data frame__ or __matrix__, `y` is the outcome
 #' specified as:
@@ -23,10 +25,15 @@
 #'   * A __data frame__ containing both the predictors and the outcome.
 #'
 #' @param formula A formula specifying the outcome terms on the left-hand side,
-#' and the predictor terms on the right-hand side.
-#' @param config The config parameters. See [tabnet_config()].
+#'  and the predictor terms on the right-hand side.
+#' @param ... Model hyperparameters. See [tabnet_config()] for a list of
+#'  all possible hyperparameters.
 #'
-#'
+#' @examples
+#' if (torch::torch_is_installed()) {
+#' data("ames", package = "modeldata")
+#' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
+#' }
 #' @export
 tabnet_fit <- function(x, ...) {
   UseMethod("tabnet_fit")
@@ -35,19 +42,20 @@ tabnet_fit <- function(x, ...) {
 #' @export
 tabnet_fit.default <- function(x, ...) {
   stop(
-    "`tabnet()` is not defined for a '", class(x)[1], "'.",
+    "`tabnet_fit()` is not defined for a '", class(x)[1], "'.",
     call. = FALSE
   )
 }
 
 #' @export
-tabnet_fit.data.frame <- function(x, y, ..., config) {
+tabnet_fit.data.frame <- function(x, y, ...) {
   processed <- hardhat::mold(x, y)
+  config <- do.call(tabnet_config, list(...))
   tabnet_bridge(processed, config = config)
 }
 
 #' @export
-tabnet_fit.formula <- function(formula, data, ..., config) {
+tabnet_fit.formula <- function(formula, data, ...) {
   processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -55,12 +63,14 @@ tabnet_fit.formula <- function(formula, data, ..., config) {
       intercept = FALSE
     )
   )
+  config <- do.call(tabnet_config, list(...))
   tabnet_bridge(processed, config = config)
 }
 
 #' @export
-tabnet_fit.recipe <- function(x, data, ..., config) {
+tabnet_fit.recipe <- function(x, data, ...) {
   processed <- mold(x, data)
+  config <- do.call(tabnet_config, list(...))
   tabnet_bridge(processed, config = config)
 }
 
@@ -88,22 +98,28 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ...) {
   out
 }
 
-check_type <- function(object, type = NULL) {
+check_type <- function(model, type) {
+
+  outcome_ptype <- model$blueprint$ptypes$outcomes[[1]]
 
   if (is.null(type)) {
-    if (is.factor(object$blueprint$ptypes$outcomes$.outcome))
+    if (is.factor(outcome_ptype))
       type <- "class"
-    else
+    else if (is.numeric(outcome_ptype))
       type <- "numeric"
+    else
+      rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
   }
 
-  if (!type %in% c("numeric", "prob", "class"))
-    rlang::abort(sprintf("Prediction type must be one of 'prob', 'class' or 'numeric' but got %s"), type)
+  type <- rlang::arg_match(type, c("numeric", "prob", "class"))
 
-  if (type == "numeric")
-    hardhat::validate_outcomes_are_numeric(fit$blueprint$ptypes$outcomes)
-  else
-    hardhat::validate_outcomes_are_factors(fit$blueprint$ptypes$outcomes)
+  if (is.factor(outcome_ptype)) {
+    if (!type %in% c("prob", "class"))
+      rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
+  } else if (is.numeric(outcome_ptype)) {
+    if (type != "numeric")
+      rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
+  }
 
   type
 }
