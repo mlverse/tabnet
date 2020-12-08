@@ -5,15 +5,13 @@ test_that("Training regression", {
   x <- ames[-which(names(ames) == "Sale_Price")]
   y <- ames$Sale_Price
 
-  config <- tabnet_config(epochs = 1)
-
   expect_error(
-    fit <- tabnet_fit(x, y, config = config),
+    fit <- tabnet_fit(x, y, epochs = 1),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(Sale_Price ~ ., data = ames, config = config),
+    fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1),
     regexp = NA
   )
 
@@ -30,10 +28,8 @@ test_that("Training classification", {
   x <- attrition[-which(names(attrition) == "Attrition")]
   y <- attrition$Attrition
 
-  config <- tabnet_config(epochs = 1)
-
   expect_error(
-    fit <- tabnet_fit(x, y, config = config),
+    fit <- tabnet_fit(x, y, epochs = 1),
     regexp = NA
   )
 
