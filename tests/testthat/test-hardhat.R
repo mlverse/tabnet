@@ -16,4 +16,11 @@ test_that("Training regression", {
     fit <- tabnet_fit(Sale_Price ~ ., data = ames, config = config),
     regexp = NA
   )
+
+  expect_error(
+    predict(fit, x),
+    regexp = NA
+  )
 })
+
+

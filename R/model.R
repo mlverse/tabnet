@@ -216,6 +216,16 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
   )
 }
 
+predict_impl_numeric <- function(obj, x) {
+  data <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
+
+  network <- obj$fit$network
+  network$eval()
+
+  p <- as.numeric(network(data$x)[[1]])
+  hardhat::spruce_numeric(p)
+}
+
 test <- function() {
   data("ames", package = "modeldata")
   x <- dplyr::select(ames, -Sale_Price)

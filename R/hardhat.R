@@ -78,3 +78,22 @@ tabnet_bridge <- function(processed, config = tabnet_config()) {
   fit <- tabnet_impl(predictors, outcomes, config = config)
   new_tabnet_fit(fit, blueprint = processed$blueprint)
 }
+
+#' @export
+predict.tabnet_fit <- function(object, new_data, type = "numeric", ...) {
+  # Enforces column order, type, column names, etc
+  processed <- hardhat::forge(new_data, object$blueprint)
+  out <- predict_tabnet_bridge(type, object, processed$predictors)
+  hardhat::validate_prediction_size(out, new_data)
+  out
+}
+
+predict_tabnet_bridge <- function(type, object, predictors) {
+
+  type <- rlang::arg_match(type, "numeric")
+
+  switch(
+    type,
+    numeric = predict_impl_numeric(object, predictors)
+  )
+}
