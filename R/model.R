@@ -82,6 +82,10 @@ tabnet_config <- function(...) {
   )
   args <- list(...)
   for (arg_nm in names(args)) {
+
+    if (is.null(default[[arg_nm]]))
+      rlang::abort(paste0("Argument '", arg_nm, "' is not an hyperparameter."))
+
     default[[arg_nm]] <- args[[arg_nm]]
   }
   default

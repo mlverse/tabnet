@@ -45,4 +45,13 @@ test_that("Training classification", {
 
 })
 
+test_that("errors when using an argument that do not exist", {
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochsas = 1),
+    "Argument"
+  )
+
+})
+
 
