@@ -70,7 +70,7 @@ tabnet_config <- function(...) {
     batch_size = 256,
     lambda_sparse = 1e-3,
     clip_value = 1,
-    loss = "mse",
+    loss = "auto",
     epochs = 5,
     drop_last = FALSE,
     n_d = 8,
@@ -161,6 +161,13 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     has_valid <- TRUE
   }
 
+  if (config$loss == "auto") {
+    if (data$y$dtype == torch::torch_long())
+      config$loss <- "cross_entropy"
+    else
+      config$loss <- "mse"
+  }
+
   # resolve loss
   if (config$loss == "mse")
     config$loss_fn <- torch::nn_mse_loss()
@@ -216,14 +223,25 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
   )
 }
 
-predict_impl_numeric <- function(obj, x) {
+predict_impl <- function(obj, x) {
   data <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
 
   network <- obj$fit$network
   network$eval()
 
-  p <- as.numeric(network(data$x)[[1]])
+  network(data$x)[[1]]
+}
+
+predict_impl_numeric <- function(obj, x) {
+  p <- as.numeric(predict_impl(obj, x))
   hardhat::spruce_numeric(p)
+}
+
+predict_impl_prob <- function(obj, x) {
+  p <- predict_impl(obj, x)
+  p <- torch::nnf_softmax(p, dim = 2)
+  p <- as.matrix(p)
+  hardhat::spruce_prob(levels(fit$blueprint$ptypes$outcomes$.outcome), p)
 }
 
 test <- function() {

@@ -90,10 +90,11 @@ predict.tabnet_fit <- function(object, new_data, type = "numeric", ...) {
 
 predict_tabnet_bridge <- function(type, object, predictors) {
 
-  type <- rlang::arg_match(type, "numeric")
+  type <- rlang::arg_match(type, c("numeric", "prob"))
 
   switch(
     type,
-    numeric = predict_impl_numeric(object, predictors)
+    numeric = predict_impl_numeric(object, predictors),
+    prob    = predict_impl_prob(object, predictors)
   )
 }

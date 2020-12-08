@@ -23,4 +23,25 @@ test_that("Training regression", {
   )
 })
 
+test_that("Training classification", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+
+  config <- tabnet_config(epochs = 1)
+
+  expect_error(
+    fit <- tabnet_fit(x, y, config = config),
+    regexp = NA
+  )
+
+  expect_error(
+    predict(fit, x, type = "prob"),
+    regexp = NA
+  )
+
+})
+
 
