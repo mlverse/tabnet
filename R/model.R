@@ -237,11 +237,24 @@ predict_impl_numeric <- function(obj, x) {
   hardhat::spruce_numeric(p)
 }
 
+get_blueprint_levels <- function(obj) {
+  levels(obj$blueprint$ptypes$outcomes$.outcome)
+}
+
 predict_impl_prob <- function(obj, x) {
   p <- predict_impl(obj, x)
   p <- torch::nnf_softmax(p, dim = 2)
   p <- as.matrix(p)
-  hardhat::spruce_prob(levels(fit$blueprint$ptypes$outcomes$.outcome), p)
+  hardhat::spruce_prob(get_blueprint_levels(obj), p)
+}
+
+predict_impl_class <- function(obj, x) {
+  p <- predict_impl(obj, x)
+  p <- torch::torch_max(p, dim = 2)
+  p <- as.integer(p[[2]])
+  p <- get_blueprint_levels(obj)[p]
+  p <- factor(p, levels = get_blueprint_levels(obj))
+  hardhat::spruce_class(p)
 }
 
 test <- function() {

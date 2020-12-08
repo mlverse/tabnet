@@ -42,6 +42,11 @@ test_that("Training classification", {
     regexp = NA
   )
 
+  expect_error(
+    predict(fit, x),
+    regexp = NA
+  )
+
 })
 
 

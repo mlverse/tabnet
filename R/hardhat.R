@@ -80,7 +80,7 @@ tabnet_bridge <- function(processed, config = tabnet_config()) {
 }
 
 #' @export
-predict.tabnet_fit <- function(object, new_data, type = "numeric", ...) {
+predict.tabnet_fit <- function(object, new_data, type = NULL, ...) {
   # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data, object$blueprint)
   out <- predict_tabnet_bridge(type, object, processed$predictors)
@@ -88,13 +88,34 @@ predict.tabnet_fit <- function(object, new_data, type = "numeric", ...) {
   out
 }
 
+check_type <- function(object, type = NULL) {
+
+  if (is.null(type)) {
+    if (is.factor(object$blueprint$ptypes$outcomes$.outcome))
+      type <- "class"
+    else
+      type <- "numeric"
+  }
+
+  if (!type %in% c("numeric", "prob", "class"))
+    rlang::abort(sprintf("Prediction type must be one of 'prob', 'class' or 'numeric' but got %s"), type)
+
+  if (type == "numeric")
+    hardhat::validate_outcomes_are_numeric(fit$blueprint$ptypes$outcomes)
+  else
+    hardhat::validate_outcomes_are_factors(fit$blueprint$ptypes$outcomes)
+
+  type
+}
+
 predict_tabnet_bridge <- function(type, object, predictors) {
 
-  type <- rlang::arg_match(type, c("numeric", "prob"))
+  type <- check_type(object, type)
 
   switch(
     type,
     numeric = predict_impl_numeric(object, predictors),
-    prob    = predict_impl_prob(object, predictors)
+    prob    = predict_impl_prob(object, predictors),
+    class   = predict_impl_class(object, predictors)
   )
 }
