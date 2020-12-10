@@ -112,7 +112,19 @@
     <p>Fits the <a href='https://arxiv.org/abs/1908.07442'>TabNet: Attentive Interpretable Tabular Learning</a> model</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for default</span>
+<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for data.frame</span>
+<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for formula</span>
+<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>formula</span>, <span class='va'>data</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for recipe</span>
+<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>data</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -123,7 +135,7 @@
 <li><p>A <strong>data frame</strong> of predictors.</p></li>
 <li><p>A <strong>matrix</strong> of predictors.</p></li>
 <li><p>A <strong>recipe</strong> specifying a set of preprocessing steps
-created from <code>recipes::recipe()</code>.</p></li>
+created from <code><a href='https://recipes.tidymodels.org/reference/recipe.html'>recipes::recipe()</a></code>.</p></li>
 </ul>
 
 <p>The predictor data should be standardized (e.g. centered or scaled).
@@ -145,15 +157,15 @@ specified as:</p><ul>
 </ul></td>
     </tr>
     <tr>
+      <th>formula</th>
+      <td><p>A formula specifying the outcome terms on the left-hand side,
+and the predictor terms on the right-hand side.</p></td>
+    </tr>
+    <tr>
       <th>data</th>
       <td><p>When a <strong>recipe</strong> or <strong>formula</strong> is used, <code>data</code> is specified as:</p><ul>
 <li><p>A <strong>data frame</strong> containing both the predictors and the outcome.</p></li>
 </ul></td>
-    </tr>
-    <tr>
-      <th>formula</th>
-      <td><p>A formula specifying the outcome terms on the left-hand side,
-and the predictor terms on the right-hand side.</p></td>
     </tr>
     </table>
 
