@@ -146,6 +146,25 @@ transpose_metrics <- function(metrics) {
 
 tabnet_impl <- function(x, y, config = tabnet_config()) {
 
+  has_valid <- config$valid_split > 0
+
+  if (has_valid) {
+    n <- nrow(x)
+    valid_idx <- sample.int(n, n*config$valid_split)
+
+    if (is.data.frame(y)) {
+      valid_y <- y[valid_idx,]
+      train_y <- y[-valid_idx,]
+    } else if (is.numeric(y) || is.factor(y)) {
+      valid_y <- y[valid_idx]
+      train_y <- y[-valid_idx]
+    }
+
+    valid_data <- list(x = x[valid_idx, ], y = valid_y)
+    x <- x[-valid_idx, ]
+    y <- train_y
+  }
+
   # training data
   data <- resolve_data(x, y)
   dl <- torch::dataloader(
@@ -156,7 +175,6 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
   )
 
   # validation data
-  has_valid <- config$valid_split > 0
   if (has_valid) {
     valid_data <- resolve_data(valid_data$x, valid_data$y)
     valid_dl <- torch::dataloader(
@@ -165,7 +183,6 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
       drop_last = FALSE,
       shuffle = FALSE
     )
-    has_valid <- TRUE
   }
 
   if (config$loss == "auto") {
@@ -230,7 +247,7 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
 
     message <- sprintf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss))
     if (has_valid)
-      message <- paste0(message, sprintf("Valid loss: %3f", mean(metrics[[epoch]]$valid$loss)))
+      message <- paste0(message, sprintf(" Valid loss: %3f", mean(metrics[[epoch]]$valid$loss)))
 
     if (config$verbose)
       rlang::inform(message)

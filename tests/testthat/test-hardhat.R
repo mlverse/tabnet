@@ -59,4 +59,21 @@ test_that("errors when using an argument that do not exist", {
 
 })
 
+test_that("works with validation split", {
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2),
+    regexp = NA
+  )
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2, verbose = TRUE),
+    regexp = NA
+  )
+
+})
+
 
