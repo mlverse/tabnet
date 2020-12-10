@@ -16,6 +16,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports: 
     torch,
+    hardhat,
     magrittr
 Suggests: 
     testthat
+Remotes:
+    mlverse/torch

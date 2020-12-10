@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 Work In Progress!
 
 <!-- badges: start -->
+[![R build status](https://github.com/mlverse/tabnet/workflows/R-CMD-check/badge.svg)](https://github.com/mlverse/tabnet/actions)
 <!-- badges: end -->
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular Learning](https://arxiv.org/abs/1908.07442).

@@ -7,6 +7,8 @@ Work In Progress\!
 
 <!-- badges: start -->
 
+[![R build
+status](https://github.com/mlverse/tabnet/workflows/R-CMD-check/badge.svg)](https://github.com/mlverse/tabnet/actions)
 <!-- badges: end -->
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular
@@ -65,12 +67,12 @@ cbind(attrition, predict(fit, test)) %>%
 #> # A tibble: 1 x 3
 #>   .metric  .estimator .estimate
 #>   <chr>    <chr>          <dbl>
-#> 1 accuracy binary         0.795
+#> 1 accuracy binary         0.788
   
 cbind(attrition, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 x 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.491
+#> 1 roc_auc binary         0.504
 ```
