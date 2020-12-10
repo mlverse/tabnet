@@ -65,6 +65,7 @@ resolve_data <- function(x, y) {
 #' @param valid_split (float) The fraction of the dataset used for validation.
 #' @param verbose (bool) wether to print progress and loss values during
 #'   training.
+#' @param ... used to take all keyword arguments.
 #'
 #' @export
 tabnet_config <- function(...) {

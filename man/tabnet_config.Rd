@@ -7,6 +7,8 @@
 tabnet_config(...)
 }
 \arguments{
+\item{...}{used to take all keyword arguments.}
+
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024)}
 

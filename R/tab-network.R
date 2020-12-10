@@ -8,9 +8,9 @@ initialize_glu <- function(module, input_dim, output_dim) {
   torch::nn_init_xavier_normal_(module$weight, gain = gain_value)
 }
 
-#' Ghost Batch Normalization
-#' https://arxiv.org/abs/1705.08741
-#'
+# Ghost Batch Normalization
+# https://arxiv.org/abs/1705.08741
+#
 gbn <- torch::nn_module(
   "gbn",
   initialize = function(input_dim, virtual_batch_size=128, momentum=0.01) {
@@ -25,9 +25,9 @@ gbn <- torch::nn_module(
   }
 )
 
-#' Defines main part of the TabNet network without the embedding layers.
-#'
-#'
+# Defines main part of the TabNet network without the embedding layers.
+#
+#
 tabnet_no_embedding <- torch::nn_module(
   "tabnet_no_embedding",
   initialize = function(input_dim, output_dim,
