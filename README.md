@@ -3,8 +3,6 @@
 
 # tabnet
 
-Work In Progress\!
-
 <!-- badges: start -->
 
 [![R build

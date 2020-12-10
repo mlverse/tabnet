@@ -15,8 +15,6 @@ knitr::opts_chunk$set(
 
 # tabnet
 
-Work In Progress!
-
 <!-- badges: start -->
 [![R build status](https://github.com/mlverse/tabnet/workflows/R-CMD-check/badge.svg)](https://github.com/mlverse/tabnet/actions)
 <!-- badges: end -->
