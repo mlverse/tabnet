@@ -44,6 +44,9 @@ Values range from 1.0 to 2.0.}
 "Ghost Batch Normalization" (default=128)}
 
 \item{valid_split}{(float) The fraction of the dataset used for validation.}
+
+\item{verbose}{(bool) wether to print progress and loss values during
+training.}
 }
 \description{
 Configuration for TabNet models

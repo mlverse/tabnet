@@ -19,6 +19,11 @@ test_that("Training regression", {
     predict(fit, x),
     regexp = NA
   )
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 2, verbose = TRUE),
+    regexp = NA
+  )
 })
 
 test_that("Training classification", {

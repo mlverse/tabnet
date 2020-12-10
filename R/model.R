@@ -63,6 +63,8 @@ resolve_data <- function(x, y) {
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=128)
 #' @param valid_split (float) The fraction of the dataset used for validation.
+#' @param verbose (bool) wether to print progress and loss values during
+#'   training.
 #'
 #' @export
 tabnet_config <- function(...) {
@@ -78,7 +80,8 @@ tabnet_config <- function(...) {
     n_steps = 3,
     gamma = 1.3,
     virtual_batch_size = 128,
-    valid_split = 0
+    valid_split = 0,
+    verbose = FALSE
   )
   args <- list(...)
   for (arg_nm in names(args)) {
@@ -202,8 +205,16 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     valid_metrics <- c()
 
     network$train()
+
+    if (config$verbose)
+      pb <- progress::progress_bar$new(
+        total = length(dl),
+        format = "[:bar] loss= :loss"
+      )
+
     for (batch in torch::enumerate(dl)) {
       m <- train_batch(network, optimizer, batch, config)
+      if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     }
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
@@ -217,7 +228,12 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
     }
 
-    message(sprintf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss)))
+    message <- sprintf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss))
+    if (has_valid)
+      message <- paste0(message, sprintf("Valid loss: %3f", mean(metrics[[epoch]]$valid$loss)))
+
+    if (config$verbose)
+      rlang::inform(message)
   }
 
   list(
