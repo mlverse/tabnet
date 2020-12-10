@@ -168,7 +168,7 @@ tabnet_no_embedding <- torch::nn_module(
   }
 )
 
-tabnet <- torch::nn_module(
+tabnet_nn <- torch::nn_module(
   "tabnet",
   initialize = function(input_dim, output_dim, n_d=8, n_a=8,
                         n_steps=3, gamma=1.3, cat_idxs=c(), cat_dims=c(), cat_emb_dim=1,

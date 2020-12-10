@@ -23,6 +23,7 @@ Imports:
 Suggests: 
     testthat,
     modeldata,
-    recipes
+    recipes,
+    parsnip
 Remotes:
     mlverse/torch

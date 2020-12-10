@@ -29,8 +29,8 @@ in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help.}
 
-\item{clip_value}{(NULL) If a float is given this will clip the gradient at
-clip_value.}
+\item{clip_value}{If a float is given this will clip the gradient at
+clip_value. Pass \code{NULL} to not clip.}
 
 \item{loss}{(character or function) Loss function for training (default to mse
 for regression and cross entropy for classification)}

@@ -43,8 +43,8 @@ resolve_data <- function(x, y) {
 #'   in the original paper. The bigger this coefficient is, the sparser your model
 #'   will be in terms of feature selection. Depending on the difficulty of your
 #'   problem, reducing this value could help.
-#' @param clip_value (NULL) If a float is given this will clip the gradient at
-#'   clip_value.
+#' @param clip_value If a float is given this will clip the gradient at
+#'   clip_value. Pass `NULL` to not clip.
 #' @param loss (character or function) Loss function for training (default to mse
 #'   for regression and cross entropy for classification)
 #' @param epochs (int) Number of training epochs.
@@ -203,7 +203,7 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     config$loss_fn <- torch::nn_cross_entropy_loss()
 
   # create network
-  network <- tabnet(
+  network <- tabnet_nn(
     input_dim = data$input_dim,
     output_dim = data$output_dim,
     cat_idxs = data$cat_idx,
