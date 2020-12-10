@@ -19,7 +19,8 @@ Imports:
     magrittr,
     glue,
     progress,
-    rlang
+    rlang,
+    methods
 Suggests: 
     testthat,
     modeldata,
