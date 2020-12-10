@@ -79,8 +79,12 @@ tabnet_fit.recipe <- function(x, data, ...) {
 }
 
 new_tabnet_fit <- function(fit, blueprint) {
+
+  serialized_net <- model_to_raw(fit$network)
+
   hardhat::new_model(
     fit = fit,
+    serialized_net = serialized_net,
     blueprint = blueprint,
     class = "tabnet_fit"
   )
@@ -128,9 +132,17 @@ check_type <- function(model, type) {
   type
 }
 
+
+
 predict_tabnet_bridge <- function(type, object, predictors) {
 
   type <- check_type(object, type)
+
+  if (check_net_is_empty_ptr(object)) {
+    m <- reload_model(object)
+    # this modifies 'object' in-place
+    object$fit$network$load_state_dict(m$state_dict())
+  }
 
   switch(
     type,
@@ -138,4 +150,32 @@ predict_tabnet_bridge <- function(type, object, predictors) {
     prob    = predict_impl_prob(object, predictors),
     class   = predict_impl_class(object, predictors)
   )
+}
+
+model_to_raw <- function(model) {
+  con <- rawConnection(raw(), open = "wr")
+  torch::torch_save(model, con)
+  on.exit({close(con)}, add = TRUE)
+  r <- rawConnectionValue(con)
+  r
+}
+
+check_net_is_empty_ptr <- function(object) {
+  is_null_external_pointer(object$fit$network$.check$ptr)
+}
+
+# https://stackoverflow.com/a/27350487/3297472
+is_null_external_pointer <- function(pointer) {
+  a <- attributes(pointer)
+  attributes(pointer) <- NULL
+  out <- identical(pointer, methods::new("externalptr"))
+  attributes(pointer) <- a
+  out
+}
+
+reload_model <- function(object) {
+  con <- rawConnection(object$serialized_net)
+  on.exit({close(con)}, add = TRUE)
+  module <- torch::torch_load(con)
+  module
 }

@@ -179,6 +179,10 @@ tabnet_nn <- torch::nn_module(
     self$cat_dims <- cat_dims
     self$cat_emb_dim <- cat_emb_dim
 
+    # a check par, just to easily find out when we need to
+    # reload the model
+    self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
+
     self$input_dim <- input_dim
     self$output_dim <- output_dim
     self$n_d <- n_d
