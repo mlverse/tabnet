@@ -294,9 +294,3 @@ predict_impl_class <- function(obj, x) {
   hardhat::spruce_class(p)
 }
 
-test <- function() {
-  data("ames", package = "modeldata")
-  x <- dplyr::select(ames, -Sale_Price)
-  y <- ames$Sale_Price
-  tabnet_impl(x, y)
-}
