@@ -40,6 +40,7 @@ tabnet_fit <- function(x, ...) {
 }
 
 #' @export
+#' @rdname tabnet_fit
 tabnet_fit.default <- function(x, ...) {
   stop(
     "`tabnet_fit()` is not defined for a '", class(x)[1], "'.",
@@ -48,6 +49,7 @@ tabnet_fit.default <- function(x, ...) {
 }
 
 #' @export
+#' @rdname tabnet_fit
 tabnet_fit.data.frame <- function(x, y, ...) {
   processed <- hardhat::mold(x, y)
   config <- do.call(tabnet_config, list(...))
@@ -55,6 +57,7 @@ tabnet_fit.data.frame <- function(x, y, ...) {
 }
 
 #' @export
+#' @rdname tabnet_fit
 tabnet_fit.formula <- function(formula, data, ...) {
   processed <- hardhat::mold(
     formula, data,
@@ -68,6 +71,7 @@ tabnet_fit.formula <- function(formula, data, ...) {
 }
 
 #' @export
+#' @rdname tabnet_fit
 tabnet_fit.recipe <- function(x, data, ...) {
   processed <- hardhat::mold(x, data)
   config <- do.call(tabnet_config, list(...))

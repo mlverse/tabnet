@@ -65,34 +65,36 @@ resolve_data <- function(x, y) {
 #' @param valid_split (float) The fraction of the dataset used for validation.
 #' @param verbose (bool) wether to print progress and loss values during
 #'   training.
-#' @param ... used to take all keyword arguments.
 #'
 #' @export
-tabnet_config <- function(...) {
-  default <- list(
-    batch_size = 256,
-    lambda_sparse = 1e-3,
-    clip_value = 1,
-    loss = "auto",
-    epochs = 5,
-    drop_last = FALSE,
-    n_d = 8,
-    n_a = 8,
-    n_steps = 3,
-    gamma = 1.3,
-    virtual_batch_size = 128,
-    valid_split = 0,
-    verbose = FALSE
+tabnet_config <- function(batch_size = 256,
+                          lambda_sparse = 1e-3,
+                          clip_value = 1,
+                          loss = "auto",
+                          epochs = 5,
+                          drop_last = FALSE,
+                          n_d = 8,
+                          n_a = 8,
+                          n_steps = 3,
+                          gamma = 1.3,
+                          virtual_batch_size = 128,
+                          valid_split = 0,
+                          verbose = FALSE) {
+  list(
+    batch_size = batch_size,
+    lambda_sparse = lambda_sparse,
+    clip_value = clip_value,
+    loss = loss,
+    epochs = epochs,
+    drop_last = drop_last,
+    n_d = n_d,
+    n_a = n_a,
+    n_steps = n_steps,
+    gamma = gamma,
+    virtual_batch_size = virtual_batch_size,
+    valid_split = valid_split,
+    verbose = verbose
   )
-  args <- list(...)
-  for (arg_nm in names(args)) {
-
-    if (is.null(default[[arg_nm]]))
-      rlang::abort(paste0("Argument '", arg_nm, "' is not an hyperparameter."))
-
-    default[[arg_nm]] <- args[[arg_nm]]
-  }
-  default
 }
 
 train_batch <- function(network, optimizer, batch, config) {

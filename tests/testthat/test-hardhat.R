@@ -52,14 +52,21 @@ test_that("Training classification", {
 
 test_that("errors when using an argument that do not exist", {
 
+  data("ames", package = "modeldata")
+
+  x <- ames[-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price
+
   expect_error(
     fit <- tabnet_fit(x, y, epochsas = 1),
-    "Argument"
+    "unused argument"
   )
 
 })
 
 test_that("works with validation split", {
+
+  data("attrition", package = "modeldata")
 
   x <- attrition[-which(names(attrition) == "Attrition")]
   y <- attrition$Attrition
@@ -78,6 +85,7 @@ test_that("works with validation split", {
 
 test_that("can train from a recipe", {
 
+  library(recipes)
   data("attrition", package = "modeldata")
 
   rec <- recipe(Attrition ~ ., data = attrition) %>%

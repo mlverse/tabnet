@@ -16,9 +16,13 @@ RoxygenNote: 7.1.1
 Imports: 
     torch,
     hardhat,
-    magrittr
+    magrittr,
+    glue,
+    progress,
+    rlang
 Suggests: 
     testthat,
-    modeldata
+    modeldata,
+    recipes
 Remotes:
     mlverse/torch

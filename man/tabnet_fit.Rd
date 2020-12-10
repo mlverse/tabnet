@@ -2,9 +2,21 @@
 % Please edit documentation in R/hardhat.R
 \name{tabnet_fit}
 \alias{tabnet_fit}
+\alias{tabnet_fit.default}
+\alias{tabnet_fit.data.frame}
+\alias{tabnet_fit.formula}
+\alias{tabnet_fit.recipe}
 \title{Tabnet model}
 \usage{
 tabnet_fit(x, ...)
+
+\method{tabnet_fit}{default}(x, ...)
+
+\method{tabnet_fit}{data.frame}(x, y, ...)
+
+\method{tabnet_fit}{formula}(formula, data, ...)
+
+\method{tabnet_fit}{recipe}(x, data, ...)
 }
 \arguments{
 \item{x}{Depending on the context:
@@ -30,13 +42,13 @@ specified as:
 \item A numeric \strong{vector}.
 }}
 
+\item{formula}{A formula specifying the outcome terms on the left-hand side,
+and the predictor terms on the right-hand side.}
+
 \item{data}{When a \strong{recipe} or \strong{formula} is used, \code{data} is specified as:
 \itemize{
 \item A \strong{data frame} containing both the predictors and the outcome.
 }}
-
-\item{formula}{A formula specifying the outcome terms on the left-hand side,
-and the predictor terms on the right-hand side.}
 }
 \description{
 Fits the \href{https://arxiv.org/abs/1908.07442}{TabNet: Attentive Interpretable Tabular Learning} model

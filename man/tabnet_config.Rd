@@ -4,11 +4,23 @@
 \alias{tabnet_config}
 \title{Configuration for TabNet models}
 \usage{
-tabnet_config(...)
+tabnet_config(
+  batch_size = 256,
+  lambda_sparse = 0.001,
+  clip_value = 1,
+  loss = "auto",
+  epochs = 5,
+  drop_last = FALSE,
+  n_d = 8,
+  n_a = 8,
+  n_steps = 3,
+  gamma = 1.3,
+  virtual_batch_size = 128,
+  valid_split = 0,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{...}{used to take all keyword arguments.}
-
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024)}
 
