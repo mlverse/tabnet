@@ -76,4 +76,23 @@ test_that("works with validation split", {
 
 })
 
+test_that("can train from a recipe", {
+
+  data("attrition", package = "modeldata")
+
+  rec <- recipe(Attrition ~ ., data = attrition) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+
+  expect_error(
+    fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
+                    verbose = TRUE),
+    regexp = NA
+  )
+
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+})
 

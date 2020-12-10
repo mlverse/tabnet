@@ -275,7 +275,7 @@ predict_impl_numeric <- function(obj, x) {
 }
 
 get_blueprint_levels <- function(obj) {
-  levels(obj$blueprint$ptypes$outcomes$.outcome)
+  levels(obj$blueprint$ptypes$outcomes[[1]])
 }
 
 predict_impl_prob <- function(obj, x) {

@@ -69,7 +69,7 @@ tabnet_fit.formula <- function(formula, data, ...) {
 
 #' @export
 tabnet_fit.recipe <- function(x, data, ...) {
-  processed <- mold(x, data)
+  processed <- hardhat::mold(x, data)
   config <- do.call(tabnet_config, list(...))
   tabnet_bridge(processed, config = config)
 }

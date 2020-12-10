@@ -34,4 +34,26 @@ devtools::install_github("mlverse/tabnet")
 
 ## Example
 
-...
+```{r}
+library(tabnet)
+library(recipes)
+library(yardstick)
+
+data("attrition", package = "modeldata")
+test_idx <- sample.int(nrow(attrition), size = 0.2 * nrow(attrition))
+
+train <- attrition[-test_idx,]
+test <- attrition[test_idx,]
+
+rec <- recipe(Attrition ~ ., data = train) %>% 
+  step_normalize(all_numeric(), -all_outcomes())
+
+fit <- tabnet_fit(rec, train, epochs = 50)
+
+cbind(attrition, predict(fit, test)) %>% 
+  accuracy(Attrition, .pred_class)
+  
+cbind(attrition, predict(fit, test, type = "prob")) %>% 
+  roc_auc(Attrition, .pred_No)
+```
+
