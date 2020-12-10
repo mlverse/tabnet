@@ -18,6 +18,7 @@ Imports:
     hardhat,
     magrittr
 Suggests: 
-    testthat
+    testthat,
+    modeldata
 Remotes:
     mlverse/torch
