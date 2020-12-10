@@ -149,6 +149,7 @@ transpose_metrics <- function(metrics) {
 
 tabnet_impl <- function(x, y, config = tabnet_config()) {
 
+  torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
 
   if (has_valid) {

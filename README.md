@@ -50,6 +50,7 @@ library(recipes)
 library(yardstick)
 #> For binary classification, the first factor level is assumed to be the event.
 #> Use the argument `event_level = "second"` to alter this as needed.
+set.seed(1)
 
 data("attrition", package = "modeldata")
 test_idx <- sample.int(nrow(attrition), size = 0.2 * nrow(attrition))
@@ -60,19 +61,22 @@ test <- attrition[test_idx,]
 rec <- recipe(Attrition ~ ., data = train) %>% 
   step_normalize(all_numeric(), -all_outcomes())
 
-fit <- tabnet_fit(rec, train, epochs = 50)
+fit <- tabnet_fit(rec, train, epochs = 30)
 
-cbind(attrition, predict(fit, test)) %>% 
-  accuracy(Attrition, .pred_class)
-#> # A tibble: 1 x 3
-#>   .metric  .estimator .estimate
-#>   <chr>    <chr>          <dbl>
-#> 1 accuracy binary         0.788
+metrics <- metric_set(accuracy, precision, recall)
+cbind(test, predict(fit, test)) %>% 
+  metrics(Attrition, estimate = .pred_class)
+#> # A tibble: 3 x 3
+#>   .metric   .estimator .estimate
+#>   <chr>     <chr>          <dbl>
+#> 1 accuracy  binary         0.813
+#> 2 precision binary         0.837
+#> 3 recall    binary         0.963
   
-cbind(attrition, predict(fit, test, type = "prob")) %>% 
+cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 x 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.504
+#> 1 roc_auc binary         0.616
 ```
