@@ -114,7 +114,7 @@
 
     <pre class="usage"><span class='fu'>tabnet_config</span><span class='op'>(</span>
   batch_size <span class='op'>=</span> <span class='fl'>256</span>,
-  lambda_sparse <span class='op'>=</span> <span class='fl'>0.001</span>,
+  penalty <span class='op'>=</span> <span class='fl'>0.001</span>,
   clip_value <span class='op'>=</span> <span class='fl'>1</span>,
   loss <span class='op'>=</span> <span class='st'>"auto"</span>,
   epochs <span class='op'>=</span> <span class='fl'>5</span>,
@@ -125,6 +125,8 @@
   gamma <span class='op'>=</span> <span class='fl'>1.3</span>,
   virtual_batch_size <span class='op'>=</span> <span class='fl'>128</span>,
   valid_split <span class='op'>=</span> <span class='fl'>0</span>,
+  learn_rate <span class='op'>=</span> <span class='fl'>0.02</span>,
+  optimizer <span class='op'>=</span> <span class='st'>"adam"</span>,
   verbose <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
@@ -137,7 +139,7 @@
 recommended. (default: 1024)</p></td>
     </tr>
     <tr>
-      <th>lambda_sparse</th>
+      <th>penalty</th>
       <td><p>This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
@@ -192,6 +194,15 @@ Values range from 1.0 to 2.0.</p></td>
     <tr>
       <th>valid_split</th>
       <td><p>(float) The fraction of the dataset used for validation.</p></td>
+    </tr>
+    <tr>
+      <th>learn_rate</th>
+      <td><p>initial learning rate for the optimizer.</p></td>
+    </tr>
+    <tr>
+      <th>optimizer</th>
+      <td><p>the optimization method. currently only 'adam' is supported,
+you can also pass any torch optimizer function.</p></td>
     </tr>
     <tr>
       <th>verbose</th>
