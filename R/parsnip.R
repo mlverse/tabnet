@@ -111,7 +111,8 @@ add_parsnip_tabnet <- function() {
 #' }
 #'
 #' @export
-tabnet <- function(mode = "unknown", epochs = NULL) {
+tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
+                   learn_rate = NULL) {
 
   if (!tabnet_env$parsnip_added) {
     add_parsnip_tabnet()
@@ -119,7 +120,12 @@ tabnet <- function(mode = "unknown", epochs = NULL) {
   }
 
   # Capture the arguments in quosures
-  args <- list(epochs = rlang::enquo(epochs))
+  args <- list(
+    epochs = rlang::enquo(epochs),
+    penalty = rlang::enquo(penalty),
+    batch_size = rlang::enquo(batch_size),
+    learn_rate = rlang::enquo(learn_rate)
+  )
 
   # Save some empty slots for future parts of the specification
   out <- list(args = args, eng_args = NULL,

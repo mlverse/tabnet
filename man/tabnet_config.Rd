@@ -6,7 +6,7 @@
 \usage{
 tabnet_config(
   batch_size = 256,
-  lambda_sparse = 0.001,
+  penalty = 0.001,
   clip_value = 1,
   loss = "auto",
   epochs = 5,
@@ -17,6 +17,8 @@ tabnet_config(
   gamma = 1.3,
   virtual_batch_size = 128,
   valid_split = 0,
+  learn_rate = 0.02,
+  optimizer = "adam",
   verbose = FALSE
 )
 }
@@ -24,7 +26,7 @@ tabnet_config(
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024)}
 
-\item{lambda_sparse}{This is the extra sparsity loss coefficient as proposed
+\item{penalty}{This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help.}
@@ -58,6 +60,11 @@ Values range from 1.0 to 2.0.}
 "Ghost Batch Normalization" (default=128)}
 
 \item{valid_split}{(float) The fraction of the dataset used for validation.}
+
+\item{learn_rate}{initial learning rate for the optimizer.}
+
+\item{optimizer}{the optimization method. currently only 'adam' is supported,
+you can also pass any torch optimizer function.}
 
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}

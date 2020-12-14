@@ -4,13 +4,29 @@
 \alias{tabnet}
 \title{Parsnip compatible tabnet model}
 \usage{
-tabnet(mode = "unknown", epochs = NULL)
+tabnet(
+  mode = "unknown",
+  epochs = NULL,
+  penalty = NULL,
+  batch_size = NULL,
+  learn_rate = NULL
+)
 }
 \arguments{
 \item{mode}{A single character string for the type of model. Possible values
 for this model are "unknown", "regression", or "classification".}
 
 \item{epochs}{(int) Number of training epochs.}
+
+\item{penalty}{This is the extra sparsity loss coefficient as proposed
+in the original paper. The bigger this coefficient is, the sparser your model
+will be in terms of feature selection. Depending on the difficulty of your
+problem, reducing this value could help.}
+
+\item{batch_size}{(int) Number of examples per batch, large batch sizes are
+recommended. (default: 1024)}
+
+\item{learn_rate}{initial learning rate for the optimizer.}
 }
 \description{
 Parsnip compatible tabnet model

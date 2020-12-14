@@ -39,7 +39,7 @@ resolve_data <- function(x, y) {
 #'
 #' @param batch_size (int) Number of examples per batch, large batch sizes are
 #'   recommended. (default: 1024)
-#' @param lambda_sparse This is the extra sparsity loss coefficient as proposed
+#' @param penalty This is the extra sparsity loss coefficient as proposed
 #'   in the original paper. The bigger this coefficient is, the sparser your model
 #'   will be in terms of feature selection. Depending on the difficulty of your
 #'   problem, reducing this value could help.
@@ -62,13 +62,16 @@ resolve_data <- function(x, y) {
 #'   Values range from 1.0 to 2.0.
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=128)
+#' @param learn_rate initial learning rate for the optimizer.
+#' @param optimizer the optimization method. currently only 'adam' is supported,
+#'   you can also pass any torch optimizer function.
 #' @param valid_split (float) The fraction of the dataset used for validation.
 #' @param verbose (bool) wether to print progress and loss values during
 #'   training.
 #'
 #' @export
 tabnet_config <- function(batch_size = 256,
-                          lambda_sparse = 1e-3,
+                          penalty = 1e-3,
                           clip_value = 1,
                           loss = "auto",
                           epochs = 5,
@@ -79,10 +82,12 @@ tabnet_config <- function(batch_size = 256,
                           gamma = 1.3,
                           virtual_batch_size = 128,
                           valid_split = 0,
+                          learn_rate = 2e-2,
+                          optimizer = "adam",
                           verbose = FALSE) {
   list(
     batch_size = batch_size,
-    lambda_sparse = lambda_sparse,
+    lambda_sparse = penalty,
     clip_value = clip_value,
     loss = loss,
     epochs = epochs,
@@ -93,7 +98,9 @@ tabnet_config <- function(batch_size = 256,
     gamma = gamma,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
-    verbose = verbose
+    verbose = verbose,
+    learn_rate = learn_rate,
+    optimizer = optimizer
   )
 }
 
@@ -215,7 +222,19 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
   )
 
   # define optimizer
-  optimizer <- torch::optim_adam(network$parameters, lr = 2e-2)
+
+  if (rlang::is_function(config$optimizer)) {
+
+    optimizer <- config$optimizer(network$parameters, config$learn_rate)
+
+  } else if (rlang::is_scalar_character(config$optimizer)) {
+
+    if (config$optimizer == "adam")
+      optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
+    else
+      rlang::abort("Currently only the 'adam' optimizer is supported.")
+
+  }
 
   # main loop
   metrics <- list()
