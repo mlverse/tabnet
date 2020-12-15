@@ -127,3 +127,30 @@ test_that("serialization with saveRDS just works", {
 
 })
 
+test_that("scheduler works", {
+
+  data("ames", package = "modeldata")
+
+  x <- ames[-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "step",
+                      lr_decay = 0.1, step_size = 1),
+    regexp = NA
+  )
+
+  sc_fn <- function(optimizer) {
+    torch::lr_step(optimizer, step_size = 1, gamma = 0.1)
+  }
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = sc_fn,
+                      lr_decay = 0.1, step_size = 1),
+    regexp = NA
+  )
+
+
+
+})
+

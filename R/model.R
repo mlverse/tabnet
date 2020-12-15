@@ -68,6 +68,15 @@ resolve_data <- function(x, y) {
 #' @param valid_split (float) The fraction of the dataset used for validation.
 #' @param verbose (bool) wether to print progress and loss values during
 #'   training.
+#' @param lr_scheduler if `NULL`, no learning rate decay is used. if "step"
+#'   decays the learning rate by `lr_decay` every `step_size` epochs. It can
+#'   also be a [torch::lr_scheduler] function that only takes the optimizer
+#'   as parameter. The `step` method is called once per epoch.
+#' @param lr_decay multiplies the initial learning rate by `lr_decay` every
+#'   `step_size` epochs. Unused if `lr_scheduler` is a `torch::lr_scheduler`
+#'   or `NULL`.
+#' @param step_size the learning rate scheduler step size. Unused if
+#'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
 #'
 #' @export
 tabnet_config <- function(batch_size = 256,
@@ -84,6 +93,9 @@ tabnet_config <- function(batch_size = 256,
                           valid_split = 0,
                           learn_rate = 2e-2,
                           optimizer = "adam",
+                          lr_scheduler = NULL,
+                          lr_decay = 0.1,
+                          step_size = 30,
                           verbose = FALSE) {
   list(
     batch_size = batch_size,
@@ -100,7 +112,10 @@ tabnet_config <- function(batch_size = 256,
     valid_split = valid_split,
     verbose = verbose,
     learn_rate = learn_rate,
-    optimizer = optimizer
+    optimizer = optimizer,
+    lr_scheduler = lr_scheduler,
+    lr_decay = lr_decay,
+    step_size = step_size
   )
 }
 
@@ -236,6 +251,16 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
 
   }
 
+  # define scheduler
+
+  if (is.null(config$lr_scheduler)) {
+    scheduler <- list(step = function() {})
+  } else if (rlang::is_function(config$lr_scheduler)) {
+    scheduler <- config$lr_scheduler(optimizer)
+  } else if (config$lr_scheduler == "step") {
+    scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
+  }
+
   # main loop
   metrics <- list()
   for (epoch in seq_len(config$epochs)) {
@@ -274,6 +299,8 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
 
     if (config$verbose)
       rlang::inform(message)
+
+    scheduler$step()
   }
 
   list(

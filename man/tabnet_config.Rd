@@ -19,6 +19,9 @@ tabnet_config(
   valid_split = 0,
   learn_rate = 0.02,
   optimizer = "adam",
+  lr_scheduler = NULL,
+  lr_decay = 0.1,
+  step_size = 30,
   verbose = FALSE
 )
 }
@@ -65,6 +68,18 @@ Values range from 1.0 to 2.0.}
 
 \item{optimizer}{the optimization method. currently only 'adam' is supported,
 you can also pass any torch optimizer function.}
+
+\item{lr_scheduler}{if \code{NULL}, no learning rate decay is used. if "step"
+decays the learning rate by \code{lr_decay} every \code{step_size} epochs. It can
+also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
+as parameter. The \code{step} method is called once per epoch.}
+
+\item{lr_decay}{multiplies the initial learning rate by \code{lr_decay} every
+\code{step_size} epochs. Unused if \code{lr_scheduler} is a \code{torch::lr_scheduler}
+or \code{NULL}.}
+
+\item{step_size}{the learning rate scheduler step size. Unused if
+\code{lr_scheduler} is a \code{torch::lr_scheduler} or \code{NULL}.}
 
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}
