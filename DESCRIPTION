@@ -28,4 +28,4 @@ Suggests:
     parsnip,
     dials
 Remotes:
-    mlverse/torch
+    tidymodels/dials
