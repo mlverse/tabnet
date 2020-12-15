@@ -79,6 +79,7 @@ resolve_data <- function(x, y) {
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
 #' @param checkpoint_epochs checkpoint model weights and architecture every
 #'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
+#'   Use `0` to disable checkpoints.
 #'
 #' @export
 tabnet_config <- function(batch_size = 256,
@@ -290,7 +291,7 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     }
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
 
-    if (epoch %% config$checkpoint_epochs == 0)
+    if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0)
       checkpoints[[length(checkpoints) + 1]] <- model_to_raw(network)
 
     network$eval()

@@ -22,6 +22,7 @@ tabnet_config(
   lr_scheduler = NULL,
   lr_decay = 0.1,
   step_size = 30,
+  checkpoint_epochs = 10,
   verbose = FALSE
 )
 }
@@ -80,6 +81,10 @@ or \code{NULL}.}
 
 \item{step_size}{the learning rate scheduler step size. Unused if
 \code{lr_scheduler} is a \code{torch::lr_scheduler} or \code{NULL}.}
+
+\item{checkpoint_epochs}{checkpoint model weights and architecture every
+\code{checkpoint_epochs}. (default is 10). This may cause large memory usage.
+Use \code{0} to disable checkpoints.}
 
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}
