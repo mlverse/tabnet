@@ -50,14 +50,14 @@ resolve_data <- function(x, y) {
 #' @param epochs (int) Number of training epochs.
 #' @param drop_last (bool) Whether to drop last batch if not complete during
 #'   training
-#' @param n_d (int) Width of the decision prediction layer. Bigger values gives
+#' @param decision_width (int) Width of the decision prediction layer. Bigger values gives
 #'   more capacity to the model with the risk of overfitting. Values typically
 #'   range from 8 to 64.
-#' @param n_a (int) Width of the attention embedding for each mask. According to
+#' @param attention_width (int) Width of the attention embedding for each mask. According to
 #'   the paper n_d=n_a is usually a good choice. (default=8)
-#' @param n_steps (int) Number of steps in the architecture
+#' @param num_steps (int) Number of steps in the architecture
 #'   (usually between 3 and 10)
-#' @param gamma (float) This is the coefficient for feature reusage in the masks.
+#' @param feature_reusage (float) This is the coefficient for feature reusage in the masks.
 #'   A value close to 1 will make mask selection least correlated between layers.
 #'   Values range from 1.0 to 2.0.
 #' @param virtual_batch_size (int) Size of the mini batches used for
@@ -77,6 +77,7 @@ resolve_data <- function(x, y) {
 #'   or `NULL`.
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
+#' @param cat_emb_dim Embedding size for categorial features (default=1)
 #' @param checkpoint_epochs checkpoint model weights and architecture every
 #'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
@@ -88,10 +89,10 @@ tabnet_config <- function(batch_size = 256,
                           loss = "auto",
                           epochs = 5,
                           drop_last = FALSE,
-                          n_d = 8,
-                          n_a = 8,
-                          n_steps = 3,
-                          gamma = 1.3,
+                          decision_width = 8,
+                          attention_width = 8,
+                          num_steps = 3,
+                          feature_reusage = 1.3,
                           virtual_batch_size = 128,
                           valid_split = 0,
                           learn_rate = 2e-2,
@@ -100,6 +101,7 @@ tabnet_config <- function(batch_size = 256,
                           lr_decay = 0.1,
                           step_size = 30,
                           checkpoint_epochs = 10,
+                          cat_emb_dim = 1,
                           verbose = FALSE) {
   list(
     batch_size = batch_size,
@@ -108,10 +110,10 @@ tabnet_config <- function(batch_size = 256,
     loss = loss,
     epochs = epochs,
     drop_last = drop_last,
-    n_d = n_d,
-    n_a = n_a,
-    n_steps = n_steps,
-    gamma = gamma,
+    n_d = decision_width,
+    n_a = attention_width,
+    n_steps = num_steps,
+    gamma = feature_reusage,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
     verbose = verbose,
@@ -120,6 +122,7 @@ tabnet_config <- function(batch_size = 256,
     lr_scheduler = lr_scheduler,
     lr_decay = lr_decay,
     step_size = step_size,
+    cat_emb_dim = cat_emb_dim,
     checkpoint_epochs = checkpoint_epochs
   )
 }
@@ -238,7 +241,8 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     n_a = config$n_a,
     n_steps = config$n_steps,
     gamma = config$gamma,
-    virtual_batch_size = config$virtual_batch_size
+    virtual_batch_size = config$virtual_batch_size,
+    cat_emb_dim = config$cat_emb_dim
   )
 
   # define optimizer

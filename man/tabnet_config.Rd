@@ -11,10 +11,10 @@ tabnet_config(
   loss = "auto",
   epochs = 5,
   drop_last = FALSE,
-  n_d = 8,
-  n_a = 8,
-  n_steps = 3,
-  gamma = 1.3,
+  decision_width = 8,
+  attention_width = 8,
+  num_steps = 3,
+  feature_reusage = 1.3,
   virtual_batch_size = 128,
   valid_split = 0,
   learn_rate = 0.02,
@@ -23,6 +23,7 @@ tabnet_config(
   lr_decay = 0.1,
   step_size = 30,
   checkpoint_epochs = 10,
+  cat_emb_dim = 1,
   verbose = FALSE
 )
 }
@@ -46,17 +47,17 @@ for regression and cross entropy for classification)}
 \item{drop_last}{(bool) Whether to drop last batch if not complete during
 training}
 
-\item{n_d}{(int) Width of the decision prediction layer. Bigger values gives
+\item{decision_width}{(int) Width of the decision prediction layer. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.}
 
-\item{n_a}{(int) Width of the attention embedding for each mask. According to
+\item{attention_width}{(int) Width of the attention embedding for each mask. According to
 the paper n_d=n_a is usually a good choice. (default=8)}
 
-\item{n_steps}{(int) Number of steps in the architecture
+\item{num_steps}{(int) Number of steps in the architecture
 (usually between 3 and 10)}
 
-\item{gamma}{(float) This is the coefficient for feature reusage in the masks.
+\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.}
 
@@ -85,6 +86,8 @@ or \code{NULL}.}
 \item{checkpoint_epochs}{checkpoint model weights and architecture every
 \code{checkpoint_epochs}. (default is 10). This may cause large memory usage.
 Use \code{0} to disable checkpoints.}
+
+\item{cat_emb_dim}{Embedding size for categorial features (default=1)}
 
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}

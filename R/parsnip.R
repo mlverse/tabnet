@@ -83,6 +83,51 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "learn_rate",
+    original = "learn_rate",
+    func = list(pkg = "dials", fun = "learn_rate"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "decision_width",
+    original = "decision_width",
+    func = list(pkg = "tabnet", fun = "decision_width"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "attention_width",
+    original = "attention_width",
+    func = list(pkg = "tabnet", fun = "attention_width"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_steps",
+    original = "num_steps",
+    func = list(pkg = "tabnet", fun = "num_steps"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "feature_reusage",
+    original = "feature_reusage",
+    func = list(pkg = "tabnet", fun = "feature_reusage"),
+    has_submodel = FALSE
+  )
+
   parsnip::set_pred(
     model = "tabnet",
     eng = "torch",
@@ -130,7 +175,8 @@ add_parsnip_tabnet <- function() {
 #'
 #' @export
 tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
-                   learn_rate = NULL) {
+                   learn_rate = NULL, decision_width = NULL, attention_width = NULL,
+                   num_steps = NULL, feature_reusage = NULL) {
 
   if (!tabnet_env$parsnip_added) {
     add_parsnip_tabnet()
@@ -142,7 +188,11 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
     epochs = rlang::enquo(epochs),
     penalty = rlang::enquo(penalty),
     batch_size = rlang::enquo(batch_size),
-    learn_rate = rlang::enquo(learn_rate)
+    learn_rate = rlang::enquo(learn_rate),
+    decision_width = rlang::enquo(decision_width),
+    attention_width = rlang::enquo(attention_width),
+    num_steps = rlang::enquo(num_steps),
+    feature_reusage = rlang::enquo(feature_reusage)
   )
 
   # Save some empty slots for future parts of the specification

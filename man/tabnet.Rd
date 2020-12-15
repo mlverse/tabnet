@@ -9,7 +9,11 @@ tabnet(
   epochs = NULL,
   penalty = NULL,
   batch_size = NULL,
-  learn_rate = NULL
+  learn_rate = NULL,
+  decision_width = NULL,
+  attention_width = NULL,
+  num_steps = NULL,
+  feature_reusage = NULL
 )
 }
 \arguments{
@@ -27,6 +31,20 @@ problem, reducing this value could help.}
 recommended. (default: 1024)}
 
 \item{learn_rate}{initial learning rate for the optimizer.}
+
+\item{decision_width}{(int) Width of the decision prediction layer. Bigger values gives
+more capacity to the model with the risk of overfitting. Values typically
+range from 8 to 64.}
+
+\item{attention_width}{(int) Width of the attention embedding for each mask. According to
+the paper n_d=n_a is usually a good choice. (default=8)}
+
+\item{num_steps}{(int) Number of steps in the architecture
+(usually between 3 and 10)}
+
+\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
+A value close to 1 will make mask selection least correlated between layers.
+Values range from 1.0 to 2.0.}
 }
 \description{
 Parsnip compatible tabnet model

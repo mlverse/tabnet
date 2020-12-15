@@ -25,6 +25,7 @@ Suggests:
     testthat,
     modeldata,
     recipes,
-    parsnip
+    parsnip,
+    dials
 Remotes:
     mlverse/torch
