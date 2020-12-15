@@ -119,10 +119,10 @@
   loss <span class='op'>=</span> <span class='st'>"auto"</span>,
   epochs <span class='op'>=</span> <span class='fl'>5</span>,
   drop_last <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  n_d <span class='op'>=</span> <span class='fl'>8</span>,
-  n_a <span class='op'>=</span> <span class='fl'>8</span>,
-  n_steps <span class='op'>=</span> <span class='fl'>3</span>,
-  gamma <span class='op'>=</span> <span class='fl'>1.3</span>,
+  decision_width <span class='op'>=</span> <span class='fl'>8</span>,
+  attention_width <span class='op'>=</span> <span class='fl'>8</span>,
+  num_steps <span class='op'>=</span> <span class='fl'>3</span>,
+  feature_reusage <span class='op'>=</span> <span class='fl'>1.3</span>,
   virtual_batch_size <span class='op'>=</span> <span class='fl'>128</span>,
   valid_split <span class='op'>=</span> <span class='fl'>0</span>,
   learn_rate <span class='op'>=</span> <span class='fl'>0.02</span>,
@@ -131,6 +131,7 @@
   lr_decay <span class='op'>=</span> <span class='fl'>0.1</span>,
   step_size <span class='op'>=</span> <span class='fl'>30</span>,
   checkpoint_epochs <span class='op'>=</span> <span class='fl'>10</span>,
+  cat_emb_dim <span class='op'>=</span> <span class='fl'>1</span>,
   verbose <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
@@ -169,23 +170,23 @@ for regression and cross entropy for classification)</p></td>
 training</p></td>
     </tr>
     <tr>
-      <th>n_d</th>
+      <th>decision_width</th>
       <td><p>(int) Width of the decision prediction layer. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.</p></td>
     </tr>
     <tr>
-      <th>n_a</th>
+      <th>attention_width</th>
       <td><p>(int) Width of the attention embedding for each mask. According to
 the paper n_d=n_a is usually a good choice. (default=8)</p></td>
     </tr>
     <tr>
-      <th>n_steps</th>
+      <th>num_steps</th>
       <td><p>(int) Number of steps in the architecture
 (usually between 3 and 10)</p></td>
     </tr>
     <tr>
-      <th>gamma</th>
+      <th>feature_reusage</th>
       <td><p>(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.</p></td>
@@ -231,6 +232,10 @@ or <code>NULL</code>.</p></td>
       <td><p>checkpoint model weights and architecture every
 <code>checkpoint_epochs</code>. (default is 10). This may cause large memory usage.
 Use <code>0</code> to disable checkpoints.</p></td>
+    </tr>
+    <tr>
+      <th>cat_emb_dim</th>
+      <td><p>Embedding size for categorial features (default=1)</p></td>
     </tr>
     <tr>
       <th>verbose</th>

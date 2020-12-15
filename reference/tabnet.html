@@ -117,7 +117,11 @@
   epochs <span class='op'>=</span> <span class='cn'>NULL</span>,
   penalty <span class='op'>=</span> <span class='cn'>NULL</span>,
   batch_size <span class='op'>=</span> <span class='cn'>NULL</span>,
-  learn_rate <span class='op'>=</span> <span class='cn'>NULL</span>
+  learn_rate <span class='op'>=</span> <span class='cn'>NULL</span>,
+  decision_width <span class='op'>=</span> <span class='cn'>NULL</span>,
+  attention_width <span class='op'>=</span> <span class='cn'>NULL</span>,
+  num_steps <span class='op'>=</span> <span class='cn'>NULL</span>,
+  feature_reusage <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -148,6 +152,28 @@ recommended. (default: 1024)</p></td>
       <th>learn_rate</th>
       <td><p>initial learning rate for the optimizer.</p></td>
     </tr>
+    <tr>
+      <th>decision_width</th>
+      <td><p>(int) Width of the decision prediction layer. Bigger values gives
+more capacity to the model with the risk of overfitting. Values typically
+range from 8 to 64.</p></td>
+    </tr>
+    <tr>
+      <th>attention_width</th>
+      <td><p>(int) Width of the attention embedding for each mask. According to
+the paper n_d=n_a is usually a good choice. (default=8)</p></td>
+    </tr>
+    <tr>
+      <th>num_steps</th>
+      <td><p>(int) Number of steps in the architecture
+(usually between 3 and 10)</p></td>
+    </tr>
+    <tr>
+      <th>feature_reusage</th>
+      <td><p>(float) This is the coefficient for feature reusage in the masks.
+A value close to 1 will make mask selection least correlated between layers.
+Values range from 1.0 to 2.0.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
@@ -166,7 +192,7 @@ recommended. (default: 1024)</p></td>
 <span class='op'>}</span>
 </div><div class='output co'>#&gt; parsnip model object
 #&gt; 
-#&gt; Fit time:  41.6s 
+#&gt; Fit time:  37.4s 
 #&gt; An `nn_module` containing 10,313 parameters.
 #&gt; 
 #&gt; ── Modules ─────────────────────────────────────────────────────────────────────
