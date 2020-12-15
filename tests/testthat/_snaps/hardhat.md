@@ -2,10 +2,10 @@
 
     An `nn_module` containing 10,313 parameters.
     
-    ── Modules ──────────────────────────────────────────────────────────────────────────────────────
+    ── Modules ───────────────────────────────────────
     ● embedder: <embedding_generator> #0 parameters
     ● tabnet: <tabnet_no_embedding> #10,312 parameters
     
-    ── Parameters ───────────────────────────────────────────────────────────────────────────────────
+    ── Parameters ────────────────────────────────────
     ● .check: Float [1:1]
 

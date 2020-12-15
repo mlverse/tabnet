@@ -186,6 +186,8 @@ test_that("checkpoints works", {
 test_that("print module works", {
 
   testthat::local_edition(3)
+  testthat::skip_on_os("linux")
+  testthat::skip_on_os("windows")
 
   data("ames", package = "modeldata")
 
@@ -197,7 +199,8 @@ test_that("print module works", {
     regexp = NA
   )
 
-  expect_snapshot_output(fit)
+  withr::with_options(new = c(cli.width = 50),
+                      expect_snapshot_output(fit))
 
 })
 
