@@ -121,7 +121,11 @@
   decision_width <span class='op'>=</span> <span class='cn'>NULL</span>,
   attention_width <span class='op'>=</span> <span class='cn'>NULL</span>,
   num_steps <span class='op'>=</span> <span class='cn'>NULL</span>,
-  feature_reusage <span class='op'>=</span> <span class='cn'>NULL</span>
+  feature_reusage <span class='op'>=</span> <span class='cn'>NULL</span>,
+  virtual_batch_size <span class='op'>=</span> <span class='cn'>NULL</span>,
+  num_independent <span class='op'>=</span> <span class='cn'>NULL</span>,
+  num_shared <span class='op'>=</span> <span class='cn'>NULL</span>,
+  momentum <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -174,6 +178,26 @@ the paper n_d=n_a is usually a good choice. (default=8)</p></td>
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.</p></td>
     </tr>
+    <tr>
+      <th>virtual_batch_size</th>
+      <td><p>(int) Size of the mini batches used for
+"Ghost Batch Normalization" (default=128)</p></td>
+    </tr>
+    <tr>
+      <th>num_independent</th>
+      <td><p>Number of independent Gated Linear Units layers at each step.
+Usual values range from 1 to 5.</p></td>
+    </tr>
+    <tr>
+      <th>num_shared</th>
+      <td><p>Number of shared Gated Linear Units at each step Usual values
+range from 1 to 5</p></td>
+    </tr>
+    <tr>
+      <th>momentum</th>
+      <td><p>Momentum for batch normalization, typically ranges from 0.01
+to 0.4 (default=0.02)</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
@@ -192,7 +216,7 @@ Values range from 1.0 to 2.0.</p></td>
 <span class='op'>}</span>
 </div><div class='output co'>#&gt; parsnip model object
 #&gt; 
-#&gt; Fit time:  37.4s 
+#&gt; Fit time:  39.5s 
 #&gt; An `nn_module` containing 10,313 parameters.
 #&gt; 
 #&gt; ── Modules ─────────────────────────────────────────────────────────────────────

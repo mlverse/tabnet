@@ -132,6 +132,9 @@
   step_size <span class='op'>=</span> <span class='fl'>30</span>,
   checkpoint_epochs <span class='op'>=</span> <span class='fl'>10</span>,
   cat_emb_dim <span class='op'>=</span> <span class='fl'>1</span>,
+  num_independent <span class='op'>=</span> <span class='fl'>2</span>,
+  num_shared <span class='op'>=</span> <span class='fl'>2</span>,
+  momentum <span class='op'>=</span> <span class='fl'>0.02</span>,
   verbose <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
@@ -236,6 +239,21 @@ Use <code>0</code> to disable checkpoints.</p></td>
     <tr>
       <th>cat_emb_dim</th>
       <td><p>Embedding size for categorial features (default=1)</p></td>
+    </tr>
+    <tr>
+      <th>num_independent</th>
+      <td><p>Number of independent Gated Linear Units layers at each step.
+Usual values range from 1 to 5.</p></td>
+    </tr>
+    <tr>
+      <th>num_shared</th>
+      <td><p>Number of shared Gated Linear Units at each step Usual values
+range from 1 to 5</p></td>
+    </tr>
+    <tr>
+      <th>momentum</th>
+      <td><p>Momentum for batch normalization, typically ranges from 0.01
+to 0.4 (default=0.02)</p></td>
     </tr>
     <tr>
       <th>verbose</th>
