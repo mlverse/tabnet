@@ -128,6 +128,42 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "virtual_batch_size",
+    original = "virtual_batch_size",
+    func = list(pkg = "dials", fun = "batch_size"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_independent",
+    original = "num_independent",
+    func = list(pkg = "tabnet", fun = "num_independent"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_shared",
+    original = "num_shared",
+    func = list(pkg = "tabnet", fun = "num_shared"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "momentum",
+    original = "momentum",
+    func = list(pkg = "dials", fun = "momentum"),
+    has_submodel = FALSE
+  )
+
   parsnip::set_pred(
     model = "tabnet",
     eng = "torch",
@@ -176,7 +212,8 @@ add_parsnip_tabnet <- function() {
 #' @export
 tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
                    learn_rate = NULL, decision_width = NULL, attention_width = NULL,
-                   num_steps = NULL, feature_reusage = NULL) {
+                   num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
+                   num_independent = NULL, num_shared = NULL, momentum = NULL) {
 
   if (!tabnet_env$parsnip_added) {
     add_parsnip_tabnet()
@@ -192,7 +229,11 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
     decision_width = rlang::enquo(decision_width),
     attention_width = rlang::enquo(attention_width),
     num_steps = rlang::enquo(num_steps),
-    feature_reusage = rlang::enquo(feature_reusage)
+    feature_reusage = rlang::enquo(feature_reusage),
+    virtual_batch_size = rlang::enquo(virtual_batch_size),
+    num_independent = rlang::enquo(num_independent),
+    num_shared = rlang::enquo(num_shared),
+    momentum = rlang::enquo(momentum)
   )
 
   # Save some empty slots for future parts of the specification

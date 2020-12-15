@@ -13,7 +13,11 @@ tabnet(
   decision_width = NULL,
   attention_width = NULL,
   num_steps = NULL,
-  feature_reusage = NULL
+  feature_reusage = NULL,
+  virtual_batch_size = NULL,
+  num_independent = NULL,
+  num_shared = NULL,
+  momentum = NULL
 )
 }
 \arguments{
@@ -45,6 +49,18 @@ the paper n_d=n_a is usually a good choice. (default=8)}
 \item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.}
+
+\item{virtual_batch_size}{(int) Size of the mini batches used for
+"Ghost Batch Normalization" (default=128)}
+
+\item{num_independent}{Number of independent Gated Linear Units layers at each step.
+Usual values range from 1 to 5.}
+
+\item{num_shared}{Number of shared Gated Linear Units at each step Usual values
+range from 1 to 5}
+
+\item{momentum}{Momentum for batch normalization, typically ranges from 0.01
+to 0.4 (default=0.02)}
 }
 \description{
 Parsnip compatible tabnet model

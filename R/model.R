@@ -66,6 +66,10 @@ resolve_data <- function(x, y) {
 #' @param optimizer the optimization method. currently only 'adam' is supported,
 #'   you can also pass any torch optimizer function.
 #' @param valid_split (float) The fraction of the dataset used for validation.
+#' @param num_independent Number of independent Gated Linear Units layers at each step.
+#'   Usual values range from 1 to 5.
+#' @param num_shared Number of shared Gated Linear Units at each step Usual values
+#'   range from 1 to 5
 #' @param verbose (bool) wether to print progress and loss values during
 #'   training.
 #' @param lr_scheduler if `NULL`, no learning rate decay is used. if "step"
@@ -78,6 +82,8 @@ resolve_data <- function(x, y) {
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
 #' @param cat_emb_dim Embedding size for categorial features (default=1)
+#' @param momentum Momentum for batch normalization, typically ranges from 0.01
+#'   to 0.4 (default=0.02)
 #' @param checkpoint_epochs checkpoint model weights and architecture every
 #'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
@@ -102,6 +108,9 @@ tabnet_config <- function(batch_size = 256,
                           step_size = 30,
                           checkpoint_epochs = 10,
                           cat_emb_dim = 1,
+                          num_independent = 2,
+                          num_shared = 2,
+                          momentum = 0.02,
                           verbose = FALSE) {
   list(
     batch_size = batch_size,
@@ -123,6 +132,9 @@ tabnet_config <- function(batch_size = 256,
     lr_decay = lr_decay,
     step_size = step_size,
     cat_emb_dim = cat_emb_dim,
+    n_independent = num_independent,
+    n_shared = num_shared,
+    momentum = momentum,
     checkpoint_epochs = checkpoint_epochs
   )
 }
@@ -242,7 +254,10 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     n_steps = config$n_steps,
     gamma = config$gamma,
     virtual_batch_size = config$virtual_batch_size,
-    cat_emb_dim = config$cat_emb_dim
+    cat_emb_dim = config$cat_emb_dim,
+    n_independent = config$n_independent,
+    n_shared = config$n_shared,
+    momentum = config$momentum
   )
 
   # define optimizer

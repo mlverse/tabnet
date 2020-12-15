@@ -5,6 +5,8 @@
 \alias{attention_width}
 \alias{num_steps}
 \alias{feature_reusage}
+\alias{num_independent}
+\alias{num_shared}
 \title{Parameters for the tabnet model}
 \usage{
 decision_width(range = c(8L, 64L), trans = NULL)
@@ -14,6 +16,10 @@ attention_width(range = c(8L, 64L), trans = NULL)
 num_steps(range = c(3L, 10L), trans = NULL)
 
 feature_reusage(range = c(1, 2), trans = NULL)
+
+num_independent(range = c(1L, 5L), trans = NULL)
+
+num_shared(range = c(1L, 5L), trans = NULL)
 }
 \arguments{
 \item{range}{the default range for the parameter value}

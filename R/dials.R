@@ -55,3 +55,29 @@ feature_reusage <- function(range = c(1, 2), trans = NULL) {
     finalize = NULL
   )
 }
+
+#' @rdname tabnet_params
+#' @export
+num_independent <- function(range = c(1L, 5L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(min_n = "Number of independent Gated Linear Units layers at each step"),
+    finalize = NULL
+  )
+}
+
+#' @rdname tabnet_params
+#' @export
+num_shared <- function(range = c(1L, 5L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(min_n = "Number of shared Gated Linear Units at each step"),
+    finalize = NULL
+  )
+}

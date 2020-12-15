@@ -24,6 +24,9 @@ tabnet_config(
   step_size = 30,
   checkpoint_epochs = 10,
   cat_emb_dim = 1,
+  num_independent = 2,
+  num_shared = 2,
+  momentum = 0.02,
   verbose = FALSE
 )
 }
@@ -88,6 +91,15 @@ or \code{NULL}.}
 Use \code{0} to disable checkpoints.}
 
 \item{cat_emb_dim}{Embedding size for categorial features (default=1)}
+
+\item{num_independent}{Number of independent Gated Linear Units layers at each step.
+Usual values range from 1 to 5.}
+
+\item{num_shared}{Number of shared Gated Linear Units at each step Usual values
+range from 1 to 5}
+
+\item{momentum}{Momentum for batch normalization, typically ranges from 0.01
+to 0.4 (default=0.02)}
 
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}
