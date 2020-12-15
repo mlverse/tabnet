@@ -62,7 +62,7 @@ add_parsnip_tabnet <- function() {
     parsnip = "epochs",
     original = "epochs",
     func = list(pkg = "dials", fun = "epochs"),
-    has_submodel = FALSE
+    has_submodel = TRUE
   )
 
   parsnip::set_model_arg(
@@ -248,4 +248,24 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
 tabnet_env <- new.env()
 tabnet_env$parsnip_added <- FALSE
 
+
+multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NULL, ...) {
+
+  if (is.null(epochs))
+    epochs <- object$fit$config$epochs
+
+  p <- lapply(epochs, function(epoch) {
+    pred <- predict(object$fit, new_data, type = type, epoch = epoch)
+    nms <- names(pred)
+    pred[["epochs"]] <- epoch
+    pred[[".row"]] <- 1:nrow(new_data)
+    pred[, c(".row", "epochs", nms)]
+  })
+
+  p <- do.call(rbind, p)
+  p <- p[order(p$.row, p$epochs),]
+  p <- split(p[,-1], p$.row)
+  names(p) <- NULL
+  tibble::tibble(.pred = p)
+}
 
