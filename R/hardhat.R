@@ -98,10 +98,10 @@ tabnet_bridge <- function(processed, config = tabnet_config()) {
 }
 
 #' @export
-predict.tabnet_fit <- function(object, new_data, type = NULL, ...) {
+predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data, object$blueprint)
-  out <- predict_tabnet_bridge(type, object, processed$predictors)
+  out <- predict_tabnet_bridge(type, object, processed$predictors, epoch)
   hardhat::validate_prediction_size(out, new_data)
   out
 }
@@ -134,13 +134,25 @@ check_type <- function(model, type) {
 
 
 
-predict_tabnet_bridge <- function(type, object, predictors) {
+predict_tabnet_bridge <- function(type, object, predictors, epoch) {
 
   type <- check_type(object, type)
 
+  if (!is.null(epoch)) {
+
+    if (epoch > (length(object$fit$checkpoints) * object$fit$config$checkpoint_epoch))
+      rlang::abort(paste0("The model was trained for less than ", epoch, " epochs"))
+
+    # find closest checkpoint for that epoch
+    ind <- epoch %/% object$fit$config$checkpoint_epoch
+
+    object$fit$network <- reload_model(object$fit$checkpoints[[ind]])
+  }
+
   if (check_net_is_empty_ptr(object)) {
-    m <- reload_model(object)
-    # this modifies 'object' in-place
+    m <- reload_model(object$serialized_net)
+    # this modifies 'object' in-place so subsequent predicts won't
+    # need to reload.
     object$fit$network$load_state_dict(m$state_dict())
   }
 
@@ -174,7 +186,7 @@ is_null_external_pointer <- function(pointer) {
 }
 
 reload_model <- function(object) {
-  con <- rawConnection(object$serialized_net)
+  con <- rawConnection(object)
   on.exit({close(con)}, add = TRUE)
   module <- torch::torch_load(con)
   module

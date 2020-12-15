@@ -77,6 +77,8 @@ resolve_data <- function(x, y) {
 #'   or `NULL`.
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
+#' @param checkpoint_epochs checkpoint model weights and architecture every
+#'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
 #'
 #' @export
 tabnet_config <- function(batch_size = 256,
@@ -96,6 +98,7 @@ tabnet_config <- function(batch_size = 256,
                           lr_scheduler = NULL,
                           lr_decay = 0.1,
                           step_size = 30,
+                          checkpoint_epochs = 10,
                           verbose = FALSE) {
   list(
     batch_size = batch_size,
@@ -115,7 +118,8 @@ tabnet_config <- function(batch_size = 256,
     optimizer = optimizer,
     lr_scheduler = lr_scheduler,
     lr_decay = lr_decay,
-    step_size = step_size
+    step_size = step_size,
+    checkpoint_epochs = checkpoint_epochs
   )
 }
 
@@ -263,6 +267,8 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
 
   # main loop
   metrics <- list()
+  checkpoints <- list()
+
   for (epoch in seq_len(config$epochs)) {
 
     metrics[[epoch]] <- list(train = NULL, valid = NULL)
@@ -283,6 +289,9 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
       train_metrics <- c(train_metrics, m)
     }
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
+
+    if (epoch %% config$checkpoint_epochs == 0)
+      checkpoints[[length(checkpoints) + 1]] <- model_to_raw(network)
 
     network$eval()
     if (has_valid) {
@@ -306,7 +315,8 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
   list(
     network = network,
     metrics = metrics,
-    config = config
+    config = config,
+    checkpoints = checkpoints
   )
 }
 

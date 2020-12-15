@@ -150,7 +150,36 @@ test_that("scheduler works", {
     regexp = NA
   )
 
+})
 
+test_that("checkpoints works", {
+
+  data("ames", package = "modeldata")
+
+  x <- ames[-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, checkpoint_epochs = 1),
+    regexp = NA
+  )
+
+  expect_error(
+    p1 <- predict(fit, x, epoch = 1),
+    regexp = NA
+  )
+
+  expect_error(
+    p2 <- predict(fit, x, epoch = 2),
+    regexp = NA
+  )
+
+  expect_error(
+    p3 <- predict(fit, x, epoch = 3),
+    regexp = NA
+  )
+
+  expect_equal(p3, predict(fit, x))
 
 })
 
