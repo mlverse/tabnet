@@ -191,3 +191,9 @@ reload_model <- function(object) {
   module <- torch::torch_load(con)
   module
 }
+
+#' @export
+print.tabnet_fit <- function(x, ...) {
+  print(x$fit$network)
+  invisible(x)
+}

@@ -183,3 +183,21 @@ test_that("checkpoints works", {
 
 })
 
+test_that("print module works", {
+
+  testthat::local_edition(3)
+
+  data("ames", package = "modeldata")
+
+  x <- ames[-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 1),
+    regexp = NA
+  )
+
+  expect_snapshot_output(fit)
+
+})
+
