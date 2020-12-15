@@ -26,6 +26,7 @@ Suggests:
     modeldata,
     recipes,
     parsnip,
-    dials
+    dials,
+    withr
 Remotes:
     tidymodels/dials
