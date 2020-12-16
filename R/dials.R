@@ -1,3 +1,10 @@
+check_dials <- function() {
+  if (!requireNamespace("dials", quietly = TRUE))
+    rlang::abort("Package \"dials\" needed for this function to work. Please install it.")
+}
+
+
+
 #' Parameters for the tabnet model
 #'
 #' @param range the default range for the parameter value
@@ -7,6 +14,7 @@
 #' @rdname tabnet_params
 #' @export
 decision_width <- function(range = c(8L, 64L), trans = NULL) {
+  check_dials()
   dials::new_quant_param(
     type = "integer",
     range = range,
@@ -20,6 +28,7 @@ decision_width <- function(range = c(8L, 64L), trans = NULL) {
 #' @rdname tabnet_params
 #' @export
 attention_width <- function(range = c(8L, 64L), trans = NULL) {
+  check_dials()
   dials::new_quant_param(
     type = "integer",
     range = range,
@@ -33,6 +42,7 @@ attention_width <- function(range = c(8L, 64L), trans = NULL) {
 #' @rdname tabnet_params
 #' @export
 num_steps <- function(range = c(3L, 10L), trans = NULL) {
+  check_dials()
   dials::new_quant_param(
     type = "integer",
     range = range,
@@ -46,6 +56,7 @@ num_steps <- function(range = c(3L, 10L), trans = NULL) {
 #' @rdname tabnet_params
 #' @export
 feature_reusage <- function(range = c(1, 2), trans = NULL) {
+  check_dials()
   dials::new_quant_param(
     type = "double",
     range = range,
@@ -59,6 +70,7 @@ feature_reusage <- function(range = c(1, 2), trans = NULL) {
 #' @rdname tabnet_params
 #' @export
 num_independent <- function(range = c(1L, 5L), trans = NULL) {
+  check_dials()
   dials::new_quant_param(
     type = "integer",
     range = range,
@@ -72,6 +84,7 @@ num_independent <- function(range = c(1L, 5L), trans = NULL) {
 #' @rdname tabnet_params
 #' @export
 num_shared <- function(range = c(1L, 5L), trans = NULL) {
+  check_dials()
   dials::new_quant_param(
     type = "integer",
     range = range,

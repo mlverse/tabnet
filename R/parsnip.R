@@ -215,6 +215,9 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
                    num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
                    num_independent = NULL, num_shared = NULL, momentum = NULL) {
 
+  if (!requireNamespace("parsnip", quietly = TRUE))
+    rlang::abort("Package \"parsnip\" needed for this function to work. Please install it.")
+
   if (!tabnet_env$parsnip_added) {
     add_parsnip_tabnet()
     tabnet_env$parsnip_added <- TRUE
