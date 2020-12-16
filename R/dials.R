@@ -12,7 +12,7 @@ decision_width <- function(range = c(8L, 64L), trans = NULL) {
     range = range,
     inclusive = c(TRUE, TRUE),
     trans = trans,
-    label = c(min_n = "Width of the decision prediction layer"),
+    label = c(decision_width = "Width of the decision prediction layer"),
     finalize = NULL
   )
 }
@@ -25,7 +25,7 @@ attention_width <- function(range = c(8L, 64L), trans = NULL) {
     range = range,
     inclusive = c(TRUE, TRUE),
     trans = trans,
-    label = c(min_n = "Width of the attention embedding for each mask"),
+    label = c(attention_width = "Width of the attention embedding for each mask"),
     finalize = NULL
   )
 }
@@ -38,7 +38,7 @@ num_steps <- function(range = c(3L, 10L), trans = NULL) {
     range = range,
     inclusive = c(TRUE, TRUE),
     trans = trans,
-    label = c(min_n = "Number of steps in the architecture"),
+    label = c(num_steps = "Number of steps in the architecture"),
     finalize = NULL
   )
 }
@@ -51,7 +51,7 @@ feature_reusage <- function(range = c(1, 2), trans = NULL) {
     range = range,
     inclusive = c(TRUE, TRUE),
     trans = trans,
-    label = c(min_n = "Coefficient for feature reusage in the masks"),
+    label = c(feature_reusage = "Coefficient for feature reusage in the masks"),
     finalize = NULL
   )
 }
@@ -64,7 +64,7 @@ num_independent <- function(range = c(1L, 5L), trans = NULL) {
     range = range,
     inclusive = c(TRUE, TRUE),
     trans = trans,
-    label = c(min_n = "Number of independent Gated Linear Units layers at each step"),
+    label = c(num_independent = "Number of independent Gated Linear Units layers at each step"),
     finalize = NULL
   )
 }
@@ -77,7 +77,7 @@ num_shared <- function(range = c(1L, 5L), trans = NULL) {
     range = range,
     inclusive = c(TRUE, TRUE),
     trans = trans,
-    label = c(min_n = "Number of shared Gated Linear Units at each step"),
+    label = c(num_shared = "Number of shared Gated Linear Units at each step"),
     finalize = NULL
   )
 }
