@@ -42,6 +42,30 @@ add_parsnip_tabnet <- function() {
     )
   )
 
+  parsnip::set_encoding(
+    model = "tabnet",
+    eng = "torch",
+    mode = "regression",
+    options = list(
+      predictor_indicators = "none",
+      compute_intercept = FALSE,
+      remove_intercept = FALSE,
+      allow_sparse_x = FALSE
+    )
+  )
+
+  parsnip::set_encoding(
+    model = "tabnet",
+    eng = "torch",
+    mode = "classification",
+    options = list(
+      predictor_indicators = "none",
+      compute_intercept = FALSE,
+      remove_intercept = FALSE,
+      allow_sparse_x = FALSE
+    )
+  )
+
   make_class_info <- function(type) {
     list(
       pre = NULL,
