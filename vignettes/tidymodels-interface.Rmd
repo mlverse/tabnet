@@ -30,6 +30,7 @@ First let's split our dataset into training and testing so we can later access p
 
 ```{r}
 set.seed(123)
+data("lending_club", package = "modeldata")
 split <- initial_split(lending_club, strata = Class)
 train <- training(split)
 test  <- testing(split)

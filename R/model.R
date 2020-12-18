@@ -112,7 +112,8 @@ tabnet_config <- function(batch_size = 256,
                           num_independent = 2,
                           num_shared = 2,
                           momentum = 0.02,
-                          verbose = FALSE) {
+                          verbose = FALSE,
+                          device = "auto") {
   list(
     batch_size = batch_size,
     lambda_sparse = penalty,
@@ -136,8 +137,16 @@ tabnet_config <- function(batch_size = 256,
     n_independent = num_independent,
     n_shared = num_shared,
     momentum = momentum,
-    checkpoint_epochs = checkpoint_epochs
+    checkpoint_epochs = checkpoint_epochs,
+    device = device
   )
+}
+
+batch_to_device <- function(batch, device) {
+  batch <- list(x = batch$x, y  = batch$y)
+  lapply(batch, function(x) {
+    x$to(device = device)
+  })
 }
 
 train_batch <- function(network, optimizer, batch, config) {
@@ -194,6 +203,15 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
 
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
+
+  if (config$device == "auto") {
+    if (torch::cuda_is_available())
+      device <- "cuda"
+    else
+      device <- "cpu"
+  } else {
+    device <- config$device
+  }
 
   if (has_valid) {
     n <- nrow(x)
@@ -262,6 +280,8 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     momentum = config$momentum
   )
 
+  network$to(device = device)
+
   # define optimizer
 
   if (rlang::is_function(config$optimizer)) {
@@ -306,19 +326,22 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
       )
 
     for (batch in torch::enumerate(dl)) {
-      m <- train_batch(network, optimizer, batch, config)
+      m <- train_batch(network, optimizer, batch_to_device(batch, device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     }
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
 
-    if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0)
+    if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0) {
+      network$to(device = "cpu")
       checkpoints[[length(checkpoints) + 1]] <- model_to_raw(network)
+      network$to(device = device)
+    }
 
     network$eval()
     if (has_valid) {
       for (batch in torch::enumerate(valid_dl)) {
-        m <- valid_batch(network, batch, config)
+        m <- valid_batch(network, batch_to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
       }
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
@@ -333,6 +356,8 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
 
     scheduler$step()
   }
+
+  network$to(device = "cpu")
 
   list(
     network = network,

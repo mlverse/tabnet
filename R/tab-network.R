@@ -102,7 +102,7 @@ tabnet_no_embedding <- torch::nn_module(
 
   },
   forward = function(x) {
-    res <- 0
+    res <- torch::torch_tensor(0, device = x$device)
     x <- self$initial_bn(x)
 
     prior <- torch::torch_ones(size = x$shape, device = x$device)
@@ -173,7 +173,7 @@ tabnet_nn <- torch::nn_module(
   initialize = function(input_dim, output_dim, n_d=8, n_a=8,
                         n_steps=3, gamma=1.3, cat_idxs=c(), cat_dims=c(), cat_emb_dim=1,
                         n_independent=2, n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum=0.02, device_name='auto',
+                        virtual_batch_size=128, momentum=0.02,
                         mask_type="sparsemax") {
     self$cat_idxs <- cat_idxs
     self$cat_dims <- cat_dims
@@ -205,16 +205,6 @@ tabnet_nn <- torch::nn_module(
     self$tabnet <- tabnet_no_embedding(self$post_embed_dim, output_dim, n_d, n_a, n_steps,
                                      gamma, n_independent, n_shared, epsilon,
                                      virtual_batch_size, momentum, mask_type)
-
-    # Defining device
-    if (device_name == 'auto') {
-      if (torch::cuda_is_available())
-        device_name <- "cuda"
-      else
-        device_name <- "cpu"
-    }
-    self$device <- torch::torch_device(device_name)
-    self$to(device = self$device)
 
   },
   forward = function(x) {
