@@ -24,7 +24,10 @@ num_shared(range = c(1L, 5L), trans = NULL)
 \arguments{
 \item{range}{the default range for the parameter value}
 
-\item{trans}{wether to apply a transformation to the parameter}
+\item{trans}{wether to apply a transformation to the parameter
+
+These functions are used with \code{tune} grid functions to generate
+candidates.}
 }
 \description{
 Parameters for the tabnet model

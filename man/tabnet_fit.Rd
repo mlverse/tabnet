@@ -53,6 +53,17 @@ and the predictor terms on the right-hand side.}
 \description{
 Fits the \href{https://arxiv.org/abs/1908.07442}{TabNet: Attentive Interpretable Tabular Learning} model
 }
+\section{Threading}{
+
+
+TabNet uses \code{torch} as it's backend for computation and \code{torch} uses all
+available threads by default.
+
+You can control the number of threads used by \code{torch} with:\preformatted{torch::torch_set_num_threads(1)
+torch::torch_set_num_interop_threads(1)
+}
+}
+
 \examples{
 if (torch::torch_is_installed()) {
 data("ames", package = "modeldata")

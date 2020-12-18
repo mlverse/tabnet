@@ -65,6 +65,17 @@ to 0.4 (default=0.02)}
 \description{
 Parsnip compatible tabnet model
 }
+\section{Threading}{
+
+
+TabNet uses \code{torch} as it's backend for computation and \code{torch} uses all
+available threads by default.
+
+You can control the number of threads used by \code{torch} with:\preformatted{torch::torch_set_num_threads(1)
+torch::torch_set_num_interop_threads(1)
+}
+}
+
 \examples{
 if (torch::torch_is_installed()) {
 library(parsnip)

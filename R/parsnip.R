@@ -221,7 +221,6 @@ add_parsnip_tabnet <- function() {
 #' @inheritParams tabnet_config
 #'
 #' @inheritSection tabnet_fit Threading
-#'
 #' @seealso tabnet_fit
 #'
 #' @examples

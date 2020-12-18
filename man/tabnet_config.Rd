@@ -7,7 +7,7 @@
 tabnet_config(
   batch_size = 256,
   penalty = 0.001,
-  clip_value = 1,
+  clip_value = NULL,
   loss = "auto",
   epochs = 5,
   drop_last = FALSE,
