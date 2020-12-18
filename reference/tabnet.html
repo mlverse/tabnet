@@ -80,12 +80,24 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+    </li>
+  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -200,6 +212,17 @@ to 0.4 (default=0.02)</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="threading"><a class="anchor" href="#threading"></a>Threading</h2>
+
+    
+
+
+<p>TabNet uses <code>torch</code> as it's backend for computation and <code>torch</code> uses all
+available threads by default.</p>
+<p>You can control the number of threads used by <code>torch</code> with:</p><pre><span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/threads.html'>torch_set_num_threads</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
+<span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/threads.html'>torch_set_num_interop_threads</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
+</pre>
+
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>tabnet_fit</p></div>
@@ -216,11 +239,11 @@ to 0.4 (default=0.02)</p></td>
 <span class='op'>}</span>
 </div><div class='output co'>#&gt; parsnip model object
 #&gt; 
-#&gt; Fit time:  35.8s 
-#&gt; An `nn_module` containing 10,313 parameters.
+#&gt; Fit time:  1m 55.9s 
+#&gt; An `nn_module` containing 10,596 parameters.
 #&gt; 
 #&gt; ── Modules ─────────────────────────────────────────────────────────────────────
-#&gt; ● embedder: &lt;embedding_generator&gt; #0 parameters
+#&gt; ● embedder: &lt;embedding_generator&gt; #283 parameters
 #&gt; ● tabnet: &lt;tabnet_no_embedding&gt; #10,312 parameters
 #&gt; 
 #&gt; ── Parameters ──────────────────────────────────────────────────────────────────

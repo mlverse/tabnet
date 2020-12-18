@@ -80,12 +80,24 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+    </li>
+  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -133,7 +145,9 @@
     </tr>
     <tr>
       <th>trans</th>
-      <td><p>wether to apply a transformation to the parameter</p></td>
+      <td><p>wether to apply a transformation to the parameter</p>
+<p>These functions are used with <code>tune</code> grid functions to generate
+candidates.</p></td>
     </tr>
     </table>
 
