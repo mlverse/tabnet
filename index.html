@@ -129,16 +129,16 @@
 <span class="co">#&gt; # A tibble: 3 x 3</span>
 <span class="co">#&gt;   .metric   .estimator .estimate</span>
 <span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;          &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 accuracy  binary         0.813</span>
-<span class="co">#&gt; 2 precision binary         0.837</span>
-<span class="co">#&gt; 3 recall    binary         0.963</span>
+<span class="co">#&gt; 1 accuracy  binary         0.847</span>
+<span class="co">#&gt; 2 precision binary         0.848</span>
+<span class="co">#&gt; 3 recall    binary         0.996</span>
   
 <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">roc_auc</span><span class="op">(</span><span class="va">Attrition</span>, <span class="va">.pred_No</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 1 x 3</span>
 <span class="co">#&gt;   .metric .estimator .estimate</span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 roc_auc binary         0.616</span></code></pre></div>
+<span class="co">#&gt; 1 roc_auc binary         0.705</span></code></pre></div>
 </div>
 </div>
   </div>
