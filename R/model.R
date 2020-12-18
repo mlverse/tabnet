@@ -88,6 +88,8 @@ resolve_data <- function(x, y) {
 #' @param checkpoint_epochs checkpoint model weights and architecture every
 #'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
+#' @param device the device to use for training. "cpu" or "cuda". The default ("auto")
+#'   uses  to "cuda" if it's available, otherwise uses "cpu".
 #'
 #' @export
 tabnet_config <- function(batch_size = 256,

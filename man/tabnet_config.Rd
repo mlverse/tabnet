@@ -27,7 +27,8 @@ tabnet_config(
   num_independent = 2,
   num_shared = 2,
   momentum = 0.02,
-  verbose = FALSE
+  verbose = FALSE,
+  device = "auto"
 )
 }
 \arguments{
@@ -103,6 +104,9 @@ to 0.4 (default=0.02)}
 
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}
+
+\item{device}{the device to use for training. "cpu" or "cuda". The default ("auto")
+uses  to "cuda" if it's available, otherwise uses "cpu".}
 }
 \description{
 Configuration for TabNet models
