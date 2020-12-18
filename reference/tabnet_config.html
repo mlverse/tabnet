@@ -147,7 +147,8 @@
   num_independent <span class='op'>=</span> <span class='fl'>2</span>,
   num_shared <span class='op'>=</span> <span class='fl'>2</span>,
   momentum <span class='op'>=</span> <span class='fl'>0.02</span>,
-  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>
+  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  device <span class='op'>=</span> <span class='st'>"auto"</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -271,6 +272,11 @@ to 0.4 (default=0.02)</p></td>
       <th>verbose</th>
       <td><p>(bool) wether to print progress and loss values during
 training.</p></td>
+    </tr>
+    <tr>
+      <th>device</th>
+      <td><p>the device to use for training. "cpu" or "cuda". The default ("auto")
+uses  to "cuda" if it's available, otherwise uses "cpu".</p></td>
     </tr>
     </table>
 
