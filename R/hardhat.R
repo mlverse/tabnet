@@ -109,6 +109,7 @@ tabnet_bridge <- function(processed, config = tabnet_config()) {
   new_tabnet_fit(fit, blueprint = processed$blueprint)
 }
 
+#' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   # Enforces column order, type, column names, etc
