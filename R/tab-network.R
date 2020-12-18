@@ -417,7 +417,7 @@ embedding_generator <- torch::nn_module(
     self$embeddings <- torch::nn_module_list()
 
     # Sort dims by cat_idx
-    sorted_idxs <- order(cat_idxs)
+    sorted_idx <- order(cat_idxs)
     cat_dims <- cat_dims[sorted_idx]
     self$cat_emb_dims <- self$cat_emb_dims[sorted_idx]
 
@@ -448,9 +448,9 @@ embedding_generator <- torch::nn_module(
     for (i in seq_along(self$continuous_idx)) {
 
       if (self$continuous_idx[i]) {
-        cols[[i]] <- x[,i]$float()$view(-1, 1)
+        cols[[i]] <- x[,i]$to(dtype = torch::torch_float())$view(c(-1, 1))
       } else {
-        cols[[i]] <- self$embedding[[cat_feat_counter]](x[, i]$long())
+        cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$to(dtype = torch::torch_long()))
         cat_feat_counter <- cat_feat_counter + 1
       }
 

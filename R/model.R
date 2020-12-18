@@ -23,6 +23,7 @@ resolve_data <- function(x, y) {
   }
 
   cat_idx <- which(sapply(x, is.factor))
+  cat_dims <- sapply(cat_idx, function(i) length(levels(x[[i]])))
 
   if (is.factor(y))
     output_dim <- max(as.integer(y))
@@ -32,7 +33,7 @@ resolve_data <- function(x, y) {
   input_dim <- ncol(x)
 
   list(x = x_tensor, y = y_tensor, cat_idx = cat_idx, output_dim = output_dim,
-       input_dim = input_dim)
+       input_dim = input_dim, cat_dims = cat_dims)
 }
 
 #' Configuration for TabNet models
@@ -91,7 +92,7 @@ resolve_data <- function(x, y) {
 #' @export
 tabnet_config <- function(batch_size = 256,
                           penalty = 1e-3,
-                          clip_value = 1,
+                          clip_value = NULL,
                           loss = "auto",
                           epochs = 5,
                           drop_last = FALSE,
@@ -249,6 +250,7 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     input_dim = data$input_dim,
     output_dim = data$output_dim,
     cat_idxs = data$cat_idx,
+    cat_dims = data$cat_dims,
     n_d = config$n_d,
     n_a = config$n_a,
     n_steps = config$n_steps,

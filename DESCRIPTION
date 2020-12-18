@@ -29,6 +29,9 @@ Suggests:
     recipes,
     parsnip,
     dials,
-    withr
+    withr,
+    knitr,
+    rmarkdown
 Remotes:
     tidymodels/dials
+VignetteBuilder: knitr

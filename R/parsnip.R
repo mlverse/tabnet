@@ -220,6 +220,8 @@ add_parsnip_tabnet <- function() {
 #'   for this model are "unknown", "regression", or "classification".
 #' @inheritParams tabnet_config
 #'
+#' @inheritSection tabnet_fit Threading
+#'
 #' @seealso tabnet_fit
 #'
 #' @examples

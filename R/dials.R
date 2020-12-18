@@ -10,6 +10,8 @@ check_dials <- function() {
 #' @param range the default range for the parameter value
 #' @param trans wether to apply a transformation to the parameter
 #'
+#' These functions are used with `tune` grid functions to generate
+#' candidates.
 #'
 #' @rdname tabnet_params
 #' @export

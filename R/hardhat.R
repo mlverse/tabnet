@@ -29,6 +29,18 @@
 #' @param ... Model hyperparameters. See [tabnet_config()] for a list of
 #'  all possible hyperparameters.
 #'
+#' @section Threading:
+#'
+#' TabNet uses `torch` as it's backend for computation and `torch` uses all
+#' available threads by default.
+#'
+#' You can control the number of threads used by `torch` with:
+#'
+#' ```
+#' torch::torch_set_num_threads(1)
+#' torch::torch_set_num_interop_threads(1)
+#' ```
+#'
 #' @examples
 #' if (torch::torch_is_installed()) {
 #' data("ames", package = "modeldata")
