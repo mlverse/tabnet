@@ -32,6 +32,4 @@ Suggests:
     withr,
     knitr,
     rmarkdown
-Remotes:
-    tidymodels/dials
 VignetteBuilder: knitr
