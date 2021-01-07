@@ -42,7 +42,7 @@
 #' @export
 tabnet_explain <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint)
-  data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(x))))
+  data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(new_data))))
   output <- explain_impl(object$fit$network, data$x)
 
   # convert stuff to matrix with colnames
