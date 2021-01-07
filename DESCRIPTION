@@ -32,5 +32,6 @@ Suggests:
     withr,
     knitr,
     rmarkdown,
-    vip
+    vip,
+    tidyverse
 VignetteBuilder: knitr
