@@ -359,13 +359,19 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     scheduler$step()
   }
 
+  importances <- tibble::tibble(
+    variables = colnames(x),
+    importance = compute_feature_importance(network, data$x)
+  )
+
   network$to(device = "cpu")
 
   list(
     network = network,
     metrics = metrics,
     config = config,
-    checkpoints = checkpoints
+    checkpoints = checkpoints,
+    importances = importances
   )
 }
 
