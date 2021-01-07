@@ -98,8 +98,8 @@ tabnet_config <- function(batch_size = 256,
                           loss = "auto",
                           epochs = 5,
                           drop_last = FALSE,
-                          decision_width = 8,
-                          attention_width = 8,
+                          decision_width = NULL,
+                          attention_width = NULL,
                           num_steps = 3,
                           feature_reusage = 1.3,
                           virtual_batch_size = 128,
@@ -116,6 +116,17 @@ tabnet_config <- function(batch_size = 256,
                           momentum = 0.02,
                           verbose = FALSE,
                           device = "auto") {
+
+  if (is.null(decision_width) && is.null(attention_width)) {
+    decision_width <- 8 # default is 8
+  }
+
+  if (is.null(attention_width))
+    attention_width <- decision_width
+
+  if (is.null(decision_width))
+    decision_width <- attention_width
+
   list(
     batch_size = batch_size,
     lambda_sparse = penalty,

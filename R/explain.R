@@ -14,8 +14,32 @@
 #'
 #' @examples
 #'
+#' if (torch::torch_is_installed()) {
+#'
+#' set.seed(2021)
+#'
+#' n <- 1000
+#' x <- data.frame(
+#'   x = runif(n),
+#'   y = runif(n),
+#'   z = runif(n)
+#' )
+#'
+#' y <- x$x
+#'
+#' fit <- tabnet_fit(x, y, epochs = 20,
+#'                   num_steps = 1,
+#'                   batch_size = 512,
+#'                   attention_width = 1,
+#'                   num_shared = 1,
+#'                   num_independent = 1)
 #'
 #'
+#'  ex <- tabnet_explain(fit, x)
+#'
+#' }
+#'
+#' @export
 tabnet_explain <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint)
   data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(x))))
@@ -74,29 +98,5 @@ sum_embedding_masks <- function(mask, input_dim, cat_idx, cat_emb_dim) {
   splits <- lapply(splits, torch::torch_sum, dim = 2, keepdim = TRUE)
 
   torch::torch_cat(splits, dim = 2)
-}
-
-plot.tabnet_explain <- function(x, ...) {
-
-  df <- rbind(x[[1]], do.call(rbind, x[[2]]))
-  df$.type <- rep(c("Aggregated masks", sprintf("Step %d", seq_along(x[[2]]))), each = nrow(x[[1]]))
-  df$.rowid <- rep(seq_len(nrow(x[[1]])), times = 1 + length(x[[2]]))
-
-  df <- tidyr::pivot_longer(df, c(-.type, -.rowid), names_to = "variable", values_to = "mask")
-  df <- df %>%
-    dplyr::group_by(.type) %>%
-    dplyr::mutate(mask = trim_quantile(mask)) %>%
-    dplyr::ungroup()
- # df <- df %>% dplyr::filter(.type == "Aggregated masks")
-
-  ggplot2::ggplot(df, ggplot2::aes(x = .rowid, y = variable, fill = mask)) +
-    ggplot2::geom_tile() +
-    ggplot2::facet_wrap(~.type) +
-    ggplot2::scale_fill_viridis_c()
-}
-
-trim_quantile <- function(x) {
-  q99 <- quantile(x, probs = 0.99)
-  ifelse(x > q99, q99, x)
 }
 
