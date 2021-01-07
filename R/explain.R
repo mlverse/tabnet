@@ -100,3 +100,9 @@ sum_embedding_masks <- function(mask, input_dim, cat_idx, cat_emb_dim) {
   torch::torch_cat(splits, dim = 2)
 }
 
+vi_model.tabnet_fit <- function(object, ...) {
+  tib <- object$fit$importances
+  names(tib) <- c("Variable", "Importance")
+  tib
+}
+
