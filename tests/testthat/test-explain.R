@@ -1,6 +1,7 @@
 test_that("explain", {
 
-  set.seed(2021)
+  set.seed(1)
+  torch::torch_manual_seed(1)
 
   n <- 1000
   x <- data.frame(
@@ -11,7 +12,7 @@ test_that("explain", {
 
   y <- x$x
 
-  fit <- tabnet_fit(x, y, epochs = 20,
+  fit <- tabnet_fit(x, y, epochs = 10,
                     num_steps = 1,
                     batch_size = 512,
                     attention_width = 1,
