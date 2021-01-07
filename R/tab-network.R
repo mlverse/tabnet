@@ -145,22 +145,25 @@ tabnet_no_embedding <- torch::nn_module(
     att <- self$initial_splitter(x)[, (self$n_d+1):N]
     masks <- list()
 
-    for (step in seq_along(self$n_steps)) {
+    for (step in seq_len(self$n_steps)) {
 
       M <- self$att_transformers[[step]](prior, att)
       masks[[step]] <- M
 
       # update prior
-      prior <- torch::torch.mul(self$gamma - M, prior)
+      prior <- torch::torch_mul(self$gamma - M, prior)
+
       # output
       masked_x <- torch::torch_mul(M, x)
       out <- self$feat_transformers[[step]](masked_x)
-      d <- torch::nnf_relu(out[, 1:self$n_d])
+      d <- torch::nnf_relu(out[.., 1:(self$n_d)])
+
       # explain
       step_importance <- torch::torch_sum(d, dim=2)
       M_explain <- M_explain + torch::torch_mul(M, step_importance$unsqueeze(dim=2))
+
       # update attention
-      att <- out[, self$n_d:N]
+      att <- out[, (self$n_d+1):N]
 
     }
 

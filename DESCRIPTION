@@ -31,5 +31,7 @@ Suggests:
     dials,
     withr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    vip,
+    tidyverse
 VignetteBuilder: knitr
