@@ -91,6 +91,8 @@ resolve_data <- function(x, y) {
 #' @param device the device to use for training. "cpu" or "cuda". The default ("auto")
 #'   uses  to "cuda" if it's available, otherwise uses "cpu".
 #'
+#' @return A named list with all hyperparameters of the TabNet implementation.
+#'
 #' @export
 tabnet_config <- function(batch_size = 256,
                           penalty = 1e-3,

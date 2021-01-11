@@ -14,6 +14,7 @@ check_dials <- function() {
 #' candidates.
 #'
 #' @rdname tabnet_params
+#' @return A `dials` parameter to be used when tuning TabNet models.
 #' @export
 decision_width <- function(range = c(8L, 64L), trans = NULL) {
   check_dials()

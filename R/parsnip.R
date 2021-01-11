@@ -234,6 +234,9 @@ add_parsnip_tabnet <- function() {
 #'   fit(Sale_Price ~ ., data = ames)
 #' }
 #'
+#' @return A TabNet `parsnip` instance. It can be used to fit tabnet models using
+#' `parsnip` machinery.
+#'
 #' @export
 tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
                    learn_rate = NULL, decision_width = NULL, attention_width = NULL,

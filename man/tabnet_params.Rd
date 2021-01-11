@@ -29,6 +29,9 @@ num_shared(range = c(1L, 5L), trans = NULL)
 These functions are used with \code{tune} grid functions to generate
 candidates.}
 }
+\value{
+A \code{dials} parameter to be used when tuning TabNet models.
+}
 \description{
 Parameters for the tabnet model
 }

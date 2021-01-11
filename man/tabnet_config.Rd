@@ -108,6 +108,9 @@ training.}
 \item{device}{the device to use for training. "cpu" or "cuda". The default ("auto")
 uses  to "cuda" if it's available, otherwise uses "cpu".}
 }
+\value{
+A named list with all hyperparameters of the TabNet implementation.
+}
 \description{
 Configuration for TabNet models
 }

@@ -50,6 +50,9 @@ and the predictor terms on the right-hand side.}
 \item A \strong{data frame} containing both the predictors and the outcome.
 }}
 }
+\value{
+A TabNet model object. It can be used for serialization and predictions.
+}
 \description{
 Fits the \href{https://arxiv.org/abs/1908.07442}{TabNet: Attentive Interpretable Tabular Learning} model
 }
@@ -69,4 +72,5 @@ if (torch::torch_is_installed()) {
 data("ames", package = "modeldata")
 fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
 }
+
 }

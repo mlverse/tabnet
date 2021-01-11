@@ -46,6 +46,9 @@
 #' data("ames", package = "modeldata")
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
 #' }
+#'
+#' @return A TabNet model object. It can be used for serialization and predictions.
+#'
 #' @export
 tabnet_fit <- function(x, ...) {
   UseMethod("tabnet_fit")
