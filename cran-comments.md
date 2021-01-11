@@ -1,7 +1,4 @@
-## Test environments
-* local R installation, R 4.0.3
-* ubuntu 18.04 (on GithHub CI), R 4.0.3
-* win-builder (devel)
+Added 'value' tags to the docs as requested.
 
 ## R CMD check results
 
