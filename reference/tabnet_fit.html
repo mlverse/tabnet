@@ -184,6 +184,9 @@ and the predictor terms on the right-hand side.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A TabNet model object. It can be used for serialization and predictions.</p>
     <h2 class="hasAnchor" id="threading"><a class="anchor" href="#threading"></a>Threading</h2>
 
     
@@ -201,6 +204,7 @@ available threads by default.</p>
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"ames"</span>, package <span class='op'>=</span> <span class='st'>"modeldata"</span><span class='op'>)</span>
 <span class='va'>fit</span> <span class='op'>&lt;-</span> <span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>Sale_Price</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>ames</span>, epochs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
 <span class='op'>}</span>
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
