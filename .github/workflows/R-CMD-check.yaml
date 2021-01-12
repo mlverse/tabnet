@@ -104,7 +104,7 @@ jobs:
 
       - run: |
           apt-get update -y
-          apt-get install -y sudo
+          apt-get install -y sudo software-properties-common
 
       - uses: r-lib/actions/setup-r@v1
         with:
