@@ -107,7 +107,7 @@ jobs:
           apt-get update -y
           apt-get install -y sudo software-properties-common dialog apt-utils tzdata
 
-      - uses: dfalbel/actions/setup-r@master
+      - uses: r-lib/actions/setup-r@master
         with:
           r-version: 'release'
 
@@ -134,7 +134,7 @@ jobs:
           while read -r cmd
           do
             eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "18.04"))')
 
       - name: Install dependencies
         run: |
