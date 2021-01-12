@@ -372,12 +372,12 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
     scheduler$step()
   }
 
+  network$to(device = "cpu")
+
   importances <- tibble::tibble(
     variables = colnames(x),
     importance = compute_feature_importance(network, data$x)
   )
-
-  network$to(device = "cpu")
 
   list(
     network = network,
