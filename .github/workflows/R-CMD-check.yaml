@@ -98,6 +98,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       TORCH_INSTALL: 1
       TORCH_TEST: 1
+      DEBIAN_FRONTEND: 'noninteractive'
 
     steps:
       - uses: actions/checkout@v2
