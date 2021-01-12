@@ -94,7 +94,7 @@ jobs:
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
+      RSPM: 'https://packagemanager.rstudio.com/cran/__linux__/bionic/latest'
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       TORCH_INSTALL: 1
       TORCH_TEST: 1
@@ -108,7 +108,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v1
         with:
-          r-version: ${{ matrix.config.r }}
+          r-version: 'release'
 
       - uses: r-lib/actions/setup-pandoc@v1
 
