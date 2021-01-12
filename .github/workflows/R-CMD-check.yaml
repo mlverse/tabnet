@@ -107,7 +107,7 @@ jobs:
           apt-get update -y
           apt-get install -y sudo software-properties-common dialog apt-utils tzdata
 
-      - uses: dfalbel/actions/setup-r@master
+      - uses: r-lib/actions/setup-r@master
         with:
           r-version: 'release'
 
