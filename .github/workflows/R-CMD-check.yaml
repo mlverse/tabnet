@@ -89,12 +89,12 @@ jobs:
     name: 'gpu'
 
     container:
-      image: nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
+      image: nvidia/cuda:10.2-cudnn7-devel-ubuntu20.04
       options: --gpus all
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: 'https://packagemanager.rstudio.com/cran/__linux__/bionic/latest'
+      RSPM: 'https://packagemanager.rstudio.com/cran/__linux__/focal/latest'
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       TORCH_INSTALL: 1
       TORCH_TEST: 1
@@ -105,7 +105,7 @@ jobs:
 
       - run: |
           apt-get update -y
-          apt-get install -y sudo software-properties-common dialog apt-utils
+          apt-get install -y sudo software-properties-common dialog apt-utils tzdata
 
       - uses: dfalbel/actions/setup-r@master
         with:
