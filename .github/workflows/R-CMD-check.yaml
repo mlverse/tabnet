@@ -105,7 +105,7 @@ jobs:
 
       - run: |
           apt-get update -y
-          apt-get install -y sudo software-properties-common
+          apt-get install -y sudo software-properties-common dialog apt-utils
 
       - uses: dfalbel/actions/setup-r@master
         with:
