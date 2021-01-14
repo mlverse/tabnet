@@ -3,8 +3,11 @@ title: "Interpretation tools"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Interpretation tools}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r, include = FALSE}
@@ -25,29 +28,35 @@ set.seed(1)
 torch::torch_manual_seed(1)
 ```
 
-TabNet claims to be a interpretable model because 
-the underlying neural network architecture uses feature
-selection masks that can help identifying which features
-were used in each step.
+TabNet claims to be an interpretable model because the underlying neural
+network architecture uses feature selection masks that can help identify
+which features were used at each step.
 
-The paper also defines an aggregated measure that
-combines the masks of each step into a single measure.
+The paper also defines an aggregate measure that combines the masks of
+each step into a single measure.
 
-Note that the selection of important features in the masks is done instance-wise, thus you can identify for each observation which were relevant features.
+Note that the selection of important features in the masks is done
+instance-wise. Thus, you can identify, for each observation, which
+features were considered relevant .
 
 ## Experiments
 
-In order to show how to use the interpretation tools of tabnet we are going to make 2 experiments using synthetic datasets very similar to those that were used in the paper.
+To show how to use the interpretation tools of `tabnet`, we are going to
+perform 2 experiments using synthetic datasets very similar to those
+that were used in the paper.
 
 ### Datasets
 
 First, let's define the functions that we will use to generate data:
 
-* `make_syn2` will generate a dataset with 10 columns, but only the 3-6 columns are used to calculate the `y` response vector. This is similar to *Syn2* in the paper.
+-   `make_syn2` will generate a dataset with 10 columns, but only
+    columns 3-6 are used to calculate the `y` response vector. This is
+    similar to *Syn2* in the paper.
 
-* `make_syn4` will generate a dataset with 10 columns too. The response
-vector depends on the 10th columns: if the value is greater than 0, then
-we use the 1-2 columns to compute the logits, otherwise we use the 5-6 columns.
+-   `make_syn4` will generate a dataset with 10 columns too. The
+    response vector depends on column 10: if the value is greater than
+    0, we use columns 1-2 to compute the logits, otherwise we use
+    columns 5-6.
 
 ```{r}
 logit_to_y <- function(logits) {
@@ -91,19 +100,24 @@ syn4 <- make_syn4()
 
 ### Syn2
 
-Let's fit a TabNet model to the syn2 dataset and than analyze the
+Let's fit a TabNet model to the `syn2` dataset and analyze the
 interpretation metrics.
 
 ```{r}
 fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 10, verbose = TRUE)
 ```
-In the feature importance plot when can see that as expected V03-V06 features are by far the most important ones.
 
-```{r, }
+In the feature importance plot we can see that, as expected, features
+`V03-V06` are by far the most important ones.
+
+```{r}
 vip::vip(fit_syn2)
 ```
-Now let's visualize the aggregated masks plot. In this figure we see each observation in the x axis and each variable in the y axis the colors represent the importance of the feature to predict the
-value for each observation.
+
+Now let's visualize the aggregated-masks plot. In this figure we see
+each observation on the x axis and each variable on the y axis. The
+colors represent the importance of the feature in predicting the value
+for each observation.
 
 ```{r}
 library(tidyverse)
@@ -116,10 +130,14 @@ ex_syn2$M_explain %>%
   geom_tile() +
   scale_fill_viridis_c()
 ```
-We can see that the region between the V03 and V06 concentrate most of the higher intensity colors and the other variables are close to 0. This is expected because those are the variables that
-we considered when building the dataset.
 
-Next, we can visualize the attention masks for each step in the architecture.
+We can see that the region between V03 and V06 concentrates most of the
+higher intensity colors, and the other variables are close to 0. This is
+expected because those are the variables that we considered when
+building the dataset.
+
+Next, we can visualize the attention masks for each step in the
+architecture.
 
 ```{r}
 ex_syn2$masks %>% 
@@ -134,27 +152,36 @@ ex_syn2$masks %>%
   scale_fill_viridis_c() +
   facet_wrap(~step)
 ```
-We see that the first step captures a lot of noise, but the other 2 steps focus specifically in the important features.
+
+We see that the first step captures a lot of noise, but the other 2
+steps focus specifically on the important features.
 
 ## Syn 4
 
-Now let's analyze the results for the Syn4 dataset. This dataset is a little more complicated for TabNet because there's a strong interaction between the variables. Depending on V10, different variables are used to create the response variable and we expect to visualize this in the masks.
+Now let's analyze the results for the Syn4 dataset. This dataset is a
+little more complicated for TabNet because there's a strong interaction
+between the variables. Depending on V10, different variables are used to
+create the response variable and we expect to see this in the masks.
 
 First we fit the model for 10 epochs.
 
 ```{r}
 fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 10, verbose = TRUE)
 ```
-In the feature importance plot we have as expected, strong importance in V10, and the other features that are used conditionally - V01-V02 & V05-V06.
+
+In the feature importance plot we have, as expected, strong importance
+for `V10`, and the other features that are used conditionally - either
+`V01-V02` or `V05-V06`.
 
 ```{r}
 vip::vip(fit_syn4)
 ```
 
-Now let's visualize the attention masks. Notice that we arranged
-the dataset by V10 so we can easily visualize the interaction effects.
+Now let's visualize the attention masks. Notice that we arranged the
+dataset by `V10` so we can easily visualize the interaction effects.
 
-We also trimmed the 99th percentile so the colors shows the importance even if there are strong outliers.
+We also trimmed to the 99th percentile so the colors shows the
+importance even if there are strong outliers.
 
 ```{r}
 ex_syn4 <- tabnet_explain(fit_syn4, arrange(syn4, V10))
@@ -168,10 +195,13 @@ ex_syn4$M_explain %>%
   geom_tile() +
   scale_fill_viridis_c()
 ```
-From the figure we see that V10 is important for all observations.
-We also see that for the first half of the dataset V05 and V06 is the most important feature, for the other half, V01 and V02 are the important ones.
 
-We can also visualize the fast at each step in the architecture.
+From the figure we see that V10 is important for all observations. We
+also see that for the first half of the dataset `V05` and `V06` is the
+most important feature, while for the other half, `V01` and `V02` are
+the important ones.
+
+We can also visualize the masks at each step in the architecture.
 
 ```{r}
 ex_syn4$masks %>% 
@@ -190,4 +220,6 @@ ex_syn4$masks %>%
   facet_wrap(~step)
 ```
 
-We see that Step 1 and 3 both focus on V10, but on different features depending on V10. Step 2 seems to have found some noise in V08, but also focus strongly on V01-V02 and V05-V06.
+We see that step 1 and 3 both focus on `V10`, but on different
+additional features, depending on `V10`. Step 2 seems to have found some
+noise in `V08`, but also focuses strongly on `V01-V02` and `V05-V06`.
