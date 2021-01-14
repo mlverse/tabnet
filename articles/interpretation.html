@@ -101,20 +101,20 @@
 <span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
 <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_manual_seed.html">torch_manual_seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
-<p>TabNet claims to be a interpretable model because the underlying neural network architecture uses feature selection masks that can help identifying which features were used in each step.</p>
-<p>The paper also defines an aggregated measure that combines the masks of each step into a single measure.</p>
-<p>Note that the selection of important features in the masks is done instance-wise, thus you can identify for each observation which were relevant features.</p>
+<p>TabNet claims to be an interpretable model because the underlying neural network architecture uses feature selection masks that can help identify which features were used at each step.</p>
+<p>The paper also defines an aggregate measure that combines the masks of each step into a single measure.</p>
+<p>Note that the selection of important features in the masks is done instance-wise. Thus, you can identify, for each observation, which features were considered relevant .</p>
 <div id="experiments" class="section level2">
 <h2 class="hasAnchor">
 <a href="#experiments" class="anchor"></a>Experiments</h2>
-<p>In order to show how to use the interpretation tools of tabnet we are going to make 2 experiments using synthetic datasets very similar to those that were used in the paper.</p>
+<p>To show how to use the interpretation tools of <code>tabnet</code>, we are going to perform 2 experiments using synthetic datasets very similar to those that were used in the paper.</p>
 <div id="datasets" class="section level3">
 <h3 class="hasAnchor">
 <a href="#datasets" class="anchor"></a>Datasets</h3>
 <p>First, let’s define the functions that we will use to generate data:</p>
 <ul>
-<li><p><code>make_syn2</code> will generate a dataset with 10 columns, but only the 3-6 columns are used to calculate the <code>y</code> response vector. This is similar to <em>Syn2</em> in the paper.</p></li>
-<li><p><code>make_syn4</code> will generate a dataset with 10 columns too. The response vector depends on the 10th columns: if the value is greater than 0, then we use the 1-2 columns to compute the logits, otherwise we use the 5-6 columns.</p></li>
+<li><p><code>make_syn2</code> will generate a dataset with 10 columns, but only columns 3-6 are used to calculate the <code>y</code> response vector. This is similar to <em>Syn2</em> in the paper.</p></li>
+<li><p><code>make_syn4</code> will generate a dataset with 10 columns too. The response vector depends on column 10: if the value is greater than 0, we use columns 1-2 to compute the logits, otherwise we use columns 5-6.</p></li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">logit_to_y</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">logits</span><span class="op">)</span> <span class="op">{</span>
@@ -155,7 +155,7 @@
 <div id="syn2" class="section level3">
 <h3 class="hasAnchor">
 <a href="#syn2" class="anchor"></a>Syn2</h3>
-<p>Let’s fit a TabNet model to the syn2 dataset and than analyze the interpretation metrics.</p>
+<p>Let’s fit a TabNet model to the <code>syn2</code> dataset and analyze the interpretation metrics.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn2</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="co">#&gt; [Epoch 001] Loss: 0.820546</span>
@@ -168,10 +168,11 @@
 <span class="co">#&gt; [Epoch 008] Loss: 0.178630</span>
 <span class="co">#&gt; [Epoch 009] Loss: 0.155728</span>
 <span class="co">#&gt; [Epoch 010] Loss: 0.147667</span></code></pre></div>
-<p>In the feature importance plot when can see that as expected V03-V06 features are by far the most important ones.</p>
+<p>In the feature importance plot we can see that, as expected, features <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html">vip</a></span><span class="op">(</span><span class="va">fit_syn2</span><span class="op">)</span></code></pre></div>
-<p><img src="interpretation_files/figure-html/unnamed-chunk-5-1.png" width="100%" height="300px"> Now let’s visualize the aggregated masks plot. In this figure we see each observation in the x axis and each variable in the y axis the colors represent the importance of the feature to predict the value for each observation.</p>
+<p><img src="interpretation_files/figure-html/unnamed-chunk-5-1.png" width="100%" height="300px"></p>
+<p>Now let’s visualize the aggregated-masks plot. In this figure we see each observation on the x axis and each variable on the y axis. The colors represent the importance of the feature in predicting the value for each observation.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="va">ex_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit_syn2</span>, <span class="va">syn2</span><span class="op">)</span>
@@ -182,7 +183,8 @@
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">rowname</span>, y <span class="op">=</span> <span class="va">variable</span>, fill <span class="op">=</span> <span class="va">m_agg</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_tile</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_fill_viridis_c</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="interpretation_files/figure-html/unnamed-chunk-6-1.png" width="100%" height="300px"> We can see that the region between the V03 and V06 concentrate most of the higher intensity colors and the other variables are close to 0. This is expected because those are the variables that we considered when building the dataset.</p>
+<p><img src="interpretation_files/figure-html/unnamed-chunk-6-1.png" width="100%" height="300px"></p>
+<p>We can see that the region between V03 and V06 concentrates most of the higher intensity colors, and the other variables are close to 0. This is expected because those are the variables that we considered when building the dataset.</p>
 <p>Next, we can visualize the attention masks for each step in the architecture.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ex_syn2</span><span class="op">$</span><span class="va">masks</span> <span class="op">%&gt;%</span> 
@@ -196,13 +198,14 @@
   <span class="fu">geom_tile</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_fill_viridis_c</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">step</span><span class="op">)</span></code></pre></div>
-<p><img src="interpretation_files/figure-html/unnamed-chunk-7-1.png" width="100%" height="300px"> We see that the first step captures a lot of noise, but the other 2 steps focus specifically in the important features.</p>
+<p><img src="interpretation_files/figure-html/unnamed-chunk-7-1.png" width="100%" height="300px"></p>
+<p>We see that the first step captures a lot of noise, but the other 2 steps focus specifically on the important features.</p>
 </div>
 </div>
 <div id="syn-4" class="section level2">
 <h2 class="hasAnchor">
 <a href="#syn-4" class="anchor"></a>Syn 4</h2>
-<p>Now let’s analyze the results for the Syn4 dataset. This dataset is a little more complicated for TabNet because there’s a strong interaction between the variables. Depending on V10, different variables are used to create the response variable and we expect to visualize this in the masks.</p>
+<p>Now let’s analyze the results for the Syn4 dataset. This dataset is a little more complicated for TabNet because there’s a strong interaction between the variables. Depending on V10, different variables are used to create the response variable and we expect to see this in the masks.</p>
 <p>First we fit the model for 10 epochs.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -216,12 +219,12 @@
 <span class="co">#&gt; [Epoch 008] Loss: 0.272445</span>
 <span class="co">#&gt; [Epoch 009] Loss: 0.235137</span>
 <span class="co">#&gt; [Epoch 010] Loss: 0.214474</span></code></pre></div>
-<p>In the feature importance plot we have as expected, strong importance in V10, and the other features that are used conditionally - V01-V02 &amp; V05-V06.</p>
+<p>In the feature importance plot we have, as expected, strong importance for <code>V10</code>, and the other features that are used conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html">vip</a></span><span class="op">(</span><span class="va">fit_syn4</span><span class="op">)</span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-9-1.png" width="100%" height="300px"></p>
-<p>Now let’s visualize the attention masks. Notice that we arranged the dataset by V10 so we can easily visualize the interaction effects.</p>
-<p>We also trimmed the 99th percentile so the colors shows the importance even if there are strong outliers.</p>
+<p>Now let’s visualize the attention masks. Notice that we arranged the dataset by <code>V10</code> so we can easily visualize the interaction effects.</p>
+<p>We also trimmed to the 99th percentile so the colors shows the importance even if there are strong outliers.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ex_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit_syn4</span>, <span class="fu">arrange</span><span class="op">(</span><span class="va">syn4</span>, <span class="va">V10</span><span class="op">)</span><span class="op">)</span>
 <span class="va">q99</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">x</span>, probs <span class="op">=</span> <span class="fl">0.995</span><span class="op">)</span>
@@ -233,8 +236,9 @@
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">rowname</span>, y <span class="op">=</span> <span class="va">variable</span>, fill <span class="op">=</span> <span class="va">m_agg</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_tile</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_fill_viridis_c</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="interpretation_files/figure-html/unnamed-chunk-10-1.png" width="100%" height="300px"> From the figure we see that V10 is important for all observations. We also see that for the first half of the dataset V05 and V06 is the most important feature, for the other half, V01 and V02 are the important ones.</p>
-<p>We can also visualize the fast at each step in the architecture.</p>
+<p><img src="interpretation_files/figure-html/unnamed-chunk-10-1.png" width="100%" height="300px"></p>
+<p>From the figure we see that V10 is important for all observations. We also see that for the first half of the dataset <code>V05</code> and <code>V06</code> is the most important feature, while for the other half, <code>V01</code> and <code>V02</code> are the important ones.</p>
+<p>We can also visualize the masks at each step in the architecture.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ex_syn4</span><span class="op">$</span><span class="va">masks</span> <span class="op">%&gt;%</span> 
   <span class="fu">imap_dfr</span><span class="op">(</span><span class="op">~</span><span class="fu">mutate</span><span class="op">(</span>
@@ -251,7 +255,7 @@
   <span class="fu">scale_fill_viridis_c</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">step</span><span class="op">)</span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-11-1.png" width="100%" height="300px"></p>
-<p>We see that Step 1 and 3 both focus on V10, but on different features depending on V10. Step 2 seems to have found some noise in V08, but also focus strongly on V01-V02 and V05-V06.</p>
+<p>We see that step 1 and 3 both focus on <code>V10</code>, but on different additional features, depending on <code>V10</code>. Step 2 seems to have found some noise in <code>V08</code>, but also focuses strongly on <code>V01-V02</code> and <code>V05-V06</code>.</p>
 </div>
   </div>
 
