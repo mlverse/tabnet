@@ -9,6 +9,9 @@
 status](https://github.com/mlverse/tabnet/workflows/R-CMD-check/badge.svg)](https://github.com/mlverse/tabnet/actions)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org/package=tabnet)
+[![](https://cranlogs.r-pkg.org/badges/tabnet)](https://cran.r-project.org/package=tabnet)
 <!-- badges: end -->
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular
@@ -20,7 +23,13 @@ PyTorch’s implementation using the
 
 ## Installation
 
-You can install the development version from
+You can install the released version from CRAN with:
+
+``` r
+install.packages("tabnet")
+```
+
+The development version can be installed from
 [GitHub](https://github.com/) with:
 
 ``` r
