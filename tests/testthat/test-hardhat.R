@@ -180,21 +180,21 @@ test_that("inference works with missings in the response vector", {
   attrition[["EnvironmentSatisfaction"]] <-NA
   expect_error(
     predict(fit, attrition),
-    regexp = "NA"
+    regexp = NA
   )
 
   # predict with wrong class
   attrition[["EnvironmentSatisfaction"]] <-NA_character_
   expect_error(
     predict(fit, attrition),
-    regexp = "NA"
+    regexp = NA
   )
 
   # predict with list column
   attrition[["EnvironmentSatisfaction"]] <- list(NA)
   expect_error(
     predict(fit, attrition),
-    regexp = "NA"
+    regexp = NA
   )
 
 })
