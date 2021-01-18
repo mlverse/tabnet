@@ -110,12 +110,13 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
   x <- attrition[-which(names(attrition) == "Attrition")]
   y <- attrition$Attrition
+  y_missing <- y
+  y_missing[1] <- NA
 
   # numerical missing
   x_missing <- x
   x_missing[1,"Age"] <- NA
 
-  # fit with numerical missing
   expect_error(
     miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
     regexp = "missing"
@@ -127,6 +128,12 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
   expect_error(
     miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
+    regexp = "missing"
+  )
+
+  # missing in outcome
+  expect_error(
+    miss_fit <- tabnet_fit(x, y_missing, epochs = 1),
     regexp = "missing"
   )
 
