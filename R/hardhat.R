@@ -112,6 +112,72 @@ tabnet_bridge <- function(processed, config = tabnet_config()) {
   new_tabnet_fit(fit, blueprint = processed$blueprint)
 }
 
+#' pretrain Tabnet model
+#'
+#' Pretrain the [TabNet: Attentive Interpretable Tabular Learning](https://arxiv.org/abs/1908.07442) model
+#'
+#' @param x Depending on the context:
+#'
+#'   * A __data frame__ of predictors.
+#'
+#'  The predictor data should be standardized (e.g. centered or scaled).
+#'  The model treats categorical predictors internally thus, you don't need to
+#'  make any treatment.
+#'
+#' @param ... Model hyperparameters. See [tabnet_config()] for a list of
+#'  all possible hyperparameters.
+#'
+#' @section Threading:
+#'
+#' TabNet uses `torch` as it's backend for computation and `torch` uses all
+#' available threads by default.
+#'
+#' You can control the number of threads used by `torch` with:
+#'
+#' ```
+#' torch::torch_set_num_threads(1)
+#' torch::torch_set_num_interop_threads(1)
+#' ```
+#'
+#' @examples
+#' if (torch::torch_is_installed()) {
+#' data("ames", package = "modeldata")
+#' ames_predictors <- ames %>% select(-Sale_Price)
+#' fit <- tabnet_pretrain(x = ames_predictors, epochs = 1)
+#' }
+#'
+#' @return A TabNet model object. It can be used for supervised training.
+#'
+#' @export
+tabnet_pretrain <- function(x, ...) {
+  UseMethod("tabnet_pretrain")
+}
+
+#' @export
+#' @rdname tabnet_pretrain
+tabnet_pretrain.default <- function(x, ...) {
+  stop(
+    "`tabnet_pretrain()` is not defined for a '", class(x)[1], "'.",
+    call. = FALSE
+  )
+}
+
+#' @export
+#' @rdname tabnet_pretrain
+tabnet_pretrain.data.frame <- function(x, ...) {
+  y <- rep(1, nrow(x))
+  processed <- hardhat::mold(x, y)
+  config <- do.call(tabnet_config, list(...))
+  pretrain_tabnet_bridge(processed, config = config)
+}
+
+pretrain_tabnet_bridge <- function(processed, config = tabnet_config()) {
+  predictors <- processed$predictors
+  outcomes <- processed$outcomes
+  fit <- tabnet_impl(predictors, outcomes, config = config)
+  new_tabnet_fit(fit, blueprint = processed$blueprint)
+}
+
 #' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {

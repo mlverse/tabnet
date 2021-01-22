@@ -51,14 +51,16 @@ We now define our pre-processing steps. Note that tabnet handles categorical var
 
 ```{r}
 rec_unsup <- recipe(Class ~ ., unsupervised) %>%
-  step_normalize(all_numeric())
+  step_normalize(all_numeric()) %>% 
+  prep
+unsupervised_baked_df <- rec_unsup %>% bake(new_data=NULL)
 ```
 
-Next, we pre-train our model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
+We now have the normalized dataset ready for unsupervised training. 
+Next, we pre-train our model. For now, input is  We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
 
 ```{r}
-mod <- tabnet_pretrain(rec_unsup, attrition, epochs = 1, valid_split = 0.25,
-                    verbose = TRUE)
+mod <- tabnet_pretrain(x=unsupervised_baked_df, attrition, epochs = 50, verbose = TRUE)
 ```
 
 After a few minutes we can get the results:
