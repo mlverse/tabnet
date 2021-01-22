@@ -1,0 +1,152 @@
+---
+title: "Unsupervised training of tabnet"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Unsupervised training of tabnet}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+```{r setup}
+library(tabnet)
+library(tidymodels)
+library(modeldata)
+```
+
+In this vignette we show how to train TabNet model with unsupervised data.
+
+We are going to use the `lending_club` dataset available
+in the `modeldata` package, using 80 % of it as unsupervised data.
+
+First let's split our dataset into unsupervised and supervised so we can later train the supervised step of the model:
+
+```{r}
+set.seed(123)
+data("lending_club", package = "modeldata")
+split <- initial_split(lending_club, strata = Class, prop = 4/5)
+unsupervised <- training(split) %>% mutate(Class=NA)
+supervised  <- testing(split)
+```
+
+Then we proceed of usual split of the supervised dataset into train and test so we can later access performance of our model:
+
+```{r}
+set.seed(123)
+split <- initial_split(supervised, strata = Class)
+train <- training(split) 
+test  <- testing(split)
+```
+
+## Unsupervised step
+
+We now define our pre-processing steps. Note that tabnet handles categorical variables, so we don't need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.
+
+```{r}
+rec_unsup <- recipe(Class ~ ., unsupervised) %>%
+  step_normalize(all_numeric())
+```
+
+Next, we pre-train our model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
+
+```{r}
+mod <- tabnet_pretrain(rec_unsup, attrition, epochs = 1, valid_split = 0.25,
+                    verbose = TRUE)
+```
+
+After a few minutes we can get the results:
+
+```{r}
+collect_metrics(fit_rs)
+```
+
+```
+# A tibble: 2 x 5
+  .metric  .estimator  mean     n  std_err
+  <chr>    <chr>      <dbl> <int>    <dbl>
+1 accuracy binary     0.946     5 0.000713
+2 roc_auc  binary     0.732     5 0.00539 
+```
+
+## Back to supervised procedure
+
+We now define our pre-processing steps. Note that tabnet handles categorical variables, so we don't need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.
+
+```{r}
+rec <- recipe(Class ~ ., train) %>%
+  step_normalize(all_numeric())
+```
+
+Next, we define our model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
+
+```{r}
+mod <- tabnet(epochs = 50, batch_size = 128) %>%
+  set_engine("torch", verbose = TRUE) %>%
+  set_mode("classification")
+```
+
+We also define our `workflow` object:
+
+```{r}
+wf <- workflow() %>%
+  add_model(mod) %>%
+  add_recipe(rec)
+```
+
+We can now define our cross-validation strategy:
+
+```{r}
+folds <- vfold_cv(train, v = 5)
+```
+
+And finally, fit the model:
+
+```{r}
+fit_rs <- wf %>%
+  fit_resamples(folds)
+```
+
+After a few minutes we can get the results:
+
+```{r}
+collect_metrics(fit_rs)
+```
+
+```
+# A tibble: 2 x 5
+  .metric  .estimator  mean     n  std_err
+  <chr>    <chr>      <dbl> <int>    <dbl>
+1 accuracy binary     0.946     5 0.000713
+2 roc_auc  binary     0.732     5 0.00539 
+```
+
+And finally, we can verify the results in our test set:
+
+```{r}
+model <- wf %>% fit(train)
+test %>% 
+  bind_cols(
+    predict(model, test, type = "prob")
+  ) %>% 
+  roc_auc(Class, .pred_bad)
+```
+
+```
+# A tibble: 1 x 3
+  .metric .estimator .estimate
+  <chr>   <chr>          <dbl>
+1 roc_auc binary         0.710
+```
+
+
+
+
+
+
