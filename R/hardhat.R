@@ -26,6 +26,8 @@
 #'
 #' @param formula A formula specifying the outcome terms on the left-hand side,
 #'  and the predictor terms on the right-hand side.
+#' @param tabnet_model A previously trained TabNet model object you want to continue the fitting on.
+#'  if {\code NULL} (the default) a brand new model is initialized.
 #' @param ... Model hyperparameters. See [tabnet_config()] for a list of
 #'  all possible hyperparameters.
 #'
@@ -65,15 +67,15 @@ tabnet_fit.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.data.frame <- function(x, y, ...) {
+tabnet_fit.data.frame <- function(x, y, tabnet_model=NULL, ...) {
   processed <- hardhat::mold(x, y)
   config <- do.call(tabnet_config, list(...))
-  tabnet_bridge(processed, config = config)
+  tabnet_bridge(processed, config = config, tabnet_model)
 }
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.formula <- function(formula, data, ...) {
+tabnet_fit.formula <- function(formula, data, tabnet_model=NULL, ...) {
   processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -82,15 +84,15 @@ tabnet_fit.formula <- function(formula, data, ...) {
     )
   )
   config <- do.call(tabnet_config, list(...))
-  tabnet_bridge(processed, config = config)
+  tabnet_bridge(processed, config = config, tabnet_model)
 }
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.recipe <- function(x, data, ...) {
+tabnet_fit.recipe <- function(x, data, tabnet_model=NULL, ...) {
   processed <- hardhat::mold(x, data)
   config <- do.call(tabnet_config, list(...))
-  tabnet_bridge(processed, config = config)
+  tabnet_bridge(processed, config = config, tabnet_model)
 }
 
 new_tabnet_fit <- function(fit, blueprint) {
@@ -105,11 +107,14 @@ new_tabnet_fit <- function(fit, blueprint) {
   )
 }
 
-tabnet_bridge <- function(processed, config = tabnet_config()) {
+tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model) {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
-  initialized <- tabnet_initialize(predictors, outcomes, config = config)
-  fit <- tabnet_train_supervised(initialized, predictors, outcomes, config = config)
+  stopifnot("tabnet_model is not recognised as a proper TabNet model"= (is.null(tabnet_model) | inherits(tabnet_model, "tabnet_fit")))
+  if (is.null(tabnet_model)) {
+    tabnet_model <- tabnet_initialize(predictors, outcomes, config = config)
+  }
+  fit <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config)
   new_tabnet_fit(fit, blueprint = processed$blueprint)
 }
 

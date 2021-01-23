@@ -302,8 +302,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
 }
 
 tabnet_train_supervised <- function(obj, x, y, config = tabnet_config()) {
-
-  stopifnot("obj shall be initialised or pretrained"= length(obj$network) > 0)
+  # TODO BUG `obj` coming directly from `tabnet_initialize` is not at all a tabnet_fit object, so different schemas
+  stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
 
