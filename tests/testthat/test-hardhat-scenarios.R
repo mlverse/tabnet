@@ -1,4 +1,3 @@
-
 test_that("we can continue training with a additional fit", {
 
   data("ames", package = "modeldata")
