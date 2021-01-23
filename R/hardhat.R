@@ -108,7 +108,8 @@ new_tabnet_fit <- function(fit, blueprint) {
 tabnet_bridge <- function(processed, config = tabnet_config()) {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
-  fit <- tabnet_impl(predictors, outcomes, config = config)
+  initialized <- tabnet_initialize(predictors, outcomes, config = config)
+  fit <- tabnet_train_supervised(initialized, predictors, outcomes, config = config)
   new_tabnet_fit(fit, blueprint = processed$blueprint)
 }
 
