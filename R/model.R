@@ -4,7 +4,8 @@
 #' @param x a data frame
 #' @param y a response vector
 resolve_data <- function(x, y) {
-
+  stopifnot("Error: found missing values in the predictor data frame" = sum(is.na(x))==0)
+  stopifnot("Error: found missing values in the response vector" = sum(is.na(y))==0)
   # convert factors to integers
   x_ <- x
   for (v in seq_along(x_)) {

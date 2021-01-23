@@ -104,6 +104,102 @@ test_that("can train from a recipe", {
 
 })
 
+test_that("data-frame with missing value makes training fails with explicit message", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  y_missing <- y
+  y_missing[1] <- NA
+
+  # numerical missing
+  x_missing <- x
+  x_missing[1,"Age"] <- NA
+
+  expect_error(
+    miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
+    regexp = "missing"
+  )
+
+  # categorical missing
+  x_missing <- x
+  x_missing[1,"BusinessTravel"] <- NA
+
+  expect_error(
+    miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
+    regexp = "missing"
+  )
+
+  # missing in outcome
+  expect_error(
+    miss_fit <- tabnet_fit(x, y_missing, epochs = 1),
+    regexp = "missing"
+  )
+
+})
+
+test_that("data-frame with missing value makes inference fails with explicit message", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  #
+  fit <- tabnet_fit(x, y, epochs = 1)
+
+  # numerical missing
+  x_missing <- x
+  x_missing[1,"Age"] <- NA
+
+  # predict with numerical missing
+  expect_error(
+    predict(fit, x_missing),
+    regexp = "missing"
+  )
+  # categorical missing
+  x_missing <- x
+  x_missing[1,"BusinessTravel"] <- NA
+
+  # predict
+  expect_error(
+    predict(fit, x_missing),
+    regexp = "missing"
+  )
+
+})
+test_that("inference works with missings in the response vector", {
+
+  library(recipes)
+  data("attrition", package = "modeldata")
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
+                    verbose = TRUE)
+  # predict with empty vector
+  attrition[["EnvironmentSatisfaction"]] <-NA
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+  # predict with wrong class
+  attrition[["EnvironmentSatisfaction"]] <-NA_character_
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+  # predict with list column
+  attrition[["EnvironmentSatisfaction"]] <- list(NA)
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+})
+
+
 test_that("serialization with saveRDS just works", {
 
   data("ames", package = "modeldata")
