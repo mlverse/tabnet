@@ -142,8 +142,9 @@ tabnet_bridge <- function(processed, config = tabnet_config()) {
 #' @examples
 #' if (torch::torch_is_installed()) {
 #' data("ames", package = "modeldata")
-#' ames_predictors <- ames %>% select(-Sale_Price)
-#' fit <- tabnet_pretrain(x = ames_predictors, epochs = 1)
+#' without_outcome <- setdiff(names(ames),"Sale_Price")
+#' ames_predictors <- ames[,without_outcome]
+#' pretrained_model <- tabnet_pretrain(x = ames_predictors, epochs = 1)
 #' }
 #'
 #' @return A TabNet model object. It can be used for supervised training.
@@ -168,14 +169,8 @@ tabnet_pretrain.data.frame <- function(x, ...) {
   y <- rep(1, nrow(x))
   processed <- hardhat::mold(x, y)
   config <- do.call(tabnet_config, list(...))
-  pretrain_tabnet_bridge(processed, config = config)
-}
-
-pretrain_tabnet_bridge <- function(processed, config = tabnet_config()) {
-  predictors <- processed$predictors
-  outcomes <- processed$outcomes
-  fit <- tabnet_impl(predictors, outcomes, config = config)
-  new_tabnet_fit(fit, blueprint = processed$blueprint)
+  config$loss <- "unsupervised_loss"
+  new_tabnet_fit(processed, config = config)
 }
 
 #' @importFrom stats predict
