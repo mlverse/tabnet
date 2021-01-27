@@ -12,11 +12,11 @@ tabnet_fit(x, ...)
 
 \method{tabnet_fit}{default}(x, ...)
 
-\method{tabnet_fit}{data.frame}(x, y, ...)
+\method{tabnet_fit}{data.frame}(x, y, tabnet_model = NULL, ...)
 
-\method{tabnet_fit}{formula}(formula, data, ...)
+\method{tabnet_fit}{formula}(formula, data, tabnet_model = NULL, ...)
 
-\method{tabnet_fit}{recipe}(x, data, ...)
+\method{tabnet_fit}{recipe}(x, data, tabnet_model = NULL, ...)
 }
 \arguments{
 \item{x}{Depending on the context:
@@ -41,6 +41,9 @@ specified as:
 \item A \strong{matrix} with 1 numeric column.
 \item A numeric \strong{vector}.
 }}
+
+\item{tabnet_model}{A previously trained TabNet model object you want to continue the fitting on.
+if {\code NULL} (the default) a brand new model is initialized.}
 
 \item{formula}{A formula specifying the outcome terms on the left-hand side,
 and the predictor terms on the right-hand side.}
