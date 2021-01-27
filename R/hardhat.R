@@ -113,6 +113,13 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model) {
   stopifnot("tabnet_model is not recognised as a proper TabNet model"= (is.null(tabnet_model) | inherits(tabnet_model, "tabnet_fit")))
   if (is.null(tabnet_model)) {
     tabnet_model <- tabnet_initialize(predictors, outcomes, config = config)
+  } else {
+    if (check_net_is_empty_ptr(tabnet_model)) {
+      m <- reload_model(tabnet_model$serialized_net)
+      # this modifies 'object' in-place so subsequent predicts won't
+      # need to reload.
+      tabnet_model$fit$network$load_state_dict(m$state_dict())
+    }
   }
   fit <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config)
   new_tabnet_fit(fit, blueprint = processed$blueprint)
