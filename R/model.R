@@ -301,7 +301,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   )
 }
 
-tabnet_train_supervised <- function(obj, x, y, config = tabnet_config()) {
+tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=OL) {
   stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
@@ -360,13 +360,13 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config()) {
   }
 
   # resolve loss
-  if (config$loss == "mse")
+  if (config$loss == "mse") {
     config$loss_fn <- torch::nn_mse_loss()
-  else if (config$loss %in% c("bce", "cross_entropy"))
-    config$loss_fn <- torch::nn_cross_entropy_loss()
-
-  # restore network
-  network <- obj$network
+    }  else if (config$loss %in% c("bce", "cross_entropy")) {
+      config$loss_fn <- torch::nn_cross_entropy_loss()
+    }
+  # restore network from model and send it to device
+  network <- obj$fit$network
 
   network$to(device = device)
 
@@ -396,9 +396,8 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config()) {
   }
 
   # main loop
-  metrics <- obj$metric
-  checkpoints <- obj$checkpoints
-  epoch_shift <- length(metrics)
+  metrics <- obj$fit$metrics
+  checkpoints <- obj$fit$checkpoints
 
   for (epoch in seq_len(config$epochs)+epoch_shift) {
 
