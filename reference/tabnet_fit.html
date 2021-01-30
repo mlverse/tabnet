@@ -136,13 +136,13 @@
 <span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for data.frame</span>
-<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
 <span class='co'># S3 method for formula</span>
-<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>formula</span>, <span class='va'>data</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>formula</span>, <span class='va'>data</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
 <span class='co'># S3 method for recipe</span>
-<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>data</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'>tabnet_fit</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>data</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -175,6 +175,16 @@ specified as:</p><ul>
 </ul></td>
     </tr>
     <tr>
+      <th>tabnet_model</th>
+      <td><p>A previously fitted TabNet model object to continue the fitting on.
+if <code>NULL</code> (the default) a brand new model is initialized.</p></td>
+    </tr>
+    <tr>
+      <th>from_epoch</th>
+      <td><p>When a <code>tabnet_model</code> is provided, restore the network weights from a specific epoch.
+Default is last available checkpoint for restored model, or last epoch for in-memory model.</p></td>
+    </tr>
+    <tr>
       <th>formula</th>
       <td><p>A formula specifying the outcome terms on the left-hand side,
 and the predictor terms on the right-hand side.</p></td>
@@ -189,13 +199,26 @@ and the predictor terms on the right-hand side.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A TabNet model object. It can be used for serialization and predictions.</p>
+    <p>A TabNet model object. It can be used for serialization, predictions, or further fitting.</p>
+    <h2 class="hasAnchor" id="fitting-a-pre-trained-model"><a class="anchor" href="#fitting-a-pre-trained-model"></a>Fitting a pre-trained model</h2>
+
+    
+
+
+<p>When providing a parent <code>tabnet_model</code> parameter, the model fitting resumes from that model weights
+at the following epoch:</p><ul>
+<li><p>last fitted epoch for a model already in torch context</p></li>
+<li><p>Last model checkpoint epoch for a model loaded from file</p></li>
+<li><p>the epoch related to a checkpoint matching or preceding the <code>from_epoch</code> value if provided
+The model fitting metrics append on top of the parent metrics in the returned TabNet model.</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="threading"><a class="anchor" href="#threading"></a>Threading</h2>
 
     
 
 
-<p>TabNet uses <code>torch</code> as it's backend for computation and <code>torch</code> uses all
+<p>TabNet uses <code>torch</code> as its backend for computation and <code>torch</code> uses all
 available threads by default.</p>
 <p>You can control the number of threads used by <code>torch</code> with:</p><pre><span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/threads.html'>torch_set_num_threads</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
 <span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/threads.html'>torch_set_num_interop_threads</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
