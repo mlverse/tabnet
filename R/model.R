@@ -215,8 +215,94 @@ transpose_metrics <- function(metrics) {
   out
 }
 
-tabnet_impl <- function(x, y, config = tabnet_config()) {
+tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
+  torch::torch_manual_seed(sample.int(1e6, 1))
+  has_valid <- config$valid_split > 0
+
+  if (config$device == "auto") {
+    if (torch::cuda_is_available())
+      device <- "cuda"
+    else
+      device <- "cpu"
+  } else {
+    device <- config$device
+  }
+
+  if (has_valid) {
+    n <- nrow(x)
+    valid_idx <- sample.int(n, n*config$valid_split)
+
+    if (is.data.frame(y)) {
+      valid_y <- y[valid_idx,]
+      train_y <- y[-valid_idx,]
+    } else if (is.numeric(y) || is.factor(y)) {
+      valid_y <- y[valid_idx]
+      train_y <- y[-valid_idx]
+    }
+
+    valid_data <- list(x = x[valid_idx, ], y = valid_y)
+    x <- x[-valid_idx, ]
+    y <- train_y
+  }
+
+  # training data
+  data <- resolve_data(x, y)
+
+  # resolve loss
+  if (config$loss == "auto") {
+    if (data$y$dtype == torch::torch_long())
+      config$loss <- "cross_entropy"
+    else
+      config$loss <- "mse"
+  }
+
+  if (config$loss == "mse")
+    config$loss_fn <- torch::nn_mse_loss()
+  else if (config$loss %in% c("bce", "cross_entropy"))
+    config$loss_fn <- torch::nn_cross_entropy_loss()
+
+  # create network
+  network <- tabnet_nn(
+    input_dim = data$input_dim,
+    output_dim = data$output_dim,
+    cat_idxs = data$cat_idx,
+    cat_dims = data$cat_dims,
+    n_d = config$n_d,
+    n_a = config$n_a,
+    n_steps = config$n_steps,
+    gamma = config$gamma,
+    virtual_batch_size = config$virtual_batch_size,
+    cat_emb_dim = config$cat_emb_dim,
+    n_independent = config$n_independent,
+    n_shared = config$n_shared,
+    momentum = config$momentum
+  )
+
+  network$to(device = device)
+
+
+  # main loop
+  metrics <- list()
+  checkpoints <- list()
+
+
+  importances <- tibble::tibble(
+    variables = colnames(x),
+    importance = NA
+  )
+
+  list(
+    network = network,
+    metrics = metrics,
+    config = config,
+    checkpoints = checkpoints,
+    importances = importances
+  )
+}
+
+tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=OL) {
+  stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
 
@@ -274,27 +360,13 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
   }
 
   # resolve loss
-  if (config$loss == "mse")
+  if (config$loss == "mse") {
     config$loss_fn <- torch::nn_mse_loss()
-  else if (config$loss %in% c("bce", "cross_entropy"))
-    config$loss_fn <- torch::nn_cross_entropy_loss()
-
-  # create network
-  network <- tabnet_nn(
-    input_dim = data$input_dim,
-    output_dim = data$output_dim,
-    cat_idxs = data$cat_idx,
-    cat_dims = data$cat_dims,
-    n_d = config$n_d,
-    n_a = config$n_a,
-    n_steps = config$n_steps,
-    gamma = config$gamma,
-    virtual_batch_size = config$virtual_batch_size,
-    cat_emb_dim = config$cat_emb_dim,
-    n_independent = config$n_independent,
-    n_shared = config$n_shared,
-    momentum = config$momentum
-  )
+    }  else if (config$loss %in% c("bce", "cross_entropy")) {
+      config$loss_fn <- torch::nn_cross_entropy_loss()
+    }
+  # restore network from model and send it to device
+  network <- obj$fit$network
 
   network$to(device = device)
 
@@ -324,10 +396,10 @@ tabnet_impl <- function(x, y, config = tabnet_config()) {
   }
 
   # main loop
-  metrics <- list()
-  checkpoints <- list()
+  metrics <- obj$fit$metrics
+  checkpoints <- obj$fit$checkpoints
 
-  for (epoch in seq_len(config$epochs)) {
+  for (epoch in seq_len(config$epochs)+epoch_shift) {
 
     metrics[[epoch]] <- list(train = NULL, valid = NULL)
     train_metrics <- c()
@@ -421,5 +493,5 @@ predict_impl_class <- function(obj, x) {
   p <- get_blueprint_levels(obj)[p]
   p <- factor(p, levels = get_blueprint_levels(obj))
   hardhat::spruce_class(p)
-}
 
+}
