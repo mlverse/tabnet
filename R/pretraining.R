@@ -61,7 +61,7 @@ unsupervised_loss <- function(y_pred, embedded_x, obf_vars, eps=1e-9) {
 }
 
 
-tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=OL) {
+tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=0L) {
   stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0

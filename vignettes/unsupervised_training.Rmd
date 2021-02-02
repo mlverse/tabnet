@@ -1,8 +1,8 @@
 ---
-title: "Unsupervised training of tabnet"
+title: "Unsupervised training and fine-tuning"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Unsupervised training of tabnet}
+  %\VignetteIndexEntry{Unsupervised training and fine-tuning}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,7 +21,9 @@ library(tidymodels)
 library(modeldata)
 ```
 
-In this vignette we show how to train TabNet model with unsupervised data.
+In this vignette we show how to 
+ - pretrain TabNet model with unsupervised data
+ - fine-tune TabNet with supervised data
 
 We are going to use the `lending_club` dataset available
 in the `modeldata` package, using 80 % of it as unsupervised data.
