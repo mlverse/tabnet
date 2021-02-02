@@ -12,11 +12,11 @@ tabnet_fit(x, ...)
 
 \method{tabnet_fit}{default}(x, ...)
 
-\method{tabnet_fit}{data.frame}(x, y, ...)
+\method{tabnet_fit}{data.frame}(x, y, tabnet_model = NULL, ..., from_epoch = NULL)
 
-\method{tabnet_fit}{formula}(formula, data, ...)
+\method{tabnet_fit}{formula}(formula, data, tabnet_model = NULL, ..., from_epoch = NULL)
 
-\method{tabnet_fit}{recipe}(x, data, ...)
+\method{tabnet_fit}{recipe}(x, data, tabnet_model = NULL, ..., from_epoch = NULL)
 }
 \arguments{
 \item{x}{Depending on the context:
@@ -42,6 +42,12 @@ specified as:
 \item A numeric \strong{vector}.
 }}
 
+\item{tabnet_model}{A previously fitted TabNet model object to continue the fitting on.
+if \code{NULL} (the default) a brand new model is initialized.}
+
+\item{from_epoch}{When a \code{tabnet_model} is provided, restore the network weights from a specific epoch.
+Default is last available checkpoint for restored model, or last epoch for in-memory model.}
+
 \item{formula}{A formula specifying the outcome terms on the left-hand side,
 and the predictor terms on the right-hand side.}
 
@@ -51,15 +57,28 @@ and the predictor terms on the right-hand side.}
 }}
 }
 \value{
-A TabNet model object. It can be used for serialization and predictions.
+A TabNet model object. It can be used for serialization, predictions, or further fitting.
 }
 \description{
 Fits the \href{https://arxiv.org/abs/1908.07442}{TabNet: Attentive Interpretable Tabular Learning} model
 }
+\section{Fitting a pre-trained model}{
+
+
+When providing a parent \code{tabnet_model} parameter, the model fitting resumes from that model weights
+at the following epoch:
+\itemize{
+\item last fitted epoch for a model already in torch context
+\item Last model checkpoint epoch for a model loaded from file
+\item the epoch related to a checkpoint matching or preceding the \code{from_epoch} value if provided
+The model fitting metrics append on top of the parent metrics in the returned TabNet model.
+}
+}
+
 \section{Threading}{
 
 
-TabNet uses \code{torch} as it's backend for computation and \code{torch} uses all
+TabNet uses \code{torch} as its backend for computation and \code{torch} uses all
 available threads by default.
 
 You can control the number of threads used by \code{torch} with:\preformatted{torch::torch_set_num_threads(1)

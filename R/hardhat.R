@@ -26,12 +26,25 @@
 #'
 #' @param formula A formula specifying the outcome terms on the left-hand side,
 #'  and the predictor terms on the right-hand side.
+#' @param tabnet_model A previously fitted TabNet model object to continue the fitting on.
+#'  if `NULL` (the default) a brand new model is initialized.
+#' @param from_epoch When a `tabnet_model` is provided, restore the network weights from a specific epoch.
+#'  Default is last available checkpoint for restored model, or last epoch for in-memory model.
 #' @param ... Model hyperparameters. See [tabnet_config()] for a list of
 #'  all possible hyperparameters.
 #'
+#' @section Fitting a pre-trained model:
+#'
+#' When providing a parent `tabnet_model` parameter, the model fitting resumes from that model weights
+#' at the following epoch:
+#'    * last fitted epoch for a model already in torch context
+#'    * Last model checkpoint epoch for a model loaded from file
+#'    * the epoch related to a checkpoint matching or preceding the `from_epoch` value if provided
+#' The model fitting metrics append on top of the parent metrics in the returned TabNet model.
+#'
 #' @section Threading:
 #'
-#' TabNet uses `torch` as it's backend for computation and `torch` uses all
+#' TabNet uses `torch` as its backend for computation and `torch` uses all
 #' available threads by default.
 #'
 #' You can control the number of threads used by `torch` with:
@@ -47,7 +60,7 @@
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
 #' }
 #'
-#' @return A TabNet model object. It can be used for serialization and predictions.
+#' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'
 #' @export
 tabnet_fit <- function(x, ...) {
@@ -65,15 +78,15 @@ tabnet_fit.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.data.frame <- function(x, y, ...) {
+tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
   config <- do.call(tabnet_config, list(...))
-  tabnet_bridge(processed, config = config)
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch)
 }
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.formula <- function(formula, data, ...) {
+tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, ..., from_epoch = NULL) {
   processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -82,15 +95,15 @@ tabnet_fit.formula <- function(formula, data, ...) {
     )
   )
   config <- do.call(tabnet_config, list(...))
-  tabnet_bridge(processed, config = config)
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch)
 }
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.recipe <- function(x, data, ...) {
+tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
   config <- do.call(tabnet_config, list(...))
-  tabnet_bridge(processed, config = config)
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch)
 }
 
 new_tabnet_fit <- function(fit, blueprint) {
@@ -105,11 +118,53 @@ new_tabnet_fit <- function(fit, blueprint) {
   )
 }
 
-tabnet_bridge <- function(processed, config = tabnet_config()) {
+tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, from_epoch) {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
-  fit <- tabnet_impl(predictors, outcomes, config = config)
-  new_tabnet_fit(fit, blueprint = processed$blueprint)
+  if (!(is.null(tabnet_model) | inherits(tabnet_model, "tabnet_fit")))
+    rlang::abort("tabnet_model is not recognised as a proper TabNet model")
+
+  if (is.null(tabnet_model)) {
+    # new model needs network initialization
+
+    tabnet_model_lst <- tabnet_initialize(predictors, outcomes, config = config)
+    tabnet_model <- new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
+    epoch_shift <- 0L
+
+  } else if (!is.null(from_epoch)) {
+    # model must be loaded from checkpoint
+
+    if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
+      rlang::abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
+
+    # find closest checkpoint for that epoch
+    closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
+
+    tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
+    epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
+
+  } else if (!check_net_is_empty_ptr(tabnet_model)) {
+    # model is available from tabnet_model$serialized_net
+
+    m <- reload_model(tabnet_model$serialized_net)
+    # this modifies 'tabnet_model' in-place so subsequent predicts won't
+    # need to reload.
+    tabnet_model$fit$network$load_state_dict(m$state_dict())
+    epoch_shift <- length(tabnet_model$fit$metrics)
+
+  } else if (length(tabnet_model$fit$checkpoints)) {
+    # model is loaded from the last available checkpoint
+
+    last_checkpoint <- length(tabnet_model$fit$checkpoints)
+
+    tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
+    epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
+
+  } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
+
+
+  fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
+  new_tabnet_fit(fit_lst, blueprint = processed$blueprint)
 }
 
 #' pretrain Tabnet model
