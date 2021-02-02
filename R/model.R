@@ -214,16 +214,6 @@ transpose_metrics <- function(metrics) {
 
   out
 }
-unsupervised_loss <- function(y_pred, embedded_x, obf_vars, eps=1e-9) {
-  # TODO current loss functions in train_batch and valid_batch only receive two params : (output[[1]], batch$y)
-  errors <- y_pred - embedded_x
-  reconstruction_errors <- torch::mul(errors, obf_vars)**2
-  batch_stds <- torch::std(embedded_x, dim=0)**2 + eps
-  features_loss <- torch::matmul(reconstruction_errors, 1 / batch_stds)
-  # here we take the mean per batch, contrary to the paper
-  loss <- torch::mean(features_loss)
-  loss
-}
 
 tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
