@@ -79,46 +79,20 @@ collect_metrics(fit_rs)
 
 ## Back to supervised procedure
 
-We now define our pre-processing steps. Note that tabnet handles categorical variables, so we don't need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.
+We reuse our pre-processing steps. Note that tabnet handles categorical variables, so we don't need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.
 
 ```{r}
-rec <- recipe(Class ~ ., train) %>%
-  step_normalize(all_numeric())
+supervised_baked_train <- rec_unsup %>% bake(new_data=train)
 ```
 
-Next, we define our model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
+Next, we add a supervised fit pass to our pre-trained model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
 
 ```{r}
-mod <- tabnet(epochs = 50, batch_size = 128) %>%
-  set_engine("torch", verbose = TRUE) %>%
-  set_mode("classification")
+mod <- tabnet_fit(x=supervised_baked_train, y, tabnet_model = mod, epochs = 50)
 ```
 
-We also define our `workflow` object:
-
 ```{r}
-wf <- workflow() %>%
-  add_model(mod) %>%
-  add_recipe(rec)
-```
-
-We can now define our cross-validation strategy:
-
-```{r}
-folds <- vfold_cv(train, v = 5)
-```
-
-And finally, fit the model:
-
-```{r}
-fit_rs <- wf %>%
-  fit_resamples(folds)
-```
-
-After a few minutes we can get the results:
-
-```{r}
-collect_metrics(fit_rs)
+collect_metrics(mod)
 ```
 
 ```
@@ -132,10 +106,9 @@ collect_metrics(fit_rs)
 And finally, we can verify the results in our test set:
 
 ```{r}
-model <- wf %>% fit(train)
 test %>% 
   bind_cols(
-    predict(model, test, type = "prob")
+    predict(mod, test, type = "prob")
   ) %>% 
   roc_auc(Class, .pred_bad)
 ```
