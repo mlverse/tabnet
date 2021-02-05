@@ -107,9 +107,10 @@ test_that("can train from a recipe", {
 test_that("data-frame with missing value makes training fails with explicit message", {
 
   data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[ids,-which(names(attrition) == "Attrition")]
+  y <- attrition[ids,]$Attrition
   y_missing <- y
   y_missing[1] <- NA
 
@@ -142,9 +143,10 @@ test_that("data-frame with missing value makes training fails with explicit mess
 test_that("data-frame with missing value makes inference fails with explicit message", {
 
   data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[ids,-which(names(attrition) == "Attrition")]
+  y <- attrition[ids,]$Attrition
   #
   fit <- tabnet_fit(x, y, epochs = 1)
 
@@ -172,7 +174,9 @@ test_that("inference works with missings in the response vector", {
 
   library(recipes)
   data("attrition", package = "modeldata")
-  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition) %>%
+  ids <- sample(nrow(attrition), 256)
+
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[idx, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
                     verbose = TRUE)

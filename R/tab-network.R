@@ -230,6 +230,94 @@ tabnet_decoder <- torch::nn_module(
   },
 )
 
+tabnet_pretraining <- torch::nn_module(
+  "tabnet_pretraining",
+  initialize = function(input_dim, pretraining_ratio=0.2,
+                        n_d=8, n_a=8,
+                        n_steps=3, gamma=1.3,
+                        cat_idxs=list(), cat_dims=list(),
+                        cat_emb_dim=1, n_independent=2,
+                        n_shared=2, epsilon=1e-15,
+                        virtual_batch_size=128, momentum=0.02,
+                        mask_type="sparsemax") {
+
+    self$input_dim <- input_dim
+    self$pretraining_ratio <- pretraining_ratio
+    self$n_d <- n_d
+    self$n_a <- n_a
+    self$n_steps <- n_steps
+    self$gamma <- gamma
+    self$cat_idxs <- cat_idxs
+    self$cat_dims <- cat_dims
+    self$cat_emb_dim <- cat_emb_dim
+    self$epsilon <- epsilon
+    self$n_independent <- n_independent
+    self$n_shared <- n_shared
+    self$virtual_batch_size <- virtual_batch_size
+    self$mask_type <- mask_type
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=0.01)
+
+    if (self$n_steps <= 0)
+      stop("n_steps should be a positive integer.")
+    if (self$n_independent == 0 && self$n_shared == 0)
+      stop("n_shared and n_independant can't be both zero.")
+
+    self$virtual_batch_size <- virtual_batch_size
+    self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
+    self$post_embed_dim <- self$embedder$post_embed_dim
+    self$masker = random_obfuscator(self$pretraining_ratio)
+    self$encoder = tabnet_encoder(
+      input_dim=self$post_embed_dim,
+      output_dim=self$post_embed_dim,
+      n_d=n_d,
+      n_a=n_a,
+      n_steps=n_steps,
+      gamma=gamma,
+      n_independent=n_independent,
+      n_shared=n_shared,
+      epsilon=epsilon,
+      virtual_batch_size=virtual_batch_size,
+      momentum=momentum,
+      mask_type=mask_type,
+    )
+    self$decoder = tabnet_decoder(
+      self$post_embed_dim,
+      n_d=n_d,
+      n_steps=n_steps,
+      n_independent=n_independent,
+      n_shared=n_shared,
+      virtual_batch_size=virtual_batch_size,
+      momentum=momentum,
+    )
+
+  },
+  forward = function(x) {
+    embedded_x <- self$embedder(x)
+
+    if (self$training) {
+      masked_lst <- self$masker(embedded_x)
+      masked_x <- masked_lst[[1]]
+      obf_vars <- masked_lst[[2]]
+      # set prior of encoder with obf_mask
+      prior <- 1 - obf_vars
+      steps_out <- self$encoder(masked_x, prior = prior)[[1]]
+      res <- self$decoder(steps_out)
+      list(res, embedded_x, obf_vars)
+    } else {
+      steps_out <- self$encoder(embedded_x)[[1]]
+      res <- self$decoder(steps_out)
+      list(res,
+           embedded_x,
+           torch::torch_ones(embedded_x$shape, device = x$device))
+    }
+  },
+  forward_masks = function(x) {
+    embedded_x <- self$embedder(x)
+    self$encoder$forward_masks(embedded_x)
+  }
+
+)
+
 tabnet_no_embedding <- torch::nn_module(
   "tabnet_no_embedding",
   initialize = function(input_dim, output_dim,

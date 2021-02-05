@@ -247,7 +247,11 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   if (is.null(tabnet_model)) {
     # new model needs network initialization
 
-    tabnet_model_lst <- tabnet_initialize(predictors, outcomes, config = config)
+    tabnet_model_lst <- switch(
+      task,
+      supervised  = tabnet_initialize(predictors, outcomes, config = config),
+      unsupervised  = tabnet_train_unsupervised( predictors, config = config, epoch_shift)
+    )
     tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
     epoch_shift <- 0L
 
@@ -282,11 +286,10 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
 
-
-  fit_lst <- switch(
+  tabnet_model_lst <- switch(
     task,
     supervised  = tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift),
-    unsupervised  = tabnet_train_unsupervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
+    unsupervised  = print("Done")
   )
 
   new_tabnet_fit(fit_lst, blueprint = processed$blueprint)

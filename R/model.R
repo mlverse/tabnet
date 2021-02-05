@@ -265,8 +265,6 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     config$loss_fn <- torch::nn_mse_loss()
   else if (config$loss %in% c("bce", "cross_entropy"))
     config$loss_fn <- torch::nn_cross_entropy_loss()
-  else if (config$loss == "unsupervised_loss")
-    config$loss_fn <- unsupervised_loss()
 
 
   # create network
