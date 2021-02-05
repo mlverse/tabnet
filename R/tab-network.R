@@ -166,6 +166,70 @@ tabnet_encoder <- torch::nn_module(
   }
 )
 
+tabnet_decoder <- torch::nn_module(
+  "tabnet_decoder",
+  initialize = function(input_dim, n_d=8,
+                        n_steps=3, n_independent=2, n_shared=2,
+                        virtual_batch_size=128, momentum=0.02) {
+
+    self$input_dim <- input_dim
+    self$n_d <- n_d
+    self$n_steps <- n_steps
+    self$n_independent <- n_independent
+    self$n_shared <- n_shared
+    self$virtual_batch_size <- virtual_batch_size
+
+    self$feat_transformers <- torch::nn_module_list()
+    self$reconstruction_layers <- torch::nn_module_list()
+
+    if (self$n_shared > 0) {
+      shared_feat_transform <- torch::nn_module_list()
+
+      for (i in seq_len(self$n_shared)) {
+        if (i == 1) {
+          shared_feat_transform$append(torch::nn_linear(
+            n_d, 2 * n_d, bias = FALSE)
+          )
+        } else {
+          shared_feat_transform$append(torch::nn_linear(
+            n_d, 2 * n_d, bias = FALSE)
+          )
+        }
+      }
+
+    } else {
+      shared_feat_transform <- NULL
+    }
+
+    for (step in seq_len(n_steps)) {
+
+      transformer <- feat_transformer(n_d, n_d, shared_feat_transform,
+                                      n_glu_independent=self$n_independent,
+                                      virtual_batch_size=self$virtual_batch_size,
+                                      momentum=momentum)
+
+      self$feat_transformers$append(transformer)
+      reconstruction_layer <- torch::nn_linear(n_d, self$input_dim, bias = FALSE)
+      initialize_non_glu(reconstruction_layer, n_d, self.input_dim)
+      self$reconstruction_layers$append(reconstruction_layer)
+
+    }
+
+  },
+  forward = function(steps_output) {
+    res <- torch::torch_tensor(0, device = x$device)
+    for (step_nb in seq_along(steps_output)) {
+
+      x <- self.feat_transformers[step_nb](steps_output[step_nb])
+      x <- self.reconstruction_layers[step_nb](steps_output[step_nb])
+      res <- torch.add(res, x)
+
+    }
+
+    res
+  },
+)
+
 tabnet_no_embedding <- torch::nn_module(
   "tabnet_no_embedding",
   initialize = function(input_dim, output_dim,
