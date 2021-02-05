@@ -28,8 +28,8 @@ gbn <- torch::nn_module(
 # Defines main part of the TabNet network without the embedding layers.
 #
 #
-tabnet_no_embedding <- torch::nn_module(
-  "tabnet_no_embedding",
+tabnet_encoder <- torch::nn_module(
+  "tabnet_encoder",
   initialize = function(input_dim, output_dim,
                         n_d=8, n_a=8,
                         n_steps=3, gamma=1.3,
@@ -48,7 +48,7 @@ tabnet_no_embedding <- torch::nn_module(
     self$n_shared <- n_shared
     self$virtual_batch_size <- virtual_batch_size
     self$mask_type <- mask_type
-    self$initial_bn = torch::nn_batch_norm1d(self$input_dim, momentum=0.01)
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=0.01)
 
     if (self$n_shared > 0) {
       shared_feat_transform <- torch::nn_module_list()
@@ -97,9 +97,6 @@ tabnet_no_embedding <- torch::nn_module(
 
     }
 
-    self$final_mapping <- torch::nn_linear(n_d, output_dim, bias=FALSE)
-    initialize_non_glu(self$final_mapping, n_d, output_dim)
-
   },
   forward = function(x) {
     res <- torch::torch_tensor(0, device = x$device)
@@ -130,9 +127,7 @@ tabnet_no_embedding <- torch::nn_module(
 
     }
 
-
     M_loss <- M_loss/self$n_steps
-    res <- self$final_mapping(res)
 
     list(res, M_loss)
   },
@@ -169,6 +164,61 @@ tabnet_no_embedding <- torch::nn_module(
 
     list(M_explain, masks)
   }
+)
+
+tabnet_no_embedding <- torch::nn_module(
+  "tabnet_no_embedding",
+  initialize = function(input_dim, output_dim,
+                        n_d=8, n_a=8,
+                        n_steps=3, gamma=1.3,
+                        n_independent=2, n_shared=2, epsilon=1e-15,
+                        virtual_batch_size=128, momentum=0.02,
+                        mask_type="sparsemax") {
+
+    self$input_dim <- input_dim
+    self$output_dim <- output_dim
+    self$n_d <- n_d
+    self$n_a <- n_a
+    self$n_steps <- n_steps
+    self$gamma <- gamma
+    self$epsilon <- epsilon
+    self$n_independent <- n_independent
+    self$n_shared <- n_shared
+    self$virtual_batch_size <- virtual_batch_size
+    self$mask_type <- mask_type
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=0.01)
+
+    self$encoder <- tabnet_encoder(
+      input_dim=input_dim,
+      output_dim=output_dim,
+      n_d=n_d,
+      n_a=n_a,
+      n_steps=n_steps,
+      gamma=gamma,
+      n_independent=n_independent,
+      n_shared=n_shared,
+      epsilon=epsilon,
+      virtual_batch_size=virtual_batch_size,
+      momentum=momentum,
+      mask_type=mask_type
+    )
+    self$final_mapping <- torch::nn_linear(n_d, output_dim, bias=FALSE)
+    initialize_non_glu(self$final_mapping, n_d, output_dim)
+
+  },
+  forward = function(x) {
+    self_encoder_lst <- self$encoder(x)
+    steps_output <- self_encoder_lst[[1]]
+    M_loss <- self_encoder_lst[[2]]
+    # TODO added operation TBC
+    res <- torch::torch_sum(torch::torch_stack(steps_output, dim=1), dim=1)
+    res <- self$final_mapping(res)
+
+    list(res, M_loss)
+  },
+  forward_masks = function(x) {
+    self$encoder$forward_masks(x)
+    }
 )
 
 tabnet_nn <- torch::nn_module(

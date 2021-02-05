@@ -55,7 +55,7 @@ unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps=1e-9) {
   reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)**2
   batch_stds <- torch::torch_std(embedded_x, dim=0)**2 + eps
   # compute the number of obfuscated variables to reconstruct
-  nb_reconstructed_variables <- torch.torch_sum(obfuscation_mask, dim=1)
+  nb_reconstructed_variables <- torch::torch_sum(obfuscation_mask, dim=1)
   # take the mean of the reconstructed variable errors
   features_loss <- torch::torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
   loss <- torch::torch_mean(features_loss)
@@ -81,8 +81,8 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
 
-    valid_y <- rep(1, n)[valid_idx]
-    train_y <- rep(1, n)[-valid_idx,]
+    valid_y <- matrix(rep(1, n)[valid_idx], ncol=1)
+    train_y <- matrix(rep(1, n)[-valid_idx,], ncol=1)
 
     valid_data <- list(x = x[valid_idx, ], y = valid_y)
     x <- x[-valid_idx, ]
@@ -90,7 +90,7 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
   }
 
   # training data
-  data <- resolve_data(x, rep(1, nrow(x)))
+  data <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
   dl <- torch::dataloader(
     torch::tensor_dataset(x = data$x, y = data$y),
     batch_size = config$batch_size,
