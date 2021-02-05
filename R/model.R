@@ -86,6 +86,8 @@ resolve_data <- function(x, y) {
 #' @param cat_emb_dim Embedding size for categorial features (default=1)
 #' @param momentum Momentum for batch normalization, typically ranges from 0.01
 #'   to 0.4 (default=0.02)
+#' @param pretraining_ratio Ratio of features to mask for reconstruction during
+#'   pretraining.  Ranges from 0 to 1 (default=0.5)
 #' @param checkpoint_epochs checkpoint model weights and architecture every
 #'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
@@ -117,6 +119,7 @@ tabnet_config <- function(batch_size = 256,
                           num_independent = 2,
                           num_shared = 2,
                           momentum = 0.02,
+                          pretraining_ratio = 0.5,
                           verbose = FALSE,
                           device = "auto") {
 
@@ -154,6 +157,7 @@ tabnet_config <- function(batch_size = 256,
     n_shared = num_shared,
     momentum = momentum,
     checkpoint_epochs = checkpoint_epochs,
+    pretraining_ratio = pretraining_ratio,
     device = device
   )
 }

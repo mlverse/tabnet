@@ -454,3 +454,24 @@ embedding_generator <- torch::nn_module(
     post_embeddings
   }
 )
+
+random_obfuscator <- torch::nn_module(
+  "random_obfuscator",
+  initialize = function(pretraining_ratio) {
+
+    if (pretraining_ratio <= 0 || pretraining_ratio >= 1) {
+      pretraining_ratio <- 0.5
+    }
+
+    self$pretraining_ratio <- pretraining_ratio
+
+  },
+  forward = function(x) {
+    ones <- torch.ones(size = x$shape, device = x$device)
+    obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)
+    masked_input = torch.mul(1 - obfuscated_vars, x)
+
+    list(masked_input, obfuscated_vars)
+
+  }
+)

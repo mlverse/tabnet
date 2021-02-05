@@ -49,14 +49,16 @@ transpose_metrics <- function(metrics) {
   out
 }
 
-unsupervised_loss <- function(y_pred, embedded_x, obf_vars, eps=1e-9) {
+unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps=1e-9) {
   # TODO current loss functions in train_batch and valid_batch only receive two params : (output[[1]], batch$y)
   errors <- y_pred - embedded_x
-  reconstruction_errors <- torch::mul(errors, obf_vars)**2
-  batch_stds <- torch::std(embedded_x, dim=0)**2 + eps
-  features_loss <- torch::matmul(reconstruction_errors, 1 / batch_stds)
-  # here we take the mean per batch, contrary to the paper
-  loss <- torch::mean(features_loss)
+  reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)**2
+  batch_stds <- torch::torch_std(embedded_x, dim=0)**2 + eps
+  # compute the number of obfuscated variables to reconstruct
+  nb_reconstructed_variables <- torch.torch_sum(obfuscation_mask, dim=1)
+  # take the mean of the reconstructed variable errors
+  features_loss <- torch::torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
+  loss <- torch::torch_mean(features_loss)
   loss
 }
 
@@ -79,13 +81,8 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
 
-    if (is.data.frame(y)) {
-      valid_y <- y[valid_idx,]
-      train_y <- y[-valid_idx,]
-    } else if (is.numeric(y) || is.factor(y)) {
-      valid_y <- y[valid_idx]
-      train_y <- y[-valid_idx]
-    }
+    valid_y <- rep(1, n)[valid_idx]
+    train_y <- rep(1, n)[-valid_idx,]
 
     valid_data <- list(x = x[valid_idx, ], y = valid_y)
     x <- x[-valid_idx, ]
@@ -93,7 +90,7 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
   }
 
   # training data
-  data <- resolve_data(x, y)
+  data <- resolve_data(x, rep(1, nrow(x)))
   dl <- torch::dataloader(
     torch::tensor_dataset(x = data$x, y = data$y),
     batch_size = config$batch_size,
@@ -112,19 +109,8 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
     )
   }
 
-  if (config$loss == "auto") {
-    if (data$y$dtype == torch::torch_long())
-      config$loss <- "cross_entropy"
-    else
-      config$loss <- "mse"
-  }
-
   # resolve loss
-  if (config$loss == "mse") {
-    config$loss_fn <- torch::nn_mse_loss()
-    }  else if (config$loss %in% c("bce", "cross_entropy")) {
-      config$loss_fn <- torch::nn_cross_entropy_loss()
-    }
+  config$loss_fn <- unsupervised_loss
   # restore network from model and send it to device
   network <- obj$fit$network
 
