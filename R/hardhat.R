@@ -286,7 +286,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
 
-  tabnet_model_lst <- switch(
+  fit_lst <- switch(
     task,
     supervised  = tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift),
     unsupervised  = print("Done")

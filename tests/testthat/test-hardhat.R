@@ -176,7 +176,7 @@ test_that("inference works with missings in the response vector", {
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 
-  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[idx, ]) %>%
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
                     verbose = TRUE)

@@ -62,11 +62,8 @@ unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps=1e-9) {
   loss
 }
 
-
-tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=0L) {
-  stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
+tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0L) {
   torch::torch_manual_seed(sample.int(1e6, 1))
-  has_valid <- config$valid_split > 0
 
   if (config$device == "auto") {
     if (torch::cuda_is_available())
@@ -75,18 +72,6 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
       device <- "cpu"
   } else {
     device <- config$device
-  }
-
-  if (has_valid) {
-    n <- nrow(x)
-    valid_idx <- sample.int(n, n*config$valid_split)
-
-    valid_y <- matrix(rep(1, n)[valid_idx], ncol=1)
-    train_y <- matrix(rep(1, n)[-valid_idx,], ncol=1)
-
-    valid_data <- list(x = x[valid_idx, ], y = valid_y)
-    x <- x[-valid_idx, ]
-    y <- train_y
   }
 
   # training data
@@ -111,8 +96,23 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
 
   # resolve loss
   config$loss_fn <- unsupervised_loss
-  # restore network from model and send it to device
-  network <- obj$fit$network
+
+  # create network
+  network <- tabnet_pretraining(
+    input_dim = data$input_dim,
+    cat_idxs = data$cat_idx,
+    cat_dims = data$cat_dims,
+    pretraining_ratio = config$pretraining_ratio,
+    n_d = config$n_d,
+    n_a = config$n_a,
+    n_steps = config$n_steps,
+    gamma = config$gamma,
+    virtual_batch_size = config$virtual_batch_size,
+    cat_emb_dim = config$cat_emb_dim,
+    n_independent = config$n_independent,
+    n_shared = config$n_shared,
+    momentum = config$momentum
+  )
 
   network$to(device = device)
 
@@ -141,11 +141,11 @@ tabnet_train_unsupervised <- function(obj, x, y, config = tabnet_config(), epoch
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   }
 
-  # main loop
+  # main loop over epochs
   metrics <- obj$fit$metrics
   checkpoints <- obj$fit$checkpoints
 
-  for (epoch in seq_len(config$epochs)+epoch_shift) {
+  for (epoch in seq_len(config$epochs) + epoch_shift) {
 
     metrics[[epoch]] <- list(train = NULL, valid = NULL)
     train_metrics <- c()
