@@ -284,9 +284,6 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     momentum = config$momentum
   )
 
-  network$to(device = device)
-
-
   # main loop
   metrics <- list()
   checkpoints <- list()
@@ -418,11 +415,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         format = "[:bar] loss= :loss"
       )
 
-    for (batch in torch::enumerate(dl)) {
+    coro::loop(for (batch in dl) {
       m <- train_batch(network, optimizer, batch_to_device(batch, device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
-    }
+    })
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
 
     if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0) {
