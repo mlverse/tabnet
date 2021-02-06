@@ -158,16 +158,16 @@
 <p>Let’s fit a TabNet model to the <code>syn2</code> dataset and analyze the interpretation metrics.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn2</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; [Epoch 001] Loss: 0.838752</span>
-<span class="co">#&gt; [Epoch 002] Loss: 0.542368</span>
-<span class="co">#&gt; [Epoch 003] Loss: 0.477737</span>
-<span class="co">#&gt; [Epoch 004] Loss: 0.411476</span>
-<span class="co">#&gt; [Epoch 005] Loss: 0.370032</span>
-<span class="co">#&gt; [Epoch 006] Loss: 0.348424</span>
-<span class="co">#&gt; [Epoch 007] Loss: 0.296177</span>
-<span class="co">#&gt; [Epoch 008] Loss: 0.241971</span>
-<span class="co">#&gt; [Epoch 009] Loss: 0.220075</span>
-<span class="co">#&gt; [Epoch 010] Loss: 0.184658</span></code></pre></div>
+<span class="co">#&gt; [Epoch 001] Loss: 0.837698</span>
+<span class="co">#&gt; [Epoch 002] Loss: 0.544841</span>
+<span class="co">#&gt; [Epoch 003] Loss: 0.498679</span>
+<span class="co">#&gt; [Epoch 004] Loss: 0.409265</span>
+<span class="co">#&gt; [Epoch 005] Loss: 0.332193</span>
+<span class="co">#&gt; [Epoch 006] Loss: 0.287646</span>
+<span class="co">#&gt; [Epoch 007] Loss: 0.246461</span>
+<span class="co">#&gt; [Epoch 008] Loss: 0.208621</span>
+<span class="co">#&gt; [Epoch 009] Loss: 0.198708</span>
+<span class="co">#&gt; [Epoch 010] Loss: 0.174893</span></code></pre></div>
 <p>In the feature importance plot we can see that, as expected, features <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html">vip</a></span><span class="op">(</span><span class="va">fit_syn2</span><span class="op">)</span></code></pre></div>
@@ -209,16 +209,16 @@
 <p>First we fit the model for 10 epochs.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; [Epoch 001] Loss: 0.701655</span>
-<span class="co">#&gt; [Epoch 002] Loss: 0.518490</span>
-<span class="co">#&gt; [Epoch 003] Loss: 0.437286</span>
-<span class="co">#&gt; [Epoch 004] Loss: 0.377861</span>
-<span class="co">#&gt; [Epoch 005] Loss: 0.326733</span>
-<span class="co">#&gt; [Epoch 006] Loss: 0.274935</span>
-<span class="co">#&gt; [Epoch 007] Loss: 0.256575</span>
-<span class="co">#&gt; [Epoch 008] Loss: 0.241770</span>
-<span class="co">#&gt; [Epoch 009] Loss: 0.198424</span>
-<span class="co">#&gt; [Epoch 010] Loss: 0.200058</span></code></pre></div>
+<span class="co">#&gt; [Epoch 001] Loss: 0.707384</span>
+<span class="co">#&gt; [Epoch 002] Loss: 0.525251</span>
+<span class="co">#&gt; [Epoch 003] Loss: 0.475734</span>
+<span class="co">#&gt; [Epoch 004] Loss: 0.415081</span>
+<span class="co">#&gt; [Epoch 005] Loss: 0.359265</span>
+<span class="co">#&gt; [Epoch 006] Loss: 0.292786</span>
+<span class="co">#&gt; [Epoch 007] Loss: 0.279230</span>
+<span class="co">#&gt; [Epoch 008] Loss: 0.232137</span>
+<span class="co">#&gt; [Epoch 009] Loss: 0.212693</span>
+<span class="co">#&gt; [Epoch 010] Loss: 0.189036</span></code></pre></div>
 <p>In the feature importance plot we have, as expected, strong importance for <code>V10</code>, and the other features that are used conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html">vip</a></span><span class="op">(</span><span class="va">fit_syn4</span><span class="op">)</span></code></pre></div>
