@@ -220,7 +220,7 @@ tabnet_decoder <- torch::nn_module(
     res <- torch::torch_tensor(0, device = x$device)
     for (step_nb in seq_along(steps_output)) {
 
-      x <- self$feat_transformers[[step_nb]](steps_output[[step_nb]])
+      # x <- self$feat_transformers[[step_nb]](steps_output[[step_nb]])
       x <- self$reconstruction_layers[[step_nb]](steps_output[[step_nb]])
       res <- torch::torch_add(res, x)
 
@@ -302,13 +302,14 @@ tabnet_pretrainer <- torch::nn_module(
       obf_vars <- masker_out_lst[[2]]
       # set prior of encoder with obf_mask
       prior <- 1 - obf_vars
-      steps_out <- self$encoder(masker_out_lst[[1]], prior = prior)[[1]]
+      steps_out <- self$encoder(masker_out_lst[[1]], prior)[[1]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
            obf_vars)
     } else {
-      steps_out <- self$encoder(embedded_x)[[1]]
+      prior <- torch::torch_ones(size = x$shape, device = x$device)
+      steps_out <- self$encoder(embedded_x, prior)[[1]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
@@ -363,7 +364,8 @@ tabnet_no_embedding <- torch::nn_module(
 
   },
   forward = function(x) {
-    self_encoder_lst <- self$encoder(x)
+    prior <- torch::torch_ones(size = x$shape, device = x$device)
+    self_encoder_lst <- self$encoder(x, prior)
     steps_output <- self_encoder_lst[[1]]
     M_loss <- self_encoder_lst[[2]]
     # TODO added operation TBC
