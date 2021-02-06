@@ -28,7 +28,8 @@ tabnet_config(
   num_shared = 2,
   momentum = 0.02,
   verbose = FALSE,
-  device = "auto"
+  device = "auto",
+  importance_sample_size = NULL
 )
 }
 \arguments{
@@ -107,6 +108,10 @@ training.}
 
 \item{device}{the device to use for training. "cpu" or "cuda". The default ("auto")
 uses  to "cuda" if it's available, otherwise uses "cpu".}
+
+\item{importance_sample_size}{sample of the dataset to compute importance metrics.
+If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
+display a warning.}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.
