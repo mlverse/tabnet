@@ -1,4 +1,4 @@
-test_that("Training regression", {
+test_that("Unsupervised training with default config", {
 
   data("ames", package = "modeldata")
 
@@ -26,7 +26,7 @@ test_that("Training regression", {
   )
 })
 
-test_that("Training classification", {
+test_that("Unsupervised training with pretraining_ratio", {
 
   data("attrition", package = "modeldata")
 
@@ -34,7 +34,7 @@ test_that("Training classification", {
   y <- attrition$Attrition
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, epochs = 1),
+    fit <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2),
     regexp = NA
   )
 
@@ -58,7 +58,7 @@ test_that("errors when using an argument that do not exist", {
   y <- ames$Sale_Price
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, epochsas = 1),
+    fit <- tabnet_pretrain(x, y, pretraining_ratiosas = 1-1e5),
     "unused argument"
   )
 
@@ -107,9 +107,10 @@ test_that("can train from a recipe", {
 test_that("data-frame with missing value makes training fails with explicit message", {
 
   data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[ids,-which(names(attrition) == "Attrition")]
+  y <- attrition[ids,]$Attrition
   y_missing <- y
   y_missing[1] <- NA
 

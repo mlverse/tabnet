@@ -388,7 +388,6 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # define scheduler
-
   if (is.null(config$lr_scheduler)) {
     scheduler <- list(step = function() {})
   } else if (rlang::is_function(config$lr_scheduler)) {
@@ -397,10 +396,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   }
 
-  # main loop
+  # restore previous metrics & checkpoints
   metrics <- obj$fit$metrics
   checkpoints <- obj$fit$checkpoints
 
+  # main loop
   for (epoch in seq_len(config$epochs)+epoch_shift) {
 
     metrics[[epoch]] <- list(train = NULL, valid = NULL)

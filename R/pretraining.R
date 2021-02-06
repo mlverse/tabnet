@@ -1,13 +1,10 @@
 
-train_batch <- function(network, optimizer, batch, config) {
+train_batch_un <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x)
-  loss <- config$loss_fn(output[[1]], batch$y)
+  loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
 
-  # Add the overall sparsity loss
-  loss <- loss - config$lambda_sparse * output[[2]]
-
-  # step of the optimization
+  # step of the backward pass and optimization
   optimizer$zero_grad()
   loss$backward()
   if (!is.null(config$clip_value)) {
@@ -20,13 +17,11 @@ train_batch <- function(network, optimizer, batch, config) {
   )
 }
 
-valid_batch <- function(network, batch, config) {
+valid_batch_un <- function(network, batch, config) {
   # forward pass
   output <- network(batch$x)
-  loss <- config$loss_fn(output[[1]], batch$y)
-
-  # Add the overall sparsity loss
-  loss <- loss - config$lambda_sparse * output[[2]]
+  # TODO turn y into the 2 required params for unsupervised_loss()
+  loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
 
   list(
     loss = loss$item()
@@ -49,20 +44,22 @@ transpose_metrics <- function(metrics) {
   out
 }
 
-unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps=1e-9) {
-  # TODO current loss functions in train_batch and valid_batch only receive two params : (output[[1]], batch$y)
+unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
+
   errors <- y_pred - embedded_x
   reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)**2
   batch_stds <- torch::torch_std(embedded_x, dim=0)**2 + eps
+
   # compute the number of obfuscated variables to reconstruct
   nb_reconstructed_variables <- torch::torch_sum(obfuscation_mask, dim=1)
+
   # take the mean of the reconstructed variable errors
   features_loss <- torch::torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
   loss <- torch::torch_mean(features_loss)
   loss
 }
 
-tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0L) {
+tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift = 0L) {
   torch::torch_manual_seed(sample.int(1e6, 1))
 
   if (config$device == "auto") {
@@ -74,10 +71,19 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0
     device <- config$device
   }
 
+  # dataset to dataloaders
+  has_valid <- config$valid_split > 0
+  if (has_valid) {
+    n <- nrow(x)
+    valid_idx <- sample.int(n, n*config$valid_split)
+    valid_data <- list(x = x[valid_idx, ])
+    x <- x[-valid_idx, ]
+
+  }
   # training data
   data <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
   dl <- torch::dataloader(
-    torch::tensor_dataset(x = data$x, y = data$y),
+    torch::tensor_dataset(x = data$x),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -85,20 +91,20 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0
 
   # validation data
   if (has_valid) {
-    valid_data <- resolve_data(valid_data$x, valid_data$y)
+    valid_data <- resolve_data(valid_data$x, y=matrix(rep(1, nrow(valid_data$x)),ncol=1))
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_data$x, y = valid_data$y),
+      torch::tensor_dataset(x = valid_data$x),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
     )
   }
 
-  # resolve loss
+  # resolve loss (shortcutted from config)
   config$loss_fn <- unsupervised_loss
 
   # create network
-  network <- tabnet_pretraining(
+  network <- tabnet_pretrainer(
     input_dim = data$input_dim,
     cat_idxs = data$cat_idx,
     cat_dims = data$cat_dims,
@@ -117,7 +123,6 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0
   network$to(device = device)
 
   # define optimizer
-
   if (rlang::is_function(config$optimizer)) {
 
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
@@ -132,7 +137,6 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0
   }
 
   # define scheduler
-
   if (is.null(config$lr_scheduler)) {
     scheduler <- list(step = function() {})
   } else if (rlang::is_function(config$lr_scheduler)) {
@@ -141,10 +145,11 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   }
 
-  # main loop over epochs
-  metrics <- obj$fit$metrics
-  checkpoints <- obj$fit$checkpoints
+  # initialize metrics & checkpoints
+  metrics <- list()
+  checkpoints <- list()
 
+  # main loop
   for (epoch in seq_len(config$epochs) + epoch_shift) {
 
     metrics[[epoch]] <- list(train = NULL, valid = NULL)
@@ -159,11 +164,11 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0
         format = "[:bar] loss= :loss"
       )
 
-    for (batch in torch::enumerate(dl)) {
-      m <- train_batch(network, optimizer, batch_to_device(batch, device), config)
+    coro::loop(for (batch in dl) {
+      m <- train_batch_un(network, optimizer, batch$x$to(device=device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
-    }
+    })
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
 
     if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0) {
@@ -174,10 +179,10 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift=0
 
     network$eval()
     if (has_valid) {
-      for (batch in torch::enumerate(valid_dl)) {
-        m <- valid_batch(network, batch_to_device(batch, device), config)
+      coro::loop(for (batch in valid_dl) {
+        m <- valid_batch_un(network, batch_to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
-      }
+      })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
     }
 

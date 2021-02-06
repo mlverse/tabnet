@@ -250,7 +250,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     tabnet_model_lst <- switch(
       task,
       supervised  = tabnet_initialize(predictors, outcomes, config = config),
-      unsupervised  = tabnet_train_unsupervised( predictors, config = config, epoch_shift)
+      unsupervised  = tabnet_train_unsupervised( predictors, config = config)
     )
     tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
     epoch_shift <- 0L
