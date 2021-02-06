@@ -1,7 +1,7 @@
 
 train_batch_un <- function(network, optimizer, batch, config) {
   # forward pass
-  output <- network(batch$x)
+  output <- network(batch)
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
 
   # step of the backward pass and optimization

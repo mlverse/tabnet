@@ -98,11 +98,11 @@ tabnet_encoder <- torch::nn_module(
     }
 
   },
-  forward = function(x) {
+  forward = function(x, prior) {
     res <- torch::torch_tensor(0, device = x$device)
     x <- self$initial_bn(x)
 
-    prior <- torch::torch_ones(size = x$shape, device = x$device)
+    #prior <- torch::torch_ones(size = x$shape, device = x$device)
     M_loss <- 0
     att <- self$initial_splitter(x)[, (self$n_d + 1):N]
 
@@ -220,9 +220,9 @@ tabnet_decoder <- torch::nn_module(
     res <- torch::torch_tensor(0, device = x$device)
     for (step_nb in seq_along(steps_output)) {
 
-      x <- self$feat_transformers[step_nb](steps_output[step_nb])
-      x <- self$reconstruction_layers[step_nb](steps_output[step_nb])
-      res <- torch.add(res, x)
+      x <- self$feat_transformers[[step_nb]](steps_output[[step_nb]])
+      x <- self$reconstruction_layers[[step_nb]](steps_output[[step_nb]])
+      res <- torch::torch_add(res, x)
 
     }
 
@@ -235,14 +235,18 @@ tabnet_pretrainer <- torch::nn_module(
   initialize = function(input_dim, pretraining_ratio=0.2,
                         n_d=8, n_a=8,
                         n_steps=3, gamma=1.3,
-                        cat_idxs=list(), cat_dims=list(),
+                        cat_idxs=c(), cat_dims=c(),
                         cat_emb_dim=1, n_independent=2,
                         n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum=0.02,
+                        virtual_batch_size=128, momentum=0.01,
                         mask_type="sparsemax") {
 
     self$input_dim <- input_dim
     self$pretraining_ratio <- pretraining_ratio
+
+    # a check par, just to easily find out when we need to
+    # reload the model
+    self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
     self$n_d <- n_d
     self$n_a <- n_a
     self$n_steps <- n_steps
@@ -253,9 +257,8 @@ tabnet_pretrainer <- torch::nn_module(
     self$epsilon <- epsilon
     self$n_independent <- n_independent
     self$n_shared <- n_shared
-    self$virtual_batch_size <- virtual_batch_size
     self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=0.01)
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=momentum)
 
     if (self$n_steps <= 0)
       stop("n_steps should be a positive integer.")
@@ -266,11 +269,6 @@ tabnet_pretrainer <- torch::nn_module(
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$post_embed_dim <- self$embedder$post_embed_dim
     self$masker = random_obfuscator(self$pretraining_ratio)
-    # TODO BUG tabnet_encoder(input_dim = self$post_embed_dim, output_dim = self$post_embed_dim,  :
-    # argument inutilisé (alist())
-    # 4.
-    # initialize(...)
-
     self$encoder = tabnet_encoder(
       input_dim=self$post_embed_dim,
       output_dim=self$post_embed_dim,
@@ -300,12 +298,11 @@ tabnet_pretrainer <- torch::nn_module(
     embedded_x <- self$embedder(x)
 
     if (self$training) {
-      masked_lst <- self$masker(embedded_x)
-      masked_x <- masked_lst[[1]]
-      obf_vars <- masked_lst[[2]]
+      masker_out_lst <- self$masker(embedded_x)
+      obf_vars <- masker_out_lst[[2]]
       # set prior of encoder with obf_mask
       prior <- 1 - obf_vars
-      steps_out <- self$encoder(masked_x, prior = prior)[[1]]
+      steps_out <- self$encoder(masker_out_lst[[1]], prior = prior)[[1]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
@@ -676,9 +673,9 @@ random_obfuscator <- torch::nn_module(
 
   },
   forward = function(x) {
-    ones <- torch.ones(size = x$shape, device = x$device)
+    ones <- torch::torch_ones(size = x$shape, device = x$device)
     obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)
-    masked_input = torch.mul(1 - obfuscated_vars, x)
+    masked_input = torch::torch_mul(1 - obfuscated_vars, x)
 
     list(masked_input, obfuscated_vars)
 
