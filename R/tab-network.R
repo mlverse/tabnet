@@ -220,7 +220,7 @@ tabnet_decoder <- torch::nn_module(
     res <- torch::torch_tensor(0, device = x$device)
     for (step_nb in seq_along(steps_output)) {
 
-      # x <- self$feat_transformers[[step_nb]](steps_output[[step_nb]])
+      x <- self$feat_transformers[[step_nb]](steps_output[[step_nb]])
       x <- self$reconstruction_layers[[step_nb]](steps_output[[step_nb]])
       res <- torch::torch_add(res, x)
 
