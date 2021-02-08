@@ -106,6 +106,7 @@ tabnet_encoder <- torch::nn_module(
     M_loss <- 0
     att <- self$initial_splitter(x)[, (self$n_d + 1):N]
 
+    steps_output <- list()
     for (step in seq_len(self$n_steps)) {
 
       M <- self$att_transformers[[step]](prior, att)
@@ -121,6 +122,7 @@ tabnet_encoder <- torch::nn_module(
       masked_x <- torch::torch_mul(M, x)
       out <- self$feat_transformers[[step]](masked_x)
       d <- torch::nnf_relu(out[.., 1:(self$n_d)])
+      steps_output[[step]] <- d
       res <- torch::torch_add(res, d)
       # update attention
       att <- out[, (self$n_d + 1):N]
@@ -129,7 +131,7 @@ tabnet_encoder <- torch::nn_module(
 
     M_loss <- M_loss/self$n_steps
 
-    list(res, M_loss)
+    list(res, M_loss, steps_output)
   },
   forward_masks = function(x) {
 
@@ -217,7 +219,7 @@ tabnet_decoder <- torch::nn_module(
 
   },
   forward = function(steps_output) {
-    res <- torch::torch_tensor(0, device = x$device)
+    res <- torch::torch_tensor(0, device = steps_output[[1]]$device)
     for (step_nb in seq_along(steps_output)) {
 
       x <- self$feat_transformers[[step_nb]](steps_output[[step_nb]])
@@ -302,7 +304,7 @@ tabnet_pretrainer <- torch::nn_module(
       obf_vars <- masker_out_lst[[2]]
       # set prior of encoder with obf_mask
       prior <- 1 - obf_vars
-      steps_out <- self$encoder(masker_out_lst[[1]], prior)[[1]]
+      steps_out <- self$encoder(masker_out_lst[[1]], prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
@@ -545,7 +547,6 @@ glu_block <- torch::nn_module(
 
   },
   forward = function(x) {
-
     scale <- torch::torch_sqrt(torch::torch_tensor(0.5, device = x$device))
 
     if (self$first) {

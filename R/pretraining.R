@@ -47,11 +47,11 @@ transpose_metrics <- function(metrics) {
 unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
 
   errors <- y_pred - embedded_x
-  reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)**2
-  batch_stds <- torch::torch_std(embedded_x, dim=0)**2 + eps
+  reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)^2
+  batch_stds <- torch::torch_std(embedded_x, dim=1)^2 + eps
 
   # compute the number of obfuscated variables to reconstruct
-  nb_reconstructed_variables <- torch::torch_sum(obfuscation_mask, dim=1)
+  nb_reconstructed_variables <- torch::torch_sum(obfuscation_mask, dim=2)
 
   # take the mean of the reconstructed variable errors
   features_loss <- torch::torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
