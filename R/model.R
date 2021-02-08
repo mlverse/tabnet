@@ -480,7 +480,9 @@ predict_impl <- function(obj, x) {
   network <- obj$fit$network
   network$eval()
 
-  network(data$x)[[1]]
+  splits <- torch::torch_split(data$x, split_size = 10000)
+  splits <- lapply(splits, function(x) network(x)[[1]])
+  torch::torch_cat(splits)
 }
 
 predict_impl_numeric <- function(obj, x) {
