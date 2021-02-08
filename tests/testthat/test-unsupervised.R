@@ -15,15 +15,26 @@ test_that("Unsupervised training with default config", {
     regexp = NA
   )
 
+})
+
+test_that("Supervised training can continue unsupervised training", {
+
+  data("ames", package = "modeldata")
+
+  x <- ames[-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price
+  pretrain <- tabnet_pretrain(x, y, epochs = 1)
+
   expect_error(
-    predict(fit, x),
+    fit <- tabnet_fit(x, y, pretrain, epoch = 1),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, epochs = 2, verbose = TRUE),
+    fit <- tabnet_fit(Sale_Price ~ ., data = ames, tabnet_model = pretrain, epochs = 1),
     regexp = NA
   )
+
 })
 
 test_that("Unsupervised training with pretraining_ratio", {
@@ -34,18 +45,32 @@ test_that("Unsupervised training with pretraining_ratio", {
   y <- attrition$Attrition
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2),
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2),
     regexp = NA
   )
 
+})
+
+test_that("Unsupervised training prevent predict with an explicit message", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+
   expect_error(
-    predict(fit, x, type = "prob"),
-    regexp = NA
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2),
+    regexp = "Error"
   )
 
   expect_error(
-    predict(fit, x),
-    regexp = NA
+    predict(pretrain, x, type = "prob"),
+    regexp = "Error"
+  )
+
+  expect_error(
+    predict(pretrain, x),
+    regexp = "Error"
   )
 
 })
@@ -58,7 +83,7 @@ test_that("errors when using an argument that do not exist", {
   y <- ames$Sale_Price
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, pretraining_ratiosas = 1-1e5),
+    pretrain <- tabnet_pretrain(x, y, pretraining_ratiosas = 1-1e5),
     "unused argument"
   )
 
@@ -72,12 +97,12 @@ test_that("works with validation split", {
   y <- attrition$Attrition
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2),
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, verbose = TRUE),
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, verbose = TRUE),
     regexp = NA
   )
 
@@ -92,13 +117,8 @@ test_that("can train from a recipe", {
     step_normalize(all_numeric(), -all_outcomes())
 
   expect_error(
-    fit <- tabnet_pretrain(rec, attrition, epochs = 1, valid_split = 0.25,
+    pretrain <- tabnet_pretrain(rec, attrition, epochs = 1, valid_split = 0.25,
                     verbose = TRUE),
-    regexp = NA
-  )
-
-  expect_error(
-    predict(fit, attrition),
     regexp = NA
   )
 
@@ -119,7 +139,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
   x_missing[1,"Age"] <- NA
 
   expect_error(
-    miss_fit <- tabnet_pretrain(x_missing, y, epochs = 1),
+    miss_pretrain <- tabnet_pretrain(x_missing, y, epochs = 1),
     regexp = "missing"
   )
 
@@ -128,13 +148,13 @@ test_that("data-frame with missing value makes training fails with explicit mess
   x_missing[1,"BusinessTravel"] <- NA
 
   expect_error(
-    miss_fit <- tabnet_pretrain(x_missing, y, epochs = 1),
+    miss_pretrain <- tabnet_pretrain(x_missing, y, epochs = 1),
     regexp = "missing"
   )
 
   # missing in outcome
   expect_error(
-    miss_fit <- tabnet_pretrain(x, y_missing, epochs = 1),
+    miss_pretrain <- tabnet_pretrain(x, y_missing, epochs = 1),
     regexp = NA
   )
 
@@ -148,12 +168,13 @@ test_that("serialization with saveRDS just works", {
   x <- ames[-which(names(ames) == "Sale_Price")]
   y <- ames$Sale_Price
 
-  fit <- tabnet_pretrain(x, y, epochs = 1)
-
+  pretrain <- tabnet_pretrain(x, y, epochs = 1)
+  fit <- tabnet_fit(x, y, pretrain, epoch = 1 )
   tmp <- tempfile("model", fileext = "rds")
-  saveRDS(fit, tmp)
+  saveRDS(pretrain, tmp)
 
-  fit2 <- readRDS(tmp)
+  pretrain2 <- readRDS(tmp)
+  fit2 <- tabnet_fit(x, y, pretrain2, epoch = 1 )
 
   expect_equal(
     predict(fit, ames),
