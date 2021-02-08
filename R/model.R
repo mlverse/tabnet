@@ -93,6 +93,9 @@ resolve_data <- function(x, y) {
 #'   Use `0` to disable checkpoints.
 #' @param device the device to use for training. "cpu" or "cuda". The default ("auto")
 #'   uses  to "cuda" if it's available, otherwise uses "cpu".
+#' @param importance_sample_size sample of the dataset to compute importance metrics.
+#'   If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
+#'   display a warning.
 #'
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
@@ -121,7 +124,8 @@ tabnet_config <- function(batch_size = 256,
                           momentum = 0.02,
                           pretraining_ratio = 0.5,
                           verbose = FALSE,
-                          device = "auto") {
+                          device = "auto",
+                          importance_sample_size = NULL) {
 
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
@@ -158,7 +162,8 @@ tabnet_config <- function(batch_size = 256,
     momentum = momentum,
     checkpoint_epochs = checkpoint_epochs,
     pretraining_ratio = pretraining_ratio,
-    device = device
+    device = device,
+    importance_sample_size = importance_sample_size
   )
 }
 
@@ -449,9 +454,20 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   network$to(device = "cpu")
 
+  importance_sample_size <- config$importance_sample_size
+  if (is.null(config$importance_sample_size) && data$x$shape[1] > 1e5) {
+    rlang::warn(c(glue::glue("Computing importances for a dataset with size {data$x$shape[1]}."),
+                "This can consume too much memory. We are going to use a sample of size 1e5",
+                "You can disable this message by using the `importance_sample_size` argument."))
+    importance_sample_size <- 1e5
+  }
+  indexes <- torch::torch_randint(
+    1, data$x$shape[1], min(importance_sample_size, data$x$shape[1]),
+    dtype = torch::torch_long()
+  )
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, data$x)
+    importance = compute_feature_importance(network, data$x[indexes,..])
   )
 
   list(
