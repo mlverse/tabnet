@@ -238,10 +238,22 @@ new_tabnet_fit <- function(fit, blueprint) {
   )
 }
 
+new_tabnet_pretrain <- function(pretrain, blueprint) {
+
+  serialized_net <- model_to_raw(pretrain$network)
+
+  hardhat::new_model(
+    fit = pretrain,
+    serialized_net = serialized_net,
+    blueprint = blueprint,
+    class = "tabnet_pretrain"
+  )
+}
+
 tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, from_epoch, task="supervised") {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
-  if (!(is.null(tabnet_model) | inherits(tabnet_model, "tabnet_fit")))
+  if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
     rlang::abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
   if (task == "supervised") {
     if (is.null(tabnet_model)) {
@@ -281,14 +293,14 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
     } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
   }
+  if (task == "supervised") {
+    fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
+    return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
+  } else if (task == "unsupervised") {
+    pretrain_lst <- tabnet_train_unsupervised( predictors, config = config)
+    return(new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint))
+  }
 
-  fit_lst <- switch(
-    task,
-    supervised  = tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift),
-    unsupervised  = tabnet_train_unsupervised( predictors, config = config)
-  )
-
-  new_tabnet_fit(fit_lst, blueprint = processed$blueprint)
 }
 
 
@@ -382,9 +394,21 @@ is_null_external_pointer <- function(pointer) {
 }
 
 reload_model <- function(object) {
+  UseMethod("reload_model")
+}
+
+reload_model.tabnet_fit <- function(object) {
   con <- rawConnection(object)
   on.exit({close(con)}, add = TRUE)
   module <- torch::torch_load(con)
+  module
+}
+
+reload_model.tabnet_pretrain <- function(object) {
+  con <- rawConnection(object)
+  on.exit({close(con)}, add = TRUE)
+  module <- torch::torch_load(con)
+  # TODO perform ablation of the decoder nn_module and addition of the linear layer
   module
 }
 
@@ -393,3 +417,5 @@ print.tabnet_fit <- function(x, ...) {
   print(x$fit$network)
   invisible(x)
 }
+#' @export
+print.tabnet_pretrain <- print.tabnet_fit

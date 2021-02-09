@@ -57,20 +57,16 @@ test_that("Unsupervised training prevent predict with an explicit message", {
 
   x <- attrition[-which(names(attrition) == "Attrition")]
   y <- attrition$Attrition
-
-  expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2),
-    regexp = "Error"
-  )
+  pretrain <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2)
 
   expect_error(
     predict(pretrain, x, type = "prob"),
-    regexp = "Error"
+    regexp = "tabnet_pretrain"
   )
 
   expect_error(
     predict(pretrain, x),
-    regexp = "Error"
+    regexp = "tabnet_pretrain"
   )
 
 })
