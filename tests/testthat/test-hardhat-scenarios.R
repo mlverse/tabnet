@@ -49,3 +49,30 @@ test_that("epoch counter is valid for retraining from a checkpoint", {
   expect_lte(mean(fit_2$fit$metrics[[22]]$train$loss), mean(fit_2$fit$metrics[[1]]$train$loss))
 
 })
+
+test_that("trying to continue training with different dataset raise error", {
+
+  data("ames", package = "modeldata")
+  ids <- sample(nrow(ames), 256)
+  x1 <- ames[ids,-which(names(ames) == "Sale_Price")]
+  y1 <- ames[ids,]$Sale_Price
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+  x2 <- attrition[ids,-which(names(attrition) == "Attrition")]
+  y2 <- attrition$Attrition
+
+
+  fit_1 <- tabnet_fit(x1, y1, epochs = 1)
+
+  expect_error(
+    fit_2 <- tabnet_fit(x2, y1, tabnet_model=fit_1, epochs = 1),
+    regexp = "Error"
+  )
+
+  expect_error(
+    fit_2 <- tabnet_fit(x1, y2, tabnet_model=fit_1, epochs = 1),
+    regexp = "Error"
+  )
+
+})
+
