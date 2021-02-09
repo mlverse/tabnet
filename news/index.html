@@ -133,6 +133,9 @@
 <li>Added GPU CI. (#22)</li>
 <li>Explicit error in case of missing values (@cregouby, #24)</li>
 <li>Allow model fine-tuning through passing a pre-trained model to tabnet_fit() (@cregouby, #26)</li>
+<li>Fixed memory leaks when using custom autograd function.</li>
+<li>Better handling of larger datasets when running <code>tabnet_explain</code>.</li>
+<li>Batch predictions to avoid OOM error.</li>
 </ul>
 </div>
     <div id="tabnet-010" class="section level1">
