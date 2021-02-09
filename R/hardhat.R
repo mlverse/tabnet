@@ -396,6 +396,12 @@ is_null_external_pointer <- function(pointer) {
 reload_model <- function(object) {
   UseMethod("reload_model")
 }
+reload_model.default <- function(x, ...) {
+  stop(
+    "`reload_model()` is not defined for a '", class(x)[1], "'.",
+    call. = FALSE
+  )
+}
 
 reload_model.tabnet_fit <- function(object) {
   con <- rawConnection(object)
