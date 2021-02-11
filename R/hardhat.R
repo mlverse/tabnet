@@ -226,18 +226,6 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, ..., from_epoch
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
-new_tabnet_fit <- function(fit, blueprint) {
-
-  serialized_net <- model_to_raw(fit$network)
-
-  hardhat::new_model(
-    fit = fit,
-    serialized_net = serialized_net,
-    blueprint = blueprint,
-    class = "tabnet_fit"
-  )
-}
-
 new_tabnet_pretrain <- function(pretrain, blueprint) {
 
   serialized_net <- model_to_raw(pretrain$network)
@@ -298,6 +286,13 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
+
+    } else if (inherits(tabnet_model, "tabnet_pretrain")) {
+      # pretrain_model after reload
+
+      m <- reload_model(tabnet_model$serialized_net)
+      tabnet_model$fit$network$load_state_dict(m$state_dict())
+      epoch_shift <- 0L
 
     } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
 
@@ -395,8 +390,6 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
 
   # do not restore previous metrics as loss function return non comparable
   # values, nor checkpoints
-  # tabnet_model_lst$metrics <- obj$fit$metrics
-  # tabnet_model_lst$checkpoints <- obj$fit$checkpoints
 
   m <- reload_model(obj$serialized_net)
   # perform update of selected weights into new tabnet_model

@@ -113,8 +113,7 @@ test_that("can train from a recipe", {
     step_normalize(all_numeric(), -all_outcomes())
 
   expect_error(
-    pretrain <- tabnet_pretrain(rec, attrition, epochs = 1, valid_split = 0.25,
-                    verbose = TRUE),
+    pretrain <- tabnet_pretrain(rec, attrition, epochs = 1, verbose = TRUE),
     regexp = NA
   )
 
