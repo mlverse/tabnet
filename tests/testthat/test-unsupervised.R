@@ -80,7 +80,7 @@ test_that("errors when using an argument that do not exist", {
 
   expect_error(
     pretrain <- tabnet_pretrain(x, y, pretraining_ratiosas = 1-1e5),
-    "unused argument"
+    regexp = "unused argument"
   )
 
 })
@@ -148,7 +148,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
     regexp = "missing"
   )
 
-  # missing in outcome
+  # no error when missing in outcome
   expect_error(
     miss_pretrain <- tabnet_pretrain(x, y_missing, epochs = 1),
     regexp = NA
@@ -157,7 +157,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
 })
 
 
-test_that("serialization with saveRDS just works", {
+test_that("serialization of tabnet_pretrain with saveRDS just works", {
 
   data("ames", package = "modeldata")
 

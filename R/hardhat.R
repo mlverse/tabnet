@@ -277,10 +277,18 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     } else if (!check_net_is_empty_ptr(tabnet_model)) {
       # model is available from tabnet_model$serialized_net
 
-      m <- reload_model(tabnet_model$serialized_net)
-      # this modifies 'tabnet_model' in-place so subsequent predicts won't
-      # need to reload.
-      tabnet_model$fit$network$load_state_dict(m$state_dict())
+      if (inherits(tabnet_model, "tabnet_fit")) {
+        m <- reload_model(tabnet_model$serialized_net)
+        # this modifies 'tabnet_model' in-place so subsequent predicts won't
+        # need to reload.
+        tabnet_model$fit$network$load_state_dict(m$state_dict())
+
+      }
+
+      if (inherits(tabnet_model, "tabnet_pretrain")) {
+        tabnet_model_lst <- model_pretrain_to_fit(tabnet_model, predictors, outcomes, config)
+        tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
+      }
       epoch_shift <- length(tabnet_model$fit$metrics)
 
     } else if (length(tabnet_model$fit$checkpoints)) {
@@ -292,15 +300,16 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
     } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
-  }
-  if (task == "supervised") {
+
     fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
+
   } else if (task == "unsupervised") {
+
     pretrain_lst <- tabnet_train_unsupervised( predictors, config = config)
     return(new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint))
-  }
 
+  }
 }
 
 
@@ -380,6 +389,35 @@ model_to_raw <- function(model) {
   r
 }
 
+model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
+
+  tabnet_model_lst <- tabnet_initialize(x, y, config)
+
+  # do not restore previous metrics as loss function return non comparable
+  # values, nor checkpoints
+  # tabnet_model_lst$metrics <- obj$fit$metrics
+  # tabnet_model_lst$checkpoints <- obj$fit$checkpoints
+
+  m <- reload_model(obj$serialized_net)
+  # perform update of selected weights into new tabnet_model
+  m_stat_dict <- m$state_dict()
+  tabnet_state_dict <- tabnet_model_lst$network$state_dict()
+  for (param in names(m_stat_dict)) {
+    if (stringr::str_detect(param, "^encoder")) {
+      # Convert encoder's layers name to match
+      new_param <- paste0("tabnet.", param)
+    } else {
+      new_param <- param
+    }
+    if (!is.null(tabnet_state_dict[new_param])) {
+      tabnet_state_dict[[new_param]] <- m_stat_dict[[param]]
+    }
+  }
+  tabnet_model_lst$network$load_state_dict(tabnet_state_dict)
+  tabnet_model_lst
+}
+
+
 check_net_is_empty_ptr <- function(object) {
   is_null_external_pointer(object$fit$network$.check$ptr)
 }
@@ -394,27 +432,9 @@ is_null_external_pointer <- function(pointer) {
 }
 
 reload_model <- function(object) {
-  UseMethod("reload_model")
-}
-reload_model.default <- function(x, ...) {
-  stop(
-    "`reload_model()` is not defined for a '", class(x)[1], "'.",
-    call. = FALSE
-  )
-}
-
-reload_model.tabnet_fit <- function(object) {
   con <- rawConnection(object)
   on.exit({close(con)}, add = TRUE)
   module <- torch::torch_load(con)
-  module
-}
-
-reload_model.tabnet_pretrain <- function(object) {
-  con <- rawConnection(object)
-  on.exit({close(con)}, add = TRUE)
-  module <- torch::torch_load(con)
-  # TODO perform ablation of the decoder nn_module and addition of the linear layer
   module
 }
 
