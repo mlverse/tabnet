@@ -37,7 +37,7 @@ The development version can be installed from [GitHub](https://github.com/) with
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mlverse/tabnet")
+remotes::install_github("mlverse/tabnet")
 ```
 
 ## Example
