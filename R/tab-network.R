@@ -311,7 +311,7 @@ tabnet_pretrainer <- torch::nn_module(
            obf_vars)
     } else {
       prior <- torch::torch_ones(size = x$shape, device = x$device)
-      steps_out <- self$encoder(embedded_x, prior)[[1]]
+      steps_out <- self$encoder(embedded_x, prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,

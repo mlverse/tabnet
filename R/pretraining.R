@@ -19,7 +19,7 @@ train_batch_un <- function(network, optimizer, batch, config) {
 
 valid_batch_un <- function(network, batch, config) {
   # forward pass
-  output <- network(batch$x)
+  output <- network(batch)
   # TODO turn y into the 2 required params for unsupervised_loss()
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
 
@@ -180,7 +180,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     network$eval()
     if (has_valid) {
       coro::loop(for (batch in valid_dl) {
-        m <- valid_batch_un(network, batch_to_device(batch, device), config)
+        m <- valid_batch_un(network, batch$x$to(device=device), config)
         valid_metrics <- c(valid_metrics, m)
       })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
