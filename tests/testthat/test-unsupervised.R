@@ -17,26 +17,6 @@ test_that("Unsupervised training with default config", {
 
 })
 
-test_that("Supervised training can continue unsupervised training", {
-
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-  pretrain <- tabnet_pretrain(x, y, epochs = 1)
-
-  expect_error(
-    fit <- tabnet_fit(x, y, pretrain, epoch = 1),
-    regexp = NA
-  )
-
-  expect_error(
-    fit <- tabnet_fit(Sale_Price ~ ., data = ames, tabnet_model = pretrain, epochs = 1),
-    regexp = NA
-  )
-
-})
-
 test_that("Unsupervised training with pretraining_ratio", {
 
   data("attrition", package = "modeldata")
@@ -155,31 +135,6 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
 })
 
-
-test_that("serialization of tabnet_pretrain with saveRDS just works", {
-
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-
-  pretrain <- tabnet_pretrain(x, y, epochs = 1)
-  fit <- tabnet_fit(x, y, pretrain, epoch = 1 )
-  tmp <- tempfile("model", fileext = "rds")
-  saveRDS(pretrain, tmp)
-
-  pretrain2 <- readRDS(tmp)
-  fit2 <- tabnet_fit(x, y, pretrain2, epoch = 1 )
-
-  expect_equal(
-    predict(fit, ames),
-    predict(fit2, ames)
-  )
-
-  expect_equal(as.numeric(fit2$fit$network$.check), 1)
-
-})
-
 test_that("scheduler works", {
 
   data("ames", package = "modeldata")
@@ -213,26 +168,13 @@ test_that("checkpoints works", {
   y <- ames$Sale_Price
 
   expect_error(
-    fit <- tabnet_pretrain(x, y, epochs = 3, checkpoint_epochs = 1),
+    pretrain <- tabnet_pretrain(x, y, epochs = 3, checkpoint_epochs = 1),
     regexp = NA
   )
 
-  expect_error(
-    p1 <- predict(fit, x, epoch = 1),
-    regexp = NA
-  )
+  expect_length( pretrain$fit$checkpoints, 3  )
 
-  expect_error(
-    p2 <- predict(fit, x, epoch = 2),
-    regexp = NA
-  )
-
-  expect_error(
-    p3 <- predict(fit, x, epoch = 3),
-    regexp = NA
-  )
-
-  expect_equal(p3, predict(fit, x))
+  # expect_equal(  pretrain$fit$checkpoints[[3]], pretrain$serialized_net )
 
 })
 

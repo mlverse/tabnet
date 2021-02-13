@@ -292,6 +292,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
       m <- reload_model(tabnet_model$serialized_net)
       tabnet_model$fit$network$load_state_dict(m$state_dict())
+      tabnet_model$fit$network$eval()
       epoch_shift <- 0L
 
     } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
