@@ -479,17 +479,19 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   )
 }
 
-predict_impl <- function(obj, x) {
+predict_impl <- function(obj, x, batch_size = 1e5) {
   data <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
 
   network <- obj$fit$network
   network$eval()
 
-  network(data$x)[[1]]
+  splits <- torch::torch_split(data$x, split_size = 10000)
+  splits <- lapply(splits, function(x) network(x)[[1]])
+  torch::torch_cat(splits)
 }
 
-predict_impl_numeric <- function(obj, x) {
-  p <- as.numeric(predict_impl(obj, x))
+predict_impl_numeric <- function(obj, x, batch_size) {
+  p <- as.numeric(predict_impl(obj, x, batch_size))
   hardhat::spruce_numeric(p)
 }
 
@@ -497,15 +499,15 @@ get_blueprint_levels <- function(obj) {
   levels(obj$blueprint$ptypes$outcomes[[1]])
 }
 
-predict_impl_prob <- function(obj, x) {
-  p <- predict_impl(obj, x)
+predict_impl_prob <- function(obj, x, batch_size) {
+  p <- predict_impl(obj, x, batch_size)
   p <- torch::nnf_softmax(p, dim = 2)
   p <- as.matrix(p)
   hardhat::spruce_prob(get_blueprint_levels(obj), p)
 }
 
-predict_impl_class <- function(obj, x) {
-  p <- predict_impl(obj, x)
+predict_impl_class <- function(obj, x, batch_size) {
+  p <- predict_impl(obj, x, batch_size)
   p <- torch::torch_max(p, dim = 2)
   p <- as.integer(p[[2]])
   p <- get_blueprint_levels(obj)[p]

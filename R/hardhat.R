@@ -311,10 +311,11 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
 #' @importFrom stats predict
 #' @export
-predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
+predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL,
+                               batch_size = 1e5) {
   # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data, object$blueprint)
-  out <- predict_tabnet_bridge(type, object, processed$predictors, epoch)
+  out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
   hardhat::validate_prediction_size(out, new_data)
   out
 }
@@ -347,7 +348,7 @@ check_type <- function(model, type) {
 
 
 
-predict_tabnet_bridge <- function(type, object, predictors, epoch) {
+predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   type <- check_type(object, type)
 
@@ -371,9 +372,9 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch) {
 
   switch(
     type,
-    numeric = predict_impl_numeric(object, predictors),
-    prob    = predict_impl_prob(object, predictors),
-    class   = predict_impl_class(object, predictors)
+    numeric = predict_impl_numeric(object, predictors, batch_size),
+    prob    = predict_impl_prob(object, predictors, batch_size),
+    class   = predict_impl_class(object, predictors, batch_size)
   )
 }
 
