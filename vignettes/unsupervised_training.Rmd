@@ -99,9 +99,11 @@ collect_metrics <- enframe(mod$fit$metrics,name = "epoch") %>% unnest_longer(val
 ggplot(collect_metrics, aes(x=epoch, y=mean_loss, color=dataset)) + geom_line() + scale_y_log10()
 ```
 ![pretraining task loss plot](pretraining_loss.png)
+We could continue the training here for few epoch as it seems that the validation loss may continue to decrease...
+
 ## Back to supervised procedure
 
-We reuse our pre-processing steps recipe and feed it directly in a supervised fit pass on top of our pre-trained model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
+Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fit pass on top of our pre-trained model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
 
 ```{r}
 pretrained_model_fit <- tabnet_fit(rec_unsup, train , tabnet_model = mod, valid_split = 0.2, epochs = 50, verbose=TRUE)
@@ -128,15 +130,15 @@ test %>%
 # A tibble: 1 x 3
   .metric .estimator .estimate
   <chr>   <chr>          <dbl>
-1 roc_auc binary         0.456
+1 roc_auc binary         0.553
 ```
 
 ## Comparison with no pretraining
 
-The question now is What if we did not pretrain the model ? We can build a vanillia tabnet model on the training set for comparison : 
+The question now is What if we did not pretrain the model ? We can build a vanilla tabnet model on the training set for comparison : 
 
 ```{r}
-vanillia_model_fit <- tabnet_fit(rec_unsup, train , valid_split = 0.2, epochs = 50, verbose=TRUE)
+vanilla_model_fit <- tabnet_fit(rec_unsup, train , valid_split = 0.2, epochs = 50, verbose=TRUE)
 
 ```
 
@@ -195,17 +197,17 @@ vanillia_model_fit <- tabnet_fit(rec_unsup, train , valid_split = 0.2, epochs = 
 ```
 
 ```{r}
-collect_vanillia_metrics <- enframe(vanillia_model_fit$fit$metrics,name = "epoch") %>% unnest_longer(value,indices_to = "dataset") %>% unnest_wider(value) %>% mutate(mean_loss = map_dbl(loss, mean))
-ggplot(collect_vanillia_metrics, aes(x=epoch, y=mean_loss, color=dataset)) + geom_line() + scale_y_log10()
+collect_vanilla_metrics <- enframe(vanilla_model_fit$fit$metrics,name = "epoch") %>% unnest_longer(value,indices_to = "dataset") %>% unnest_wider(value) %>% mutate(mean_loss = map_dbl(loss, mean))
+ggplot(collect_vanilla_metrics, aes(x=epoch, y=mean_loss, color=dataset)) + geom_line() + scale_y_log10()
 ```
 ![Training and validation loss plot for vanillia tabnet](vanillia_model.png)
 
 ```{r}
 test %>% 
   bind_cols(
-    predict(vanillia_model_fit, test, type = "prob")
+    predict(vanilla_model_fit, test, type = "prob")
   ) %>% 
-  roc_auc(Class, .pred_bad)
+  roc_auc(Class, .pred_good)
 
 ```
 
@@ -213,7 +215,7 @@ test %>%
 # A tibble: 1 x 3
   .metric .estimator .estimate
   <chr>   <chr>          <dbl>
-1 roc_auc binary         0.469
+1 roc_auc binary         0.532
 ```
 
 
