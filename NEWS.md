@@ -7,6 +7,7 @@
 * Fixed memory leaks when using custom autograd function.
 * Better handling of larger datasets when running `tabnet_explain`.
 * Batch predictions to avoid OOM error.
+* Add tabnet_pretrain() for unsupervised pretraining (@cregouby, #29 )
 
 # tabnet 0.1.0
 

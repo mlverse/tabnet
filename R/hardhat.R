@@ -262,38 +262,31 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
       epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
-    } else if (!check_net_is_empty_ptr(tabnet_model)) {
+    } else if (!check_net_is_empty_ptr(tabnet_model) && inherits(tabnet_model, "tabnet_fit")) {
       # model is available from tabnet_model$serialized_net
 
-      if (inherits(tabnet_model, "tabnet_fit")) {
-        m <- reload_model(tabnet_model$serialized_net)
-        # this modifies 'tabnet_model' in-place so subsequent predicts won't
-        # need to reload.
-        tabnet_model$fit$network$load_state_dict(m$state_dict())
-
-      }
-
-      if (inherits(tabnet_model, "tabnet_pretrain")) {
-        tabnet_model_lst <- model_pretrain_to_fit(tabnet_model, predictors, outcomes, config)
-        tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
-      }
+      m <- reload_model(tabnet_model$serialized_net)
+      # this modifies 'tabnet_model' in-place so subsequent predicts won't
+      # need to reload.
+      tabnet_model$fit$network$load_state_dict(m$state_dict())
       epoch_shift <- length(tabnet_model$fit$metrics)
 
-    } else if (length(tabnet_model$fit$checkpoints)) {
+
+    } else if (inherits(tabnet_model, "tabnet_pretrain")) {
+      # pretrain_model after reload
+
+      tabnet_model_lst <- model_pretrain_to_fit(tabnet_model, predictors, outcomes, config)
+      tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
+      epoch_shift <- 0L
+
+
+    }  else if (length(tabnet_model$fit$checkpoints)) {
       # model is loaded from the last available checkpoint
 
       last_checkpoint <- length(tabnet_model$fit$checkpoints)
 
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
-
-    } else if (inherits(tabnet_model, "tabnet_pretrain")) {
-      # pretrain_model after reload
-
-      m <- reload_model(tabnet_model$serialized_net)
-      tabnet_model$fit$network$load_state_dict(m$state_dict())
-      tabnet_model$fit$network$eval()
-      epoch_shift <- 0L
 
     } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
 
@@ -311,11 +304,10 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
 #' @importFrom stats predict
 #' @export
-predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL,
-                               batch_size = 1e5) {
+predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data, object$blueprint)
-  out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
+  out <- predict_tabnet_bridge(type, object, processed$predictors, epoch)
   hardhat::validate_prediction_size(out, new_data)
   out
 }
@@ -348,7 +340,7 @@ check_type <- function(model, type) {
 
 
 
-predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
+predict_tabnet_bridge <- function(type, object, predictors, epoch) {
 
   type <- check_type(object, type)
 
@@ -372,9 +364,9 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   switch(
     type,
-    numeric = predict_impl_numeric(object, predictors, batch_size),
-    prob    = predict_impl_prob(object, predictors, batch_size),
-    class   = predict_impl_class(object, predictors, batch_size)
+    numeric = predict_impl_numeric(object, predictors),
+    prob    = predict_impl_prob(object, predictors),
+    class   = predict_impl_class(object, predictors)
   )
 }
 

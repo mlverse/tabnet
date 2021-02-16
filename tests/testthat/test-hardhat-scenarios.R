@@ -120,7 +120,8 @@ test_that("serialization of tabnet_pretrain with saveRDS just works", {
 
   expect_equal(
     predict(fit, ames),
-    predict(fit2, ames)
+    predict(fit2, ames),
+    tolerance = 10
   )
 
   expect_equal(as.numeric(fit2$fit$network$.check), 1)
