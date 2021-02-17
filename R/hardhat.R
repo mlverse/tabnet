@@ -390,7 +390,7 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
   m_stat_dict <- m$state_dict()
   tabnet_state_dict <- tabnet_model_lst$network$state_dict()
   for (param in names(m_stat_dict)) {
-    if (stringr::str_detect(param, "^encoder")) {
+    if (grepl("^encoder", param)) {
       # Convert encoder's layers name to match
       new_param <- paste0("tabnet.", param)
     } else {
