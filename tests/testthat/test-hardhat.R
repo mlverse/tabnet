@@ -283,7 +283,7 @@ test_that("checkpoints works", {
 
 })
 
-test_that("print module works", {
+test_that("print module works even after a reload from disk", {
 
   testthat::local_edition(3)
   testthat::skip_on_os("linux")
@@ -294,13 +294,18 @@ test_that("print module works", {
   x <- ames[-which(names(ames) == "Sale_Price")]
   y <- ames$Sale_Price
 
-  expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1),
-    regexp = NA
-  )
+  fit <- tabnet_fit(x, y, epochs = 1)
 
   withr::with_options(new = c(cli.width = 50),
                       expect_snapshot_output(fit))
+
+  tmp <- tempfile("model", fileext = "rds")
+  saveRDS(fit, tmp)
+  fit2 <- readRDS(tmp)
+
+  withr::with_options(new = c(cli.width = 50),
+                      expect_snapshot_output(fit2))
+
 
 })
 

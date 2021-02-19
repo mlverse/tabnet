@@ -427,7 +427,11 @@ reload_model <- function(object) {
 
 #' @export
 print.tabnet_fit <- function(x, ...) {
-  print(x$fit$network)
+  if (check_net_is_empty_ptr(x)) {
+    print(reload_model(x$serialized_net))
+  } else {
+    print(x$fit$network)
+  }
   invisible(x)
 }
 #' @export
