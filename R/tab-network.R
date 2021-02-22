@@ -676,8 +676,9 @@ random_obfuscator <- torch::nn_module(
 
   },
   forward = function(x) {
-    ones <- torch::torch_ones(size = x$shape, device = x$device)
-    obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)
+    # workaround while torch_bernoulli is not available in CUDA
+    ones <- torch::torch_ones(size = x$shape, device="cpu")
+    obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)$to(device=x$device)
     masked_input = torch::torch_mul(1 - obfuscated_vars, x)
 
     list(masked_input, obfuscated_vars)
