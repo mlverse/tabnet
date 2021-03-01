@@ -4,13 +4,13 @@
 \alias{autoplot.tabnet_fit}
 \title{Plot tabnet_fit loss along epochs}
 \usage{
-autoplot.tabnet_fit(object, ...)
+\method{autoplot}{tabnet_fit}(object, ...)
 }
 \arguments{
-\item{object}{A \code{tabnet_fit} object as a result of \code{\link[=tabnet_fit]{tabnet_fit()}} .}
+\item{object}{A \code{tabnet_fit} or \code{tabnet_pretrain} object as a result of
+\code{\link[=tabnet_fit]{tabnet_fit()}} or \code{\link[=tabnet_pretrain]{tabnet_pretrain()}}.}
 
-\item{...}{For plots with a regular grid, this is passed to \code{format()} and is
-applied to a parameter used to color points. Otherwise, it is not used.}
+\item{...}{not used.}
 }
 \value{
 A \code{ggplot2} object.
@@ -19,7 +19,8 @@ A \code{ggplot2} object.
 Plot tabnet_fit loss along epochs
 }
 \details{
-
+Plot the training loss along epochs, and validation loss along epochs if any.
+A diamond symbol is added on epochs where model snapshot is available.
 }
 \examples{
 \donttest{
