@@ -4,7 +4,7 @@
 \alias{autoplot.tabnet_fit}
 \title{Plot tabnet_fit loss along epochs}
 \usage{
-\method{autoplot}{tabnet_fit}(object, ...)
+autoplot.tabnet_fit(object, ...)
 }
 \arguments{
 \item{object}{A \code{tabnet_fit} or \code{tabnet_pretrain} object as a result of
@@ -24,10 +24,10 @@ A diamond symbol is added on epochs where model snapshot is available.
 }
 \examples{
 \donttest{
-data("ames", package = "modeldata")
-ames_fit <- tabnet_fit(Sale_Price ~. , data=ames, epoch=15)
+data("attrition", package = "modeldata")
+attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
 
 # Plot the model loss over epochs
-autoplot(ames_fit)
+autoplot(attrition_fit)
 }
 }

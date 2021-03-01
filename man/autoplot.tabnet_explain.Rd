@@ -2,9 +2,14 @@
 % Please edit documentation in R/plot.R
 \name{autoplot.tabnet_explain}
 \alias{autoplot.tabnet_explain}
-\title{Plot tabnet_explain interpretation}
+\title{Plot tabnet_explain mask interpretation heatmap}
 \usage{
-\method{autoplot}{tabnet_explain}(object, type = c("mask_agg", "steps"), ...)
+autoplot.tabnet_explain(
+  object,
+  type = c("mask_agg", "steps"),
+  quantile = 1,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{tabnet_explain} object as a result of \code{\link[=tabnet_explain]{tabnet_explain()}}.}
@@ -12,26 +17,30 @@
 \item{type}{a character value. Either \code{"mask_agg"} the default, for per predictor
 mask importance aggregate,or \code{"steps"} for a plot at each mask step.}
 
+\item{quantile}{numerical value between 0 and 1. Provides quantile clipping on the
+mask value}
+
 \item{...}{not used.}
 }
 \value{
 A \code{ggplot2} object.
 }
 \description{
-Plot tabnet_explain interpretation
+Plot tabnet_explain mask interpretation heatmap
 }
 \details{
 Plot the tabnet_explain object mask importance per variable along the predicted dataset.
 \code{type="mask_agg"} output a single heatmap of mask aggregated values,
 \code{type="mask_agg"} provides a facet plot of each mask along the model.
+\code{quantile=.995} may be used for strong outlier filtering.
 }
 \examples{
 \donttest{
-data("ames", package = "modeldata")
-ames_fit <- tabnet_fit(Sale_Price ~. , data=ames, epoch=15)
-ames_explain <- tabnet_explain(ames_fit, ames)
-# Plot the model mask interpretation heatmap
-autoplot(ames_explain)
+data("attrition", package = "modeldata")
+attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
+attrition_explain <- tabnet_explain(attrition_fit, attrition)
+# Plot the model aggregated mask interpretation heatmap
+autoplot(attrition_explain)
 }
  @export
 }
