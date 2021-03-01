@@ -3,4 +3,5 @@
   vctrs::s3_register("vip::vi_model", "tabnet_fit")
   vctrs::s3_register("ggplot2::autoplot", "tabnet_fit")
   vctrs::s3_register("ggplot2::autoplot", "tabnet_pretrain")
+  vctrs::s3_register("ggplot2::autoplot", "tabnet_explain")
 }
