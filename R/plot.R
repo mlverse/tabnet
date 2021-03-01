@@ -10,11 +10,11 @@
 #'
 #' @examples
 #' \donttest{
-#' data("ames", package = "modeldata")
-#' ames_fit <- tabnet_fit(Sale_Price ~. , data=ames, epoch=15)
+#' data("attrition", package = "modeldata")
+#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
 #'
 #' # Plot the model loss over epochs
-#' autoplot(ames_fit)
+#' autoplot(attrition_fit)
 #' }
 #' @export
 autoplot.tabnet_fit <- function(object, ...) {
@@ -35,29 +35,32 @@ autoplot.tabnet_fit <- function(object, ...) {
 #' @export
 autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 
-#' Plot tabnet_explain interpretation
+#' Plot tabnet_explain mask interpretation heatmap
 #'
 #' @param object A `tabnet_explain` object as a result of [tabnet_explain()].
 #' @param type a character value. Either `"mask_agg"` the default, for per predictor
-#' mask importance aggregate,or `"steps"` for a plot at each mask step.
+#'  mask importance aggregate,or `"steps"` for a plot at each mask step.
+#' @param quantile numerical value between 0 and 1. Provides quantile clipping on the
+#'  mask value
 #' @param ...  not used.
 #' @return A `ggplot2` object.
 #' @details
 #'  Plot the tabnet_explain object mask importance per variable along the predicted dataset.
 #'  `type="mask_agg"` output a single heatmap of mask aggregated values,
 #'  `type="mask_agg"` provides a facet plot of each mask along the model.
+#'  `quantile=.995` may be used for strong outlier filtering.
 #'
 #' @examples
 #' \donttest{
-#' data("ames", package = "modeldata")
-#' ames_fit <- tabnet_fit(Sale_Price ~. , data=ames, epoch=15)
-#' ames_explain <- tabnet_explain(ames_fit, ames)
-#' # Plot the model mask interpretation heatmap
-#' autoplot(ames_explain)
+#' data("attrition", package = "modeldata")
+#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
+#' attrition_explain <- tabnet_explain(attrition_fit, attrition)
+#' # Plot the model aggregated mask interpretation heatmap
+#' autoplot(attrition_explain)
 #' }
 
 #'  @export
-autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), ...) {
+autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
 
   if (type == "steps") {
@@ -69,14 +72,14 @@ autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), ...) 
       )) %>%
       tidyr::pivot_longer(-c(rowname, step), names_to = "variable", values_to = "mask_agg") %>%
       dplyr::group_by(step) %>%
-      dplyr::mutate(mask_agg = min(mask_agg , q995(mask_agg))) %>%
+      dplyr::mutate(mask_agg = quantile_clip(mask_agg, probs=quantile)) %>%
       dplyr::ungroup()
   } else {
 
   .data <- object$M_explain %>%
     dplyr::mutate(rowname = row_number()) %>%
     tidyr::pivot_longer(-rowname, names_to = "variable", values_to = "mask_agg") %>%
-    dplyr::mutate(mask_agg = min(mask_agg , q995(mask_agg)),
+    dplyr::mutate(mask_agg = quantile_clip(mask_agg, probs=quantile),
                   step = "mask_aggregate")
   }
 
@@ -87,4 +90,7 @@ autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), ...) 
   p
 }
 
-q995 <- function(x) quantile(x, probs = 0.995)
+quantile_clip <- function(x, probs) {
+  quantile <- quantile(x, probs = probs)
+  purrr::map_dbl(x, ~min(.x, quantile))
+}
