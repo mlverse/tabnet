@@ -59,7 +59,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' autoplot(attrition_explain)
 #' }
 
-#'  @export
+#' @export
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
 
