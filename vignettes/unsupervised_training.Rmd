@@ -110,8 +110,7 @@ pretrained_model_fit <- tabnet_fit(rec_unsup, train , tabnet_model = mod, valid_
 ```
 
 ```{r}
-collect_fit_metrics <- enframe(pretrained_model_fit$fit$metrics,name = "epoch") %>% unnest_longer(value,indices_to = "dataset") %>% unnest_wider(value) %>% mutate(mean_loss = map_dbl(loss, mean))
-ggplot(collect_fit_metrics, aes(x=epoch, y=mean_loss, color=dataset)) + geom_line() + scale_y_log10()
+autoplot(pretrained_model_fit)
 ```
 
 ![training and validation loss plot for pretrained tabnet](pretrained_model.png)
@@ -197,8 +196,7 @@ vanilla_model_fit <- tabnet_fit(rec_unsup, train , valid_split = 0.2, epochs = 5
 ```
 
 ```{r}
-collect_vanilla_metrics <- enframe(vanilla_model_fit$fit$metrics,name = "epoch") %>% unnest_longer(value,indices_to = "dataset") %>% unnest_wider(value) %>% mutate(mean_loss = map_dbl(loss, mean))
-ggplot(collect_vanilla_metrics, aes(x=epoch, y=mean_loss, color=dataset)) + geom_line() + scale_y_log10()
+autoplot(vanilla_model_fit)
 ```
 ![Training and validation loss plot for vanillia tabnet](vanillia_model.png)
 
