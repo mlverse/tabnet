@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{autoplot.tabnet_explain}
 \alias{autoplot.tabnet_explain}
-\title{Plot tabnet_explain mask interpretation heatmap}
+\title{Plot tabnet_explain mask importance heatmap}
 \usage{
 autoplot.tabnet_explain(
   object,
@@ -14,11 +14,12 @@ autoplot.tabnet_explain(
 \arguments{
 \item{object}{A \code{tabnet_explain} object as a result of \code{\link[=tabnet_explain]{tabnet_explain()}}.}
 
-\item{type}{a character value. Either \code{"mask_agg"} the default, for per predictor
-mask importance aggregate,or \code{"steps"} for a plot at each mask step.}
+\item{type}{a character value. Either \code{"mask_agg"} the default, for a single
+heatmap of aggregated mask importance per predictor along the dataset,
+or \code{"steps"} for one heatmap at each mask step.}
 
-\item{quantile}{numerical value between 0 and 1. Provides quantile clipping on the
-mask value}
+\item{quantile}{numerical value between 0 and 1. Provides quantile clipping of the
+mask values}
 
 \item{...}{not used.}
 }
@@ -26,13 +27,14 @@ mask value}
 A \code{ggplot2} object.
 }
 \description{
-Plot tabnet_explain mask interpretation heatmap
+Plot tabnet_explain mask importance heatmap
 }
 \details{
 Plot the tabnet_explain object mask importance per variable along the predicted dataset.
 \code{type="mask_agg"} output a single heatmap of mask aggregated values,
-\code{type="mask_agg"} provides a facet plot of each mask along the model.
-\code{quantile=.995} may be used for strong outlier filtering.
+\code{type="steps"} provides a plot faceted along the \code{n_steps} mask present in the model.
+\code{quantile=.995} may be used for strong outlier clipping, in order to better highlight
+low values. \code{quantile=1}, the default, do not clip any values.
 }
 \examples{
 \donttest{
