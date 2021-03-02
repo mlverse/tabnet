@@ -69,10 +69,10 @@ autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quant
 
   if (type == "steps") {
     .data <- object$masks %>%
-      purrr::imap_dfr(~mutate(
+      purrr::imap_dfr(~dplyr::mutate(
         .x,
         step = sprintf("Step %d", .y),
-        rowname = row_number()
+        rowname = dplyr::row_number()
       )) %>%
       tidyr::pivot_longer(-c(rowname, step), names_to = "variable", values_to = "mask_agg") %>%
       dplyr::group_by(step) %>%
