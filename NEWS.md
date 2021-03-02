@@ -8,7 +8,7 @@
 * Better handling of larger datasets when running `tabnet_explain`.
 * Batch predictions to avoid OOM error.
 * Add tabnet_pretrain() for unsupervised pretraining (@cregouby, #29 )
-* Add autoplot() of model loss among epochs (@cregouby, #34)
+* Add autoplot() of model loss among epochs (@cregouby, #36)
 
 # tabnet 0.1.0
 
