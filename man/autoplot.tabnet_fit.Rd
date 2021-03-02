@@ -4,7 +4,7 @@
 \alias{autoplot.tabnet_fit}
 \title{Plot tabnet_fit loss along epochs}
 \usage{
-autoplot.tabnet_fit(object, ...)
+\method{autoplot}{tabnet_fit}(object, ...)
 }
 \arguments{
 \item{object}{A \code{tabnet_fit} or \code{tabnet_pretrain} object as a result of

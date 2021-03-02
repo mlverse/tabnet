@@ -263,9 +263,13 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
     } else if (!check_net_is_empty_ptr(tabnet_model) && inherits(tabnet_model, "tabnet_fit")) {
-      # model is available from tabnet_model$serialized_net
 
+      if (!identical(processed$blueprint, tabnet_model$blueprint))
+        rlang::abort("Model dimensions don't match.")
+
+      # model is available from tabnet_model$serialized_net
       m <- reload_model(tabnet_model$serialized_net)
+
       # this modifies 'tabnet_model' in-place so subsequent predicts won't
       # need to reload.
       tabnet_model$fit$network$load_state_dict(m$state_dict())
@@ -382,10 +386,14 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
 
   tabnet_model_lst <- tabnet_initialize(x, y, config)
 
+
   # do not restore previous metrics as loss function return non comparable
   # values, nor checkpoints
-
   m <- reload_model(obj$serialized_net)
+
+  if (m$input_dim != tabnet_model_lst$network$input_dim)
+    rlang::abort("Model dimensions don't match.")
+
   # perform update of selected weights into new tabnet_model
   m_stat_dict <- m$state_dict()
   tabnet_state_dict <- tabnet_model_lst$network$state_dict()

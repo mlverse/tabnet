@@ -65,19 +65,19 @@ test_that("trying to continue training with different dataset raise error", {
 
   expect_error(
     pretrain_2 <- tabnet_fit(x2, y1, tabnet_model=pretrain_1, epochs = 1),
-    regexp = "Error"
+    regexp = "Model dimensions"
   )
 
   fit_1 <- tabnet_fit(x1, y1, epochs = 1)
 
   expect_error(
     fit_2 <- tabnet_fit(x2, y1, tabnet_model=fit_1, epochs = 1),
-    regexp = "Error"
+    regexp = "Model dimensions"
   )
 
   expect_error(
     fit_2 <- tabnet_fit(x1, y2, tabnet_model=fit_1, epochs = 1),
-    regexp = "Error"
+    regexp = "Model dimensions"
   )
 
 })

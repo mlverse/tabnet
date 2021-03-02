@@ -163,8 +163,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
       )
 
     coro::loop(for (batch in dl) {
-      batch_to_device <- batch$x$to(device=device)
-      m <- train_batch_un(network, optimizer, batch_to_device, config)
+      batch_x_to_device <- batch$x$to(device=device)
+      m <- train_batch_un(network, optimizer, batch_x_to_device, config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     })
@@ -179,8 +179,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     network$eval()
     if (has_valid) {
       coro::loop(for (batch in valid_dl) {
-        batch_to_device <- batch$x$to(device=device)
-        m <- valid_batch_un(network, batch_to_device, config)
+        batch_x_to_device <- batch$x$to(device=device)
+        m <- valid_batch_un(network, batch_x_to_device, config)
         valid_metrics <- c(valid_metrics, m)
       })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
