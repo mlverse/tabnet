@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parsnip compatible tabnet model — tabnet • tabnet</title>
+<title>Tabnet model — tabnet_pretrain • tabnet</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Parsnip compatible tabnet model — tabnet" />
-<meta property="og:description" content="Parsnip compatible tabnet model" />
+<meta property="og:title" content="Tabnet model — tabnet_pretrain" />
+<meta property="og:description" content="Pretrain the TabNet: Attentive Interpretable Tabular Learning model
+on the predictor data exclusively (unsupervised training)." />
 
 
 
@@ -124,107 +125,101 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parsnip compatible tabnet model</h1>
+    <h1>Tabnet model</h1>
     
-    <div class="hidden name"><code>tabnet.Rd</code></div>
+    <div class="hidden name"><code>tabnet_pretrain.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parsnip compatible tabnet model</p>
+    <p>Pretrain the <a href='https://arxiv.org/abs/1908.07442'>TabNet: Attentive Interpretable Tabular Learning</a> model
+on the predictor data exclusively (unsupervised training).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tabnet</span><span class='op'>(</span>
-  mode <span class='op'>=</span> <span class='st'>"unknown"</span>,
-  epochs <span class='op'>=</span> <span class='cn'>NULL</span>,
-  penalty <span class='op'>=</span> <span class='cn'>NULL</span>,
-  batch_size <span class='op'>=</span> <span class='cn'>NULL</span>,
-  learn_rate <span class='op'>=</span> <span class='cn'>NULL</span>,
-  decision_width <span class='op'>=</span> <span class='cn'>NULL</span>,
-  attention_width <span class='op'>=</span> <span class='cn'>NULL</span>,
-  num_steps <span class='op'>=</span> <span class='cn'>NULL</span>,
-  feature_reusage <span class='op'>=</span> <span class='cn'>NULL</span>,
-  virtual_batch_size <span class='op'>=</span> <span class='cn'>NULL</span>,
-  num_independent <span class='op'>=</span> <span class='cn'>NULL</span>,
-  num_shared <span class='op'>=</span> <span class='cn'>NULL</span>,
-  momentum <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for default</span>
+<span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for data.frame</span>
+<span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
+
+<span class='co'># S3 method for formula</span>
+<span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>formula</span>, <span class='va'>data</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
+
+<span class='co'># S3 method for recipe</span>
+<span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>data</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>mode</th>
-      <td><p>A single character string for the type of model. Possible values
-for this model are "unknown", "regression", or "classification".</p></td>
+      <th>x</th>
+      <td><p>Depending on the context:</p><ul>
+<li><p>A <strong>data frame</strong> of predictors.</p></li>
+<li><p>A <strong>matrix</strong> of predictors.</p></li>
+<li><p>A <strong>recipe</strong> specifying a set of preprocessing steps
+created from <code><a href='https://recipes.tidymodels.org/reference/recipe.html'>recipes::recipe()</a></code>.</p></li>
+</ul>
+
+<p>The predictor data should be standardized (e.g. centered or scaled).
+The model treats categorical predictors internally thus, you don't need to
+make any treatment.</p></td>
     </tr>
     <tr>
-      <th>epochs</th>
-      <td><p>(int) Number of training epochs.</p></td>
+      <th>...</th>
+      <td><p>Model hyperparameters. See <code><a href='tabnet_config.html'>tabnet_config()</a></code> for a list of
+all possible hyperparameters.</p></td>
     </tr>
     <tr>
-      <th>penalty</th>
-      <td><p>This is the extra sparsity loss coefficient as proposed
-in the original paper. The bigger this coefficient is, the sparser your model
-will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help.</p></td>
+      <th>y</th>
+      <td><p>(optional) When <code>x</code> is a <strong>data frame</strong> or <strong>matrix</strong>, <code>y</code> is the outcome</p></td>
     </tr>
     <tr>
-      <th>batch_size</th>
-      <td><p>(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024)</p></td>
+      <th>tabnet_model</th>
+      <td><p>A pretrained TabNet model object to continue the fitting on.
+if <code>NULL</code> (the default) a brand new model is initialized.</p></td>
     </tr>
     <tr>
-      <th>learn_rate</th>
-      <td><p>initial learning rate for the optimizer.</p></td>
+      <th>from_epoch</th>
+      <td><p>When a <code>tabnet_model</code> is provided, restore the network weights from a specific epoch.
+Default is last available checkpoint for restored model, or last epoch for in-memory model.</p></td>
     </tr>
     <tr>
-      <th>decision_width</th>
-      <td><p>(int) Width of the decision prediction layer. Bigger values gives
-more capacity to the model with the risk of overfitting. Values typically
-range from 8 to 64.</p></td>
+      <th>formula</th>
+      <td><p>A formula specifying the outcome terms on the left-hand side,
+and the predictor terms on the right-hand side.</p></td>
     </tr>
     <tr>
-      <th>attention_width</th>
-      <td><p>(int) Width of the attention embedding for each mask. According to
-the paper n_d=n_a is usually a good choice. (default=8)</p></td>
-    </tr>
-    <tr>
-      <th>num_steps</th>
-      <td><p>(int) Number of steps in the architecture
-(usually between 3 and 10)</p></td>
-    </tr>
-    <tr>
-      <th>feature_reusage</th>
-      <td><p>(float) This is the coefficient for feature reusage in the masks.
-A value close to 1 will make mask selection least correlated between layers.
-Values range from 1.0 to 2.0.</p></td>
-    </tr>
-    <tr>
-      <th>virtual_batch_size</th>
-      <td><p>(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=128)</p></td>
-    </tr>
-    <tr>
-      <th>num_independent</th>
-      <td><p>Number of independent Gated Linear Units layers at each step.
-Usual values range from 1 to 5.</p></td>
-    </tr>
-    <tr>
-      <th>num_shared</th>
-      <td><p>Number of shared Gated Linear Units at each step Usual values
-range from 1 to 5</p></td>
-    </tr>
-    <tr>
-      <th>momentum</th>
-      <td><p>Momentum for batch normalization, typically ranges from 0.01
-to 0.4 (default=0.02)</p></td>
+      <th>data</th>
+      <td><p>When a <strong>recipe</strong> or <strong>formula</strong> is used, <code>data</code> is specified as:</p><ul>
+<li><p>A <strong>data frame</strong> containing both the predictors and the outcome.</p></li>
+</ul></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A TabNet <code>parsnip</code> instance. It can be used to fit tabnet models using
-<code>parsnip</code> machinery.</p>
+    <p>A TabNet model object. It can be used for serialization, predictions, or further fitting.</p>
+    <h2 class="hasAnchor" id="outcome"><a class="anchor" href="#outcome"></a>outcome</h2>
+
+    
+
+
+<p>Outcome value are accepted here only for consistent syntax with <code>tabnet_fit</code>, but
+by design the outcome, if present, is ignored during pre-training.</p>
+    <h2 class="hasAnchor" id="pre-training-from-a-previous-model"><a class="anchor" href="#pre-training-from-a-previous-model"></a>pre-training from a previous model</h2>
+
+    
+
+
+<p>When providing a parent <code>tabnet_model</code> parameter, the model pretraining resumes from that model weights
+at the following epoch:</p><ul>
+<li><p>last pretrained epoch for a model already in torch context</p></li>
+<li><p>Last model checkpoint epoch for a model loaded from file</p></li>
+<li><p>the epoch related to a checkpoint matching or preceding the <code>from_epoch</code> value if provided
+The model pretraining metrics append on top of the parent metrics in the returned TabNet model.</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="threading"><a class="anchor" href="#threading"></a>Threading</h2>
 
     
@@ -236,31 +231,13 @@ available threads by default.</p>
 <span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/threads.html'>torch_set_num_interop_threads</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
 </pre>
 
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p>tabnet_fit</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/torch_is_installed.html'>torch_is_installed</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://parsnip.tidymodels.org'>parsnip</a></span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"ames"</span>, package <span class='op'>=</span> <span class='st'>"modeldata"</span><span class='op'>)</span>
-<span class='va'>model</span> <span class='op'>&lt;-</span> <span class='fu'>tabnet</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'><a href='https://parsnip.tidymodels.org/reference/set_args.html'>set_mode</a></span><span class='op'>(</span><span class='st'>"regression"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'><a href='https://parsnip.tidymodels.org/reference/set_engine.html'>set_engine</a></span><span class='op'>(</span><span class='st'>"torch"</span><span class='op'>)</span>
-<span class='va'>model</span> <span class='op'>%&gt;%</span>
-  <span class='fu'><a href='https://generics.r-lib.org/reference/fit.html'>fit</a></span><span class='op'>(</span><span class='va'>Sale_Price</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>ames</span><span class='op'>)</span>
+<span class='va'>pretrained</span> <span class='op'>&lt;-</span> <span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>Sale_Price</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>ames</span>, epochs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
 <span class='op'>}</span>
-</div><div class='output co'>#&gt; parsnip model object
-#&gt; 
-#&gt; Fit time:  51s 
-#&gt; An `nn_module` containing 10,742 parameters.
-#&gt; 
-#&gt; ── Modules ─────────────────────────────────────────────────────────────────────
-#&gt; ● embedder: &lt;embedding_generator&gt; #283 parameters
-#&gt; ● tabnet: &lt;tabnet_no_embedding&gt; #10,458 parameters
-#&gt; 
-#&gt; ── Parameters ──────────────────────────────────────────────────────────────────
-#&gt; ● .check: Float [1:1]</div><div class='input'>
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -100,6 +100,9 @@
     <li>
       <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
     </li>
+    <li>
+      <a href="../articles/unsupervised_training.html">Unsupervised training and fine-tuning</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -153,6 +156,7 @@
   num_independent <span class='op'>=</span> <span class='fl'>2</span>,
   num_shared <span class='op'>=</span> <span class='fl'>2</span>,
   momentum <span class='op'>=</span> <span class='fl'>0.02</span>,
+  pretraining_ratio <span class='op'>=</span> <span class='fl'>0.5</span>,
   verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
   device <span class='op'>=</span> <span class='st'>"auto"</span>,
   importance_sample_size <span class='op'>=</span> <span class='cn'>NULL</span>
@@ -274,6 +278,11 @@ range from 1 to 5</p></td>
       <th>momentum</th>
       <td><p>Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)</p></td>
+    </tr>
+    <tr>
+      <th>pretraining_ratio</th>
+      <td><p>Ratio of features to mask for reconstruction during
+pretraining.  Ranges from 0 to 1 (default=0.5)</p></td>
     </tr>
     <tr>
       <th>verbose</th>
