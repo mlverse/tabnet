@@ -24,7 +24,10 @@ Imports:
     methods,
     tibble,
     coro,
-    vctrs
+    vctrs,
+    ggplot2,
+    dplyr,
+    tidyr
 Suggests: 
     testthat,
     modeldata,

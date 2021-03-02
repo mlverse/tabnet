@@ -24,7 +24,7 @@ mask values}
 \item{...}{not used.}
 }
 \value{
-A \code{ggplot2} object.
+A \code{ggplot} object.
 }
 \description{
 Plot tabnet_explain mask importance heatmap

@@ -13,7 +13,7 @@ autoplot.tabnet_fit(object, ...)
 \item{...}{not used.}
 }
 \value{
-A \code{ggplot2} object.
+A \code{ggplot} object.
 }
 \description{
 Plot tabnet_fit loss along epochs

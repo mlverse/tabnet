@@ -3,7 +3,7 @@
 #' @param object A `tabnet_fit` or `tabnet_pretrain` object as a result of
 #' [tabnet_fit()] or [tabnet_pretrain()].
 #' @param ...  not used.
-#' @return A `ggplot2` object.
+#' @return A `ggplot` object.
 #' @details
 #'  Plot the training loss along epochs, and validation loss along epochs if any.
 #'  A diamond symbol is added on epochs where model snapshot is available, helping
@@ -46,7 +46,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' @param quantile numerical value between 0 and 1. Provides quantile clipping of the
 #'  mask values
 #' @param ...  not used.
-#' @return A `ggplot2` object.
+#' @return A `ggplot` object.
 #' @details
 #'  Plot the tabnet_explain object mask importance per variable along the predicted dataset.
 #'  `type="mask_agg"` output a single heatmap of mask aggregated values,
