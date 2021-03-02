@@ -20,12 +20,13 @@ Plot tabnet_fit loss along epochs
 }
 \details{
 Plot the training loss along epochs, and validation loss along epochs if any.
-A diamond symbol is added on epochs where model snapshot is available.
+A diamond symbol is added on epochs where model snapshot is available, helping
+the choice of \code{from_epoch} value for later model training resume.
 }
 \examples{
 \donttest{
 data("attrition", package = "modeldata")
-attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
+attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=15)
 
 # Plot the model loss over epochs
 autoplot(attrition_fit)
