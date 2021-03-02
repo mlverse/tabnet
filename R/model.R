@@ -86,6 +86,8 @@ resolve_data <- function(x, y) {
 #' @param cat_emb_dim Embedding size for categorial features (default=1)
 #' @param momentum Momentum for batch normalization, typically ranges from 0.01
 #'   to 0.4 (default=0.02)
+#' @param pretraining_ratio Ratio of features to mask for reconstruction during
+#'   pretraining.  Ranges from 0 to 1 (default=0.5)
 #' @param checkpoint_epochs checkpoint model weights and architecture every
 #'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
@@ -120,6 +122,7 @@ tabnet_config <- function(batch_size = 256,
                           num_independent = 2,
                           num_shared = 2,
                           momentum = 0.02,
+                          pretraining_ratio = 0.5,
                           verbose = FALSE,
                           device = "auto",
                           importance_sample_size = NULL) {
@@ -158,6 +161,7 @@ tabnet_config <- function(batch_size = 256,
     n_shared = num_shared,
     momentum = momentum,
     checkpoint_epochs = checkpoint_epochs,
+    pretraining_ratio = pretraining_ratio,
     device = device,
     importance_sample_size = importance_sample_size
   )
@@ -267,6 +271,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   else if (config$loss %in% c("bce", "cross_entropy"))
     config$loss_fn <- torch::nn_cross_entropy_loss()
 
+
   # create network
   network <- tabnet_nn(
     input_dim = data$input_dim,
@@ -303,7 +308,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   )
 }
 
-tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=OL) {
+tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=0L) {
   stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
@@ -388,7 +393,6 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # define scheduler
-
   if (is.null(config$lr_scheduler)) {
     scheduler <- list(step = function() {})
   } else if (rlang::is_function(config$lr_scheduler)) {
@@ -397,10 +401,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   }
 
-  # main loop
+  # restore previous metrics & checkpoints
   metrics <- obj$fit$metrics
   checkpoints <- obj$fit$checkpoints
 
+  # main loop
   for (epoch in seq_len(config$epochs)+epoch_shift) {
 
     metrics[[epoch]] <- list(train = NULL, valid = NULL)

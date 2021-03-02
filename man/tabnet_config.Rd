@@ -27,6 +27,7 @@ tabnet_config(
   num_independent = 2,
   num_shared = 2,
   momentum = 0.02,
+  pretraining_ratio = 0.5,
   verbose = FALSE,
   device = "auto",
   importance_sample_size = NULL
@@ -102,6 +103,9 @@ range from 1 to 5}
 
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)}
+
+\item{pretraining_ratio}{Ratio of features to mask for reconstruction during
+pretraining.  Ranges from 0 to 1 (default=0.5)}
 
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}
