@@ -1,4 +1,4 @@
-#' Plot tabnet_fit loss along epochs
+#' Plot tabnet_fit model loss along epochs
 #'
 #' @param object A `tabnet_fit` or `tabnet_pretrain` object as a result of
 #' [tabnet_fit()] or [tabnet_pretrain()].
@@ -34,6 +34,8 @@ autoplot.tabnet_fit <- function(object, ...) {
   p
   }
 
+#' Plot tabnet_pretrain model loss along epochs
+#'
 #' @export
 autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{autoplot.tabnet_fit}
 \alias{autoplot.tabnet_fit}
-\title{Plot tabnet_fit loss along epochs}
+\title{Plot tabnet_fit model loss along epochs}
 \usage{
 \method{autoplot}{tabnet_fit}(object, ...)
 }
@@ -16,7 +16,7 @@
 A \code{ggplot} object.
 }
 \description{
-Plot tabnet_fit loss along epochs
+Plot tabnet_fit model loss along epochs
 }
 \details{
 Plot the training loss along epochs, and validation loss along epochs if any.
