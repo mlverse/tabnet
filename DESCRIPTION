@@ -27,7 +27,8 @@ Imports:
     vctrs,
     ggplot2,
     dplyr,
-    tidyr
+    tidyr,
+    purrr
 Suggests: 
     testthat,
     modeldata,
