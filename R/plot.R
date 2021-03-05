@@ -17,6 +17,7 @@
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
 #' }
+#' @importFrom ggplot2 autoplot
 #' @export
 autoplot.tabnet_fit <- function(object, ...) {
   epoch_checkpointed_seq <- seq_along(object$fit$checkpoints) * object$fit$config$checkpoint_epochs
@@ -63,7 +64,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' # Plot the model aggregated mask interpretation heatmap
 #' autoplot(attrition_explain)
 #' }
-
+#' @importFrom ggplot2 autoplot
 #' @export
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
