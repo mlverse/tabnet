@@ -2,9 +2,12 @@
 % Please edit documentation in R/plot.R
 \name{autoplot.tabnet_fit}
 \alias{autoplot.tabnet_fit}
+\alias{autoplot.tabnet_pretrain}
 \title{Plot tabnet_fit model loss along epochs}
 \usage{
 \method{autoplot}{tabnet_fit}(object, ...)
+
+\method{autoplot}{tabnet_pretrain}(object, ...)
 }
 \arguments{
 \item{object}{A \code{tabnet_fit} or \code{tabnet_pretrain} object as a result of

@@ -34,8 +34,7 @@ autoplot.tabnet_fit <- function(object, ...) {
   p
   }
 
-#' Plot tabnet_pretrain model loss along epochs
-#'
+#' @rdname autoplot.tabnet_fit
 #' @export
 autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 
