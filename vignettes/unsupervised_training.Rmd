@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 library(tabnet)
 library(tidymodels)
 library(modeldata)
+library(ggplot2)
 ```
 
 In this vignette we show how to 
@@ -95,20 +96,71 @@ mod <- tabnet_pretrain(x=unsupervised_baked_df, lending_club, epochs = 25, valid
 After a few minutes we can get the results:
 
 ```{r}
-collect_metrics <- enframe(mod$fit$metrics,name = "epoch") %>% unnest_longer(value,indices_to = "dataset") %>% unnest_wider(value) %>% mutate(mean_loss = map_dbl(loss, mean))
-ggplot(collect_metrics, aes(x=epoch, y=mean_loss, color=dataset)) + geom_line() + scale_y_log10()
+autoplot(mod)
 ```
 ![pretraining task loss plot](pretraining_loss.png)
 We could continue the training here for few epoch as it seems that the validation loss may continue to decrease...
+Here we can see that there is a checkpoint available at epoch 20, that provides a lower loss on the validation set than the model available on latest epoch. So we will reuse that checkpoint through the `from_epoch` option for training continuation, instead of the default being last epoch. 
 
-## Back to supervised procedure
+## Continuing training with supervised procedure
 
-Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fit pass on top of our pre-trained model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
+Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fitting pass on top of our pre-trained model. 
 
 ```{r}
 pretrained_model_fit <- tabnet_fit(rec_unsup, train , tabnet_model = mod, valid_split = 0.2, epochs = 50, verbose=TRUE)
 ```
-
+```
+[Epoch 001] Loss: 0.535567 Valid loss: 0.453246                                        
+[Epoch 002] Loss: 0.458703 Valid loss: 0.387270                                        
+[Epoch 003] Loss: 0.364556 Valid loss: 0.310847                                        
+[Epoch 004] Loss: 0.343574 Valid loss: 0.291001                                        
+[Epoch 005] Loss: 0.258480 Valid loss: 0.282971                                        
+[Epoch 006] Loss: 0.199033 Valid loss: 0.255300                                        
+[Epoch 007] Loss: 0.189404 Valid loss: 0.223795                                        
+[Epoch 008] Loss: 0.147459 Valid loss: 0.205187                                        
+[Epoch 009] Loss: 0.162647 Valid loss: 0.197404                                        
+[Epoch 010] Loss: 0.193257 Valid loss: 0.197390                                        
+[Epoch 011] Loss: 0.199101 Valid loss: 0.200320                                        
+[Epoch 012] Loss: 0.182173 Valid loss: 0.205350                                        
+[Epoch 013] Loss: 0.148617 Valid loss: 0.202165                                        
+[Epoch 014] Loss: 0.189746 Valid loss: 0.184477                                        
+[Epoch 015] Loss: 0.167868 Valid loss: 0.172689                                        
+[Epoch 016] Loss: 0.141652 Valid loss: 0.184211                                        
+[Epoch 017] Loss: 0.204711 Valid loss: 0.185827                                        
+[Epoch 018] Loss: 0.146897 Valid loss: 0.185340                                        
+[Epoch 019] Loss: 0.127194 Valid loss: 0.190952                                        
+[Epoch 020] Loss: 0.150824 Valid loss: 0.218959                                        
+[Epoch 021] Loss: 0.147319 Valid loss: 0.219081                                        
+[Epoch 022] Loss: 0.160293 Valid loss: 0.220551                                        
+[Epoch 023] Loss: 0.149031 Valid loss: 0.225626                                        
+[Epoch 024] Loss: 0.146678 Valid loss: 0.229572                                        
+[Epoch 025] Loss: 0.139511 Valid loss: 0.230401                                        
+[Epoch 026] Loss: 0.166227 Valid loss: 0.229584                                        
+[Epoch 027] Loss: 0.137615 Valid loss: 0.230412                                        
+[Epoch 028] Loss: 0.131935 Valid loss: 0.232428                                        
+[Epoch 029] Loss: 0.137770 Valid loss: 0.239560                                        
+[Epoch 030] Loss: 0.147243 Valid loss: 0.226703                                        
+[Epoch 031] Loss: 0.145138 Valid loss: 0.218452                                        
+[Epoch 032] Loss: 0.114723 Valid loss: 0.213586                                        
+[Epoch 033] Loss: 0.134871 Valid loss: 0.220906                                        
+[Epoch 034] Loss: 0.124133 Valid loss: 0.217615                                        
+[Epoch 035] Loss: 0.133592 Valid loss: 0.217964                                        
+[Epoch 036] Loss: 0.116864 Valid loss: 0.218269                                        
+[Epoch 037] Loss: 0.107225 Valid loss: 0.215826                                        
+[Epoch 038] Loss: 0.142503 Valid loss: 0.224170                                        
+[Epoch 039] Loss: 0.132398 Valid loss: 0.226665                                        
+[Epoch 040] Loss: 0.129750 Valid loss: 0.217808                                        
+[Epoch 041] Loss: 0.134004 Valid loss: 0.211509                                        
+[Epoch 042] Loss: 0.115905 Valid loss: 0.211590                                        
+[Epoch 043] Loss: 0.103961 Valid loss: 0.207739                                        
+[Epoch 044] Loss: 0.152976 Valid loss: 0.201586                                        
+[Epoch 045] Loss: 0.144814 Valid loss: 0.195170                                        
+[Epoch 046] Loss: 0.141193 Valid loss: 0.190473                                        
+[Epoch 047] Loss: 0.109359 Valid loss: 0.189756                                        
+[Epoch 048] Loss: 0.111201 Valid loss: 0.192686                                        
+[Epoch 049] Loss: 0.112732 Valid loss: 0.198303                                        
+[Epoch 050] Loss: 0.111618 Valid loss: 0.201545 
+```
 ```{r}
 autoplot(pretrained_model_fit)
 ```
@@ -129,7 +181,7 @@ test %>%
 # A tibble: 1 x 3
   .metric .estimator .estimate
   <chr>   <chr>          <dbl>
-1 roc_auc binary         0.553
+1 roc_auc binary         0.591
 ```
 
 ## Comparison with no pretraining
@@ -213,7 +265,7 @@ test %>%
 # A tibble: 1 x 3
   .metric .estimator .estimate
   <chr>   <chr>          <dbl>
-1 roc_auc binary         0.532
+1 roc_auc binary         0.557
 ```
 
 
