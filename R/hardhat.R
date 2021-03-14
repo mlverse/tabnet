@@ -245,7 +245,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
     rlang::abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
 
-  if (!is.null(from_epoch) || !(is.null(tabnet_model))) {
+  if (!is.null(from_epoch) && !is.null(tabnet_model)) {
     # model must be loaded from checkpoint
 
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
