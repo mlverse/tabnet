@@ -27,8 +27,10 @@ tabnet_config(
   num_independent = 2,
   num_shared = 2,
   momentum = 0.02,
+  pretraining_ratio = 0.5,
   verbose = FALSE,
-  device = "auto"
+  device = "auto",
+  importance_sample_size = NULL
 )
 }
 \arguments{
@@ -102,11 +104,18 @@ range from 1 to 5}
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)}
 
+\item{pretraining_ratio}{Ratio of features to mask for reconstruction during
+pretraining.  Ranges from 0 to 1 (default=0.5)}
+
 \item{verbose}{(bool) wether to print progress and loss values during
 training.}
 
 \item{device}{the device to use for training. "cpu" or "cuda". The default ("auto")
 uses  to "cuda" if it's available, otherwise uses "cpu".}
+
+\item{importance_sample_size}{sample of the dataset to compute importance metrics.
+If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
+display a warning.}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.

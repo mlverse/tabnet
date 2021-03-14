@@ -86,11 +86,16 @@ resolve_data <- function(x, y) {
 #' @param cat_emb_dim Embedding size for categorial features (default=1)
 #' @param momentum Momentum for batch normalization, typically ranges from 0.01
 #'   to 0.4 (default=0.02)
+#' @param pretraining_ratio Ratio of features to mask for reconstruction during
+#'   pretraining.  Ranges from 0 to 1 (default=0.5)
 #' @param checkpoint_epochs checkpoint model weights and architecture every
 #'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
 #' @param device the device to use for training. "cpu" or "cuda". The default ("auto")
 #'   uses  to "cuda" if it's available, otherwise uses "cpu".
+#' @param importance_sample_size sample of the dataset to compute importance metrics.
+#'   If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
+#'   display a warning.
 #'
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
@@ -117,8 +122,10 @@ tabnet_config <- function(batch_size = 256,
                           num_independent = 2,
                           num_shared = 2,
                           momentum = 0.02,
+                          pretraining_ratio = 0.5,
                           verbose = FALSE,
-                          device = "auto") {
+                          device = "auto",
+                          importance_sample_size = NULL) {
 
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
@@ -154,7 +161,9 @@ tabnet_config <- function(batch_size = 256,
     n_shared = num_shared,
     momentum = momentum,
     checkpoint_epochs = checkpoint_epochs,
-    device = device
+    pretraining_ratio = pretraining_ratio,
+    device = device,
+    importance_sample_size = importance_sample_size
   )
 }
 
@@ -262,6 +271,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   else if (config$loss %in% c("bce", "cross_entropy"))
     config$loss_fn <- torch::nn_cross_entropy_loss()
 
+
   # create network
   network <- tabnet_nn(
     input_dim = data$input_dim,
@@ -278,9 +288,6 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     n_shared = config$n_shared,
     momentum = config$momentum
   )
-
-  network$to(device = device)
-
 
   # main loop
   metrics <- list()
@@ -301,7 +308,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   )
 }
 
-tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=OL) {
+tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=0L) {
   stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
@@ -386,7 +393,6 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # define scheduler
-
   if (is.null(config$lr_scheduler)) {
     scheduler <- list(step = function() {})
   } else if (rlang::is_function(config$lr_scheduler)) {
@@ -395,10 +401,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   }
 
-  # main loop
+  # restore previous metrics & checkpoints
   metrics <- obj$fit$metrics
   checkpoints <- obj$fit$checkpoints
 
+  # main loop
   for (epoch in seq_len(config$epochs)+epoch_shift) {
 
     metrics[[epoch]] <- list(train = NULL, valid = NULL)
@@ -413,11 +420,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         format = "[:bar] loss= :loss"
       )
 
-    for (batch in torch::enumerate(dl)) {
+    coro::loop(for (batch in dl) {
       m <- train_batch(network, optimizer, batch_to_device(batch, device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
-    }
+    })
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
 
     if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0) {
@@ -447,9 +454,20 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   network$to(device = "cpu")
 
+  importance_sample_size <- config$importance_sample_size
+  if (is.null(config$importance_sample_size) && data$x$shape[1] > 1e5) {
+    rlang::warn(c(glue::glue("Computing importances for a dataset with size {data$x$shape[1]}."),
+                "This can consume too much memory. We are going to use a sample of size 1e5",
+                "You can disable this message by using the `importance_sample_size` argument."))
+    importance_sample_size <- 1e5
+  }
+  indexes <- torch::torch_randint(
+    1, data$x$shape[1], min(importance_sample_size, data$x$shape[1]),
+    dtype = torch::torch_long()
+  )
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, data$x)
+    importance = compute_feature_importance(network, data$x[indexes,..])
   )
 
   list(
@@ -461,17 +479,19 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   )
 }
 
-predict_impl <- function(obj, x) {
+predict_impl <- function(obj, x, batch_size = 1e5) {
   data <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
 
   network <- obj$fit$network
   network$eval()
 
-  network(data$x)[[1]]
+  splits <- torch::torch_split(data$x, split_size = 10000)
+  splits <- lapply(splits, function(x) network(x)[[1]])
+  torch::torch_cat(splits)
 }
 
-predict_impl_numeric <- function(obj, x) {
-  p <- as.numeric(predict_impl(obj, x))
+predict_impl_numeric <- function(obj, x, batch_size) {
+  p <- as.numeric(predict_impl(obj, x, batch_size))
   hardhat::spruce_numeric(p)
 }
 
@@ -479,15 +499,15 @@ get_blueprint_levels <- function(obj) {
   levels(obj$blueprint$ptypes$outcomes[[1]])
 }
 
-predict_impl_prob <- function(obj, x) {
-  p <- predict_impl(obj, x)
+predict_impl_prob <- function(obj, x, batch_size) {
+  p <- predict_impl(obj, x, batch_size)
   p <- torch::nnf_softmax(p, dim = 2)
   p <- as.matrix(p)
   hardhat::spruce_prob(get_blueprint_levels(obj), p)
 }
 
-predict_impl_class <- function(obj, x) {
-  p <- predict_impl(obj, x)
+predict_impl_class <- function(obj, x, batch_size) {
+  p <- predict_impl(obj, x, batch_size)
   p <- torch::torch_max(p, dim = 2)
   p <- as.integer(p[[2]])
   p <- get_blueprint_levels(obj)[p]

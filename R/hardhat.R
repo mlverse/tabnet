@@ -247,13 +247,6 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   if (!is.null(from_epoch) || !(is.null(tabnet_model))) {
     # model must be loaded from checkpoint
-
-    if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-      rlang::abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
-
-    # find closest checkpoint for that epoch
-    closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
-
     tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
     epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
     tabnet_model$fit$metrics <- tabnet_model$fit$metrics[seq(epoch_shift)]

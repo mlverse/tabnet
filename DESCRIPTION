@@ -23,6 +23,7 @@ Imports:
     rlang,
     methods,
     tibble,
+    coro,
     vctrs
 Suggests: 
     testthat,
