@@ -252,7 +252,7 @@ test_that("scheduler works", {
 
 })
 
-test_that("checkpoints works", {
+test_that("checkpoints works for inference", {
 
   data("ames", package = "modeldata")
 
