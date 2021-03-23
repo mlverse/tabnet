@@ -30,19 +30,19 @@ test_that("Autoplot with supervised training, w and wo valid_split", {
 
   tabnet_fitted <- tabnet_fit(x, y, epochs = 12)
   expect_error(
-    p <- autoplot(tabnet_fitted),
+    print(autoplot(tabnet_fitted)),
     regexp = NA
   )
 
   tabnet_fitted <- tabnet_fit(x, y, epochs = 12, valid_split=0.3)
   expect_error(
-    p <- autoplot(tabnet_fitted),
+    print(autoplot(tabnet_fitted)),
     regexp = NA
   )
 
 })
 
-test_that("Autoplot without checkpoint", {
+test_that("Autoplot a model without checkpoint", {
 
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -52,25 +52,25 @@ test_that("Autoplot without checkpoint", {
 
   tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3)
   expect_error(
-    p <- autoplot(tabnet_pretrain),
+    print(autoplot(tabnet_pretrain)),
     regexp = NA
   )
 
   tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3, valid_split=0.3)
   expect_error(
-    p <- autoplot(tabnet_pretrain),
+    print(autoplot(tabnet_pretrain)),
     regexp = NA
   )
 
   tabnet_fit <- tabnet_fit(x, y, epochs = 3)
   expect_error(
-    p <- autoplot(tabnet_fit),
+    print(autoplot(tabnet_fit)),
     regexp = NA
   )
 
   tabnet_fit <- tabnet_fit(x, y, epochs = 3, valid_split=0.3)
   expect_error(
-    p <- autoplot(tabnet_fit),
+    print(autoplot(tabnet_fit)),
     regexp = NA
   )
 
@@ -88,7 +88,7 @@ test_that("Autoplot of pretrain then fit scenario", {
   tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 12)
 
   expect_error(
-    p <- autoplot(tabnet_fit),
+    print(autoplot(tabnet_fit)),
     regexp = NA
   )
 
