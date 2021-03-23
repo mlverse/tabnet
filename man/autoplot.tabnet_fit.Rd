@@ -23,7 +23,7 @@ Plot tabnet_fit model loss along epochs
 }
 \details{
 Plot the training loss along epochs, and validation loss along epochs if any.
-A diamond symbol is added on epochs where model snapshot is available, helping
+A lilipop is added on epochs where model snapshot is available, helping
 the choice of \code{from_epoch} value for later model training resume.
 }
 \examples{
