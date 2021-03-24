@@ -80,7 +80,7 @@ tabnet_fit.default <- function(x, ...) {
 #' @rdname tabnet_fit
 tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
-  config <- do.call(modifyList(config, list(...)))
+  config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
@@ -94,7 +94,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
       intercept = FALSE
     )
   )
-  config <- do.call(modifyList(config, list(...)))
+  config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
@@ -102,7 +102,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
 #' @rdname tabnet_fit
 tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
-  config <- do.call(modifyList(config, list(...)))
+  config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
@@ -202,7 +202,7 @@ tabnet_pretrain.default <- function(x, ...) {
 #' @rdname tabnet_pretrain
 tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
-  config <- do.call(modifyList(config, list(...)))
+  config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
@@ -216,7 +216,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
       intercept = FALSE
     )
   )
-  config <- do.call(modifyList(config, list(...)))
+  config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
@@ -224,7 +224,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
 #' @rdname tabnet_pretrain
 tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
-  config <- do.call(modifyList(config, list(...)))
+  config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 

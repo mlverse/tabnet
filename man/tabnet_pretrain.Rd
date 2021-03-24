@@ -12,11 +12,32 @@ tabnet_pretrain(x, ...)
 
 \method{tabnet_pretrain}{default}(x, ...)
 
-\method{tabnet_pretrain}{data.frame}(x, y, tabnet_model = NULL, ..., from_epoch = NULL)
+\method{tabnet_pretrain}{data.frame}(
+  x,
+  y,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
 
-\method{tabnet_pretrain}{formula}(formula, data, tabnet_model = NULL, ..., from_epoch = NULL)
+\method{tabnet_pretrain}{formula}(
+  formula,
+  data,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
 
-\method{tabnet_pretrain}{recipe}(x, data, tabnet_model = NULL, ..., from_epoch = NULL)
+\method{tabnet_pretrain}{recipe}(
+  x,
+  data,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
 }
 \arguments{
 \item{x}{Depending on the context:

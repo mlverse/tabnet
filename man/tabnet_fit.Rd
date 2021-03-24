@@ -12,11 +12,32 @@ tabnet_fit(x, ...)
 
 \method{tabnet_fit}{default}(x, ...)
 
-\method{tabnet_fit}{data.frame}(x, y, tabnet_model = NULL, ..., from_epoch = NULL)
+\method{tabnet_fit}{data.frame}(
+  x,
+  y,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
 
-\method{tabnet_fit}{formula}(formula, data, tabnet_model = NULL, ..., from_epoch = NULL)
+\method{tabnet_fit}{formula}(
+  formula,
+  data,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
 
-\method{tabnet_fit}{recipe}(x, data, tabnet_model = NULL, ..., from_epoch = NULL)
+\method{tabnet_fit}{recipe}(
+  x,
+  data,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
 }
 \arguments{
 \item{x}{Depending on the context:
