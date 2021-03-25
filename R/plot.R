@@ -20,13 +20,21 @@
 #' @importFrom ggplot2 autoplot
 #' @export
 autoplot.tabnet_fit <- function(object, ...) {
+
   epoch_checkpointed_seq <- seq_along(object$fit$checkpoints) * object$fit$config$checkpoint_epochs
+
   collect_metrics <- tibble::enframe(object$fit$metrics,name = "epoch") %>%
     tidyr::unnest_longer(value,indices_to = "dataset") %>%
     tidyr::unnest_wider(value) %>%
+    # remove the valid col if all NAs to prevent ggplot warnings
+    tidyr::pivot_wider(values_from = loss, names_from = dataset) %>%
+    dplyr::select_if(~!all(is.na(.x))) %>%
+    tidyr::pivot_longer(cols = !epoch, names_to = "dataset", values_to = "loss") %>%
+    # add checkpoints
     dplyr::mutate(mean_loss = purrr::map_dbl(loss, mean),
            has_checkpoint = epoch %in% epoch_checkpointed_seq) %>%
     dplyr::select(-loss)
+
   checkpoints <- collect_metrics %>% dplyr::filter(has_checkpoint, dataset=="train")
   p <- ggplot(collect_metrics, aes(x=epoch, y=mean_loss, color=dataset)) +
     geom_point(data = checkpoints, aes(x=epoch, y=mean_loss, color=dataset), size = 2 ) +
