@@ -6,7 +6,7 @@
 #' @return A `ggplot` object.
 #' @details
 #'  Plot the training loss along epochs, and validation loss along epochs if any.
-#'  A lilipop is added on epochs where model snapshot is available, helping
+#'  A dot is added on epochs where model snapshot is available, helping
 #'  the choice of `from_epoch` value for later model training resume.
 #'
 #' @examples
@@ -25,22 +25,12 @@ autoplot.tabnet_fit <- function(object, ...) {
     tidyr::unnest_longer(value,indices_to = "dataset") %>%
     tidyr::unnest_wider(value) %>%
     dplyr::mutate(mean_loss = purrr::map_dbl(loss, mean),
-           has_checkpoint = epoch %in% c(epoch_checkpointed_seq, length(object$fit$metrics))) %>%
+           has_checkpoint = epoch %in% epoch_checkpointed_seq) %>%
     dplyr::select(-loss)
-  if (length(collect_metrics %>% dplyr::filter(dataset=="valid"))) {
-    #lilipop up to the validqtion line
-    checkpoints <- collect_metrics %>% dplyr::filter(has_checkpoint, dataset=="valid")
-  } else {
-    # lilipop up to the trqining line
-   checkpoints <- collect_metrics %>% dplyr::filter(has_checkpoint, dataset=="train")
-  }
-
-  min_ckp_loss <- min(c(checkpoints$mean_loss, 1e-9), na.rm = T)
+  checkpoints <- collect_metrics %>% dplyr::filter(has_checkpoint, dataset=="train")
   p <- ggplot(collect_metrics, aes(x=epoch, y=mean_loss, color=dataset)) +
+    geom_point(data = checkpoints, aes(x=epoch, y=mean_loss, color=dataset), size = 2 ) +
     geom_line() +
-    #geom_point(data = checkpoints, aes(x=epoch, y=mean_loss, color=dataset), shape=5) +
-    geom_segment(data = checkpoints, aes(x=epoch, xend=epoch, y=0, yend=min_ckp_loss), color="grey") +
-    geom_point(data = checkpoints, aes(x=epoch, y=min_ckp_loss), color="red", size=2) +
     scale_y_log10()
   p
   }
