@@ -101,15 +101,15 @@ resolve_data <- function(x, y) {
 #'
 #' @export
 tabnet_config <- function(batch_size = 256,
-                          lambda_sparse = 1e-3,
+                          penalty = 1e-3,
                           clip_value = NULL,
                           loss = "auto",
                           epochs = 5,
                           drop_last = FALSE,
-                          n_d = NULL,
-                          n_a = NULL,
-                          n_steps = 3,
-                          gamma = 1.3,
+                          decision_width = NULL,
+                          attention_width = NULL,
+                          num_steps = 3,
+                          feature_reusage = 1.3,
                           virtual_batch_size = 128,
                           valid_split = 0,
                           learn_rate = 2e-2,
@@ -119,49 +119,49 @@ tabnet_config <- function(batch_size = 256,
                           step_size = 30,
                           checkpoint_epochs = 10,
                           cat_emb_dim = 1,
-                          n_independent = 2,
-                          n_shared = 2,
+                          num_independent = 2,
+                          num_shared = 2,
                           momentum = 0.02,
                           pretraining_ratio = 0.5,
                           verbose = FALSE,
                           device = "auto",
                           importance_sample_size = NULL) {
 
-  if (is.null(n_d) && is.null(n_a)) {
-    n_d <- 8 # default is 8
+  if (is.null(decision_width) && is.null(attention_width)) {
+    decision_width <- 8 # default is 8
   }
 
   if (is.null(attention_width))
-    n_a <- n_d
+    attention_width <- decision_width
 
   if (is.null(decision_width))
-    n_d <- n_a
+    decision_width <- attention_width
 
   list(
     batch_size = batch_size,
-    lambda_sparse = lambda_sparse,
+    lambda_sparse = penalty,
     clip_value = clip_value,
     loss = loss,
     epochs = epochs,
     drop_last = drop_last,
-    n_d = n_d,
-    n_a = n_a,
-    n_steps = n_steps,
-    gamma = gamma,
+    n_d = decision_width,
+    n_a = attention_width,
+    n_steps = num_steps,
+    gamma = feature_reusage,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
-    verbose = verbose,
     learn_rate = learn_rate,
     optimizer = optimizer,
     lr_scheduler = lr_scheduler,
     lr_decay = lr_decay,
     step_size = step_size,
-    cat_emb_dim = cat_emb_dim,
-    n_independent = n_independent,
-    n_shared = n_shared,
-    momentum = momentum,
     checkpoint_epochs = checkpoint_epochs,
+    cat_emb_dim = cat_emb_dim,
+    n_independent = num_independent,
+    n_shared = num_shared,
+    momentum = momentum,
     pretraining_ratio = pretraining_ratio,
+    verbose = verbose,
     device = device,
     importance_sample_size = importance_sample_size
   )

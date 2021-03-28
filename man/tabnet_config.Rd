@@ -6,15 +6,15 @@
 \usage{
 tabnet_config(
   batch_size = 256,
-  lambda_sparse = 0.001,
+  penalty = 0.001,
   clip_value = NULL,
   loss = "auto",
   epochs = 5,
   drop_last = FALSE,
-  n_d = NULL,
-  n_a = NULL,
-  n_steps = 3,
-  gamma = 1.3,
+  decision_width = NULL,
+  attention_width = NULL,
+  num_steps = 3,
+  feature_reusage = 1.3,
   virtual_batch_size = 128,
   valid_split = 0,
   learn_rate = 0.02,
@@ -24,8 +24,8 @@ tabnet_config(
   step_size = 30,
   checkpoint_epochs = 10,
   cat_emb_dim = 1,
-  n_independent = 2,
-  n_shared = 2,
+  num_independent = 2,
+  num_shared = 2,
   momentum = 0.02,
   pretraining_ratio = 0.5,
   verbose = FALSE,
@@ -37,6 +37,11 @@ tabnet_config(
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024)}
 
+\item{penalty}{This is the extra sparsity loss coefficient as proposed
+in the original paper. The bigger this coefficient is, the sparser your model
+will be in terms of feature selection. Depending on the difficulty of your
+problem, reducing this value could help.}
+
 \item{clip_value}{If a float is given this will clip the gradient at
 clip_value. Pass \code{NULL} to not clip.}
 
@@ -47,6 +52,20 @@ for regression and cross entropy for classification)}
 
 \item{drop_last}{(bool) Whether to drop last batch if not complete during
 training}
+
+\item{decision_width}{(int) Width of the decision prediction layer. Bigger values gives
+more capacity to the model with the risk of overfitting. Values typically
+range from 8 to 64.}
+
+\item{attention_width}{(int) Width of the attention embedding for each mask. According to
+the paper n_d=n_a is usually a good choice. (default=8)}
+
+\item{num_steps}{(int) Number of steps in the architecture
+(usually between 3 and 10)}
+
+\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
+A value close to 1 will make mask selection least correlated between layers.
+Values range from 1.0 to 2.0.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=128)}
@@ -76,6 +95,12 @@ Use \code{0} to disable checkpoints.}
 
 \item{cat_emb_dim}{Embedding size for categorial features (default=1)}
 
+\item{num_independent}{Number of independent Gated Linear Units layers at each step.
+Usual values range from 1 to 5.}
+
+\item{num_shared}{Number of shared Gated Linear Units at each step Usual values
+range from 1 to 5}
+
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)}
 
@@ -91,31 +116,6 @@ uses  to "cuda" if it's available, otherwise uses "cpu".}
 \item{importance_sample_size}{sample of the dataset to compute importance metrics.
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.}
-
-\item{penalty}{This is the extra sparsity loss coefficient as proposed
-in the original paper. The bigger this coefficient is, the sparser your model
-will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help.}
-
-\item{decision_width}{(int) Width of the decision prediction layer. Bigger values gives
-more capacity to the model with the risk of overfitting. Values typically
-range from 8 to 64.}
-
-\item{attention_width}{(int) Width of the attention embedding for each mask. According to
-the paper n_d=n_a is usually a good choice. (default=8)}
-
-\item{num_steps}{(int) Number of steps in the architecture
-(usually between 3 and 10)}
-
-\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
-A value close to 1 will make mask selection least correlated between layers.
-Values range from 1.0 to 2.0.}
-
-\item{num_independent}{Number of independent Gated Linear Units layers at each step.
-Usual values range from 1 to 5.}
-
-\item{num_shared}{Number of shared Gated Linear Units at each step Usual values
-range from 1 to 5}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.

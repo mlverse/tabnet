@@ -28,10 +28,13 @@
 #'  and the predictor terms on the right-hand side.
 #' @param tabnet_model A previously fitted TabNet model object to continue the fitting on.
 #'  if `NULL` (the default) a brand new model is initialized.
+#' @param config A set of hyperparameters created using the `tabnet_config` function.
+#'  If no argument is supplied, this will use the default values in [tabnet_config()].
 #' @param from_epoch When a `tabnet_model` is provided, restore the network weights from a specific epoch.
 #'  Default is last available checkpoint for restored model, or last epoch for in-memory model.
-#' @param ... Model hyperparameters. See [tabnet_config()] for a list of
-#'  all possible hyperparameters.
+#' @param ... Model hyperparameters.
+#' Any hyperparameters set here will update those set by the config argument.
+#' See [tabnet_config()] for a list of all possible hyperparameters.
 #'
 #' @section Fitting a pre-trained model:
 #'
@@ -80,6 +83,7 @@ tabnet_fit.default <- function(x, ...) {
 #' @rdname tabnet_fit
 tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
+  names(config) <- names(formals(tabnet_config))
   config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
@@ -94,6 +98,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
       intercept = FALSE
     )
   )
+  names(config) <- names(formals(tabnet_config))
   config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
@@ -102,6 +107,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
 #' @rdname tabnet_fit
 tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
+  names(config) <- names(formals(tabnet_config))
   config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
@@ -143,10 +149,14 @@ new_tabnet_fit <- function(fit, blueprint) {
 #'  and the predictor terms on the right-hand side.
 #' @param tabnet_model A pretrained TabNet model object to continue the fitting on.
 #'  if `NULL` (the default) a brand new model is initialized.
+#' @param config A set of hyperparameters created using the `tabnet_config` function.
+#'  If no argument is supplied, this will use the default values in [tabnet_config()].
 #' @param from_epoch When a `tabnet_model` is provided, restore the network weights from a specific epoch.
 #'  Default is last available checkpoint for restored model, or last epoch for in-memory model.
-#' @param ... Model hyperparameters. See [tabnet_config()] for a list of
-#'  all possible hyperparameters.
+#' @param ... Model hyperparameters.
+#' Any hyperparameters set here will update those set by the config argument.
+#' See [tabnet_config()] for a list of all possible hyperparameters.
+#'
 #'
 #' @section outcome:
 #'
@@ -202,6 +212,7 @@ tabnet_pretrain.default <- function(x, ...) {
 #' @rdname tabnet_pretrain
 tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
+  names(config) <- names(formals(tabnet_config))
   config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
@@ -216,6 +227,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
       intercept = FALSE
     )
   )
+  names(config) <- names(formals(tabnet_config))
   config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
@@ -224,6 +236,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
 #' @rdname tabnet_pretrain
 tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
+  names(config) <- names(formals(tabnet_config))
   config <- do.call(tabnet_config, modifyList(config, list(...)))
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }

@@ -52,8 +52,9 @@ The predictor data should be standardized (e.g. centered or scaled).
 The model treats categorical predictors internally thus, you don't need to
 make any treatment.}
 
-\item{...}{Model hyperparameters. See \code{\link[=tabnet_config]{tabnet_config()}} for a list of
-all possible hyperparameters.}
+\item{...}{Model hyperparameters.
+Any hyperparameters set here will update those set by the config argument.
+See \code{\link[=tabnet_config]{tabnet_config()}} for a list of all possible hyperparameters.}
 
 \item{y}{When \code{x} is a \strong{data frame} or \strong{matrix}, \code{y} is the outcome
 specified as:
@@ -65,6 +66,9 @@ specified as:
 
 \item{tabnet_model}{A previously fitted TabNet model object to continue the fitting on.
 if \code{NULL} (the default) a brand new model is initialized.}
+
+\item{config}{A set of hyperparameters created using the \code{tabnet_config} function.
+If no argument is supplied, this will use the default values in \code{\link[=tabnet_config]{tabnet_config()}}.}
 
 \item{from_epoch}{When a \code{tabnet_model} is provided, restore the network weights from a specific epoch.
 Default is last available checkpoint for restored model, or last epoch for in-memory model.}
