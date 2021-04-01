@@ -9,6 +9,7 @@
 * Batch predictions to avoid OOM error.
 * Add tabnet_pretrain() for unsupervised pretraining (@cregouby, #29 )
 * Add autoplot() of model loss among epochs (@cregouby, #36)
+* Added a `config` argument to fit/pretrain functions so one can pass a pre-made config list. (#42)
 
 # tabnet 0.1.0
 
