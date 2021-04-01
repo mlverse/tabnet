@@ -1,4 +1,7 @@
+
 test_that("Autoplot with unsupervised training, w and wo valid_split", {
+
+  library(ggplot2)
 
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -22,6 +25,9 @@ test_that("Autoplot with unsupervised training, w and wo valid_split", {
 
 test_that("Autoplot with supervised training, w and wo valid_split", {
 
+
+  library(ggplot2)
+
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 
@@ -43,6 +49,8 @@ test_that("Autoplot with supervised training, w and wo valid_split", {
 })
 
 test_that("Autoplot a model without checkpoint", {
+
+  library(ggplot2)
 
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -77,6 +85,8 @@ test_that("Autoplot a model without checkpoint", {
 })
 
 test_that("Autoplot of pretrain then fit scenario", {
+
+  library(ggplot2)
 
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
