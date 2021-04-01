@@ -17,8 +17,7 @@
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
 #' }
-#' @importFrom ggplot2 autoplot
-#' @export
+#'
 autoplot.tabnet_fit <- function(object, ...) {
 
   epoch_checkpointed_seq <- seq_along(object$fit$checkpoints) * object$fit$config$checkpoint_epochs
@@ -36,15 +35,14 @@ autoplot.tabnet_fit <- function(object, ...) {
     dplyr::select(-loss)
 
   checkpoints <- collect_metrics %>% dplyr::filter(has_checkpoint, dataset=="train")
-  p <- ggplot(collect_metrics, aes(x=epoch, y=mean_loss, color=dataset)) +
-    geom_point(data = checkpoints, aes(x=epoch, y=mean_loss, color=dataset), size = 2 ) +
-    geom_line() +
-    scale_y_log10()
+  p <- ggplot2::ggplot(collect_metrics, ggplot2::aes(x=epoch, y=mean_loss, color=dataset)) +
+    ggplot2::geom_point(data = checkpoints, ggplot2::aes(x=epoch, y=mean_loss, color=dataset), size = 2 ) +
+    ggplot2::geom_line() +
+    ggplot2::scale_y_log10()
   p
   }
 
 #' @rdname autoplot.tabnet_fit
-#' @export
 autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 
 #' Plot tabnet_explain mask importance heatmap
@@ -66,14 +64,15 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #'
 #' @examples
 #' \donttest{
+#' library(ggplot2)
 #' data("attrition", package = "modeldata")
 #' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
 #' attrition_explain <- tabnet_explain(attrition_fit, attrition)
 #' # Plot the model aggregated mask interpretation heatmap
 #' autoplot(attrition_explain)
 #' }
-#' @importFrom ggplot2 autoplot
-#' @export
+#'
+#'
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
 
@@ -97,11 +96,11 @@ autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quant
                   step = "mask_aggregate")
   }
 
-  p <- ggplot(.data, aes(x = rowname, y = variable, fill = mask_agg)) +
-    geom_tile() +
-    scale_fill_viridis_c() +
-    facet_wrap(~step) +
-    theme_minimal()
+  p <- ggplot2::ggplot(.data, ggplot2::aes(x = rowname, y = variable, fill = mask_agg)) +
+    ggplot2::geom_tile() +
+    ggplot2::scale_fill_viridis_c() +
+    ggplot2::facet_wrap(~step) +
+    ggplot2::theme_minimal()
   p
 }
 

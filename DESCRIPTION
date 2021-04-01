@@ -24,11 +24,7 @@ Imports:
     methods,
     tibble,
     coro,
-    vctrs,
-    ggplot2,
-    dplyr,
-    tidyr,
-    purrr
+    vctrs
 Suggests: 
     testthat,
     modeldata,
@@ -39,5 +35,9 @@ Suggests:
     knitr,
     rmarkdown,
     vip,
-    tidyverse
+    tidyverse,
+    ggplot2,
+    dplyr,
+    tidyr,
+    purrr
 VignetteBuilder: knitr

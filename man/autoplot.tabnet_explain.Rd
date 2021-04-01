@@ -4,7 +4,12 @@
 \alias{autoplot.tabnet_explain}
 \title{Plot tabnet_explain mask importance heatmap}
 \usage{
-\method{autoplot}{tabnet_explain}(object, type = c("mask_agg", "steps"), quantile = 1, ...)
+autoplot.tabnet_explain(
+  object,
+  type = c("mask_agg", "steps"),
+  quantile = 1,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{tabnet_explain} object as a result of \code{\link[=tabnet_explain]{tabnet_explain()}}.}
@@ -33,10 +38,13 @@ low values. \code{quantile=1}, the default, do not clip any values.
 }
 \examples{
 \donttest{
+library(ggplot2)
 data("attrition", package = "modeldata")
 attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
 attrition_explain <- tabnet_explain(attrition_fit, attrition)
 # Plot the model aggregated mask interpretation heatmap
 autoplot(attrition_explain)
 }
+
+
 }

@@ -5,3 +5,18 @@
   vctrs::s3_register("ggplot2::autoplot", "tabnet_pretrain")
   vctrs::s3_register("ggplot2::autoplot", "tabnet_explain")
 }
+
+
+globalVariables(c("batch_size",
+                  "dataset",
+                  "epoch",
+                  "has_checkpoint",
+                  "loss",
+                  "mask_agg",
+                  "mean_loss",
+                  "row_number",
+                  "rowname",
+                  "step",
+                  "value",
+                  "variable",
+                  ".."))
