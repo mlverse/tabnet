@@ -141,13 +141,34 @@ on the predictor data exclusively (unsupervised training).</p>
 <span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for data.frame</span>
-<span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
+<span class='fu'>tabnet_pretrain</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  <span class='va'>y</span>,
+  tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>,
+  config <span class='op'>=</span> <span class='fu'><a href='tabnet_config.html'>tabnet_config</a></span><span class='op'>(</span><span class='op'>)</span>,
+  <span class='va'>...</span>,
+  from_epoch <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for formula</span>
-<span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>formula</span>, <span class='va'>data</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
+<span class='fu'>tabnet_pretrain</span><span class='op'>(</span>
+  <span class='va'>formula</span>,
+  <span class='va'>data</span>,
+  tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>,
+  config <span class='op'>=</span> <span class='fu'><a href='tabnet_config.html'>tabnet_config</a></span><span class='op'>(</span><span class='op'>)</span>,
+  <span class='va'>...</span>,
+  from_epoch <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for recipe</span>
-<span class='fu'>tabnet_pretrain</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>data</span>, tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span>, from_epoch <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+<span class='fu'>tabnet_pretrain</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  <span class='va'>data</span>,
+  tabnet_model <span class='op'>=</span> <span class='cn'>NULL</span>,
+  config <span class='op'>=</span> <span class='fu'><a href='tabnet_config.html'>tabnet_config</a></span><span class='op'>(</span><span class='op'>)</span>,
+  <span class='va'>...</span>,
+  from_epoch <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -167,8 +188,9 @@ make any treatment.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Model hyperparameters. See <code><a href='tabnet_config.html'>tabnet_config()</a></code> for a list of
-all possible hyperparameters.</p></td>
+      <td><p>Model hyperparameters.
+Any hyperparameters set here will update those set by the config argument.
+See <code><a href='tabnet_config.html'>tabnet_config()</a></code> for a list of all possible hyperparameters.</p></td>
     </tr>
     <tr>
       <th>y</th>
@@ -178,6 +200,11 @@ all possible hyperparameters.</p></td>
       <th>tabnet_model</th>
       <td><p>A pretrained TabNet model object to continue the fitting on.
 if <code>NULL</code> (the default) a brand new model is initialized.</p></td>
+    </tr>
+    <tr>
+      <th>config</th>
+      <td><p>A set of hyperparameters created using the <code>tabnet_config</code> function.
+If no argument is supplied, this will use the default values in <code><a href='tabnet_config.html'>tabnet_config()</a></code>.</p></td>
     </tr>
     <tr>
       <th>from_epoch</th>
