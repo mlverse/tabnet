@@ -35,5 +35,9 @@ Suggests:
     knitr,
     rmarkdown,
     vip,
-    tidyverse
+    tidyverse,
+    ggplot2,
+    dplyr,
+    tidyr,
+    purrr
 VignetteBuilder: knitr
