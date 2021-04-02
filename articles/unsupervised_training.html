@@ -68,7 +68,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/mlverse/tabnet/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -84,7 +91,7 @@
       <h1 data-toc-skip>Unsupervised training and fine-tuning</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/master/vignettes/unsupervised_training.Rmd"><code>vignettes/unsupervised_training.Rmd</code></a></small>
       <div class="hidden name"><code>unsupervised_training.Rmd</code></div>
 
     </div>
@@ -92,9 +99,10 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tabnet</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet">tabnet</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tidymodels</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org">modeldata</a></span><span class="op">)</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org">modeldata</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></code></pre></div>
 <p>In this vignette we show how to - pretrain TabNet model with unsupervised data - fine-tune TabNet with supervised data</p>
 <p>We are going to use the <code>lending_club</code> dataset available in the <code>modeldata</code> package, using 80 % of it as unsupervised data.</p>
 <p>First let’s split our dataset into unsupervised and supervised so we can later train the supervised step of the model:</p>
@@ -149,24 +157,72 @@
 [Epoch 025] Loss: 28641401.113068 Valid loss: 75703844.637030  </code></pre>
 <p>After a few minutes we can get the results:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">collect_metrics</span> <span class="op">&lt;-</span> <span class="fu">enframe</span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">metrics</span>,name <span class="op">=</span> <span class="st">"epoch"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">unnest_longer</span><span class="op">(</span><span class="va">value</span>,indices_to <span class="op">=</span> <span class="st">"dataset"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">unnest_wider</span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>mean_loss <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">loss</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>
-<span class="fu">ggplot</span><span class="op">(</span><span class="va">collect_metrics</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">epoch</span>, y<span class="op">=</span><span class="va">mean_loss</span>, color<span class="op">=</span><span class="va">dataset</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_y_log10</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="pretraining_loss.png" alt="pretraining task loss plot"> We could continue the training here for few epoch as it seems that the validation loss may continue to decrease…</p>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></code></pre></div>
+<p><img src="pretraining_loss.png" alt="pretraining task loss plot"> We could continue the training here for few epoch as it seems that the validation loss may continue to decrease… Here we can see that there is a checkpoint available at epoch 20, that provides a lower loss on the validation set than the model available on latest epoch. So we will reuse that checkpoint through the <code>from_epoch</code> option for training continuation, instead of the default being last epoch.</p>
 </div>
-<div id="back-to-supervised-procedure" class="section level2">
+<div id="continuing-training-with-supervised-procedure" class="section level2">
 <h2 class="hasAnchor">
-<a href="#back-to-supervised-procedure" class="anchor"></a>Back to supervised procedure</h2>
-<p>Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fit pass on top of our pre-trained model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.</p>
+<a href="#continuing-training-with-supervised-procedure" class="anchor"></a>Continuing training with supervised procedure</h2>
+<p>Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fitting pass on top of our pre-trained model.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pretrained_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec_unsup</span>, <span class="va">train</span> , tabnet_model <span class="op">=</span> <span class="va">mod</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">collect_fit_metrics</span> <span class="op">&lt;-</span> <span class="fu">enframe</span><span class="op">(</span><span class="va">pretrained_model_fit</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">metrics</span>,name <span class="op">=</span> <span class="st">"epoch"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">unnest_longer</span><span class="op">(</span><span class="va">value</span>,indices_to <span class="op">=</span> <span class="st">"dataset"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">unnest_wider</span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>mean_loss <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">loss</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>
-<span class="fu">ggplot</span><span class="op">(</span><span class="va">collect_fit_metrics</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">epoch</span>, y<span class="op">=</span><span class="va">mean_loss</span>, color<span class="op">=</span><span class="va">dataset</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_y_log10</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>[Epoch 001] Loss: 0.535567 Valid loss: 0.453246                                        
+[Epoch 002] Loss: 0.458703 Valid loss: 0.387270                                        
+[Epoch 003] Loss: 0.364556 Valid loss: 0.310847                                        
+[Epoch 004] Loss: 0.343574 Valid loss: 0.291001                                        
+[Epoch 005] Loss: 0.258480 Valid loss: 0.282971                                        
+[Epoch 006] Loss: 0.199033 Valid loss: 0.255300                                        
+[Epoch 007] Loss: 0.189404 Valid loss: 0.223795                                        
+[Epoch 008] Loss: 0.147459 Valid loss: 0.205187                                        
+[Epoch 009] Loss: 0.162647 Valid loss: 0.197404                                        
+[Epoch 010] Loss: 0.193257 Valid loss: 0.197390                                        
+[Epoch 011] Loss: 0.199101 Valid loss: 0.200320                                        
+[Epoch 012] Loss: 0.182173 Valid loss: 0.205350                                        
+[Epoch 013] Loss: 0.148617 Valid loss: 0.202165                                        
+[Epoch 014] Loss: 0.189746 Valid loss: 0.184477                                        
+[Epoch 015] Loss: 0.167868 Valid loss: 0.172689                                        
+[Epoch 016] Loss: 0.141652 Valid loss: 0.184211                                        
+[Epoch 017] Loss: 0.204711 Valid loss: 0.185827                                        
+[Epoch 018] Loss: 0.146897 Valid loss: 0.185340                                        
+[Epoch 019] Loss: 0.127194 Valid loss: 0.190952                                        
+[Epoch 020] Loss: 0.150824 Valid loss: 0.218959                                        
+[Epoch 021] Loss: 0.147319 Valid loss: 0.219081                                        
+[Epoch 022] Loss: 0.160293 Valid loss: 0.220551                                        
+[Epoch 023] Loss: 0.149031 Valid loss: 0.225626                                        
+[Epoch 024] Loss: 0.146678 Valid loss: 0.229572                                        
+[Epoch 025] Loss: 0.139511 Valid loss: 0.230401                                        
+[Epoch 026] Loss: 0.166227 Valid loss: 0.229584                                        
+[Epoch 027] Loss: 0.137615 Valid loss: 0.230412                                        
+[Epoch 028] Loss: 0.131935 Valid loss: 0.232428                                        
+[Epoch 029] Loss: 0.137770 Valid loss: 0.239560                                        
+[Epoch 030] Loss: 0.147243 Valid loss: 0.226703                                        
+[Epoch 031] Loss: 0.145138 Valid loss: 0.218452                                        
+[Epoch 032] Loss: 0.114723 Valid loss: 0.213586                                        
+[Epoch 033] Loss: 0.134871 Valid loss: 0.220906                                        
+[Epoch 034] Loss: 0.124133 Valid loss: 0.217615                                        
+[Epoch 035] Loss: 0.133592 Valid loss: 0.217964                                        
+[Epoch 036] Loss: 0.116864 Valid loss: 0.218269                                        
+[Epoch 037] Loss: 0.107225 Valid loss: 0.215826                                        
+[Epoch 038] Loss: 0.142503 Valid loss: 0.224170                                        
+[Epoch 039] Loss: 0.132398 Valid loss: 0.226665                                        
+[Epoch 040] Loss: 0.129750 Valid loss: 0.217808                                        
+[Epoch 041] Loss: 0.134004 Valid loss: 0.211509                                        
+[Epoch 042] Loss: 0.115905 Valid loss: 0.211590                                        
+[Epoch 043] Loss: 0.103961 Valid loss: 0.207739                                        
+[Epoch 044] Loss: 0.152976 Valid loss: 0.201586                                        
+[Epoch 045] Loss: 0.144814 Valid loss: 0.195170                                        
+[Epoch 046] Loss: 0.141193 Valid loss: 0.190473                                        
+[Epoch 047] Loss: 0.109359 Valid loss: 0.189756                                        
+[Epoch 048] Loss: 0.111201 Valid loss: 0.192686                                        
+[Epoch 049] Loss: 0.112732 Valid loss: 0.198303                                        
+[Epoch 050] Loss: 0.111618 Valid loss: 0.201545 </code></pre>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">pretrained_model_fit</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <img src="pretrained_model.png" alt=""><p class="caption">training and validation loss plot for pretrained tabnet</p>
 </div>
 <p>And finally, we can verify the results in our test set:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">test</span> <span class="op">%&gt;%</span> 
   <span class="fu">bind_cols</span><span class="op">(</span>
     <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">pretrained_model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
@@ -175,13 +231,13 @@
 <pre><code># A tibble: 1 x 3
   .metric .estimator .estimate
   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
-1 roc_auc binary         0.553</code></pre>
+1 roc_auc binary         0.591</code></pre>
 </div>
 <div id="comparison-with-no-pretraining" class="section level2">
 <h2 class="hasAnchor">
 <a href="#comparison-with-no-pretraining" class="anchor"></a>Comparison with no pretraining</h2>
 <p>The question now is What if we did not pretrain the model ? We can build a vanilla tabnet model on the training set for comparison :</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vanilla_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec_unsup</span>, <span class="va">train</span> , valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code>[Epoch 001] Loss: 3.954212 Valid loss: 357.003845                                      
 [Epoch 002] Loss: 1.657037 Valid loss: 88.164719                                       
@@ -234,13 +290,12 @@
 [Epoch 049] Loss: 0.170952 Valid loss: 0.304238                                        
 [Epoch 050] Loss: 0.173832 Valid loss: 0.284257                                        
 </code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">collect_vanilla_metrics</span> <span class="op">&lt;-</span> <span class="fu">enframe</span><span class="op">(</span><span class="va">vanilla_model_fit</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">metrics</span>,name <span class="op">=</span> <span class="st">"epoch"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">unnest_longer</span><span class="op">(</span><span class="va">value</span>,indices_to <span class="op">=</span> <span class="st">"dataset"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">unnest_wider</span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>mean_loss <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">loss</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>
-<span class="fu">ggplot</span><span class="op">(</span><span class="va">collect_vanilla_metrics</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">epoch</span>, y<span class="op">=</span><span class="va">mean_loss</span>, color<span class="op">=</span><span class="va">dataset</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_y_log10</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <img src="vanillia_model.png" alt=""><p class="caption">Training and validation loss plot for vanillia tabnet</p>
 </div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">test</span> <span class="op">%&gt;%</span> 
   <span class="fu">bind_cols</span><span class="op">(</span>
     <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
@@ -249,7 +304,7 @@
 <pre><code># A tibble: 1 x 3
   .metric .estimator .estimate
   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
-1 roc_auc binary         0.532</code></pre>
+1 roc_auc binary         0.557</code></pre>
 </div>
   </div>
 

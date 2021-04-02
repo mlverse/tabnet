@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Changelog • tabnet</title>
+<title>Plot tabnet_explain mask importance heatmap — autoplot.tabnet_explain • tabnet</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Changelog" />
+<meta property="og:title" content="Plot tabnet_explain mask importance heatmap — autoplot.tabnet_explain" />
+<meta property="og:description" content="Plot tabnet_explain mask importance heatmap" />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-news">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -128,43 +129,71 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1 data-toc-skip>Changelog <small></small></h1>
-      <small>Source: <a href='https://github.com/mlverse/tabnet/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
+    <h1>Plot tabnet_explain mask importance heatmap</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mlverse/tabnet/blob/master/R/plot.R'><code>R/plot.R</code></a></small>
+    <div class="hidden name"><code>autoplot.tabnet_explain.Rd</code></div>
     </div>
 
-    <div id="tabnet-development-version" class="section level1">
-<h1 class="page-header" data-toc-text="development version">
-<a href="#tabnet-development-version" class="anchor"></a>tabnet (development version)<small> Unreleased </small>
-</h1>
-<ul>
-<li>Fixed bug in GPU training. (<a href='https://github.com/mlverse/tabnet/issues/22'>#22</a>)</li>
-<li>Added GPU CI. (<a href='https://github.com/mlverse/tabnet/issues/22'>#22</a>)</li>
-<li>Explicit error in case of missing values (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/24'>#24</a>)</li>
-<li>Allow model fine-tuning through passing a pre-trained model to tabnet_fit() (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/26'>#26</a>)</li>
-<li>Fixed memory leaks when using custom autograd function.</li>
-<li>Better handling of larger datasets when running <code>tabnet_explain</code>.</li>
-<li>Batch predictions to avoid OOM error.</li>
-<li>Add tabnet_pretrain() for unsupervised pretraining (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/29'>#29</a> )</li>
-<li>Add autoplot() of model loss among epochs (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/36'>#36</a>)</li>
-<li>Added a <code>config</code> argument to fit/pretrain functions so one can pass a pre-made config list. (<a href='https://github.com/mlverse/tabnet/issues/42'>#42</a>)</li>
-</ul>
-</div>
-    <div id="tabnet-010" class="section level1">
-<h1 class="page-header" data-toc-text="0.1.0">
-<a href="#tabnet-010" class="anchor"></a>tabnet 0.1.0<small> 2021-01-14 </small>
-</h1>
-<ul>
-<li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
-</ul>
-</div>
-  </div>
+    <div class="ref-description">
+    <p>Plot tabnet_explain mask importance heatmap</p>
+    </div>
 
+    <pre class="usage"><span class='co'># S3 method for tabnet_explain</span>
+<span class='fu'>autoplot</span><span class='op'>(</span><span class='va'>object</span>, type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"mask_agg"</span>, <span class='st'>"steps"</span><span class='op'>)</span>, quantile <span class='op'>=</span> <span class='fl'>1</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object</th>
+      <td><p>A <code>tabnet_explain</code> object as a result of <code><a href='tabnet_explain.html'>tabnet_explain()</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>type</th>
+      <td><p>a character value. Either <code>"mask_agg"</code> the default, for a single
+heatmap of aggregated mask importance per predictor along the dataset,
+or <code>"steps"</code> for one heatmap at each mask step.</p></td>
+    </tr>
+    <tr>
+      <th>quantile</th>
+      <td><p>numerical value between 0 and 1. Provides quantile clipping of the
+mask values</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>not used.</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A <code>ggplot</code> object.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Plot the tabnet_explain object mask importance per variable along the predicted dataset.
+<code>type="mask_agg"</code> output a single heatmap of mask aggregated values,
+<code>type="steps"</code> provides a plot faceted along the <code>n_steps</code> mask present in the model.
+<code>quantile=.995</code> may be used for strong outlier clipping, in order to better highlight
+low values. <code>quantile=1</code>, the default, do not clip any values.</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"attrition"</span>, package <span class='op'>=</span> <span class='st'>"modeldata"</span><span class='op'>)</span>
+<span class='va'>attrition_fit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='tabnet_fit.html'>tabnet_fit</a></span><span class='op'>(</span><span class='va'>Attrition</span> <span class='op'>~</span><span class='va'>.</span> , data<span class='op'>=</span><span class='va'>attrition</span>, epoch<span class='op'>=</span><span class='fl'>15</span><span class='op'>)</span>
+<span class='va'>attrition_explain</span> <span class='op'>&lt;-</span> <span class='fu'><a href='tabnet_explain.html'>tabnet_explain</a></span><span class='op'>(</span><span class='va'>attrition_fit</span>, <span class='va'>attrition</span><span class='op'>)</span>
+<span class='co'># Plot the model aggregated mask interpretation heatmap</span>
+<span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>attrition_explain</span><span class='op'>)</span>
+</div><div class='img'><img src='autoplot.tabnet_explain-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># }</span>
+
+
+</div></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
-
 </div>
 
 
