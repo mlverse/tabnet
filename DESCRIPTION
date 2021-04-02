@@ -14,6 +14,8 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+URL: https://github.com/mlverse/tabnet
+BugReports: https://github.com/mlverse/tabnet/issues
 Imports: 
     torch,
     hardhat,
