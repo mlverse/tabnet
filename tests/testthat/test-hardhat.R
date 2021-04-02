@@ -212,14 +212,18 @@ test_that("serialization with saveRDS just works", {
   y <- ames$Sale_Price
 
   fit <- tabnet_fit(x, y, epochs = 1)
+  predictions <-  predict(fit, ames)
 
   tmp <- tempfile("model", fileext = "rds")
   saveRDS(fit, tmp)
 
+  rm(fit)
+  gc()
+
   fit2 <- readRDS(tmp)
 
   expect_equal(
-    predict(fit, ames),
+    predictions,
     predict(fit2, ames)
   )
 
