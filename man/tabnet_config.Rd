@@ -30,7 +30,8 @@ tabnet_config(
   pretraining_ratio = 0.5,
   verbose = FALSE,
   device = "auto",
-  importance_sample_size = NULL
+  importance_sample_size = NULL,
+  mask_type = "sparsemax"
 )
 }
 \arguments{

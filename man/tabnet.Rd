@@ -17,7 +17,8 @@ tabnet(
   virtual_batch_size = NULL,
   num_independent = NULL,
   num_shared = NULL,
-  momentum = NULL
+  momentum = NULL,
+  mask_type = NULL
 )
 }
 \arguments{
