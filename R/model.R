@@ -125,7 +125,8 @@ tabnet_config <- function(batch_size = 256,
                           pretraining_ratio = 0.5,
                           verbose = FALSE,
                           device = "auto",
-                          importance_sample_size = NULL) {
+                          importance_sample_size = NULL,
+                          mask_type = "sparsemax") {
 
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
@@ -163,7 +164,8 @@ tabnet_config <- function(batch_size = 256,
     pretraining_ratio = pretraining_ratio,
     verbose = verbose,
     device = device,
-    importance_sample_size = importance_sample_size
+    importance_sample_size = importance_sample_size,
+    mask_type = mask_type
   )
 }
 
