@@ -299,3 +299,4 @@ multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NU
   names(p) <- NULL
   tibble::tibble(.pred = p)
 }
+
