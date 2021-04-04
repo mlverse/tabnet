@@ -117,6 +117,10 @@ uses  to "cuda" if it's available, otherwise uses "cpu".}
 \item{importance_sample_size}{sample of the dataset to compute importance metrics.
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.}
+
+\item{mask_type}{can be either "sparsemax" or "entmax". The original TabNet paper used
+sparsemax, however some libraries have implemented and tested entmax. The default
+option is "sparsemax".}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.

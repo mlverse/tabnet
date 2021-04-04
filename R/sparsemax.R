@@ -12,7 +12,7 @@
 .threshold_and_support <- function(input, dim) {
   input_srt <- torch::torch_sort(input, descending=TRUE, dim=dim)[[1]]
   input_cumsum <- input_srt$cumsum(dim) - 1
-  rhos <- .make_ix_like(input, dim)
+  rhos <- .make_ix_like(input, dim=dim)
   support <- rhos * input_srt > input_cumsum
 
   support_size <- support$sum(dim=dim)$unsqueeze(dim)
@@ -28,7 +28,7 @@ sparsemax_function <- torch::autograd_function(
   forward = function(ctx, input, dim = -1) {
     max_val <- input$max(dim=dim, keepdim=TRUE)[[1]]
     input$sub_(max_val) # same numerical stability trick as for softmax
-    tau_supp_size = .threshold_and_support(input, dim=dim)
+    tau_supp_size <- .threshold_and_support(input, dim=dim)
     output <- torch::torch_clamp(input - tau_supp_size[[1]], min=0)
     ctx$save_for_backward(supp_size = tau_supp_size[[2]], output = output, dim = dim)
     output
@@ -58,6 +58,14 @@ sparsemax <- torch::nn_module(
     self$dim <- dim
   },
   forward = function(input) {
+    # Indexing from the end using -1 usually behaves the same way as pytorch,
+    # however in the .make_ix_like function the first line d <- input$size(dim)
+    # instead gives the size for all dimensions except the first, rather than
+    # giving the size for the final dimension. This if statement simply changes
+    # dim to the final dimension (e.g. 3 for a 3D tensor) when -1 is passed to dim.
+    if (self$dim == -1) {
+      self$dim <- input$dim()
+    }
     sparsemax_function(input, self$dim)
   }
 )
@@ -89,7 +97,7 @@ entmax_function <- torch::autograd_function(
     input$sub_(max_val) # same numerical stability trick as for softmax
     input <- input / 2
 
-    tau_supp = .entmax_threshold_and_support(input, dim=dim)
+    tau_supp <- .entmax_threshold_and_support(input, dim=dim)
     output <- torch::torch_clamp(input - tau_supp[[1]], min=0) ^ 2
     ctx$save_for_backward(supp_size = tau_supp[[2]], output = output, dim = dim)
     output
@@ -98,14 +106,13 @@ entmax_function <- torch::autograd_function(
 
     # supp_size, output = ctx$saved_variables
     saved <- ctx$saved_variables
-    gppr <- saved[[2]]$sqrt()
-    dX <- grad_output * gppr
-    q <- dX$sum(ctx$dim) / gppr$sum(ctx$dim)
-    q <- q$unsqueeze(ctx$dim)
-    dX = dX - q * gppr
     dim <- saved$dim
-    grad_input <- grad_output$clone()
-    grad_input[saved$output == 0] <- 0
+    Y <- saved$output
+    gppr <- Y$sqrt()
+    dX <- grad_output * gppr
+    q <- dX$sum(dim) / gppr$sum(dim)
+    q <- q$unsqueeze(dim)
+    dX = dX - q * gppr
 
     list(
       input = dX,
@@ -120,6 +127,9 @@ entmax <- torch::nn_module(
     self$dim <- dim
   },
   forward = function(input) {
+    if (self$dim == -1) {
+      self$dim <- input$dim()
+    }
     entmax_function(input, self$dim)
   }
 )

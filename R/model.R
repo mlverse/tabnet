@@ -291,7 +291,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     cat_emb_dim = config$cat_emb_dim,
     n_independent = config$n_independent,
     n_shared = config$n_shared,
-    momentum = config$momentum
+    momentum = config$momentum,
+    mask_type = config$mask_type
   )
 
   # main loop

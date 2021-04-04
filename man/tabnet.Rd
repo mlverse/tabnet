@@ -62,6 +62,10 @@ range from 1 to 5}
 
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)}
+
+\item{mask_type}{can be either "sparsemax" or "entmax". The original TabNet paper used
+sparsemax, however some libraries have implemented and tested entmax. The default
+option is "sparsemax".}
 }
 \value{
 A TabNet \code{parsnip} instance. It can be used to fit tabnet models using

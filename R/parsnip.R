@@ -193,7 +193,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "mask_type",
     original = "mask_type",
-    func = list(pkg = "dials", fun = "mask_type"),
+    func = list(pkg = "tabnet", fun = "mask_type"),
     has_submodel = FALSE
   )
 
