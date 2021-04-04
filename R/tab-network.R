@@ -443,7 +443,7 @@ attentive_transformer <- torch::nn_module(
 
 
     if (mask_type == "sparsemax")
-      self$selector <- sparsemax(dim=-1)
+      self$selector <- torch::nn_contrib_sparsemax(dim=-1)
     else if (mask_type == "entmax")
       self$selector <- entmax(dim=-1)
     else
