@@ -87,8 +87,12 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
   index <- 1:length(new_config)
-  new_config <- unlist(new_config)[unlist(new_config) != unlist(config )&
-                                     unlist(new_config) != unlist(default_config)]
+  new_config <- new_config[
+    mapply(
+    function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+    default_config,
+    new_config)
+    ]
   config <- utils::modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
@@ -108,8 +112,12 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
   index <- 1:length(new_config)
-  new_config <- unlist(new_config)[unlist(new_config) != unlist(config )&
-                                     unlist(new_config) != unlist(default_config)]
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
   config <- utils::modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
@@ -123,8 +131,12 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
   index <- 1:length(new_config)
-  new_config <- unlist(new_config)[unlist(new_config) != unlist(config )&
-                                     unlist(new_config) != unlist(default_config)]
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
   config <- utils::modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
@@ -234,8 +246,12 @@ tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabne
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
   index <- 1:length(new_config)
-  new_config <- unlist(new_config)[unlist(new_config) != unlist(config )&
-                                     unlist(new_config) != unlist(default_config)]
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
   config <- utils::modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
@@ -255,8 +271,12 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
   index <- 1:length(new_config)
-  new_config <- unlist(new_config)[unlist(new_config) != unlist(config )&
-                                     unlist(new_config) != unlist(default_config)]
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
   config <- utils::modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
@@ -270,8 +290,12 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
   index <- 1:length(new_config)
-  new_config <- unlist(new_config)[unlist(new_config) != unlist(config )&
-                                     unlist(new_config) != unlist(default_config)]
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
   config <- utils::modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
