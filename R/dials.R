@@ -8,7 +8,7 @@ check_dials <- function() {
 #' Parameters for the tabnet model
 #'
 #' @param range the default range for the parameter value
-#' @param trans whether to apply a transformation to the parameter
+#' @param trans wether to apply a transformation to the parameter
 #'
 #' These functions are used with `tune` grid functions to generate
 #' candidates.
@@ -97,16 +97,3 @@ num_shared <- function(range = c(1L, 5L), trans = NULL) {
     finalize = NULL
   )
 }
-
-#' @rdname tabnet_params
-#' @export
-mask_type <- function(values = c("sparsemax", "entmax")) {
-  check_dials()
-  dials::new_qual_param(
-    type = "character",
-    values = values,
-    label = c(mask_type = "Final layer of feature selector, either sparsemax or entmax"),
-    finalize = NULL
-  )
-}
-

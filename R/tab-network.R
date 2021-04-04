@@ -378,7 +378,7 @@ tabnet_no_embedding <- torch::nn_module(
   },
   forward_masks = function(x) {
     self$encoder$forward_masks(x)
-    }
+  }
 )
 
 tabnet_nn <- torch::nn_module(
@@ -416,8 +416,8 @@ tabnet_nn <- torch::nn_module(
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$post_embed_dim <- self$embedder$post_embed_dim
     self$tabnet <- tabnet_no_embedding(self$post_embed_dim, output_dim, n_d, n_a, n_steps,
-                                     gamma, n_independent, n_shared, epsilon,
-                                     virtual_batch_size, momentum, mask_type)
+                                       gamma, n_independent, n_shared, epsilon,
+                                       virtual_batch_size, momentum, mask_type)
 
   },
   forward = function(x) {
@@ -439,13 +439,13 @@ attentive_transformer <- torch::nn_module(
     self$fc <- torch::nn_linear(input_dim, output_dim, bias=FALSE)
     initialize_non_glu(self$fc, input_dim, output_dim)
     self$bn <- gbn(output_dim, virtual_batch_size=virtual_batch_size,
-                  momentum=momentum)
+                   momentum=momentum)
 
 
     if (mask_type == "sparsemax")
       self$selector <- torch::nn_contrib_sparsemax(dim=-1)
     else if (mask_type == "entmax")
-      self$selector <- entmax(dim=-1)
+      self$selector <- Entmax15(dim=-1)
     else
       stop("Please choose either sparsemax or entmax as masktype")
 
@@ -579,7 +579,7 @@ glu_layer <- torch::nn_module(
     initialize_glu(self$fc, input_dim, 2*output_dim)
 
     self$bn <- gbn(2*output_dim, virtual_batch_size=virtual_batch_size,
-                  momentum=momentum)
+                   momentum=momentum)
   },
   forward = function(x) {
     x <- self$fc(x)

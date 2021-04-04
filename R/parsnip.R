@@ -188,15 +188,6 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
-    model = "tabnet",
-    eng = "torch",
-    parsnip = "mask_type",
-    original = "mask_type",
-    func = list(pkg = "tabnet", fun = "mask_type"),
-    has_submodel = FALSE
-  )
-
   parsnip::set_pred(
     model = "tabnet",
     eng = "torch",
@@ -250,7 +241,7 @@ add_parsnip_tabnet <- function() {
 tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
                    learn_rate = NULL, decision_width = NULL, attention_width = NULL,
                    num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
-                   num_independent = NULL, num_shared = NULL, momentum = NULL, mask_type = NULL) {
+                   num_independent = NULL, num_shared = NULL, momentum = NULL) {
 
   if (!requireNamespace("parsnip", quietly = TRUE))
     rlang::abort("Package \"parsnip\" needed for this function to work. Please install it.")
@@ -273,8 +264,7 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
     virtual_batch_size = rlang::enquo(virtual_batch_size),
     num_independent = rlang::enquo(num_independent),
     num_shared = rlang::enquo(num_shared),
-    momentum = rlang::enquo(momentum),
-    mask_type = rlang::enquo(mask_type)
+    momentum = rlang::enquo(momentum)
   )
 
   # Save some empty slots for future parts of the specification
@@ -309,4 +299,3 @@ multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NU
   names(p) <- NULL
   tibble::tibble(.pred = p)
 }
-
