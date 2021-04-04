@@ -2,7 +2,7 @@
 # credits to Yandex https://github.com/Qwicen/node/blob/master/lib/nn_utils.py
 .make_ix_like <- function(input, dim = 1) {
   d <- input$size(dim)
-  rho <- torch::torch_arange(start = 1, end = d, device = input$device,
+  rho <- torch::torch_arange(start = 1, end = d + 1, device = input$device,
                              dtype = input$dtype)
   view <- rep(1, input$dim())
   view[1] <- -1

@@ -369,9 +369,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   # resolve loss
   if (config$loss == "mse") {
     config$loss_fn <- torch::nn_mse_loss()
-  }  else if (config$loss %in% c("bce", "cross_entropy")) {
-    config$loss_fn <- torch::nn_cross_entropy_loss()
-  }
+    }  else if (config$loss %in% c("bce", "cross_entropy")) {
+      config$loss_fn <- torch::nn_cross_entropy_loss()
+    }
   # restore network from model and send it to device
   network <- obj$fit$network
 
@@ -457,8 +457,8 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   importance_sample_size <- config$importance_sample_size
   if (is.null(config$importance_sample_size) && data$x$shape[1] > 1e5) {
     rlang::warn(c(glue::glue("Computing importances for a dataset with size {data$x$shape[1]}."),
-                  "This can consume too much memory. We are going to use a sample of size 1e5",
-                  "You can disable this message by using the `importance_sample_size` argument."))
+                "This can consume too much memory. We are going to use a sample of size 1e5",
+                "You can disable this message by using the `importance_sample_size` argument."))
     importance_sample_size <- 1e5
   }
   indexes <- torch::torch_randint(
