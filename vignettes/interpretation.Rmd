@@ -103,14 +103,8 @@ syn4 <- make_syn4()
 Let's fit a TabNet model to the `syn2` dataset and analyze the
 interpretation metrics.
 
-First let's define some hyperparamaters upfront, including switching our mask from sparsemax to entmax.
 ```{r}
-tab_config <- tabnet_config(epochs = 10, mask_type = "entmax")
-```
-
-Now we will pass this configuration and fit our tabnet model.
-```{r}
-fit_syn2 <- tabnet_fit(y ~ ., syn2, config = tab_config, verbose = TRUE)
+fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 10, verbose = TRUE)
 ```
 
 In the feature importance plot we can see that, as expected, features
