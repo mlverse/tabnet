@@ -27,7 +27,9 @@ mask_type(values = c("sparsemax", "entmax"))
 \arguments{
 \item{range}{the default range for the parameter value}
 
-\item{trans}{whether to apply a transformation to the parameter
+\item{trans}{whether to apply a transformation to the parameter}
+
+\item{values}{possible values for factor parameters
 
 These functions are used with \code{tune} grid functions to generate
 candidates.}
