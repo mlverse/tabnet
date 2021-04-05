@@ -83,9 +83,17 @@ tabnet_fit.default <- function(x, ...) {
 #' @rdname tabnet_fit
 tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
-  names(config) <- names(formals(tabnet_config))
+
+  default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
-  config <- utils::modifyList(config, new_config)
+  new_config <- new_config[
+    mapply(
+    function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+    default_config,
+    new_config)
+    ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
@@ -99,9 +107,17 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
       intercept = FALSE
     )
   )
-  names(config) <- names(formals(tabnet_config))
+
+  default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
-  config <- utils::modifyList(config, new_config)
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
@@ -109,9 +125,17 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
 #' @rdname tabnet_fit
 tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
-  names(config) <- names(formals(tabnet_config))
+
+  default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
-  config <- utils::modifyList(config, new_config)
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
@@ -215,9 +239,17 @@ tabnet_pretrain.default <- function(x, ...) {
 #' @rdname tabnet_pretrain
 tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
-  names(config) <- names(formals(tabnet_config))
+
+  default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
-  config <- utils::modifyList(config, new_config)
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
@@ -231,9 +263,17 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
       intercept = FALSE
     )
   )
-  names(config) <- names(formals(tabnet_config))
+
+  default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
-  config <- utils::modifyList(config, new_config)
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
@@ -241,9 +281,17 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
 #' @rdname tabnet_pretrain
 tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
-  names(config) <- names(formals(tabnet_config))
+
+  default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
-  config <- utils::modifyList(config, new_config)
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 

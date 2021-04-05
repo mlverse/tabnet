@@ -313,3 +313,24 @@ test_that("print module works even after a reload from disk", {
 
 })
 
+test_that("fit uses config parameters mix from config= and ...", {
+
+  library(recipes)
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+                    config = tabnet_config(decision_width=3, attention_width=5, cat_emb_dim = 2))
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+  expect_equal(fit$fit$config$verbose, TRUE)
+  expect_equal(fit$fit$config$valid_split, 0.25)
+  expect_equal(fit$fit$config$n_d, 3)
+  expect_equal(fit$fit$config$n_a, 5)
+
+})
