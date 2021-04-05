@@ -184,7 +184,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "momentum",
     original = "momentum",
-    func = list(pkg = "dials", fun = "momentum"),
+    func = list(pkg = "tabnet", fun = "momentum"),
     has_submodel = FALSE
   )
 

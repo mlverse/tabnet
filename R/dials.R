@@ -101,6 +101,21 @@ num_shared <- function(range = c(1L, 5L), trans = NULL) {
 
 #' @rdname tabnet_params
 #' @export
+momentum <- function(range = c(0.01, 0.4), trans = NULL) {
+  check_dials()
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(momentum = "Momentum for batch normalization"),
+    finalize = NULL
+  )
+}
+
+
+#' @rdname tabnet_params
+#' @export
 mask_type <- function(values = c("sparsemax", "entmax")) {
   check_dials()
   dials::new_qual_param(
