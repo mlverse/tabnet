@@ -9,6 +9,7 @@ check_dials <- function() {
 #'
 #' @param range the default range for the parameter value
 #' @param trans whether to apply a transformation to the parameter
+#' @param values possible values for factor parameters
 #'
 #' These functions are used with `tune` grid functions to generate
 #' candidates.
