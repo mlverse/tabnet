@@ -2,3 +2,5 @@
 docs
 inst/doc
 .Rhistory
+.venv
+activate

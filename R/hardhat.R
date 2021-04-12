@@ -28,10 +28,13 @@
 #'  and the predictor terms on the right-hand side.
 #' @param tabnet_model A previously fitted TabNet model object to continue the fitting on.
 #'  if `NULL` (the default) a brand new model is initialized.
+#' @param config A set of hyperparameters created using the `tabnet_config` function.
+#'  If no argument is supplied, this will use the default values in [tabnet_config()].
 #' @param from_epoch When a `tabnet_model` is provided, restore the network weights from a specific epoch.
 #'  Default is last available checkpoint for restored model, or last epoch for in-memory model.
-#' @param ... Model hyperparameters. See [tabnet_config()] for a list of
-#'  all possible hyperparameters.
+#' @param ... Model hyperparameters.
+#' Any hyperparameters set here will update those set by the config argument.
+#' See [tabnet_config()] for a list of all possible hyperparameters.
 #'
 #' @section Fitting a pre-trained model:
 #'
@@ -78,15 +81,25 @@ tabnet_fit.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, ..., from_epoch = NULL) {
+tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
-  config <- do.call(tabnet_config, list(...))
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+    function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+    default_config,
+    new_config)
+    ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, ..., from_epoch = NULL) {
+tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -94,15 +107,35 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, ..., from_epo
       intercept = FALSE
     )
   )
-  config <- do.call(tabnet_config, list(...))
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, ..., from_epoch = NULL) {
+tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
-  config <- do.call(tabnet_config, list(...))
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
@@ -143,10 +176,14 @@ new_tabnet_fit <- function(fit, blueprint) {
 #'  and the predictor terms on the right-hand side.
 #' @param tabnet_model A pretrained TabNet model object to continue the fitting on.
 #'  if `NULL` (the default) a brand new model is initialized.
+#' @param config A set of hyperparameters created using the `tabnet_config` function.
+#'  If no argument is supplied, this will use the default values in [tabnet_config()].
 #' @param from_epoch When a `tabnet_model` is provided, restore the network weights from a specific epoch.
 #'  Default is last available checkpoint for restored model, or last epoch for in-memory model.
-#' @param ... Model hyperparameters. See [tabnet_config()] for a list of
-#'  all possible hyperparameters.
+#' @param ... Model hyperparameters.
+#' Any hyperparameters set here will update those set by the config argument.
+#' See [tabnet_config()] for a list of all possible hyperparameters.
+#'
 #'
 #' @section outcome:
 #'
@@ -196,17 +233,29 @@ tabnet_pretrain.default <- function(x, ...) {
   )
 }
 
+
+
 #' @export
 #' @rdname tabnet_pretrain
-tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, ..., from_epoch = NULL) {
+tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
-  config <- do.call(tabnet_config, list(...))
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
 #' @export
 #' @rdname tabnet_pretrain
-tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, ..., from_epoch = NULL) {
+tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -214,15 +263,35 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, ..., fro
       intercept = FALSE
     )
   )
-  config <- do.call(tabnet_config, list(...))
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
 #' @export
 #' @rdname tabnet_pretrain
-tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, ..., from_epoch = NULL) {
+tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
-  config <- do.call(tabnet_config, list(...))
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
@@ -241,29 +310,32 @@ new_tabnet_pretrain <- function(pretrain, blueprint) {
 tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, from_epoch, task="supervised") {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
+  epoch_shift <- 0L
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
     rlang::abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
+
+  if (!is.null(from_epoch) && !is.null(tabnet_model)) {
+    # model must be loaded from checkpoint
+
+    if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
+      rlang::abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
+
+    # find closest checkpoint for that epoch
+    closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
+
+    tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
+    epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
+    tabnet_model$fit$metrics <- tabnet_model$fit$metrics[seq(epoch_shift)]
+
+  }
   if (task == "supervised") {
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
       tabnet_model_lst <- tabnet_initialize(predictors, outcomes, config = config)
       tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
-      epoch_shift <- 0L
-
-    } else if (!is.null(from_epoch)) {
-      # model must be loaded from checkpoint
-
-      if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-        rlang::abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
-
-      # find closest checkpoint for that epoch
-      closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
-
-      tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
-      epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
     } else if (!check_net_is_empty_ptr(tabnet_model) && inherits(tabnet_model, "tabnet_fit")) {
-
+      # resume training from supervised
       if (!identical(processed$blueprint, tabnet_model$blueprint))
         rlang::abort("Model dimensions don't match.")
 
@@ -277,12 +349,10 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
 
     } else if (inherits(tabnet_model, "tabnet_pretrain")) {
-      # pretrain_model after reload
+      # resume training from unsupervised
 
       tabnet_model_lst <- model_pretrain_to_fit(tabnet_model, predictors, outcomes, config)
       tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
-      epoch_shift <- 0L
-
 
     }  else if (length(tabnet_model$fit$checkpoints)) {
       # model is loaded from the last available checkpoint
@@ -299,7 +369,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   } else if (task == "unsupervised") {
 
-    pretrain_lst <- tabnet_train_unsupervised( predictors, config = config)
+    pretrain_lst <- tabnet_train_unsupervised( predictors, config = config, epoch_shift)
     return(new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint))
 
   }
@@ -311,7 +381,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data, object$blueprint)
-  out <- predict_tabnet_bridge(type, object, processed$predictors, epoch)
+  out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
   hardhat::validate_prediction_size(out, new_data)
   out
 }
@@ -344,7 +414,7 @@ check_type <- function(model, type) {
 
 
 
-predict_tabnet_bridge <- function(type, object, predictors, epoch) {
+predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   type <- check_type(object, type)
 
@@ -368,9 +438,9 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch) {
 
   switch(
     type,
-    numeric = predict_impl_numeric(object, predictors),
-    prob    = predict_impl_prob(object, predictors),
-    class   = predict_impl_class(object, predictors)
+    numeric = predict_impl_numeric(object, predictors, batch_size),
+    prob    = predict_impl_prob(object, predictors, batch_size),
+    class   = predict_impl_class(object, predictors, batch_size)
   )
 }
 
