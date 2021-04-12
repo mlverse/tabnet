@@ -96,9 +96,6 @@ resolve_data <- function(x, y) {
 #' @param importance_sample_size sample of the dataset to compute importance metrics.
 #'   If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 #'   display a warning.
-#' @param mask_type can be either "sparsemax" or "entmax". The original TabNet paper used
-#'   sparsemax, however some libraries have implemented and tested entmax. The default
-#'   option is "sparsemax".
 #'
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
@@ -128,8 +125,7 @@ tabnet_config <- function(batch_size = 256,
                           pretraining_ratio = 0.5,
                           verbose = FALSE,
                           device = "auto",
-                          importance_sample_size = NULL,
-                          mask_type = "sparsemax") {
+                          importance_sample_size = NULL) {
 
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
@@ -167,8 +163,7 @@ tabnet_config <- function(batch_size = 256,
     pretraining_ratio = pretraining_ratio,
     verbose = verbose,
     device = device,
-    importance_sample_size = importance_sample_size,
-    mask_type = mask_type
+    importance_sample_size = importance_sample_size
   )
 }
 
@@ -291,8 +286,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     cat_emb_dim = config$cat_emb_dim,
     n_independent = config$n_independent,
     n_shared = config$n_shared,
-    momentum = config$momentum,
-    mask_type = config$mask_type
+    momentum = config$momentum
   )
 
   # main loop

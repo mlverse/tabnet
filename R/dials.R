@@ -125,4 +125,3 @@ mask_type <- function(values = c("sparsemax", "entmax")) {
     finalize = NULL
   )
 }
-

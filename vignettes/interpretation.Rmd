@@ -123,12 +123,7 @@ for each observation.
 library(tidyverse)
 ex_syn2 <- tabnet_explain(fit_syn2, syn2)
 
-ex_syn2$M_explain %>% 
-  mutate(rowname = row_number()) %>% 
-  pivot_longer(-rowname, names_to = "variable", values_to = "m_agg") %>% 
-  ggplot(aes(x = rowname, y = variable, fill = m_agg)) +
-  geom_tile() +
-  scale_fill_viridis_c()
+autoplot(ex_syn2)
 ```
 
 We can see that the region between V03 and V06 concentrates most of the
@@ -140,17 +135,7 @@ Next, we can visualize the attention masks for each step in the
 architecture.
 
 ```{r}
-ex_syn2$masks %>% 
-  imap_dfr(~mutate(
-    .x, 
-    step = sprintf("Step %d", .y),
-    rowname = row_number()
-  )) %>% 
-  pivot_longer(-c(rowname, step), names_to = "variable", values_to = "m_agg") %>% 
-  ggplot(aes(x = rowname, y = variable, fill = m_agg)) +
-  geom_tile() +
-  scale_fill_viridis_c() +
-  facet_wrap(~step)
+autoplot(ex_syn2, type="steps")
 ```
 
 We see that the first step captures a lot of noise, but the other 2
@@ -185,15 +170,8 @@ importance even if there are strong outliers.
 
 ```{r}
 ex_syn4 <- tabnet_explain(fit_syn4, arrange(syn4, V10))
-q99 <- function(x) quantile(x, probs = 0.995)
 
-ex_syn4$M_explain %>% 
-  mutate(rowname = row_number()) %>% 
-  pivot_longer(-rowname, names_to = "variable", values_to = "m_agg") %>% 
-  mutate(m_agg = ifelse(m_agg > q99(m_agg), q99(m_agg), m_agg)) %>% 
-  ggplot(aes(x = rowname, y = variable, fill = m_agg)) +
-  geom_tile() +
-  scale_fill_viridis_c()
+autoplot(ex_syn4, quantile=.995)
 ```
 
 From the figure we see that V10 is important for all observations. We
@@ -204,20 +182,7 @@ the important ones.
 We can also visualize the masks at each step in the architecture.
 
 ```{r}
-ex_syn4$masks %>% 
-  imap_dfr(~mutate(
-    .x, 
-    step = sprintf("Step %d", .y),
-    rowname = row_number()
-  )) %>% 
-  pivot_longer(-c(rowname, step), names_to = "variable", values_to = "m_agg") %>% 
-  group_by(step) %>% 
-  mutate(m_agg = ifelse(m_agg > q99(m_agg), q99(m_agg), m_agg)) %>% 
-  ungroup() %>% 
-  ggplot(aes(x = rowname, y = variable, fill = m_agg)) +
-  geom_tile() +
-  scale_fill_viridis_c() +
-  facet_wrap(~step)
+autoplot(ex_syn4, type="steps", quantile=.995)
 ```
 
 We see that step 1 and 3 both focus on `V10`, but on different

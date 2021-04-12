@@ -445,7 +445,7 @@ attentive_transformer <- torch::nn_module(
     if (mask_type == "sparsemax")
       self$selector <- torch::nn_contrib_sparsemax(dim=-1)
     else if (mask_type == "entmax")
-      self$selector <- entmax(dim=-1)
+      self$selector <- Entmax15(dim=-1)
     else
       stop("Please choose either sparsemax or entmax as masktype")
 
