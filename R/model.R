@@ -62,6 +62,8 @@ resolve_data <- function(x, y) {
 #' @param feature_reusage (float) This is the coefficient for feature reusage in the masks.
 #'   A value close to 1 will make mask selection least correlated between layers.
 #'   Values range from 1.0 to 2.0.
+#' @param mask_type (character) Final layer of featue selector, either ["sparsemax"] or ["entmax"].
+#'   Defaults to "sparsemax".
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=128)
 #' @param learn_rate initial learning rate for the optimizer.
@@ -110,6 +112,7 @@ tabnet_config <- function(batch_size = 256,
                           attention_width = NULL,
                           num_steps = 3,
                           feature_reusage = 1.3,
+                          mask_type = "sparsemax",
                           virtual_batch_size = 128,
                           valid_split = 0,
                           learn_rate = 2e-2,
@@ -148,6 +151,7 @@ tabnet_config <- function(batch_size = 256,
     n_a = attention_width,
     n_steps = num_steps,
     gamma = feature_reusage,
+    mask_type = mask_type(mask_type)$values,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
     verbose = verbose,
@@ -286,7 +290,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     cat_emb_dim = config$cat_emb_dim,
     n_independent = config$n_independent,
     n_shared = config$n_shared,
-    momentum = config$momentum
+    momentum = config$momentum,
+    mask_type = conf$mask_type
   )
 
   # main loop
