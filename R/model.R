@@ -151,7 +151,7 @@ tabnet_config <- function(batch_size = 256,
     n_a = attention_width,
     n_steps = num_steps,
     gamma = feature_reusage,
-    mask_type = mask_type(mask_type)$values,
+    mask_type = mask_type,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
     learn_rate = learn_rate,
@@ -291,7 +291,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     n_independent = config$n_independent,
     n_shared = config$n_shared,
     momentum = config$momentum,
-    mask_type = conf$mask_type
+    mask_type = config$mask_type
   )
 
   # main loop

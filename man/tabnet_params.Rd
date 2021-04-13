@@ -7,6 +7,8 @@
 \alias{feature_reusage}
 \alias{num_independent}
 \alias{num_shared}
+\alias{momentum}
+\alias{mask_type}
 \title{Parameters for the tabnet model}
 \usage{
 decision_width(range = c(8L, 64L), trans = NULL)
@@ -20,11 +22,17 @@ feature_reusage(range = c(1, 2), trans = NULL)
 num_independent(range = c(1L, 5L), trans = NULL)
 
 num_shared(range = c(1L, 5L), trans = NULL)
+
+momentum(range = c(0.01, 0.4), trans = NULL)
+
+mask_type(values = c("sparsemax", "entmax"))
 }
 \arguments{
 \item{range}{the default range for the parameter value}
 
-\item{trans}{wether to apply a transformation to the parameter
+\item{trans}{whether to apply a transformation to the parameter}
+
+\item{values}{possible values for factor parameters
 
 These functions are used with \code{tune} grid functions to generate
 candidates.}
