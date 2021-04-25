@@ -345,12 +345,13 @@ test_that("fit works with entmax mask-type", {
     step_normalize(all_numeric(), -all_outcomes())
 
   expect_error(
-    fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
                       config = tabnet_config( mask_type="entmax")),
     regexp = NA
   )
   expect_error(
-    predict(fit, attrition),
+    predict(tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+                       config = tabnet_config( mask_type="entmax")), attrition),
     regexp = NA
   )
 
@@ -364,7 +365,7 @@ test_that("fit raise an error with non-supported mask-type", {
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   expect_error(
-    fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
                       config = tabnet_config( mask_type="max_entropy")),
     regexp = "either sparsemax or entmax"
   )
