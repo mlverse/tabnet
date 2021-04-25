@@ -68,8 +68,8 @@ the paper n_d=n_a is usually a good choice. (default=8)}
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.}
 
-\item{mask_type}{(character) Final layer of featue selector, either \link{"sparsemax"} or \link{"entmax"}.
-Defaults to "sparsemax".}
+\item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
+block, either \link{"sparsemax"} or \link{"entmax"}.Defaults to \link{"sparsemax"}.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=128)}

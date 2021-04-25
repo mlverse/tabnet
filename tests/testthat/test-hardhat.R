@@ -334,3 +334,39 @@ test_that("fit uses config parameters mix from config= and ...", {
   expect_equal(fit$fit$config$n_a, 5)
 
 })
+
+test_that("fit works with entmax mask-type", {
+
+  library(recipes)
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+
+  expect_error(
+    fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+                      config = tabnet_config( mask_type="entmax")),
+    regexp = NA
+  )
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+})
+test_that("fit raise an error with non-supported mask-type", {
+
+  library(recipes)
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  expect_error(
+    fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+                      config = tabnet_config( mask_type="max_entropy")),
+    regexp = "either sparsemax or entmax"
+  )
+
+})

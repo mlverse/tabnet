@@ -62,8 +62,8 @@ resolve_data <- function(x, y) {
 #' @param feature_reusage (float) This is the coefficient for feature reusage in the masks.
 #'   A value close to 1 will make mask selection least correlated between layers.
 #'   Values range from 1.0 to 2.0.
-#' @param mask_type (character) Final layer of featue selector, either ["sparsemax"] or ["entmax"].
-#'   Defaults to "sparsemax".
+#' @param mask_type (character) Final layer of feature selector in the attentive_transformer
+#'   block, either ["sparsemax"] or ["entmax"].Defaults to ["sparsemax"].
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=128)
 #' @param learn_rate initial learning rate for the optimizer.
