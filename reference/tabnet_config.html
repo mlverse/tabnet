@@ -149,6 +149,7 @@
   attention_width <span class='op'>=</span> <span class='cn'>NULL</span>,
   num_steps <span class='op'>=</span> <span class='fl'>3</span>,
   feature_reusage <span class='op'>=</span> <span class='fl'>1.3</span>,
+  mask_type <span class='op'>=</span> <span class='st'>"sparsemax"</span>,
   virtual_batch_size <span class='op'>=</span> <span class='fl'>128</span>,
   valid_split <span class='op'>=</span> <span class='fl'>0</span>,
   learn_rate <span class='op'>=</span> <span class='fl'>0.02</span>,
@@ -222,6 +223,11 @@ the paper n_d=n_a is usually a good choice. (default=8)</p></td>
       <td><p>(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.</p></td>
+    </tr>
+    <tr>
+      <th>mask_type</th>
+      <td><p>(character) Final layer of feature selector in the attentive_transformer
+block, either "sparsemax" or "entmax".Defaults to "sparsemax".</p></td>
     </tr>
     <tr>
       <th>virtual_batch_size</th>
