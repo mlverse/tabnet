@@ -43,3 +43,5 @@ Suggests:
     tidyr,
     purrr
 VignetteBuilder: knitr
+Remotes:
+    mlverse/torch@bugfix/restore-correct-requires_grad
