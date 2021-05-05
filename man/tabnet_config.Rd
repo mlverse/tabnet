@@ -69,7 +69,7 @@ A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.}
 
 \item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
-block, either \link{"sparsemax"} or \link{"entmax"}.Defaults to \link{"sparsemax"}.}
+block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax"}.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=128)}
