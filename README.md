@@ -12,6 +12,7 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![CRAN
 status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org/package=tabnet)
 [![](https://cranlogs.r-pkg.org/badges/tabnet)](https://cran.r-project.org/package=tabnet)
+[![Discord](https://img.shields.io/discord/837019024499277855?logo=discord)](https://discord.com/invite/s3D5cKhBkx)
 <!-- badges: end -->
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular
@@ -34,7 +35,7 @@ The development version can be installed from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mlverse/tabnet")
+remotes::install_github("mlverse/tabnet")
 ```
 
 ## Example
@@ -78,14 +79,14 @@ cbind(test, predict(fit, test)) %>%
 #> # A tibble: 3 x 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.847
-#> 2 precision binary         0.848
-#> 3 recall    binary         0.996
+#> 1 accuracy  binary         0.867
+#> 2 precision binary         0.885
+#> 3 recall    binary         0.967
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 x 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.705
+#> 1 roc_auc binary         0.726
 ```
