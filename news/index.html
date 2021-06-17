@@ -136,19 +136,35 @@
 <h1 class="page-header" data-toc-text="development version">
 <a href="#tabnet-development-version" class="anchor"></a>tabnet (development version)<small> Unreleased </small>
 </h1>
+<div id="new-features" class="section level2">
+<h2 class="hasAnchor">
+<a href="#new-features" class="anchor"></a>New features</h2>
 <ul>
-<li>Fixed bug in GPU training. (<a href='https://github.com/mlverse/tabnet/issues/22'>#22</a>)</li>
-<li>Added GPU CI. (<a href='https://github.com/mlverse/tabnet/issues/22'>#22</a>)</li>
-<li>Explicit error in case of missing values (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/24'>#24</a>)</li>
 <li>Allow model fine-tuning through passing a pre-trained model to tabnet_fit() (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/26'>#26</a>)</li>
-<li>Fixed memory leaks when using custom autograd function.</li>
+<li>Explicit error in case of missing values (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/24'>#24</a>)</li>
 <li>Better handling of larger datasets when running <code>tabnet_explain</code>.</li>
-<li>Batch predictions to avoid OOM error.</li>
 <li>Add tabnet_pretrain() for unsupervised pretraining (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/29'>#29</a>)</li>
 <li>Add autoplot() of model loss among epochs (<a href='https://github.com/cregouby'>@cregouby</a>, <a href='https://github.com/mlverse/tabnet/issues/36'>#36</a>)</li>
 <li>Added a <code>config</code> argument to fit/pretrain functions so one can pass a pre-made config list. (<a href='https://github.com/mlverse/tabnet/issues/42'>#42</a>)</li>
 <li>Add <code>mask_type</code> configuration option with <code>entmax</code> additional to <code>sparsemax</code> (<a href='https://github.com/cmcmaster1'>@cmcmaster1</a>, <a href='https://github.com/mlverse/tabnet/issues/48'>#48</a>)</li>
 </ul>
+</div>
+<div id="bugfixes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bugfixes" class="anchor"></a>Bugfixes</h2>
+<ul>
+<li>Fixed bug in GPU training. (<a href='https://github.com/mlverse/tabnet/issues/22'>#22</a>)</li>
+<li>Fixed memory leaks when using custom autograd function.</li>
+<li>Batch predictions to avoid OOM error.</li>
+</ul>
+</div>
+<div id="internal-improvements" class="section level2">
+<h2 class="hasAnchor">
+<a href="#internal-improvements" class="anchor"></a>Internal improvements</h2>
+<ul>
+<li>Added GPU CI. (<a href='https://github.com/mlverse/tabnet/issues/22'>#22</a>)</li>
+</ul>
+</div>
 </div>
     <div id="tabnet-010" class="section level1">
 <h1 class="page-header" data-toc-text="0.1.0">

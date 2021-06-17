@@ -104,7 +104,7 @@
 <p>The development version can be installed from <a href="https://github.com/">GitHub</a> with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># install.packages("devtools")</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mlverse/tabnet"</span><span class="op">)</span></code></pre></div>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"mlverse/tabnet"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
@@ -148,16 +148,16 @@
 <span class="co">#&gt; # A tibble: 3 x 3</span>
 <span class="co">#&gt;   .metric   .estimator .estimate</span>
 <span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;          &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 accuracy  binary         0.847</span>
-<span class="co">#&gt; 2 precision binary         0.848</span>
-<span class="co">#&gt; 3 recall    binary         0.996</span>
+<span class="co">#&gt; 1 accuracy  binary         0.867</span>
+<span class="co">#&gt; 2 precision binary         0.885</span>
+<span class="co">#&gt; 3 recall    binary         0.967</span>
   
 <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">roc_auc</span><span class="op">(</span><span class="va">Attrition</span>, <span class="va">.pred_No</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 1 x 3</span>
 <span class="co">#&gt;   .metric .estimator .estimate</span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 roc_auc binary         0.705</span></code></pre></div>
+<span class="co">#&gt; 1 roc_auc binary         0.726</span></code></pre></div>
 </div>
 </div>
   </div>
@@ -196,6 +196,7 @@
 <li><a href="https://www.tidyverse.org/lifecycle/#experimental"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://CRAN.R-project.org/package=tabnet"><img src="https://www.r-pkg.org/badges/version/tabnet" alt="CRAN status"></a></li>
 <li><a href="https://cran.r-project.org/package=tabnet"><img src="https://cranlogs.r-pkg.org/badges/tabnet"></a></li>
+<li><a href="https://discord.com/invite/s3D5cKhBkx"><img src="https://img.shields.io/discord/837019024499277855?logo=discord" alt="Discord"></a></li>
 </ul>
 </div>
 </div>
