@@ -4,3 +4,4 @@ inst/doc
 .Rhistory
 .venv
 activate
+.V8history
