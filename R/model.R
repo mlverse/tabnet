@@ -140,26 +140,11 @@ tabnet_config <- function(batch_size = 256,
   if (is.null(decision_width))
     decision_width <- attention_width
 
-  # resolve loss
-  if (config$loss == "auto") {
-    if (data$y$dtype == torch::torch_long())
-      config$loss <- "cross_entropy"
-    else
-      config$loss <- "mse"
-  }
-
-  if (config$loss == "mse")
-    config$loss_fn <- torch::nn_mse_loss()
-  else if (config$loss %in% c("bce", "cross_entropy"))
-    config$loss_fn <- torch::nn_cross_entropy_loss()
-
-
   list(
     batch_size = batch_size,
     lambda_sparse = penalty,
     clip_value = clip_value,
     loss = loss,
-    loss_fn = loss_fn,
     epochs = epochs,
     drop_last = drop_last,
     n_d = decision_width,
@@ -185,6 +170,27 @@ tabnet_config <- function(batch_size = 256,
     importance_sample_size = importance_sample_size
   )
 }
+
+resolve_loss <- function(loss, dtype) {
+  if (loss == "auto") {
+    if (dtype == torch::torch_long())
+      loss <- "cross_entropy"
+    else
+      loss <- "mse"
+  }
+
+  if (is.function(loss))
+    loss_fn <- loss
+  else if (loss == "mse" && !dtype == torch::torch_long())
+    loss_fn <- torch::nn_mse_loss()
+  else if (loss %in% c("bce", "cross_entropy") && dtype == torch::torch_long())
+    loss_fn <- torch::nn_cross_entropy_loss()
+  else
+    rlang::abort(paste0(loss," is not available for outcome of type ",dtype))
+
+  loss_fn
+}
+
 
 batch_to_device <- function(batch, device) {
   batch <- list(x = batch$x, y  = batch$y)
@@ -277,6 +283,9 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   # training data
   data <- resolve_data(x, y)
 
+  # resolve loss
+  config$loss_fn <- resolve_loss(config$loss, data$y$dtype)
+
   # create network
   network <- tabnet_nn(
     input_dim = data$input_dim,
@@ -364,6 +373,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       shuffle = FALSE
     )
   }
+
+  # resolve loss
+  config$loss_fn <- resolve_loss(config$loss, data$y$dtype)
 
   # restore network from model and send it to device
   network <- obj$fit$network
