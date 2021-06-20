@@ -9,6 +9,7 @@
 * Add autoplot() of model loss among epochs (@cregouby, #36)
 * Added a `config` argument to fit/pretrain functions so one can pass a pre-made config list. (#42)
 * Add `mask_type` configuration option with `entmax` additional to `sparsemax` (@cmcmaster1, #48)
+* Allow `tabnet_config(loss=)` to be a function (@cregouby, #55)
 
 ## Bugfixes
 
