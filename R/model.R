@@ -172,21 +172,14 @@ tabnet_config <- function(batch_size = 256,
 }
 
 resolve_loss <- function(loss, dtype) {
-  if (loss == "auto") {
-    if (dtype == torch::torch_long())
-      loss <- "cross_entropy"
-    else
-      loss <- "mse"
-  }
-
   if (is.function(loss))
     loss_fn <- loss
-  else if (loss == "mse" && !dtype == torch::torch_long())
+  else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
     loss_fn <- torch::nn_mse_loss()
-  else if (loss %in% c("bce", "cross_entropy") && dtype == torch::torch_long())
+  else if (loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long())
     loss_fn <- torch::nn_cross_entropy_loss()
   else
-    rlang::abort(paste0(loss," is not available for outcome of type ",dtype))
+    rlang::abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
 
   loss_fn
 }

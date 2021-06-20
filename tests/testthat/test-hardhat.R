@@ -404,17 +404,17 @@ test_that("config$loss not adapted to recipe outcome raise an explicit error", {
   # nominal outcome with numerical loss
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
-                      config = tabnet_config( loss="mse"))
-  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_mse_loss())
-
+  expect_error(tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+                          config = tabnet_config( loss="mse")),
+              regexp = "is not a valid loss for outcome of type"
+  )
   # numerical outcome
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
-                      config = tabnet_config( loss="cross_entropy"))
-  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_cross_entropy_loss())
-
+  expect_error(tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+                      config = tabnet_config( loss="cross_entropy")),
+               regexp = "is not a valid loss for outcome of type"
+  )
 })
 
 
@@ -428,15 +428,15 @@ test_that("config$loss can be a function", {
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
-                      config = tabnet_config( loss=torch::nn_kl_div_loss()))
-  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_kl_div_loss())
+                      config = tabnet_config( loss=torch::nn_nll_loss()))
+  expect_equivalent(fit_auto$fit$config$loss_fn, torch::nn_nll_loss())
 
   # numerical outcome loss
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
-                      config = tabnet_config( loss=torch::nn_smooth_l1_loss()))
-  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_smooth_l1_loss())
+                      config = tabnet_config( loss=torch::nn_poisson_nll_loss()))
+  expect_equivalent(fit_auto$fit$config$loss_fn, torch::nn_poisson_nll_loss())
 
 })
 
