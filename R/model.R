@@ -140,11 +140,26 @@ tabnet_config <- function(batch_size = 256,
   if (is.null(decision_width))
     decision_width <- attention_width
 
+  # resolve loss
+  if (config$loss == "auto") {
+    if (data$y$dtype == torch::torch_long())
+      config$loss <- "cross_entropy"
+    else
+      config$loss <- "mse"
+  }
+
+  if (config$loss == "mse")
+    config$loss_fn <- torch::nn_mse_loss()
+  else if (config$loss %in% c("bce", "cross_entropy"))
+    config$loss_fn <- torch::nn_cross_entropy_loss()
+
+
   list(
     batch_size = batch_size,
     lambda_sparse = penalty,
     clip_value = clip_value,
     loss = loss,
+    loss_fn = loss_fn,
     epochs = epochs,
     drop_last = drop_last,
     n_d = decision_width,
@@ -262,20 +277,6 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   # training data
   data <- resolve_data(x, y)
 
-  # resolve loss
-  if (config$loss == "auto") {
-    if (data$y$dtype == torch::torch_long())
-      config$loss <- "cross_entropy"
-    else
-      config$loss <- "mse"
-  }
-
-  if (config$loss == "mse")
-    config$loss_fn <- torch::nn_mse_loss()
-  else if (config$loss %in% c("bce", "cross_entropy"))
-    config$loss_fn <- torch::nn_cross_entropy_loss()
-
-
   # create network
   network <- tabnet_nn(
     input_dim = data$input_dim,
@@ -364,19 +365,6 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     )
   }
 
-  if (config$loss == "auto") {
-    if (data$y$dtype == torch::torch_long())
-      config$loss <- "cross_entropy"
-    else
-      config$loss <- "mse"
-  }
-
-  # resolve loss
-  if (config$loss == "mse") {
-    config$loss_fn <- torch::nn_mse_loss()
-    }  else if (config$loss %in% c("bce", "cross_entropy")) {
-      config$loss_fn <- torch::nn_cross_entropy_loss()
-    }
   # restore network from model and send it to device
   network <- obj$fit$network
 
