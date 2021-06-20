@@ -440,10 +440,10 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
     network$eval()
     if (has_valid) {
-      for (batch in torch::enumerate(valid_dl)) {
+      coro::loop(for (batch in valid_dl) {
         m <- valid_batch(network, batch_to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
-      }
+      })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
     }
 
