@@ -1,4 +1,4 @@
-# tabnet (development version)
+# tabnet 0.2.0
 
 ## New features
 
