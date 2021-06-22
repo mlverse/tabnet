@@ -171,6 +171,20 @@ tabnet_config <- function(batch_size = 256,
   )
 }
 
+resolve_loss <- function(loss, dtype) {
+  if (is.function(loss))
+    loss_fn <- loss
+  else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
+    loss_fn <- torch::nn_mse_loss()
+  else if (loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long())
+    loss_fn <- torch::nn_cross_entropy_loss()
+  else
+    rlang::abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
+
+  loss_fn
+}
+
+
 batch_to_device <- function(batch, device) {
   batch <- list(x = batch$x, y  = batch$y)
   lapply(batch, function(x) {
@@ -263,18 +277,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   data <- resolve_data(x, y)
 
   # resolve loss
-  if (config$loss == "auto") {
-    if (data$y$dtype == torch::torch_long())
-      config$loss <- "cross_entropy"
-    else
-      config$loss <- "mse"
-  }
-
-  if (config$loss == "mse")
-    config$loss_fn <- torch::nn_mse_loss()
-  else if (config$loss %in% c("bce", "cross_entropy"))
-    config$loss_fn <- torch::nn_cross_entropy_loss()
-
+  config$loss_fn <- resolve_loss(config$loss, data$y$dtype)
 
   # create network
   network <- tabnet_nn(
@@ -364,19 +367,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     )
   }
 
-  if (config$loss == "auto") {
-    if (data$y$dtype == torch::torch_long())
-      config$loss <- "cross_entropy"
-    else
-      config$loss <- "mse"
-  }
-
   # resolve loss
-  if (config$loss == "mse") {
-    config$loss_fn <- torch::nn_mse_loss()
-    }  else if (config$loss %in% c("bce", "cross_entropy")) {
-      config$loss_fn <- torch::nn_cross_entropy_loss()
-    }
+  config$loss_fn <- resolve_loss(config$loss, data$y$dtype)
+
   # restore network from model and send it to device
   network <- obj$fit$network
 
@@ -440,10 +433,10 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
     network$eval()
     if (has_valid) {
-      for (batch in torch::enumerate(valid_dl)) {
+      coro::loop(for (batch in valid_dl) {
         m <- valid_batch(network, batch_to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
-      }
+      })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
     }
 
