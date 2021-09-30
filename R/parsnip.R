@@ -300,3 +300,36 @@ multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NU
   tibble::tibble(.pred = p)
 }
 
+#' @export
+#' @importFrom stats update
+update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NULL, batch_size = NULL,
+                          learn_rate = NULL, decision_width = NULL, attention_width = NULL,
+                          num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
+                          num_independent = NULL, num_shared = NULL, momentum = NULL, ...) {
+  rlang::check_installed("parsnip")
+  eng_args <- parsnip::update_engine_parameters(object$eng_args, ...)
+  args <- list(
+    epochs = rlang::enquo(epochs),
+    penalty = rlang::enquo(penalty),
+    batch_size = rlang::enquo(batch_size),
+    learn_rate = rlang::enquo(learn_rate),
+    decision_width = rlang::enquo(decision_width),
+    attention_width = rlang::enquo(attention_width),
+    num_steps = rlang::enquo(num_steps),
+    feature_reusage = rlang::enquo(feature_reusage),
+    virtual_batch_size = rlang::enquo(virtual_batch_size),
+    num_independent = rlang::enquo(num_independent),
+    num_shared = rlang::enquo(num_shared),
+    momentum = rlang::enquo(momentum)
+  )
+  args <- parsnip::update_main_parameters(args, parameters)
+  parsnip::new_model_spec(
+    "tabnet",
+    args = args,
+    eng_args = eng_args,
+    mode = object$mode,
+    method = NULL,
+    engine = object$engine
+  )
+}
+
