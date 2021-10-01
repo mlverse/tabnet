@@ -41,5 +41,7 @@ Suggests:
     ggplot2,
     dplyr,
     tidyr,
-    purrr
+    purrr,
+    tune,
+    workflows
 VignetteBuilder: knitr
