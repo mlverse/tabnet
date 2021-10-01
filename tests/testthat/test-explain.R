@@ -1,16 +1,16 @@
 test_that("explain", {
 
-  set.seed(1)
-  torch::torch_manual_seed(1)
+  set.seed(2)
+  torch::torch_manual_seed(2)
 
   n <- 1000
   x <- data.frame(
-    x = runif(n),
-    y = runif(n),
-    z = runif(n)
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
   )
 
-  y <- x$x + rnorm(n, sd = 0.0000001)
+  y <- x$x
 
   fit <- tabnet_fit(x, y, epochs = 10,
                     num_steps = 1,
