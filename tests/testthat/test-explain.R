@@ -10,7 +10,7 @@ test_that("explain", {
     z = runif(n)
   )
 
-  y <- x$x
+  y <- x$x + rnorm(n, sd = 0.0000001)
 
   fit <- tabnet_fit(x, y, epochs = 10,
                     num_steps = 1,
