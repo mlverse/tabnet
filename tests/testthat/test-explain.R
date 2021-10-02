@@ -1,13 +1,13 @@
 test_that("explain", {
 
-  set.seed(1)
-  torch::torch_manual_seed(1)
+  set.seed(2)
+  torch::torch_manual_seed(2)
 
   n <- 1000
   x <- data.frame(
-    x = runif(n),
-    y = runif(n),
-    z = runif(n)
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
   )
 
   y <- x$x
