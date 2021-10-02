@@ -45,3 +45,4 @@ Suggests:
     tune,
     workflows
 VignetteBuilder: knitr
+Config/testthat/edition: 3
