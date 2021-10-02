@@ -43,5 +43,5 @@ Suggests:
     tidyr,
     purrr,
     tune,
-    workflow
+    workflows
 VignetteBuilder: knitr
