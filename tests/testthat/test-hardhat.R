@@ -85,7 +85,7 @@ test_that("works with validation split", {
 
 test_that("can train from a recipe", {
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
 
   rec <- recipe(Attrition ~ ., data = attrition) %>%
@@ -172,7 +172,7 @@ test_that("data-frame with missing value makes inference fails with explicit mes
 })
 test_that("inference works with missings in the response vector", {
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 
@@ -289,7 +289,6 @@ test_that("checkpoints works for inference", {
 
 test_that("print module works even after a reload from disk", {
 
-  testthat::local_edition(3)
   testthat::skip_on_os("linux")
   testthat::skip_on_os("windows")
 
@@ -315,7 +314,7 @@ test_that("print module works even after a reload from disk", {
 
 test_that("fit uses config parameters mix from config= and ...", {
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 
@@ -337,7 +336,7 @@ test_that("fit uses config parameters mix from config= and ...", {
 
 test_that("fit works with entmax mask-type", {
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 
@@ -375,7 +374,7 @@ test_that("fit raise an error with non-supported mask-type", {
 
 test_that("config$loss=`auto` adapt to recipe outcome str()", {
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 
@@ -384,14 +383,14 @@ test_that("config$loss=`auto` adapt to recipe outcome str()", {
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss="auto"))
-  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_cross_entropy_loss())
+  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_cross_entropy_loss(), ignore_function_env = TRUE)
 
   # numerical outcome
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss="auto"))
-  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_mse_loss())
+  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_mse_loss(), ignore_function_env = TRUE)
 
 })
 
@@ -420,7 +419,7 @@ test_that("config$loss not adapted to recipe outcome raise an explicit error", {
 
 test_that("config$loss can be a function", {
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 
@@ -429,15 +428,13 @@ test_that("config$loss can be a function", {
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss=torch::nn_nll_loss()))
-  expect_equivalent(fit_auto$fit$config$loss_fn, torch::nn_nll_loss())
+  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_nll_loss(), ignore_function_env = TRUE)
 
   # numerical outcome loss
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss=torch::nn_poisson_nll_loss()))
-  expect_equivalent(fit_auto$fit$config$loss_fn, torch::nn_poisson_nll_loss())
+  expect_equal(fit_auto$fit$config$loss_fn, torch::nn_poisson_nll_loss(), ignore_function_env = TRUE)
 
 })
-
-
