@@ -1,4 +1,4 @@
-# tabnet (development version)
+# tabnet 0.3.0
 
 - Added an `update` method for tabnet models to allow the correct usage of `finalize_workflow` (#60).
 
