@@ -1,4 +1,4 @@
-train_batch_un <- function(network, optimizer, batch, config) {
+train_batch_un <- function(network, optimizer, batch, batch_na_mask, config) {
   # forward pass
   output <- network(batch)
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
@@ -16,7 +16,7 @@ train_batch_un <- function(network, optimizer, batch, config) {
   )
 }
 
-valid_batch_un <- function(network, batch, config) {
+valid_batch_un <- function(network, batch, batch_na_mask, config) {
   # forward pass
   output <- network(batch)
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
@@ -74,14 +74,15 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
-    valid_data <- list(x = x[valid_idx, ])
+    valid_data <- list(x = x[valid_idx, ], na_mask = !x[valid_idx, ] %>% is.na)
     x <- x[-valid_idx, ]
+    na_mask = !x[-valid_idx, ] %>% is.na
 
   }
   # training data
   data <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
   dl <- torch::dataloader(
-    torch::tensor_dataset(x = data$x),
+    torch::tensor_dataset(x = data$x, na_mask = torch::torch_tensor(as.matrix(na_mask), dtype = torch::torch_bool())),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -91,7 +92,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   if (has_valid) {
     valid_data <- resolve_data(valid_data$x, y=matrix(rep(1, nrow(valid_data$x)),ncol=1))
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_data$x),
+      torch::tensor_dataset(x = valid_data$x, na_mask = torch::torch_tensor(as.matrix(valid_data$na_mask), dtype = torch::torch_bool())),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
@@ -164,7 +165,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
     coro::loop(for (batch in dl) {
       batch_x_to_device <- batch$x$to(device=device)
-      m <- train_batch_un(network, optimizer, batch_x_to_device, config)
+      batch_na_to_device <- batch$na_mask$to(device=device)
+      m <- train_batch_un(network, optimizer, batch_x_to_device, batch_na_to_device, config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     })
@@ -180,7 +182,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     if (has_valid) {
       coro::loop(for (batch in valid_dl) {
         batch_x_to_device <- batch$x$to(device=device)
-        m <- valid_batch_un(network, batch_x_to_device, config)
+        batch_na_to_device <- batch$na_mask$to(device=device)
+        m <- valid_batch_un(network, batch_x_to_device, batch_na_to_device, config)
         valid_metrics <- c(valid_metrics, m)
       })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)

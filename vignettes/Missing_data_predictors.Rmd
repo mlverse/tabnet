@@ -1,0 +1,54 @@
+---
+title: "Training a Tabnet model from missing-values dataset"
+author: "Christophe Regouby"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Motivation
+
+Real-life training dataset usually contains missing data. The vast majority of deep-learning networks do not handle missing data and thus either stop or crash when values are missing in the predictors.
+
+But Tabnet use a masking mecanism that can be adapted to cover the missing data in the training set.
+
+# Missing-data dataset creation
+
+## Ames
+
+The `ames` dataset from the `modeldata` packages contains a lot of numerical value 0 that the human analysis clearly translate into missing data, like pool size of 0 square meters, basement surface of 0 square meters, ...A lot of them can be detected visually by inspecting the distribution of the values like for the `Masonry veneer area` predictor :
+```{r}
+suppressPackageStartupMessages(library(tidymodels))
+data("ames", package = "modeldata")
+qplot(ames$Mas_Vnr_Area)
+```
+
+## Ames with missing data
+
+Let's dig up those missing data :
+
+A quick and dirty way to achieve it is to `na_if()` zeros on surface and area columns. 
+
+```{r}
+col_with_zero_as_na <- ames %>% select_if(is.numeric) %>% select(matches("_SF|Area")) %>% summarise_each(min) %>% select_if(~.x==0) %>% names()
+ames_missing <- ames %>% mutate_at(col_with_zero_as_na, na_if, 0)
+visdat::vis_miss(ames_missing)
+```
+
+A better way to achieve it would be to turn numerical value to NA when the corresponding description columns refer to ènoneè or to 0 occurence of the equipment. But this is beyond the scope of this vignette.
+
+## Variable importance with `ames` dataset
+
+## Variable importance with `ames_missing` dataset
+
+

@@ -4,7 +4,6 @@
 #' @param x a data frame
 #' @param y a response vector
 resolve_data <- function(x, y) {
-  stopifnot("Error: found missing values in the predictor data frame" = sum(is.na(x))==0)
   stopifnot("Error: found missing values in the response vector" = sum(is.na(y))==0)
   # convert factors to integers
   x_ <- x
@@ -274,6 +273,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   }
 
   # training data
+  stopifnot("Error: found missing values in the predictor initialisation data frame" = sum(is.na(x))==0)
   data <- resolve_data(x, y)
 
   # resolve loss
@@ -348,6 +348,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # training data
+  stopifnot("Error: found missing values in the predictor training data frame" = sum(is.na(x))==0)
   data <- resolve_data(x, y)
   dl <- torch::dataloader(
     torch::tensor_dataset(x = data$x, y = data$y),
@@ -358,6 +359,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # validation data
   if (has_valid) {
+    stopifnot("Error: found missing values in the predictor validation data frame" = sum(is.na(valid_data$x))==0)
     valid_data <- resolve_data(valid_data$x, valid_data$y)
     valid_dl <- torch::dataloader(
       torch::tensor_dataset(x = valid_data$x, y = valid_data$y),
@@ -478,6 +480,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 }
 
 predict_impl <- function(obj, x, batch_size = 1e5) {
+  stopifnot("Error: found missing values in the predictor data frame for prediction" = sum(is.na(x))==0)
   data <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
 
   network <- obj$fit$network

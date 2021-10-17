@@ -42,6 +42,7 @@
 #' @export
 tabnet_explain <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint)
+  stopifnot("Error: found missing values in the predictor data frame" = sum(is.na(processed$predictors))==0)
   data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(new_data))))
   output <- explain_impl(object$fit$network, data$x)
 
