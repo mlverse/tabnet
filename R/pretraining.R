@@ -1,6 +1,6 @@
 train_batch_un <- function(network, optimizer, batch, batch_na_mask, config) {
   # forward pass
-  output <- network(batch)
+  output <- network(batch, batch_na_mask)
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
 
   # step of the backward pass and optimization
@@ -18,7 +18,7 @@ train_batch_un <- function(network, optimizer, batch, batch_na_mask, config) {
 
 valid_batch_un <- function(network, batch, batch_na_mask, config) {
   # forward pass
-  output <- network(batch)
+  output <- network(batch, batch_na_mask)
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
 
   list(
@@ -76,10 +76,11 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_data <- list(x = x[valid_idx, ], na_mask = !x[valid_idx, ] %>% is.na)
     x <- x[-valid_idx, ]
-    na_mask = !x[-valid_idx, ] %>% is.na
+    na_mask = x[-valid_idx, ] %>% is.na
 
   }
   # training data
+  na_mask = x %>% is.na
   data <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
   dl <- torch::dataloader(
     torch::tensor_dataset(x = data$x, na_mask = torch::torch_tensor(as.matrix(na_mask), dtype = torch::torch_bool())),
