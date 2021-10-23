@@ -26,14 +26,17 @@ autoplot.tabnet_fit <- function(object, ...) {
   collect_metrics <- tibble::enframe(object$fit$metrics,name = "epoch") %>%
     tidyr::unnest_longer(value,indices_to = "dataset") %>%
     tidyr::unnest_wider(value) %>%
-    # remove the valid col if all NAs to prevent ggplot warnings
+    # drop entries from pretrain that have missing `dataset`
+    tidyr::drop_na(dataset) %>%
     tidyr::pivot_wider(values_from = loss, names_from = dataset) %>%
-    dplyr::select_if(~!all(is.na(.x))) %>%
+    # remove the valid col if all NAs to prevent ggplot warnings
+    dplyr::select_if(function(x) {!all(is.na(x))} ) %>%
     tidyr::pivot_longer(cols = !epoch, names_to = "dataset", values_to = "loss") %>%
     # add checkpoints
     dplyr::mutate(mean_loss = purrr::map_dbl(loss, mean),
-           has_checkpoint = epoch %in% epoch_checkpointed_seq) %>%
-    dplyr::select(-loss)
+                  min_epoch = min(epoch, na.rm=TRUE),
+           has_checkpoint = epoch %in% (epoch_checkpointed_seq + min_epoch- 1)) %>%
+    dplyr::select(-loss, -min_epoch)
 
   checkpoints <- collect_metrics %>%
     dplyr::filter(has_checkpoint, dataset=="train") %>%
