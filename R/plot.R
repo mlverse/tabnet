@@ -35,9 +35,8 @@ autoplot.tabnet_fit <- function(object, ...) {
     tidyr::pivot_longer(cols = !epoch, names_to = "dataset", values_to = "loss") %>%
     # add checkpoints
     dplyr::mutate(mean_loss = purrr::map_dbl(loss, mean),
-                  min_epoch = min(epoch, na.rm=TRUE),
-           has_checkpoint = epoch %in% (epoch_checkpointed_seq + .data$min_epoch - 1)) %>%
-    dplyr::select(-loss, -min_epoch)
+           has_checkpoint = epoch %in% (epoch_checkpointed_seq + min(epoch, na.rm=TRUE) - 1)) %>%
+    dplyr::select(-loss)
 
   checkpoints <- collect_metrics %>%
     dplyr::filter(has_checkpoint, dataset=="train") %>%
