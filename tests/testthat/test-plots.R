@@ -103,3 +103,50 @@ test_that("Autoplot of pretrain then fit scenario", {
   )
 
 })
+
+test_that("Autoplot of tabnet_explain works for pretrain and fitted model", {
+
+  library(ggplot2)
+
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+
+  x <- attrition[ids,-which(names(attrition) == "Attrition")]
+  y <- attrition[ids,]$Attrition
+
+  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 12, valid_split=.2)
+  explain_pretrain <- tabnet_explain(tabnet_pretrain, x)
+  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 12)
+  explain_fit <- tabnet_explain(tabnet_fit, x)
+
+  expect_error(
+    print(autoplot(explain_pretrain)),
+    regexp = NA
+  )
+
+  expect_error(
+    print(autoplot(explain_pretrain, type="steps")),
+    regexp = NA
+  )
+
+  expect_error(
+    print(autoplot(explain_pretrain, type="steps", quantile = 0.99)),
+    regexp = NA
+  )
+
+  expect_error(
+    print(autoplot(explain_fit)),
+    regexp = NA
+  )
+
+  expect_error(
+    print(autoplot(explain_fit, type="steps")),
+    regexp = NA
+  )
+
+  expect_error(
+    print(autoplot(explain_fit, type="steps", quantile = 0.99)),
+    regexp = NA
+  )
+
+})
