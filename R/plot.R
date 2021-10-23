@@ -18,6 +18,7 @@
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
 #' }
+#' @importFrom rlang .data
 #'
 autoplot.tabnet_fit <- function(object, ...) {
 
@@ -35,7 +36,7 @@ autoplot.tabnet_fit <- function(object, ...) {
     # add checkpoints
     dplyr::mutate(mean_loss = purrr::map_dbl(loss, mean),
                   min_epoch = min(epoch, na.rm=TRUE),
-           has_checkpoint = epoch %in% (epoch_checkpointed_seq + min_epoch- 1)) %>%
+           has_checkpoint = epoch %in% (epoch_checkpointed_seq + .data$min_epoch - 1)) %>%
     dplyr::select(-loss, -min_epoch)
 
   checkpoints <- collect_metrics %>%
@@ -43,7 +44,7 @@ autoplot.tabnet_fit <- function(object, ...) {
     dplyr::mutate(size=2)
   p <- ggplot2::ggplot(collect_metrics, ggplot2::aes(x=epoch, y=mean_loss, color=dataset)) +
     ggplot2::geom_line() +
-    ggplot2::geom_point(data = checkpoints, ggplot2::aes(x=epoch, y=mean_loss, color=dataset, size = size ) ) +
+    ggplot2::geom_point(data = checkpoints, ggplot2::aes(x=epoch, y=mean_loss, color=dataset, size = .data$size ) ) +
     ggplot2::scale_y_log10() +
     ggplot2::guides(colour = ggplot2::guide_legend("Dataset", order=1, override.aes = list(size=1.5, shape=" ")),
            size= ggplot2::guide_legend("has checkpoint", order=2, override.aes = list(size=3, color="#F8766D"), label.theme = ggplot2::element_text(colour = "#FFFFFF"))) +
