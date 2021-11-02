@@ -35,7 +35,7 @@ First, let's split our dataset into `unsupervised` and `supervised` datasets, so
 set.seed(123)
 data("lending_club", package = "modeldata")
 split <- initial_split(lending_club, strata = Class, prop = 9/10)
-unsupervised <- training(split) %>% mutate(Class=NA)
+unsupervised <- training(split) %>% mutate(Class=factor(NA))
 supervised  <- testing(split)
 ```
 
