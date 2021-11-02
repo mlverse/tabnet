@@ -29,7 +29,7 @@ In this vignette we show how to
 We are going to use the `lending_club` dataset available
 in the `modeldata` package, using 90 % of it as unsupervised data.
 
-First let's split our dataset into `unsupervised` and `supervised` datasets, so we can later train the supervised step of the model:
+First, let's split our dataset into `unsupervised` and `supervised` datasets, so we can later train the supervised step of the model:
 
 ```{r}
 set.seed(123)
@@ -43,9 +43,9 @@ Then we proceed with the usual random split of the supervised dataset into `trai
 
 ```{r}
 set.seed(123)
-split <- initial_split(supervised, strata = Class)
-train <- training(split) 
-test  <- testing(split)
+supervised_split <- initial_split(supervised, strata = Class)
+train <- training(supervised_split) 
+test  <- testing(supervised_split)
 ```
 
 ## Data preprocessing
@@ -229,5 +229,5 @@ test %>%
 1 roc_auc binary         0.557
 ```
 
-
+We can see here a much lower ROC-AUC compared with using the pretraining step. 
 
