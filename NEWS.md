@@ -1,8 +1,13 @@
 # tabnet (development version)
 
+## New features
+
+* Add explicit legend in `autoplot.tabnet_fit()`
+* Improve unsupervised vignette content.
+
 # tabnet 0.3.0
 
-- Added an `update` method for tabnet models to allow the correct usage of `finalize_workflow` (#60).
+* Added an `update` method for tabnet models to allow the correct usage of `finalize_workflow` (#60).
 
 # tabnet 0.2.0
 
