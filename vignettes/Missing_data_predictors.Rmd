@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 Real-life training dataset usually contains missing data. The vast majority of deep-learning networks do not handle missing data and thus either stop or crash when values are missing in the predictors.
 
-But Tabnet use a masking mecanism that can be adapted to cover the missing data in the training set.
+But Tabnet use a masking mechanism that can be adapted to cover the missing data in the training set.
 
 # Missing-data dataset creation
 
@@ -42,7 +42,11 @@ A quick and dirty way to achieve it is to `na_if()` zeros on surface and area co
 
 ```{r}
 col_with_zero_as_na <- ames %>% select_if(is.numeric) %>% select(matches("_SF|Area")) %>% summarise_each(min) %>% select_if(~.x==0) %>% names()
-ames_missing <- ames %>% mutate_at(col_with_zero_as_na, na_if, 0)
+ames_missing <- ames %>% mutate_at(col_with_zero_as_na, na_if, 0) %>% 
+  mutate_at("Alley", na_if, "No_Alley_Access") %>% 
+  mutate_at("Pool_QC", na_if, "No_Pool") %>% 
+  mutate_at(c("Garage_Cond", "Garage_Finish", "Garage_Type"), na_if, "No_Garage") %>% 
+  mutate_at(c("Bsmt_Cond", "Bsmt_Exposure", "BsmtFin_Type_1", "BsmtFin_Type_2"), na_if, "No_Basement")
 visdat::vis_miss(ames_missing)
 ```
 
@@ -51,13 +55,13 @@ A better way to achieve it would be to turn numerical value to NA when the corre
 ## Variable importance with `ames` dataset
 
 ```{r}
-ames_fit <- tabnet_fit(Sale_Price ~ ., data=ames, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
+ames_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
 ```
 
 
 ## Variable importance with `ames_missing` dataset
 
 ```{r}
-ames_missing_fit <- tabnet_fit(Sale_Price ~ ., data=ames_missing, epoch=40, valid_split = 0.2, verbose=TRUE)
+ames_missing_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames_missing, epoch=40, valid_split = 0.2, verbose=TRUE)
 ```
 

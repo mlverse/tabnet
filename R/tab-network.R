@@ -299,7 +299,6 @@ tabnet_pretrainer <- torch::nn_module(
   },
   forward = function(x, x_na_mask) {
     embedded_x <- self$embedder(x)
-    # TODO DANGER ZONE embedder shall be adapted for binary values
     embedded_x_na_mask <- self$embedder_na(x_na_mask)
 
     if (self$training) {
@@ -673,7 +672,6 @@ na_embedding_generator <- torch::nn_module(
 
     if (length(cat_dims) == 0 || length(cat_idxs) == 0) {
       self$skip_embedding <- TRUE
-      self$post_embed_dim <- input_dim
       return(invisible(NULL))
     }
 
@@ -684,24 +682,9 @@ na_embedding_generator <- torch::nn_module(
     else
       self$cat_emb_dims <- cat_emb_dim
 
-    # check that all embeddings are provided has already been done
-
-    self$post_embed_dim <- as.integer(input_dim + sum(self$cat_emb_dims) - length(self$cat_emb_dims))
-    self$embeddings <- torch::nn_module_list()
-
     # Sort dims by cat_idx
     sorted_idx <- order(cat_idxs)
-    cat_dims <- cat_dims[sorted_idx]
     self$cat_emb_dims <- self$cat_emb_dims[sorted_idx]
-
-    for (i in seq_along(cat_dims)) {
-      self$embeddings$append(
-        torch::nn_embedding(
-          cat_dims[i],
-          self$cat_emb_dims[i]
-        )
-      )
-    }
 
     # record continuous indices
     self$continuous_idx <- rep(TRUE, input_dim)
@@ -721,9 +704,11 @@ na_embedding_generator <- torch::nn_module(
     for (i in seq_along(self$continuous_idx)) {
 
       if (self$continuous_idx[i]) {
-        cols[[i]] <- x[,i]$to(dtype = torch::torch_float())$view(c(-1, 1))
+        cols[[i]] <- x[,i]$to(dtype = torch::torch_bool())$view(c(-1, 1))
       } else {
-        cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$to(dtype = torch::torch_long()))
+        # extend the vector to match the dimention of the embedding_x via matmul
+        # TODO basic tensor broadcasting function could be more efficient and have lower footprint
+        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dims[cat_feat_counter]))
         cat_feat_counter <- cat_feat_counter + 1
       }
 
@@ -748,9 +733,9 @@ random_obfuscator <- torch::nn_module(
   },
   forward = function(x, x_na_mask) {
     # workaround while torch_bernoulli is not available in CUDA
-    ones <- torch::torch_ones(size = x$shape, device="cpu")
+    ones <- torch::torch_ones_like(x, device="cpu")
     obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)$to(device=x$device)
-    masked_input = torch::torch_mul(1 - torch::torch_logical_or(obfuscated_vars,x_na_mask), x)
+    masked_input = torch::torch_mul(obfuscated_vars$logical_or(x_na_mask)$logical_not(), x)
 
     list(masked_input, obfuscated_vars)
 
