@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0.9000</span>
       </span>
     </div>
 
@@ -221,7 +221,7 @@
 <p>Now let’s visualize the attention masks. Notice that we arranged the dataset by <code>V10</code> so we can easily visualize the interaction effects.</p>
 <p>We also trimmed to the 99th percentile so the colors shows the importance even if there are strong outliers.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ex_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit_syn4</span>, <span class="fu">arrange</span><span class="op">(</span><span class="va">syn4</span>, <span class="va">V10</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">ex_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit_syn4</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">syn4</span>, <span class="va">V10</span><span class="op">)</span><span class="op">)</span>
 
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">ex_syn4</span>, quantile<span class="op">=</span><span class="fl">.995</span><span class="op">)</span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-10-1.png" width="100%" height="300px"></p>

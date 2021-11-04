@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0.9000</span>
       </span>
     </div>
 
@@ -100,211 +100,166 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet">tabnet</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tidymodels</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org">tidymodels</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org">modeldata</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></code></pre></div>
-<p>In this vignette we show how to - pretrain TabNet model with unsupervised data - fine-tune TabNet with supervised data</p>
-<p>We are going to use the <code>lending_club</code> dataset available in the <code>modeldata</code> package, using 80 % of it as unsupervised data.</p>
-<p>First let’s split our dataset into unsupervised and supervised so we can later train the supervised step of the model:</p>
+<p>In this vignette we show how to - pretrain TabNet model with unsupervised data - fine-tune the pretrained TabNet model with supervised data</p>
+<p>We are going to use the <code>lending_club</code> dataset available in the <code>modeldata</code> package, using 90 % of it as unsupervised data.</p>
+<p>First, let’s split our dataset into <code>unsupervised</code> and <code>supervised</code> datasets, so we can later train the supervised step of the model:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"lending_club"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span>
 <span class="va">split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">lending_club</span>, strata <span class="op">=</span> <span class="va">Class</span>, prop <span class="op">=</span> <span class="fl">9</span><span class="op">/</span><span class="fl">10</span><span class="op">)</span>
-<span class="va">unsupervised</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">split</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>Class<span class="op">=</span><span class="cn">NA</span><span class="op">)</span>
+<span class="va">unsupervised</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">split</span><span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>Class<span class="op">=</span><span class="cn">NA</span><span class="op">)</span>
 <span class="va">supervised</span>  <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></code></pre></div>
-<p>Then we proceed with the usual split of the supervised dataset into train and test so we can later access performance of our model:</p>
+<p>Then we proceed with the usual random split of the supervised dataset into <code>train</code> and <code>test</code> so that we can evaluate performance of our model:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>
-<span class="va">split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">supervised</span>, strata <span class="op">=</span> <span class="va">Class</span><span class="op">)</span>
-<span class="va">train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">split</span><span class="op">)</span> 
-<span class="va">test</span>  <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></code></pre></div>
-<div id="unsupervised-step" class="section level2">
+<span class="va">supervised_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">supervised</span>, strata <span class="op">=</span> <span class="va">Class</span><span class="op">)</span>
+<span class="va">train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">supervised_split</span><span class="op">)</span> 
+<span class="va">test</span>  <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">supervised_split</span><span class="op">)</span></code></pre></div>
+<div id="data-preprocessing" class="section level2">
 <h2 class="hasAnchor">
-<a href="#unsupervised-step" class="anchor"></a>Unsupervised step</h2>
-<p>We now define our pre-processing steps in a recipe. Note that tabnet handles categorical variables, so we don’t need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.</p>
+<a href="#data-preprocessing" class="anchor"></a>Data preprocessing</h2>
+<p>We now define our pre-processing steps in a recipe.<br>
+The <code><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe()</a></code> here is defined on the whole dataset in order to capture the full variability of numerical variables, as well as all categories present in nominal variables.<br>
+Note that tabnet handles categorical variables, so we don’t need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">rec_unsup</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">Class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">unsupervised</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_normalize.html">step_normalize</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html">all_numeric</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="va">prep</span>
-<span class="va">unsupervised_baked_df</span> <span class="op">&lt;-</span> <span class="va">rec_unsup</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html">bake</a></span><span class="op">(</span>new_data<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">Class</span><span class="op">)</span></code></pre></div>
-<p>We now have the normalized dataset ready for unsupervised training. Next, we pre-train our model. For now, input is We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.</p>
+<code class="sourceCode R"><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">Class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">lending_club</span><span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_normalize.html">step_normalize</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html">all_numeric</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="va">unsupervised_baked_df</span> <span class="op">&lt;-</span> <span class="va">rec</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> <span class="va">prep</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html">bake</a></span><span class="op">(</span>new_data<span class="op">=</span><span class="va">unsupervised</span><span class="op">)</span></code></pre></div>
+<p>We now have the normalized dataset ready for unsupervised training.</p>
+</div>
+<div id="unsupervised-training-step" class="section level2">
+<h2 class="hasAnchor">
+<a href="#unsupervised-training-step" class="anchor"></a>Unsupervised training step</h2>
+<p>Next, we pre-train our model with a <a href="https://paperswithcode.com/task/self-supervised-learning">self-supervised learning</a> task. This step will gives us a <code>tabnet_pretrain</code> object that will contain a representation of the dataset variables and their interactions.<br>
+We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">unsupervised_baked_df</span>, <span class="va">lending_club</span>, epochs <span class="op">=</span> <span class="fl">25</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<pre><code>[Epoch 001] Loss: 11191321321.754484 Valid loss: 14043303288.023577                    
-[Epoch 002] Loss: 3161280237.272630 Valid loss: 2277820688.039010                      
-[Epoch 003] Loss: 1425464713.378328 Valid loss: 1662447124.970019                      
-[Epoch 004] Loss: 1163372648.646103 Valid loss: 1255598516.977768                      
-[Epoch 005] Loss: 859951108.029864 Valid loss: 968836235.737649                        
-[Epoch 006] Loss: 297307497.709330 Valid loss: 385607395.765826                        
-[Epoch 007] Loss: 476081664.448208 Valid loss: 277912586.901293                        
-[Epoch 008] Loss: 328484951.734496 Valid loss: 244360777.370387                        
-[Epoch 009] Loss: 183076239.526333 Valid loss: 206462328.534890                        
-[Epoch 010] Loss: 150848889.915168 Valid loss: 203247962.396667                        
-[Epoch 011] Loss: 145315826.015203 Valid loss: 150506849.349409                        
-[Epoch 012] Loss: 188817877.509315 Valid loss: 128896673.254883                        
-[Epoch 013] Loss: 81961035.215651 Valid loss: 103910658.789934                         
-[Epoch 014] Loss: 93370595.965209 Valid loss: 152372156.233972                         
-[Epoch 015] Loss: 128254766.333159 Valid loss: 158965917.004584                        
-[Epoch 016] Loss: 81846709.173152 Valid loss: 79300474.808355                          
-[Epoch 017] Loss: 24074313.230707 Valid loss: 68711079.818226                          
-[Epoch 018] Loss: 39334039.101522 Valid loss: 62105596.063004                          
-[Epoch 019] Loss: 90338776.167679 Valid loss: 93538989.608816                          
-[Epoch 020] Loss: 64851167.324570 Valid loss: 71779360.537059                          
-[Epoch 021] Loss: 47695435.197353 Valid loss: 83650493.571732                          
-[Epoch 022] Loss: 64876198.276327 Valid loss: 70521401.662859                          
-[Epoch 023] Loss: 24019925.157223 Valid loss: 74711215.458229                          
-[Epoch 024] Loss: 54465801.644086 Valid loss: 97971453.633728                          
-[Epoch 025] Loss: 28641401.113068 Valid loss: 75703844.637030  </code></pre>
+<code class="sourceCode R"><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">unsupervised</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, batch_size <span class="op">=</span> <span class="fl">5000</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code>[Epoch 001] Loss: 4.195504 Valid loss: 1.713710                                                                                    
+[Epoch 002] Loss: 4.589761 Valid loss: 1.474615                                                                                    
+[Epoch 003] Loss: 1.812671 Valid loss: 1.410668                                                                                    
+[Epoch 004] Loss: 1.553153 Valid loss: 1.359872                                                                                    
+[Epoch 005] Loss: 2.345665 Valid loss: 1.299493                                                                                    
+[Epoch 006] Loss: 2.719557 Valid loss: 1.258007                                                                                    
+[Epoch 007] Loss: 1.285357 Valid loss: 1.233827                                                                                    
+[Epoch 008] Loss: 1.283360 Valid loss: 1.210789                                                                                    
+[Epoch 009] Loss: 1.452972 Valid loss: 1.194631                                                                                    
+[Epoch 010] Loss: 1.256993 Valid loss: 1.181094                                                                                    
+[Epoch 011] Loss: 1.327342 Valid loss: 1.158956                                                                                    
+[Epoch 012] Loss: 1.258828 Valid loss: 1.145682                                                                                    
+[Epoch 013] Loss: 1.130475 Valid loss: 1.130623
+...
+[Epoch 041] Loss: 1.002896 Valid loss: 0.950189                                                                                    
+[Epoch 042] Loss: 1.142027 Valid loss: 0.944114                                                                                    
+[Epoch 043] Loss: 0.940986 Valid loss: 0.940836                                                                                    
+[Epoch 044] Loss: 1.032234 Valid loss: 0.939989                                                                                    
+[Epoch 045] Loss: 0.947644 Valid loss: 0.937613                                                                                    
+[Epoch 046] Loss: 1.007923 Valid loss: 0.935926                                                                                    
+[Epoch 047] Loss: 1.721710 Valid loss: 0.938697                                                                                    
+[Epoch 048] Loss: 0.984387 Valid loss: 0.941066                                                                                    
+[Epoch 049] Loss: 1.092131 Valid loss: 0.944751                                                                                    
+[Epoch 050] Loss: 1.175343 Valid loss: 0.947859 </code></pre>
 <p>After a few minutes we can get the results:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></code></pre></div>
-<p><img src="pretraining_loss.png" alt="pretraining task loss plot"> We could continue the training here for few epoch as it seems that the validation loss may continue to decrease… Here we can see that there is a checkpoint available at epoch 20, that provides a lower loss on the validation set than the model available on latest epoch. So we will reuse that checkpoint through the <code>from_epoch</code> option for training continuation, instead of the default being last epoch.</p>
+<p><img src="pretraining_loss.png" alt="pretraining task loss plot"> We may continue the training for few epoch but the validation loss seems to plateau so it is like the model would start to overfit… Here we can identify on the plot that the model epoch providing the lowest loss on the validation-set is around epoch 35. We will reuse it through the <code>from_epoch</code> option for training continuation, instead of the default being last epoch.<br>
+But historical model weights are only available for checkpoint-ed epoch , so in our case, checkpoint at epoch 40 seems a good compromise, and we would then use <code>from_epoch=40</code>.</p>
 </div>
-<div id="continuing-training-with-supervised-procedure" class="section level2">
+<div id="continuing-training-with-supervised-task" class="section level2">
 <h2 class="hasAnchor">
-<a href="#continuing-training-with-supervised-procedure" class="anchor"></a>Continuing training with supervised procedure</h2>
-<p>Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fitting pass on top of our pre-trained model.</p>
+<a href="#continuing-training-with-supervised-task" class="anchor"></a>Continuing training with supervised task</h2>
+<p>Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fitting task on top of our pre-trained model.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pretrained_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec_unsup</span>, <span class="va">train</span> , tabnet_model <span class="op">=</span> <span class="va">mod</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<pre><code>[Epoch 001] Loss: 0.535567 Valid loss: 0.453246                                        
-[Epoch 002] Loss: 0.458703 Valid loss: 0.387270                                        
-[Epoch 003] Loss: 0.364556 Valid loss: 0.310847                                        
-[Epoch 004] Loss: 0.343574 Valid loss: 0.291001                                        
-[Epoch 005] Loss: 0.258480 Valid loss: 0.282971                                        
-[Epoch 006] Loss: 0.199033 Valid loss: 0.255300                                        
-[Epoch 007] Loss: 0.189404 Valid loss: 0.223795                                        
-[Epoch 008] Loss: 0.147459 Valid loss: 0.205187                                        
-[Epoch 009] Loss: 0.162647 Valid loss: 0.197404                                        
-[Epoch 010] Loss: 0.193257 Valid loss: 0.197390                                        
-[Epoch 011] Loss: 0.199101 Valid loss: 0.200320                                        
-[Epoch 012] Loss: 0.182173 Valid loss: 0.205350                                        
-[Epoch 013] Loss: 0.148617 Valid loss: 0.202165                                        
-[Epoch 014] Loss: 0.189746 Valid loss: 0.184477                                        
-[Epoch 015] Loss: 0.167868 Valid loss: 0.172689                                        
-[Epoch 016] Loss: 0.141652 Valid loss: 0.184211                                        
-[Epoch 017] Loss: 0.204711 Valid loss: 0.185827                                        
-[Epoch 018] Loss: 0.146897 Valid loss: 0.185340                                        
-[Epoch 019] Loss: 0.127194 Valid loss: 0.190952                                        
-[Epoch 020] Loss: 0.150824 Valid loss: 0.218959                                        
-[Epoch 021] Loss: 0.147319 Valid loss: 0.219081                                        
-[Epoch 022] Loss: 0.160293 Valid loss: 0.220551                                        
-[Epoch 023] Loss: 0.149031 Valid loss: 0.225626                                        
-[Epoch 024] Loss: 0.146678 Valid loss: 0.229572                                        
-[Epoch 025] Loss: 0.139511 Valid loss: 0.230401                                        
-[Epoch 026] Loss: 0.166227 Valid loss: 0.229584                                        
-[Epoch 027] Loss: 0.137615 Valid loss: 0.230412                                        
-[Epoch 028] Loss: 0.131935 Valid loss: 0.232428                                        
-[Epoch 029] Loss: 0.137770 Valid loss: 0.239560                                        
-[Epoch 030] Loss: 0.147243 Valid loss: 0.226703                                        
-[Epoch 031] Loss: 0.145138 Valid loss: 0.218452                                        
-[Epoch 032] Loss: 0.114723 Valid loss: 0.213586                                        
-[Epoch 033] Loss: 0.134871 Valid loss: 0.220906                                        
-[Epoch 034] Loss: 0.124133 Valid loss: 0.217615                                        
-[Epoch 035] Loss: 0.133592 Valid loss: 0.217964                                        
-[Epoch 036] Loss: 0.116864 Valid loss: 0.218269                                        
-[Epoch 037] Loss: 0.107225 Valid loss: 0.215826                                        
-[Epoch 038] Loss: 0.142503 Valid loss: 0.224170                                        
-[Epoch 039] Loss: 0.132398 Valid loss: 0.226665                                        
-[Epoch 040] Loss: 0.129750 Valid loss: 0.217808                                        
-[Epoch 041] Loss: 0.134004 Valid loss: 0.211509                                        
-[Epoch 042] Loss: 0.115905 Valid loss: 0.211590                                        
-[Epoch 043] Loss: 0.103961 Valid loss: 0.207739                                        
-[Epoch 044] Loss: 0.152976 Valid loss: 0.201586                                        
-[Epoch 045] Loss: 0.144814 Valid loss: 0.195170                                        
-[Epoch 046] Loss: 0.141193 Valid loss: 0.190473                                        
-[Epoch 047] Loss: 0.109359 Valid loss: 0.189756                                        
-[Epoch 048] Loss: 0.111201 Valid loss: 0.192686                                        
-[Epoch 049] Loss: 0.112732 Valid loss: 0.198303                                        
-[Epoch 050] Loss: 0.111618 Valid loss: 0.201545 </code></pre>
+<code class="sourceCode R"><span class="va">model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model <span class="op">=</span> <span class="va">mod</span>, from_epoch<span class="op">=</span><span class="fl">40</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code>[Epoch 041] Loss: 0.260110 Valid loss: 0.250054                                                                                    
+[Epoch 042] Loss: 0.213628 Valid loss: 0.219784                                                                                    
+[Epoch 043] Loss: 0.154529 Valid loss: 0.201305                                                                                    
+[Epoch 044] Loss: 0.187461 Valid loss: 0.202042                                                                                    
+[Epoch 045] Loss: 0.144463 Valid loss: 0.196665                                                                                    
+[Epoch 046] Loss: 0.191665 Valid loss: 0.196853                                                                                    
+[Epoch 047] Loss: 0.186484 Valid loss: 0.190732                                                                                    
+[Epoch 048] Loss: 0.166680 Valid loss: 0.188041                                                                                    
+[Epoch 049] Loss: 0.134771 Valid loss: 0.180121                                                                                    
+[Epoch 050] Loss: 0.127854 Valid loss: 0.168102   
+...
+[Epoch 082] Loss: 0.101062 Valid loss: 0.262795                                                                                    
+[Epoch 083] Loss: 0.097425 Valid loss: 0.280869                                                                                    
+[Epoch 084] Loss: 0.113473 Valid loss: 0.296119                                                                                    
+[Epoch 085] Loss: 0.094036 Valid loss: 0.303786                                                                                    
+[Epoch 086] Loss: 0.092469 Valid loss: 0.309182                                                                                    
+[Epoch 087] Loss: 0.117400 Valid loss: 0.316657                                                                                    
+[Epoch 088] Loss: 0.097304 Valid loss: 0.338525                                                                                    
+[Epoch 089] Loss: 0.091212 Valid loss: 0.341918                                                                                    
+[Epoch 090] Loss: 0.087092 Valid loss: 0.361795 </code></pre>
+<p>The training continue starting at epoch 41 as experted and ending at epoch 90.<br>
+Now let’s diagnose the model training with a new <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot()</a></code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">pretrained_model_fit</span><span class="op">)</span></code></pre></div>
-<div class="figure">
-<img src="pretrained_model.png" alt=""><p class="caption">training and validation loss plot for pretrained tabnet</p>
-</div>
-<p>And finally, we can verify the results in our test set:</p>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">model_fit</span><span class="op">)</span></code></pre></div>
+<p><img src="pretrained_model.png" alt="training and validation loss plot for pretrained tabnet"> We can see that model starts to overfit after epoch 52 as the validation-set loss reaches its minimum. If we consider epoch 54 to be the epoch to move to production, we can redo the training from checkpoint 50 for 4 epochs :</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">test</span> <span class="op">%&gt;%</span> 
-  <span class="fu">bind_cols</span><span class="op">(</span>
-    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">pretrained_model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
-  <span class="op">)</span> <span class="op">%&gt;%</span> 
+<code class="sourceCode R"><span class="va">model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model <span class="op">=</span> <span class="va">model_fit</span>, from_epoch<span class="op">=</span><span class="fl">50</span>, epochs <span class="op">=</span> <span class="fl">4</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<p>Now, <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code> and <code><a href="../reference/tabnet_explain.html">tabnet_explain()</a></code> functions will use the model from last epoch beeing epoch 54.<br>
+Finally, we can measure the results against our test set:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">test</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html">bind_cols</a></span><span class="op">(</span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
+  <span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_bad</span><span class="op">)</span></code></pre></div>
-<pre><code># A tibble: 1 x 3
+<pre><code># A tibble: 1 × 3
   .metric .estimator .estimate
   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
-1 roc_auc binary         0.591</code></pre>
+1 roc_auc binary         0.653</code></pre>
 </div>
-<div id="comparison-with-no-pretraining" class="section level2">
+<div id="comparing-against-a-model-without-pretraining" class="section level2">
 <h2 class="hasAnchor">
-<a href="#comparison-with-no-pretraining" class="anchor"></a>Comparison with no pretraining</h2>
-<p>The question now is What if we did not pretrain the model ? We can build a vanilla tabnet model on the training set for comparison :</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">vanilla_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec_unsup</span>, <span class="va">train</span> , valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<pre><code>[Epoch 001] Loss: 3.954212 Valid loss: 357.003845                                      
-[Epoch 002] Loss: 1.657037 Valid loss: 88.164719                                       
-[Epoch 003] Loss: 0.770962 Valid loss: 31.805477                                       
-[Epoch 004] Loss: 0.517055 Valid loss: 9.380780                                        
-[Epoch 005] Loss: 0.377433 Valid loss: 5.324175                                        
-[Epoch 006] Loss: 0.388823 Valid loss: 2.053061                                        
-[Epoch 007] Loss: 0.500606 Valid loss: 1.649050                                        
-[Epoch 008] Loss: 0.265715 Valid loss: 1.097458                                        
-[Epoch 009] Loss: 0.370738 Valid loss: 0.574024                                        
-[Epoch 010] Loss: 0.359987 Valid loss: 0.606566                                        
-[Epoch 011] Loss: 0.283269 Valid loss: 0.628849                                        
-[Epoch 012] Loss: 0.329766 Valid loss: 0.701086                                        
-[Epoch 013] Loss: 0.336294 Valid loss: 0.558645                                        
-[Epoch 014] Loss: 0.351286 Valid loss: 0.468713                                        
-[Epoch 015] Loss: 0.282994 Valid loss: 0.420345                                        
-[Epoch 016] Loss: 0.241551 Valid loss: 0.436012                                        
-[Epoch 017] Loss: 0.149629 Valid loss: 0.449700                                        
-[Epoch 018] Loss: 0.293744 Valid loss: 0.446544                                        
-[Epoch 019] Loss: 0.181337 Valid loss: 0.343755                                        
-[Epoch 020] Loss: 0.200111 Valid loss: 0.343263                                        
-[Epoch 021] Loss: 0.156949 Valid loss: 0.350573                                        
-[Epoch 022] Loss: 0.173938 Valid loss: 0.348184                                        
-[Epoch 023] Loss: 0.148609 Valid loss: 0.337935                                        
-[Epoch 024] Loss: 0.212665 Valid loss: 0.374608                                        
-[Epoch 025] Loss: 0.205049 Valid loss: 0.309404                                        
-[Epoch 026] Loss: 0.161079 Valid loss: 0.356037                                        
-[Epoch 027] Loss: 0.174830 Valid loss: 0.365742                                        
-[Epoch 028] Loss: 0.151125 Valid loss: 0.352408                                        
-[Epoch 029] Loss: 0.165492 Valid loss: 0.344264                                        
-[Epoch 030] Loss: 0.200064 Valid loss: 0.357004                                        
-[Epoch 031] Loss: 0.205795 Valid loss: 0.315966                                        
-[Epoch 032] Loss: 0.146525 Valid loss: 0.344379                                        
-[Epoch 033] Loss: 0.116525 Valid loss: 0.355242                                        
-[Epoch 034] Loss: 0.172986 Valid loss: 0.336197                                        
-[Epoch 035] Loss: 0.203015 Valid loss: 0.414292                                        
-[Epoch 036] Loss: 0.138108 Valid loss: 0.434222                                        
-[Epoch 037] Loss: 0.151225 Valid loss: 0.410418                                        
-[Epoch 038] Loss: 0.155617 Valid loss: 0.455525                                        
-[Epoch 039] Loss: 0.211946 Valid loss: 0.447252                                        
-[Epoch 040] Loss: 0.165805 Valid loss: 0.442458                                        
-[Epoch 041] Loss: 0.198498 Valid loss: 0.436459                                        
-[Epoch 042] Loss: 0.150489 Valid loss: 0.447738                                        
-[Epoch 043] Loss: 0.172017 Valid loss: 0.449404                                        
-[Epoch 044] Loss: 0.148023 Valid loss: 0.438061                                        
-[Epoch 045] Loss: 0.154685 Valid loss: 0.432680                                        
-[Epoch 046] Loss: 0.138607 Valid loss: 0.382017                                        
-[Epoch 047] Loss: 0.160092 Valid loss: 0.343325                                        
-[Epoch 048] Loss: 0.171914 Valid loss: 0.317833                                        
-[Epoch 049] Loss: 0.170952 Valid loss: 0.304238                                        
-[Epoch 050] Loss: 0.173832 Valid loss: 0.284257                                        
+<a href="#comparing-against-a-model-without-pretraining" class="anchor"></a>Comparing against a model without pretraining</h2>
+<p>The question now is “what if we did not pretrain the model ?” We can build a vanilla tabnet model on the <code>train</code> dataset for comparison :</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">vanilla_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code>[Epoch 001] Loss: 0.725771 Valid loss: 0.491390                                                                                    
+[Epoch 002] Loss: 0.328243 Valid loss: 0.268964                                                                                    
+[Epoch 003] Loss: 0.241829 Valid loss: 0.181927                                                                                    
+[Epoch 004] Loss: 0.205124 Valid loss: 0.166245                                                                                    
+[Epoch 005] Loss: 0.218578 Valid loss: 0.161050                                                                                    
+[Epoch 006] Loss: 0.192196 Valid loss: 0.150333                                                                                    
+[Epoch 007] Loss: 0.235362 Valid loss: 0.148007                                                                                    
+[Epoch 008] Loss: 0.167538 Valid loss: 0.151358                                                                                    
+[Epoch 009] Loss: 0.146265 Valid loss: 0.155682                                                                                    
+[Epoch 010] Loss: 0.168639 Valid loss: 0.154740                                                                                    
+[Epoch 011] Loss: 0.164683 Valid loss: 0.153092                                                                                    
+[Epoch 012] Loss: 0.166895 Valid loss: 0.152931                                                                                    
+[Epoch 013] Loss: 0.153897 Valid loss: 0.155470                                                                                    
+...
+[Epoch 040] Loss: 0.125999 Valid loss: 0.184985                                                                                    
+[Epoch 041] Loss: 0.116995 Valid loss: 0.173780                                                                                    
+[Epoch 042] Loss: 0.161852 Valid loss: 0.166246                                                                                    
+[Epoch 043] Loss: 0.144460 Valid loss: 0.171052                                                                                    
+[Epoch 044] Loss: 0.146622 Valid loss: 0.170186                                                                                    
+[Epoch 045] Loss: 0.138121 Valid loss: 0.165647                                                                                    
+[Epoch 046] Loss: 0.130105 Valid loss: 0.154928                                                                                    
+[Epoch 047] Loss: 0.123869 Valid loss: 0.158995                                                                                    
+[Epoch 048] Loss: 0.139626 Valid loss: 0.159415                                                                                    
+[Epoch 049] Loss: 0.125219 Valid loss: 0.151668                                                                                    
+[Epoch 050] Loss: 0.129994 Valid loss: 0.154256                                          
 </code></pre>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span><span class="op">)</span></code></pre></div>
-<div class="figure">
-<img src="vanillia_model.png" alt=""><p class="caption">Training and validation loss plot for vanillia tabnet</p>
-</div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">test</span> <span class="op">%&gt;%</span> 
-  <span class="fu">bind_cols</span><span class="op">(</span>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span><span class="op">)</span></code></pre></div>
+<p><img src="vanillia_model.png" alt="Training and validation loss plot for vanillia tabnet"> The model overfits around epoch 20, we will restore it at checkpoint epoch 20 and retrain for 1 epoch , and proceed to prediction :</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">vanilla_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model<span class="op">=</span> <span class="va">vanilla_model_fit</span>, from_epoch<span class="op">=</span><span class="fl">20</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">1</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">test</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html">bind_cols</a></span><span class="op">(</span>
     <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
-  <span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_good</span><span class="op">)</span></code></pre></div>
 <pre><code># A tibble: 1 x 3
   .metric .estimator .estimate
   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
 1 roc_auc binary         0.557</code></pre>
+<p>We can see here a much lower ROC-AUC compared with using the pretraining step.</p>
 </div>
   </div>
 

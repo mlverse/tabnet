@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0.9000</span>
       </span>
     </div>
 
@@ -137,13 +137,13 @@
 <span class="va">train</span> <span class="op">&lt;-</span> <span class="va">attrition</span><span class="op">[</span><span class="op">-</span><span class="va">test_idx</span>,<span class="op">]</span>
 <span class="va">test</span> <span class="op">&lt;-</span> <span class="va">attrition</span><span class="op">[</span><span class="va">test_idx</span>,<span class="op">]</span>
 
-<span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">Attrition</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">Attrition</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span> <span class="op"><a href="reference/%&gt;%.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_normalize.html">step_normalize</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html">all_numeric</a></span><span class="op">(</span><span class="op">)</span>, <span class="op">-</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html">all_outcomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">30</span><span class="op">)</span>
 
 <span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://yardstick.tidymodels.org/reference/metric_set.html">metric_set</a></span><span class="op">(</span><span class="va">accuracy</span>, <span class="va">precision</span>, <span class="va">recall</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/%&gt;%.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://yardstick.tidymodels.org/reference/metrics.html">metrics</a></span><span class="op">(</span><span class="va">Attrition</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 3 x 3</span>
 <span class="co">#&gt;   .metric   .estimator .estimate</span>
@@ -152,7 +152,7 @@
 <span class="co">#&gt; 2 precision binary         0.885</span>
 <span class="co">#&gt; 3 recall    binary         0.967</span>
   
-<span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/%&gt;%.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html">roc_auc</a></span><span class="op">(</span><span class="va">Attrition</span>, <span class="va">.pred_No</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 1 x 3</span>
 <span class="co">#&gt;   .metric .estimator .estimate</span>
