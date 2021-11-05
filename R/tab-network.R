@@ -304,20 +304,20 @@ tabnet_pretrainer <- torch::nn_module(
     if (self$training) {
       masker_out_lst <- self$masker(embedded_x, embedded_x_na_mask)
       obf_vars <- masker_out_lst[[2]]
-      # set prior of encoder with obf_mask
+      # set prior of encoder as !obf_mask
       prior <- obf_vars$logical_not()
       steps_out <- self$encoder(masker_out_lst[[1]], prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
-           prior)
+           obf_vars)
     } else {
       prior <- embedded_x_na_mask$logical_not()
       steps_out <- self$encoder(embedded_x, prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
-           prior)
+           embedded_x_na_mask)
     }
   },
   forward_masks = function(x) {

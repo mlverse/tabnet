@@ -4,7 +4,7 @@ author: "Christophe Regouby"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{pretrain from dataset with missing-values}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -56,12 +56,16 @@ A better way to achieve it would be to turn numerical value to NA when the corre
 
 ```{r}
 ames_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
+autoplot(ames_fit)
+
 ```
 
 
 ## Variable importance with `ames_missing` dataset
 
 ```{r}
-ames_missing_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames_missing, epoch=40, valid_split = 0.2, verbose=TRUE)
+ames_missing_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames_missing, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
+autoplot(ames_missing_fit)
+
 ```
 
