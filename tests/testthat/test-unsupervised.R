@@ -84,6 +84,35 @@ test_that("works with validation split", {
 
 })
 
+test_that("works with categorical embedding dimension as list", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
+
+  expect_error(
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, config=config),
+    regexp = NA
+  )
+  expect_equal(sum(pretrain$fit$config$cat_emb_dim), pretrain$fit$network$embedder$post_embed_dim )
+})
+
+test_that("explicit error message when categorical embedding dimension vector has wrong size", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
+
+  expect_error(
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, config=config),
+    regexp = "number of categorical predictors"
+  )
+})
+
 test_that("can train from a recipe", {
 
   library(recipes)
