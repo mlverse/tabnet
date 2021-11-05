@@ -96,7 +96,6 @@ test_that("works with categorical embedding dimension as list", {
     pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, config=config),
     regexp = NA
   )
-  expect_equal(sum(pretrain$fit$config$cat_emb_dim), pretrain$fit$network$embedder$post_embed_dim )
 })
 
 test_that("explicit error message when categorical embedding dimension vector has wrong size", {
