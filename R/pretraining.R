@@ -74,7 +74,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
-    valid_data <- list(x = x[valid_idx, ], na_mask = !x[valid_idx, ] %>% is.na)
+    valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na)
     x <- x[-valid_idx, ]
     na_mask = x[-valid_idx, ] %>% is.na
 
@@ -91,9 +91,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   # validation data
   if (has_valid) {
-    valid_data <- resolve_data(valid_data$x, y=matrix(rep(1, nrow(valid_data$x)),ncol=1))
+    valid_data <- resolve_data(valid_lst$x, y=matrix(rep(1, nrow(valid_lst$x)),ncol=1))
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_data$x, na_mask = torch::torch_tensor(as.matrix(valid_data$na_mask), dtype = torch::torch_bool())),
+      torch::tensor_dataset(x = valid_data$x, na_mask = torch::torch_tensor(as.matrix(valid_lst$na_mask), dtype = torch::torch_bool())),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE

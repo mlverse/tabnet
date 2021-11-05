@@ -611,9 +611,9 @@ embedding_generator <- torch::nn_module(
     else
       self$cat_emb_dims <- cat_emb_dim
 
-    # check that all embeddings are provided
+    # check that all embeddings dimensions are provided
     if (length(self$cat_emb_dims) != length(cat_dims)){
-      msg = "cat_emb_dim and cat_dims must be lists of same length, got {length(self$cat_emb_dims)} and {length(cat_dims)}"
+      msg = paste0("`cat_emb_dim` length must be 1 or the number of categorical predictors, got length ",length(self$cat_emb_dims)," for ",length(cat_dims)," categorical predictors")
       stop(msg)
     }
 
