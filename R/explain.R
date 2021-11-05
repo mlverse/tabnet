@@ -107,3 +107,4 @@ vi_model.tabnet_fit <- function(object, ...) {
   tib
 }
 
+vi_model.tabnet_pretrain <- vi_model.tabnet_fit

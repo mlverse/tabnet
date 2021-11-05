@@ -19,7 +19,8 @@ train_batch_un <- function(network, optimizer, batch, batch_na_mask, config) {
 valid_batch_un <- function(network, batch, batch_na_mask, config) {
   # forward pass
   output <- network(batch, batch_na_mask)
-  loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
+  # we inverse the batch_na_mask here to avoid nan in the loss
+  loss <- config$loss_fn(output[[1]], output[[2]], output[[3]]$logical_not())
 
   list(
     loss = loss$item()

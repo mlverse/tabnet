@@ -57,7 +57,7 @@ A better way to achieve it would be to turn numerical value to NA when the corre
 ```{r}
 ames_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
 autoplot(ames_fit)
-
+vip::vip(ames_fit)
 ```
 
 
@@ -66,6 +66,6 @@ autoplot(ames_fit)
 ```{r}
 ames_missing_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames_missing, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
 autoplot(ames_missing_fit)
-
+vip::vip(ames_missing_fit)
 ```
 
