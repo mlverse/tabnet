@@ -127,7 +127,7 @@ test_that("can train from a recipe", {
 
 })
 
-test_that("data-frame with missing value makes training fails with explicit message", {
+test_that("predictors with missing value works", {
 
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -143,7 +143,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
   expect_error(
     miss_pretrain <- tabnet_pretrain(x_missing, y, epochs = 1),
-    regexp = "missing"
+    regexp = NA
   )
 
   # categorical missing
@@ -152,7 +152,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
   expect_error(
     miss_pretrain <- tabnet_pretrain(x_missing, y, epochs = 1),
-    regexp = "missing"
+    regexp = NA
   )
 
   # no error when missing in outcome
