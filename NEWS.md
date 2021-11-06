@@ -4,6 +4,9 @@
 
 * Add explicit legend in `autoplot.tabnet_fit()`
 * Improve unsupervised vignette content.
+* `tabnet_pretrain()` now allows missing values in predictors.
+* Improve performance of `random_obfuscator`.
+* Add pretrain from dataset with missing-values vignette.
 
 # tabnet 0.3.0
 
