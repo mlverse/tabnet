@@ -12,7 +12,8 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
 ```
 
@@ -33,6 +34,7 @@ library(tabnet)
 data("ames", package = "modeldata")
 qplot(ames$Mas_Vnr_Area)
 ```
+![ames variable Mas_Vnr_Area histogram showing high occurence of value zero](ames_mas_vnr_hist.png)
 
 ## Ames with missing data
 
@@ -41,31 +43,81 @@ Let's dig up those missing data :
 A quick and dirty way to achieve it is to `na_if()` zeros on surface and area columns. 
 
 ```{r}
-col_with_zero_as_na <- ames %>% select_if(is.numeric) %>% select(matches("_SF|Area")) %>% summarise_each(min) %>% select_if(~.x==0) %>% names()
+col_with_zero_as_na <- ames %>% 
+  select(where(is.numeric)) %>% 
+  select(matches("_SF|Area|Misc_Val|[Pp]orch$")) %>% 
+  summarise_each(min) %>% 
+  select_if(~.x==0) %>% 
+  names()
 ames_missing <- ames %>% mutate_at(col_with_zero_as_na, na_if, 0) %>% 
   mutate_at("Alley", na_if, "No_Alley_Access") %>% 
   mutate_at("Pool_QC", na_if, "No_Pool") %>% 
+  mutate_at("Fence", na_if, "No_Fence") %>% 
+  mutate_at("Misc_Feature", na_if, "None") %>% 
   mutate_at(c("Garage_Cond", "Garage_Finish", "Garage_Type"), na_if, "No_Garage") %>% 
   mutate_at(c("Bsmt_Cond", "Bsmt_Exposure", "BsmtFin_Type_1", "BsmtFin_Type_2"), na_if, "No_Basement")
 visdat::vis_miss(ames_missing)
 ```
+![ames missing values visualisation showing few variables with more than 90% missingness with a global 16% missing](vis_miss_ames.png)
 
-A better way to achieve it would be to turn numerical value to NA when the corresponding description columns refer to `none` or to zero occurence of the equipment. But this is beyond the scope of this vignette.
+We can see here that variable are not missing at random, and thus we can expect the model to capture the missingness relation during the pretraining phase.
 
-## Variable importance with `ames` dataset
+Note: A better way to achieve proper missing value to be explicit NAs would be to turn numerical value to NA when the corresponding description columns refer to `none` or to zero occurence of the equipment. But this is beyond the scope of this vignette.
+
+## Variable importance with raw `ames` dataset
 
 ```{r}
-ames_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
+ames_rec <- recipe(Sale_Price ~ ., data=ames) %>% 
+  step_normalize(all_numeric())
+ames_fit <- tabnet_pretrain(ames_rec, data=ames,  epoch=50, valid_split = 0.2, verbose=TRUE, batch=2930)
 autoplot(ames_fit)
 vip::vip(ames_fit)
 ```
+```
+[Epoch 001] Loss: 110.153397 Valid loss: 12.796356
+[Epoch 002] Loss: 66.345421 Valid loss: 11.866967
+[Epoch 003] Loss: 51.413067 Valid loss: 11.043683
+[Epoch 004] Loss: 36.273647 Valid loss: 10.270563
+[Epoch 005] Loss: 24.078966 Valid loss: 9.520718
+[Epoch 006] Loss: 21.428942 Valid loss: 8.859156
+[Epoch 007] Loss: 16.256685 Valid loss: 8.487848
+[Epoch 008] Loss: 13.973124 Valid loss: 8.076593
+[Epoch 009] Loss: 11.290054 Valid loss: 7.611485
+[Epoch 010] Loss: 10.598895 Valid loss: 6.829431
+...
+[Epoch 039] Loss: 1.939946 Valid loss: 1.402237
+[Epoch 040] Loss: 1.945023 Valid loss: 1.385195
+[Epoch 041] Loss: 1.833169 Valid loss: 1.367162
+[Epoch 042] Loss: 1.801182 Valid loss: 1.355827
+[Epoch 043] Loss: 1.726875 Valid loss: 1.349461
+[Epoch 044] Loss: 1.744924 Valid loss: 1.338369
+[Epoch 045] Loss: 1.722017 Valid loss: 1.329846
+[Epoch 046] Loss: 1.696083 Valid loss: 1.340198
+[Epoch 047] Loss: 1.690017 Valid loss: 1.318003
+[Epoch 048] Loss: 1.639485 Valid loss: 1.316320
+[Epoch 049] Loss: 1.665496 Valid loss: 1.301890
+[Epoch 050] Loss: 1.644812 Valid loss: 1.293987
+```
 
+[ames_fit model training diagnostic plot](ames_pretrain.png)
+[ames_fit model variable importance plot](ames_pretrain_vip.png)
+
+Training loss evolution seems correct and we get `Screen_Porch`,  `Basmt_Unf_SF` and `Fence` in the top ten important variables according to the pretrained model. Those three variables have been screened as having a very important missing rate.
 
 ## Variable importance with `ames_missing` dataset
 
+Let's pretrain a new model with the same hyperparameter, but now using the `ames_missing` dataset.  
+In order to compensate the 16% missingness already present in the `ames_missing` dataset, we adjust the `pretraining_ratio` parameter to `0.5 - 0.16 = 0.34`
+
 ```{r}
-ames_missing_fit <- tabnet_pretrain(Sale_Price ~ ., data=ames_missing, epoch=40, valid_split = 0.2, verbose=TRUE, batch=2930)
+ames_missing_rec <- recipe(Sale_Price ~ ., data=ames_missing) %>% 
+  step_normalize(all_numeric())
+ames_missing_fit <- tabnet_pretrain(ames_missing_rec, data=ames_missing, epoch=50, valid_split = 0.2, verbose=TRUE, batch=2930, pretraining_ratio=0.34)
 autoplot(ames_missing_fit)
 vip::vip(ames_missing_fit)
 ```
+[ames_missing_fit model training diagnostic plot](ames_missing_pretrain.png)
+[ames_missing_fit model variable importance plot](ames_pissing_pretrain_vip.png)
+
+We can see here that no variables with high missingness is present in the top 10 important variables, which seems to be a good sign of the model having captured proper interactions between variables.
 
