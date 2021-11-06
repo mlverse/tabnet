@@ -1,4 +1,4 @@
-test_that("Unsupervised training with default config", {
+test_that("Unsupervised training with default config, data.frame and formula", {
 
   data("ames", package = "modeldata")
 
@@ -163,7 +163,7 @@ test_that("predictors with missing value works", {
 
 })
 
-test_that("scheduler works", {
+test_that("lr scheduler works", {
 
   data("ames", package = "modeldata")
 

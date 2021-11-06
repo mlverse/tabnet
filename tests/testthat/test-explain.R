@@ -1,4 +1,4 @@
-test_that("explain", {
+test_that("explain provides correct result with data.frame", {
 
   set.seed(2)
   torch::torch_manual_seed(2)
@@ -31,7 +31,48 @@ test_that("explain", {
 
 })
 
-test_that("support for vip", {
+test_that("explain works with formula and recipe", {
+
+  suppressPackageStartupMessages(library(recipes))
+  data("ames", package = "modeldata")
+  set.seed(2021)
+  ids <- sample(nrow(ames), 256)
+  small_ames <- ames[ids,]
+
+  tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 12, valid_split=.2,
+                                     num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  expect_error(
+    tabnet_explain(tabnet_pretrain, new_data=small_ames),
+    regexp = NA
+  )
+
+  tabnet_fit <- tabnet_fit(Sale_Price ~., data=small_ames, tabnet_model=tabnet_pretrain, epochs = 12,
+                           num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  explain_fit <- tabnet_explain(tabnet_fit, new_data=small_ames)
+  expect_error(
+    tabnet_explain(tabnet_fit, new_data=small_ames),
+    regexp = NA
+  )
+
+  rec <- recipe(Sale_Price ~., data = small_ames) %>%
+    step_normalize(all_numeric())
+  tabnet_pretrain <- tabnet_pretrain(rec, data=small_ames, epochs = 12, valid_split=.2,
+                                     num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  expect_error(
+    tabnet_explain(tabnet_pretrain, new_data=small_ames),
+    regexp = NA
+  )
+
+  tabnet_fit <- tabnet_fit(rec, data=small_ames, tabnet_model=tabnet_pretrain, epochs = 12,
+                           num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  explain_fit <- tabnet_explain(tabnet_fit, new_data=small_)
+  expect_error(
+    tabnet_explain(tabnet_fit, new_data=small_ames),
+    regexp = NA
+  )
+})
+
+test_that("support for vip on tabnet_fit and tabnet_pretrain", {
 
   skip_if_not_installed("vip")
 
@@ -44,6 +85,13 @@ test_that("support for vip", {
 
   y <- x$x
 
+  pretrain <- tabnet_pretrain(x, y, epochs = 1,
+                    num_steps = 1,
+                    batch_size = 512,
+                    attention_width = 1,
+                    num_shared = 1,
+                    num_independent = 1)
+
   fit <- tabnet_fit(x, y, epochs = 1,
                     num_steps = 1,
                     batch_size = 512,
@@ -51,6 +99,7 @@ test_that("support for vip", {
                     num_shared = 1,
                     num_independent = 1)
 
+  expect_error(vip::vip(pretrain), regexp = NA)
   expect_error(vip::vip(fit), regexp = NA)
 
 })

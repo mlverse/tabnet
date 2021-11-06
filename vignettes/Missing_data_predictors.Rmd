@@ -117,7 +117,7 @@ autoplot(ames_missing_fit)
 vip::vip(ames_missing_fit)
 ```
 [ames_missing_fit model training diagnostic plot](ames_missing_pretrain.png)
-[ames_missing_fit model variable importance plot](ames_pissing_pretrain_vip.png)
+[ames_missing_fit model variable importance plot](ames_missing_pretrain_vip.png)
 
 We can see here that no variables with high missingness is present in the top 10 important variables, which seems to be a good sign of the model having captured proper interactions between variables.
 
