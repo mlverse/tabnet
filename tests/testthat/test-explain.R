@@ -35,9 +35,7 @@ test_that("explain works with formula and recipe", {
 
   suppressPackageStartupMessages(library(recipes))
   data("ames", package = "modeldata")
-  set.seed(2021)
-  ids <- sample(nrow(ames), 256)
-  small_ames <- ames[ids,]
+  small_ames <- ames[1:1024,]
 
   tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 12, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
@@ -48,7 +46,6 @@ test_that("explain works with formula and recipe", {
 
   tabnet_fit <- tabnet_fit(Sale_Price ~., data=small_ames, tabnet_model=tabnet_pretrain, epochs = 12,
                            num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  explain_fit <- tabnet_explain(tabnet_fit, new_data=small_ames)
   expect_error(
     tabnet_explain(tabnet_fit, new_data=small_ames),
     regexp = NA
@@ -65,7 +62,6 @@ test_that("explain works with formula and recipe", {
 
   tabnet_fit <- tabnet_fit(rec, data=small_ames, tabnet_model=tabnet_pretrain, epochs = 12,
                            num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  explain_fit <- tabnet_explain(tabnet_fit, new_data=small_)
   expect_error(
     tabnet_explain(tabnet_fit, new_data=small_ames),
     regexp = NA
