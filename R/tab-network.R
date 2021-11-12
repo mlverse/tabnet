@@ -710,7 +710,7 @@ na_embedding_generator <- torch::nn_module(
       } else {
         # extend the vector to match the dimention of the embedding_x via matmul
         # TODO basic tensor broadcasting function could be more efficient and have lower footprint
-        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dims[cat_feat_counter]))
+        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dims[cat_feat_counter], device = x$device))
         cat_feat_counter <- cat_feat_counter + 1
       }
 

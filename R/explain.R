@@ -64,6 +64,7 @@ tabnet_explain.tabnet_fit <- function(object, new_data) {
 #' @export
 #' @rdname tabnet_explain
 tabnet_explain.tabnet_pretrain <- function(object, new_data) {
+  new_data <- cbind(new_data, .outcome=1)
   processed <- hardhat::forge(new_data, object$blueprint, outcomes = TRUE)
   tabnet_explain_processed(object, processed)
 }

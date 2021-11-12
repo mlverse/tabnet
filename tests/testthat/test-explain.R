@@ -31,13 +31,31 @@ test_that("explain provides correct result with data.frame", {
 
 })
 
-test_that("explain works with formula and recipe", {
+test_that("explain works for dataframe, formula and recipe", {
 
   suppressPackageStartupMessages(library(recipes))
   data("ames", package = "modeldata")
   ids <- sample(nrow(ames),256)
   small_ames <- ames[ids,]
 
+  # data.frame
+  x <- ames[-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price
+  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 12, valid_split=.2,
+                                     num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  expect_error(
+    tabnet_explain(tabnet_pretrain, new_data=small_ames),
+    regexp = NA
+  )
+
+  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 12,
+                           num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  expect_error(
+    tabnet_explain(tabnet_fit, new_data=small_ames),
+    regexp = NA
+  )
+
+  # formula
   tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 12, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
@@ -52,6 +70,7 @@ test_that("explain works with formula and recipe", {
     regexp = NA
   )
 
+  # recipe
   rec <- recipe(Sale_Price ~., data = small_ames) %>%
     step_zv(all_predictors()) %>%
     step_normalize(all_numeric_predictors())
