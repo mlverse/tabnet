@@ -35,7 +35,8 @@ test_that("explain works with formula and recipe", {
 
   suppressPackageStartupMessages(library(recipes))
   data("ames", package = "modeldata")
-  small_ames <- ames[1:1024,]
+  ids <- sample(nrow(ames),256)
+  small_ames <- ames[ids,]
 
   tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 12, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
@@ -52,7 +53,9 @@ test_that("explain works with formula and recipe", {
   )
 
   rec <- recipe(Sale_Price ~., data = small_ames) %>%
-    step_normalize(all_numeric())
+    step_zv(all_predictors()) %>%
+    step_normalize(all_numeric_predictors())
+
   tabnet_pretrain <- tabnet_pretrain(rec, data=small_ames, epochs = 12, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(

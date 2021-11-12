@@ -2,11 +2,12 @@
 
 ## New features
 
-* Add explicit legend in `autoplot.tabnet_fit()`
-* Improve unsupervised vignette content.
-* `tabnet_pretrain()` now allows missing values in predictors.
-* Improve performance of `random_obfuscator`.
-* Add pretrain from dataset with missing-values vignette.
+* Add explicit legend in `autoplot.tabnet_fit()` (#67)
+* Improve unsupervised vignette content. (#67)
+* `tabnet_pretrain()` now allows missing values in predictors. (#68)
+* `tabnet_explain()` now works for `tabnet_pretrain` models. (#68)
+* Add  vignette for "pretrain from dataset with missing-values". (#68)
+* Improve performance of `random_obfuscator()` torch_nn module. (#68)
 
 # tabnet 0.3.0
 

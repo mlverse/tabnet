@@ -41,9 +41,35 @@
 #'
 #' @export
 tabnet_explain <- function(object, new_data) {
-  processed <- hardhat::forge(new_data, object$blueprint)
+  UseMethod("tabnet_explain")
+}
+
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.default <- function(object, new_data) {
+  stop(
+    "`tabnet_explain()` is not defined for a '", class(object)[1], "'.",
+    call. = FALSE
+  )
+}
+
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.tabnet_fit <- function(object, new_data) {
+  processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
   stopifnot("Error: found missing values in the predictor data frame" = sum(is.na(processed$predictors))==0)
-  data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(new_data))))
+  tabnet_explain_processed(object, processed)
+}
+
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.tabnet_pretrain <- function(object, new_data) {
+  processed <- hardhat::forge(new_data, object$blueprint, outcomes = TRUE)
+  tabnet_explain_processed(object, processed)
+}
+
+tabnet_explain_processed <- function(object, processed) {
+  data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(processed$predictors))))
   output <- explain_impl(object$fit$network, data$x)
 
   # convert stuff to matrix with colnames
