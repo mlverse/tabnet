@@ -38,32 +38,47 @@ test_that("explain works for dataframe, formula and recipe", {
   ids <- sample(nrow(ames),256)
   small_ames <- ames[ids,]
 
-  # data.frame
+  # data.frame, regression
   x <- ames[-which(names(ames) == "Sale_Price")]
   y <- ames$Sale_Price
-  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 12, valid_split=.2,
+  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
     tabnet_explain(tabnet_pretrain, new_data=small_ames),
     regexp = NA
   )
 
-  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 12,
+  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 3,
                            num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
     tabnet_explain(tabnet_fit, new_data=small_ames),
     regexp = NA
   )
 
+  # data.frame, classification
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+
+  x <- attrition[ids,-which(names(attrition) == "Attrition")]
+  y <- attrition[ids,]$Attrition
+
+  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3, valid_split=.2,
+                                     num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  explain_pretrain <- tabnet_explain(tabnet_pretrain, x)
+  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 3,
+                           num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+  explain_fit <- tabnet_explain(tabnet_fit, x)
+
+
   # formula
-  tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 12, valid_split=.2,
+  tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 3, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
     tabnet_explain(tabnet_pretrain, new_data=small_ames),
     regexp = NA
   )
 
-  tabnet_fit <- tabnet_fit(Sale_Price ~., data=small_ames, tabnet_model=tabnet_pretrain, epochs = 12,
+  tabnet_fit <- tabnet_fit(Sale_Price ~., data=small_ames, tabnet_model=tabnet_pretrain, epochs = 3,
                            num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
     tabnet_explain(tabnet_fit, new_data=small_ames),
@@ -75,14 +90,14 @@ test_that("explain works for dataframe, formula and recipe", {
     step_zv(all_predictors()) %>%
     step_normalize(all_numeric_predictors())
 
-  tabnet_pretrain <- tabnet_pretrain(rec, data=small_ames, epochs = 12, valid_split=.2,
+  tabnet_pretrain <- tabnet_pretrain(rec, data=small_ames, epochs = 3, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
     tabnet_explain(tabnet_pretrain, new_data=small_ames),
     regexp = NA
   )
 
-  tabnet_fit <- tabnet_fit(rec, data=small_ames, tabnet_model=tabnet_pretrain, epochs = 12,
+  tabnet_fit <- tabnet_fit(rec, data=small_ames, tabnet_model=tabnet_pretrain, epochs = 3,
                            num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
     tabnet_explain(tabnet_fit, new_data=small_ames),

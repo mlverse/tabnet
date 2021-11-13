@@ -58,18 +58,6 @@ tabnet_explain.default <- function(object, new_data) {
 tabnet_explain.tabnet_fit <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
   stopifnot("Error: found missing values in the predictor data frame" = sum(is.na(processed$predictors))==0)
-  tabnet_explain_processed(object, processed)
-}
-
-#' @export
-#' @rdname tabnet_explain
-tabnet_explain.tabnet_pretrain <- function(object, new_data) {
-  new_data <- cbind(new_data, .outcome=1)
-  processed <- hardhat::forge(new_data, object$blueprint, outcomes = TRUE)
-  tabnet_explain_processed(object, processed)
-}
-
-tabnet_explain_processed <- function(object, processed) {
   data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(processed$predictors))))
   output <- explain_impl(object$fit$network, data$x)
 
@@ -80,6 +68,11 @@ tabnet_explain_processed <- function(object, processed) {
   class(output) <- "tabnet_explain"
   output
 }
+
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.tabnet_pretrain <- tabnet_explain.tabnet_fit
+
 
 convert_to_df <- function(x, nms) {
   x <- as.data.frame(as.matrix(x$to(device = "cpu")$detach()))
