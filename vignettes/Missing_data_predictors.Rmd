@@ -74,35 +74,27 @@ autoplot(ames_fit)
 vip::vip(ames_fit)
 ```
 ```
-[Epoch 001] Loss: 110.153397 Valid loss: 12.796356
-[Epoch 002] Loss: 66.345421 Valid loss: 11.866967
-[Epoch 003] Loss: 51.413067 Valid loss: 11.043683
-[Epoch 004] Loss: 36.273647 Valid loss: 10.270563
-[Epoch 005] Loss: 24.078966 Valid loss: 9.520718
-[Epoch 006] Loss: 21.428942 Valid loss: 8.859156
-[Epoch 007] Loss: 16.256685 Valid loss: 8.487848
-[Epoch 008] Loss: 13.973124 Valid loss: 8.076593
-[Epoch 009] Loss: 11.290054 Valid loss: 7.611485
-[Epoch 010] Loss: 10.598895 Valid loss: 6.829431
+[Epoch 001] Loss: 197.987808 Valid loss: 2521389.750000
+[Epoch 002] Loss: 90.309837 Valid loss: 1317253.625000
+[Epoch 003] Loss: 55.909924 Valid loss: 731009.875000
+[Epoch 004] Loss: 40.682549 Valid loss: 592438.062500
+[Epoch 005] Loss: 34.729988 Valid loss: 340338.500000
+[Epoch 006] Loss: 27.579042 Valid loss: 287374.906250
+[Epoch 007] Loss: 23.080545 Valid loss: 277046.562500
+[Epoch 008] Loss: 20.220177 Valid loss: 256409.828125
 ...
-[Epoch 039] Loss: 1.939946 Valid loss: 1.402237
-[Epoch 040] Loss: 1.945023 Valid loss: 1.385195
-[Epoch 041] Loss: 1.833169 Valid loss: 1.367162
-[Epoch 042] Loss: 1.801182 Valid loss: 1.355827
-[Epoch 043] Loss: 1.726875 Valid loss: 1.349461
-[Epoch 044] Loss: 1.744924 Valid loss: 1.338369
-[Epoch 045] Loss: 1.722017 Valid loss: 1.329846
-[Epoch 046] Loss: 1.696083 Valid loss: 1.340198
-[Epoch 047] Loss: 1.690017 Valid loss: 1.318003
-[Epoch 048] Loss: 1.639485 Valid loss: 1.316320
-[Epoch 049] Loss: 1.665496 Valid loss: 1.301890
-[Epoch 050] Loss: 1.644812 Valid loss: 1.293987
+[Epoch 045] Loss: 2.362013 Valid loss: 63409.878906
+[Epoch 046] Loss: 2.217737 Valid loss: 60885.753906
+[Epoch 047] Loss: 2.113867 Valid loss: 61390.011719
+[Epoch 048] Loss: 2.358693 Valid loss: 58433.234375
+[Epoch 049] Loss: 2.108813 Valid loss: 56608.714844
+[Epoch 050] Loss: 2.016043 Valid loss: 57533.851562
 ```
 
 [ames_fit model training diagnostic plot](ames_pretrain.png)
 [ames_fit model variable importance plot](ames_pretrain_vip.png)
 
-Training loss evolution seems correct and we get `Screen_Porch`,  `Basmt_Unf_SF` and `Fence` in the top ten important variables according to the pretrained model. Those three variables have been screened as having a very important missing rate.
+Training loss evolution seems correct and we get `Alley` and `Pool_QC` variables in the top ten important variables according to the pretrained model. Those two variables have been screened as having a very important missing rate.
 
 ## Variable importance with `ames_missing` dataset
 
@@ -116,8 +108,26 @@ ames_missing_fit <- tabnet_pretrain(ames_missing_rec, data=ames_missing, epoch=5
 autoplot(ames_missing_fit)
 vip::vip(ames_missing_fit)
 ```
+```
+[Epoch 001] Loss: 41.925888 Valid loss: 11.546161
+[Epoch 002] Loss: 32.214478 Valid loss: 10.309987
+[Epoch 003] Loss: 24.262951 Valid loss: 9.479233
+[Epoch 004] Loss: 19.042051 Valid loss: 8.434237
+[Epoch 005] Loss: 15.512108 Valid loss: 7.437159
+[Epoch 006] Loss: 12.279278 Valid loss: 6.486411
+[Epoch 007] Loss: 10.196947 Valid loss: 5.815371
+[Epoch 008] Loss: 9.259965 Valid loss: 5.111839
+...
+[Epoch 045] Loss: 6.641933 Valid loss: 4.190426
+[Epoch 046] Loss: 6.781425 Valid loss: 4.186747
+[Epoch 047] Loss: 6.599716 Valid loss: 4.178854
+[Epoch 048] Loss: 6.766137 Valid loss: 4.275692
+[Epoch 049] Loss: 7.051480 Valid loss: 4.244986
+[Epoch 050] Loss: 6.723494 Valid loss: 4.215664
+
+```
 [ames_missing_fit model training diagnostic plot](ames_missing_pretrain.png)
 [ames_missing_fit model variable importance plot](ames_missing_pretrain_vip.png)
 
-We can see here that no variables with high missingness is present in the top 10 important variables, which seems to be a good sign of the model having captured proper interactions between variables.
+The model is slightly overfitting here, but we can see here no variables with high missingness is present in the top 10 important variables. This seems to be a good sign of the model having captured proper interactions between variables.
 
