@@ -76,8 +76,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na)
-    x <- x[-valid_idx, ]
     na_mask = x[-valid_idx, ] %>% is.na
+    x <- x[-valid_idx, ]
 
   }
   # training data
