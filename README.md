@@ -31,10 +31,10 @@ install.packages("tabnet")
 ```
 
 The development version can be installed from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/mlverse/tabnet) with:
 
 ``` r
-# install.packages("devtools")
+# install.packages("remotes")
 remotes::install_github("mlverse/tabnet")
 ```
 
@@ -42,24 +42,11 @@ remotes::install_github("mlverse/tabnet")
 
 ``` r
 library(tabnet)
-library(recipes)
-#> Loading required package: dplyr
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-#> 
-#> Attaching package: 'recipes'
-#> The following object is masked from 'package:stats':
-#> 
-#>     step
+suppressPackageStartupMessages(library(recipes))
 library(yardstick)
 #> For binary classification, the first factor level is assumed to be the event.
 #> Use the argument `event_level = "second"` to alter this as needed.
+library(ggplot2)
 set.seed(1)
 
 data("attrition", package = "modeldata")
@@ -72,21 +59,27 @@ rec <- recipe(Attrition ~ ., data = train) %>%
   step_normalize(all_numeric(), -all_outcomes())
 
 fit <- tabnet_fit(rec, train, epochs = 30)
+suppressWarnings(autoplot(fit))
+#> Warning: Removed 30 row(s) containing missing values (geom_path).
+```
 
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+``` r
 metrics <- metric_set(accuracy, precision, recall)
 cbind(test, predict(fit, test)) %>% 
   metrics(Attrition, estimate = .pred_class)
-#> # A tibble: 3 x 3
+#> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.867
-#> 2 precision binary         0.885
-#> 3 recall    binary         0.967
+#> 1 accuracy  binary         0.837
+#> 2 precision binary         0.849
+#> 3 recall    binary         0.980
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
-#> # A tibble: 1 x 3
+#> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.726
+#> 1 roc_auc binary         0.695
 ```
