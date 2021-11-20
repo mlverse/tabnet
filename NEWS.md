@@ -8,6 +8,7 @@
 * `tabnet_explain()` now works for `tabnet_pretrain` models. (#68)
 * Add  vignette for "pretrain from dataset with missing-values". (#68)
 * Improve performance of `random_obfuscator()` torch_nn module. (#68)
+* add support for early stopping (#69)
 
 # tabnet 0.3.0
 
