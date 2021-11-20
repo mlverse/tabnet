@@ -97,7 +97,10 @@ resolve_data <- function(x, y) {
 #' @param importance_sample_size sample of the dataset to compute importance metrics.
 #'   If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 #'   display a warning.
-#'
+#' @param early_stopping_monitor Unused (defaults to "valid_loss").
+#' @param  early_stopping_tolerance Minimum improvement to reset the patience counter.
+#'  (default 0 for no early stopping)
+#' @param early_stopping_patience Number of epochs without improving until stopping training. (default=5)
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
 #' @export
@@ -127,8 +130,10 @@ tabnet_config <- function(batch_size = 256,
                           pretraining_ratio = 0.5,
                           verbose = FALSE,
                           device = "auto",
-                          importance_sample_size = NULL) {
-
+                          importance_sample_size = NULL,
+                          early_stopping_monitor = "valid_loss",
+                          early_stopping_tolerance = 0,
+                          early_stopping_patience = 0L) {
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
   }
@@ -166,7 +171,13 @@ tabnet_config <- function(batch_size = 256,
     pretraining_ratio = pretraining_ratio,
     verbose = verbose,
     device = device,
-    importance_sample_size = importance_sample_size
+    importance_sample_size = importance_sample_size,
+    early_stopping_monitor = "valid_loss",
+    early_stopping_min_delta = 0,
+    patience = 0,
+    early_stopping_tolerance = early_stopping_tolerance,
+    early_stopping_patience = early_stopping_patience,
+    early_stopping = !(early_stopping_tolerance==0 || early_stopping_patience==0)
   )
 }
 
@@ -404,6 +415,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   # restore previous metrics & checkpoints
   metrics <- obj$fit$metrics
   checkpoints <- obj$fit$checkpoints
+  patience_counter <- 0L
 
   # main loop
   for (epoch in seq_len(config$epochs)+epoch_shift) {
@@ -448,6 +460,27 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
     if (config$verbose)
       rlang::inform(message)
+
+    if (config$early_stopping && has_valid && epoch > 1) {
+      # compare to best_metric
+      change <- (mean(metrics[[epoch]]$valid$loss) - best_metric) / mean(metrics[[epoch]]$valid$loss)
+      if (change > config$early_stopping_tolerance){
+        patience_counter <- patience_counter + 1
+        if (patience_counter >= config$early_stopping_patience){
+          if (config$verbose)
+            rlang::inform(sprintf("Early stopping at epoch %03d", epoch))
+          break
+        }
+      } else {
+        best_metric <- mean(metrics[[epoch]]$valid$loss)
+        patience_counter <- 0L
+      }
+    }
+    if (config$early_stopping && has_valid && epoch == 1) {
+      # initialise best_metric
+      best_metric <- mean(metrics[[epoch]]$valid$loss)
+    }
+
 
     scheduler$step()
   }
