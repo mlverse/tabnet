@@ -64,12 +64,17 @@ We can see here that variable are not missing at random, and thus we can expect 
 
 Note: A better way to achieve proper missing value to be explicit NAs would be to turn numerical value to NA when the corresponding description columns refer to `none` or to zero occurence of the equipment. But this is beyond the scope of this vignette.
 
+# Model pretraining
+
+Let's pretrain one model for each of those dataset, and analyse variable importance that emerge after the unsupervised representation learning step:   
+
 ## Variable importance with raw `ames` dataset
 
 ```{r}
 ames_rec <- recipe(Sale_Price ~ ., data=ames) %>% 
   step_normalize(all_numeric())
-ames_fit <- tabnet_pretrain(ames_rec, data=ames,  epoch=50, valid_split = 0.2, verbose=TRUE, batch=2930)
+ames_fit <- tabnet_pretrain(ames_rec, data=ames,  epoch=50, 
+                            valid_split = 0.2, verbose=TRUE, batch=2930)
 autoplot(ames_fit)
 vip::vip(ames_fit)
 ```
@@ -91,8 +96,8 @@ vip::vip(ames_fit)
 [Epoch 050] Loss: 2.016043 Valid loss: 57533.851562
 ```
 
-[ames_fit model training diagnostic plot](ames_pretrain.png)
-[ames_fit model variable importance plot](ames_pretrain_vip.png)
+![ames_fit model training diagnostic plot](ames_pretrain.png)
+![ames_fit model variable importance plot](ames_pretrain_vip.png)
 
 Training loss evolution seems correct and we get `Alley` and `Pool_QC` variables in the top ten important variables according to the pretrained model. Those two variables have been screened as having a very important missing rate.
 
@@ -104,7 +109,9 @@ In order to compensate the 16% missingness already present in the `ames_missing`
 ```{r}
 ames_missing_rec <- recipe(Sale_Price ~ ., data=ames_missing) %>% 
   step_normalize(all_numeric())
-ames_missing_fit <- tabnet_pretrain(ames_missing_rec, data=ames_missing, epoch=50, valid_split = 0.2, verbose=TRUE, batch=2930, pretraining_ratio=0.34)
+ames_missing_fit <- tabnet_pretrain(ames_missing_rec, data=ames_missing, epoch=50, 
+                                    valid_split = 0.2, verbose=TRUE, batch=2930, 
+                                    pretraining_ratio=0.34)
 autoplot(ames_missing_fit)
 vip::vip(ames_missing_fit)
 ```
@@ -126,8 +133,8 @@ vip::vip(ames_missing_fit)
 [Epoch 050] Loss: 6.723494 Valid loss: 4.215664
 
 ```
-[ames_missing_fit model training diagnostic plot](ames_missing_pretrain.png)
-[ames_missing_fit model variable importance plot](ames_missing_pretrain_vip.png)
+![ames_missing_fit model training diagnostic plot](ames_missing_pretrain.png)
+![ames_missing_fit model variable importance plot](ames_missing_pretrain_vip.png)
 
 The model is slightly overfitting here, but we can see here no variables with high missingness is present in the top 10 important variables. This seems to be a good sign of the model having captured proper interactions between variables.
 
