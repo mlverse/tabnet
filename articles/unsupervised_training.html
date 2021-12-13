@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0.9000</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -70,7 +66,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/mlverse/tabnet/">
+  <a href="https://github.com/mlverse/tabnet/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -91,7 +87,7 @@
       <h1 data-toc-skip>Unsupervised training and fine-tuning</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/master/vignettes/unsupervised_training.Rmd"><code>vignettes/unsupervised_training.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/HEAD/vignettes/unsupervised_training.Rmd" class="external-link"><code>vignettes/unsupervised_training.Rmd</code></a></small>
       <div class="hidden name"><code>unsupervised_training.Rmd</code></div>
 
     </div>
@@ -99,41 +95,41 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet">tabnet</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org">tidymodels</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org">modeldata</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></code></pre></div>
 <p>In this vignette we show how to - pretrain TabNet model with unsupervised data - fine-tune the pretrained TabNet model with supervised data</p>
 <p>We are going to use the <code>lending_club</code> dataset available in the <code>modeldata</code> package, using 90 % of it as unsupervised data.</p>
 <p>First, let’s split our dataset into <code>unsupervised</code> and <code>supervised</code> datasets, so we can later train the supervised step of the model:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"lending_club"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"lending_club"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span>
 <span class="va">split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">lending_club</span>, strata <span class="op">=</span> <span class="va">Class</span>, prop <span class="op">=</span> <span class="fl">9</span><span class="op">/</span><span class="fl">10</span><span class="op">)</span>
-<span class="va">unsupervised</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">split</span><span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>Class<span class="op">=</span><span class="cn">NA</span><span class="op">)</span>
+<span class="va">unsupervised</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">split</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Class<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span><span class="op">)</span>
 <span class="va">supervised</span>  <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></code></pre></div>
 <p>Then we proceed with the usual random split of the supervised dataset into <code>train</code> and <code>test</code> so that we can evaluate performance of our model:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>
 <span class="va">supervised_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">supervised</span>, strata <span class="op">=</span> <span class="va">Class</span><span class="op">)</span>
 <span class="va">train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">supervised_split</span><span class="op">)</span> 
 <span class="va">test</span>  <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">supervised_split</span><span class="op">)</span></code></pre></div>
-<div id="data-preprocessing" class="section level2">
-<h2 class="hasAnchor">
-<a href="#data-preprocessing" class="anchor"></a>Data preprocessing</h2>
+<div class="section level2">
+<h2 id="data-preprocessing">Data preprocessing<a class="anchor" aria-label="anchor" href="#data-preprocessing"></a>
+</h2>
 <p>We now define our pre-processing steps in a recipe.<br>
-The <code><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe()</a></code> here is defined on the whole dataset in order to capture the full variability of numerical variables, as well as all categories present in nominal variables.<br>
+The <code><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe()</a></code> here is defined on the whole dataset in order to capture the full variability of numerical variables, as well as all categories present in nominal variables.<br>
 Note that tabnet handles categorical variables, so we don’t need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">Class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">lending_club</span><span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span>
-  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_normalize.html">step_normalize</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html">all_numeric</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-<span class="va">unsupervised_baked_df</span> <span class="op">&lt;-</span> <span class="va">rec</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> <span class="va">prep</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html">bake</a></span><span class="op">(</span>new_data<span class="op">=</span><span class="va">unsupervised</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">Class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">lending_club</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_normalize.html" class="external-link">step_normalize</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_numeric</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="va">unsupervised_baked_df</span> <span class="op">&lt;-</span> <span class="va">rec</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="va">prep</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span>new_data<span class="op">=</span><span class="va">unsupervised</span><span class="op">)</span></code></pre></div>
 <p>We now have the normalized dataset ready for unsupervised training.</p>
 </div>
-<div id="unsupervised-training-step" class="section level2">
-<h2 class="hasAnchor">
-<a href="#unsupervised-training-step" class="anchor"></a>Unsupervised training step</h2>
-<p>Next, we pre-train our model with a <a href="https://paperswithcode.com/task/self-supervised-learning">self-supervised learning</a> task. This step will gives us a <code>tabnet_pretrain</code> object that will contain a representation of the dataset variables and their interactions.<br>
+<div class="section level2">
+<h2 id="unsupervised-training-step">Unsupervised training step<a class="anchor" aria-label="anchor" href="#unsupervised-training-step"></a>
+</h2>
+<p>Next, we pre-train our model with a <a href="https://paperswithcode.com/task/self-supervised-learning" class="external-link">self-supervised learning</a> task. This step will gives us a <code>tabnet_pretrain</code> object that will contain a representation of the dataset variables and their interactions.<br>
 We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">unsupervised</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, batch_size <span class="op">=</span> <span class="fl">5000</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -163,13 +159,13 @@ We are going to train for 50 epochs with a batch size of 5000 i.e. half of the 
 [Epoch 050] Loss: 1.175343 Valid loss: 0.947859 </code></pre>
 <p>After a few minutes we can get the results:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></code></pre></div>
 <p><img src="pretraining_loss.png" alt="pretraining task loss plot"> We may continue the training for few epoch but the validation loss seems to plateau so it is like the model would start to overfit… Here we can identify on the plot that the model epoch providing the lowest loss on the validation-set is around epoch 35. We will reuse it through the <code>from_epoch</code> option for training continuation, instead of the default being last epoch.<br>
 But historical model weights are only available for checkpoint-ed epoch , so in our case, checkpoint at epoch 40 seems a good compromise, and we would then use <code>from_epoch=40</code>.</p>
 </div>
-<div id="continuing-training-with-supervised-task" class="section level2">
-<h2 class="hasAnchor">
-<a href="#continuing-training-with-supervised-task" class="anchor"></a>Continuing training with supervised task</h2>
+<div class="section level2">
+<h2 id="continuing-training-with-supervised-task">Continuing training with supervised task<a class="anchor" aria-label="anchor" href="#continuing-training-with-supervised-task"></a>
+</h2>
 <p>Now, we reuse our pre-processing steps recipe and feed it directly in a supervised fitting task on top of our pre-trained model.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model <span class="op">=</span> <span class="va">mod</span>, from_epoch<span class="op">=</span><span class="fl">40</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -194,28 +190,28 @@ But historical model weights are only available for checkpoint-ed epoch , so in 
 [Epoch 089] Loss: 0.091212 Valid loss: 0.341918                                                                                    
 [Epoch 090] Loss: 0.087092 Valid loss: 0.361795 </code></pre>
 <p>The training continue starting at epoch 41 as experted and ending at epoch 90.<br>
-Now let’s diagnose the model training with a new <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot()</a></code>:</p>
+Now let’s diagnose the model training with a new <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">model_fit</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model_fit</span><span class="op">)</span></code></pre></div>
 <p><img src="pretrained_model.png" alt="training and validation loss plot for pretrained tabnet"> We can see that model starts to overfit after epoch 52 as the validation-set loss reaches its minimum. If we consider epoch 54 to be the epoch to move to production, we can redo the training from checkpoint 50 for 4 epochs :</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model <span class="op">=</span> <span class="va">model_fit</span>, from_epoch<span class="op">=</span><span class="fl">50</span>, epochs <span class="op">=</span> <span class="fl">4</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p>Now, <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code> and <code><a href="../reference/tabnet_explain.html">tabnet_explain()</a></code> functions will use the model from last epoch beeing epoch 54.<br>
+<p>Now, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and <code><a href="../reference/tabnet_explain.html">tabnet_explain()</a></code> functions will use the model from last epoch beeing epoch 54.<br>
 Finally, we can measure the results against our test set:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">test</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html">bind_cols</a></span><span class="op">(</span>
-    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
-  <span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_bad</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
+  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_bad</span><span class="op">)</span></code></pre></div>
 <pre><code># A tibble: 1 × 3
   .metric .estimator .estimate
   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
 1 roc_auc binary         0.653</code></pre>
 </div>
-<div id="comparing-against-a-model-without-pretraining" class="section level2">
-<h2 class="hasAnchor">
-<a href="#comparing-against-a-model-without-pretraining" class="anchor"></a>Comparing against a model without pretraining</h2>
+<div class="section level2">
+<h2 id="comparing-against-a-model-without-pretraining">Comparing against a model without pretraining<a class="anchor" aria-label="anchor" href="#comparing-against-a-model-without-pretraining"></a>
+</h2>
 <p>The question now is “what if we did not pretrain the model ?” We can build a vanilla tabnet model on the <code>train</code> dataset for comparison :</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vanilla_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">50</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -246,15 +242,15 @@ Finally, we can measure the results against our test set:</p>
 [Epoch 050] Loss: 0.129994 Valid loss: 0.154256                                          
 </code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span><span class="op">)</span></code></pre></div>
 <p><img src="vanillia_model.png" alt="Training and validation loss plot for vanillia tabnet"> The model overfits around epoch 20, we will restore it at checkpoint epoch 20 and retrain for 1 epoch , and proceed to prediction :</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vanilla_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model<span class="op">=</span> <span class="va">vanilla_model_fit</span>, from_epoch<span class="op">=</span><span class="fl">20</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">1</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">test</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html">bind_cols</a></span><span class="op">(</span>
-    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
-  <span class="op">)</span> <span class="op"><a href="../reference/%&gt;%.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_good</span><span class="op">)</span></code></pre></div>
+<span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>
+  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_good</span><span class="op">)</span></code></pre></div>
 <pre><code># A tibble: 1 x 3
   .metric .estimator .estimate
   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
@@ -274,11 +270,13 @@ Finally, we can measure the results against our test set:</p>
 
 
       <footer><div class="copyright">
-  <p>Developed by Daniel Falbel.</p>
+  <p></p>
+<p>Developed by Daniel Falbel.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -286,6 +284,8 @@ Finally, we can measure the results against our test set:</p>
 
   
 
+
+  
 
   </body>
 </html>
