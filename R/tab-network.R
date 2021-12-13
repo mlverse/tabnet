@@ -269,6 +269,7 @@ tabnet_pretrainer <- torch::nn_module(
 
     self$virtual_batch_size <- virtual_batch_size
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
+    self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$post_embed_dim <- self$embedder$post_embed_dim
     self$masker = random_obfuscator(self$pretraining_ratio)
     self$encoder = tabnet_encoder(
@@ -296,26 +297,27 @@ tabnet_pretrainer <- torch::nn_module(
     )
 
   },
-  forward = function(x) {
+  forward = function(x, x_na_mask) {
     embedded_x <- self$embedder(x)
+    embedded_x_na_mask <- self$embedder_na(x_na_mask)
 
     if (self$training) {
-      masker_out_lst <- self$masker(embedded_x)
+      masker_out_lst <- self$masker(embedded_x, embedded_x_na_mask)
       obf_vars <- masker_out_lst[[2]]
-      # set prior of encoder with obf_mask
-      prior <- 1 - obf_vars
+      # set prior of encoder as !obf_mask
+      prior <- obf_vars$logical_not()
       steps_out <- self$encoder(masker_out_lst[[1]], prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
            obf_vars)
     } else {
-      prior <- torch::torch_ones(size = x$shape, device = x$device)
+      prior <- embedded_x_na_mask$logical_not()
       steps_out <- self$encoder(embedded_x, prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
-           torch::torch_ones(embedded_x$shape, device = x$device))
+           embedded_x_na_mask)
     }
   },
   forward_masks = function(x) {
@@ -609,9 +611,9 @@ embedding_generator <- torch::nn_module(
     else
       self$cat_emb_dims <- cat_emb_dim
 
-    # check that all embeddings are provided
+    # check that all embeddings dimensions are provided
     if (length(self$cat_emb_dims) != length(cat_dims)){
-      msg = "cat_emb_dim and cat_dims must be lists of same length, got {length(self$cat_emb_dims)} and {length(cat_dims)}"
+      msg = paste0("`cat_emb_dim` length must be 1 or the number of categorical predictors, got length ",length(self$cat_emb_dims)," for ",length(cat_dims)," categorical predictors")
       stop(msg)
     }
 
@@ -650,9 +652,65 @@ embedding_generator <- torch::nn_module(
     for (i in seq_along(self$continuous_idx)) {
 
       if (self$continuous_idx[i]) {
-        cols[[i]] <- x[,i]$to(dtype = torch::torch_float())$view(c(-1, 1))
+        # impute nan with 0s
+        cols[[i]] <- x[,i]$nan_to_num(0)$to(dtype = torch::torch_float())$view(c(-1, 1))
       } else {
-        cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$to(dtype = torch::torch_long()))
+        # impute nan with 1s (categorical vars are 1-indexed)
+        cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$nan_to_num(1)$to(dtype = torch::torch_long()))
+        cat_feat_counter <- cat_feat_counter + 1
+      }
+
+    }
+
+    # concat
+    post_embeddings <- torch::torch_cat(cols, dim=2)
+    post_embeddings
+  }
+)
+
+na_embedding_generator <- torch::nn_module(
+  "na_embedding_generator",
+  initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
+
+    if (length(cat_dims) == 0 || length(cat_idxs) == 0) {
+      self$skip_embedding <- TRUE
+      return(invisible(NULL))
+    }
+
+    self$skip_embedding <- FALSE
+
+    if (length(cat_emb_dim) == 1)
+      self$cat_emb_dims <- rep(cat_emb_dim, length(cat_idxs))
+    else
+      self$cat_emb_dims <- cat_emb_dim
+
+    # Sort dims by cat_idx
+    sorted_idx <- order(cat_idxs)
+    self$cat_emb_dims <- self$cat_emb_dims[sorted_idx]
+
+    # record continuous indices
+    self$continuous_idx <- rep(TRUE, input_dim)
+    self$continuous_idx[cat_idxs] <- FALSE
+
+  },
+  forward = function(x) {
+
+    if (self$skip_embedding) {
+      # no embeddings required
+      return(x)
+    }
+
+    cols <- list()
+    cat_feat_counter <- 1
+
+    for (i in seq_along(self$continuous_idx)) {
+
+      if (self$continuous_idx[i]) {
+        cols[[i]] <- x[,i]$to(dtype = torch::torch_bool())$view(c(-1, 1))
+      } else {
+        # extend the vector to match the dimention of the embedding_x via matmul
+        # TODO basic tensor broadcasting function could be more efficient and have lower footprint
+        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dims[cat_feat_counter], device = x$device))
         cat_feat_counter <- cat_feat_counter + 1
       }
 
@@ -675,11 +733,11 @@ random_obfuscator <- torch::nn_module(
     self$pretraining_ratio <- pretraining_ratio
 
   },
-  forward = function(x) {
+  forward = function(x, x_na_mask) {
     # workaround while torch_bernoulli is not available in CUDA
-    ones <- torch::torch_ones(size = x$shape, device="cpu")
+    ones <- torch::torch_ones_like(x, device="cpu")
     obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)$to(device=x$device)
-    masked_input = torch::torch_mul(1 - obfuscated_vars, x)
+    masked_input = torch::torch_mul(obfuscated_vars$logical_or(x_na_mask)$logical_not(), x)
 
     list(masked_input, obfuscated_vars)
 

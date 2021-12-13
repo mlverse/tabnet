@@ -34,10 +34,10 @@ You can install the released version from CRAN with:
 install.packages("tabnet")
 ```
 
-The development version can be installed from [GitHub](https://github.com/) with:
+The development version can be installed from [GitHub](https://github.com/mlverse/tabnet) with:
 
 ``` r
-# install.packages("devtools")
+# install.packages("remotes")
 remotes::install_github("mlverse/tabnet")
 ```
 
@@ -45,8 +45,9 @@ remotes::install_github("mlverse/tabnet")
 
 ```{r}
 library(tabnet)
-library(recipes)
+suppressPackageStartupMessages(library(recipes))
 library(yardstick)
+library(ggplot2)
 set.seed(1)
 
 data("attrition", package = "modeldata")
@@ -59,7 +60,11 @@ rec <- recipe(Attrition ~ ., data = train) %>%
   step_normalize(all_numeric(), -all_outcomes())
 
 fit <- tabnet_fit(rec, train, epochs = 30)
+suppressWarnings(autoplot(fit))
+```
 
+
+```{r}
 metrics <- metric_set(accuracy, precision, recall)
 cbind(test, predict(fit, test)) %>% 
   metrics(Attrition, estimate = .pred_class)

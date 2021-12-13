@@ -2,9 +2,18 @@
 % Please edit documentation in R/explain.R
 \name{tabnet_explain}
 \alias{tabnet_explain}
+\alias{tabnet_explain.default}
+\alias{tabnet_explain.tabnet_fit}
+\alias{tabnet_explain.tabnet_pretrain}
 \title{Interpretation metrics from a TabNet model}
 \usage{
 tabnet_explain(object, new_data)
+
+\method{tabnet_explain}{default}(object, new_data)
+
+\method{tabnet_explain}{tabnet_fit}(object, new_data)
+
+\method{tabnet_explain}{tabnet_pretrain}(object, new_data)
 }
 \arguments{
 \item{object}{a TabNet fit object}

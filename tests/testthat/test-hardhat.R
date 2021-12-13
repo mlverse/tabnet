@@ -1,4 +1,4 @@
-test_that("Training regression", {
+test_that("Training regression for data.frame and formula", {
 
   data("ames", package = "modeldata")
 
@@ -26,7 +26,7 @@ test_that("Training regression", {
   )
 })
 
-test_that("Training classification", {
+test_that("Training classification for data.frame", {
 
   data("attrition", package = "modeldata")
 
@@ -170,6 +170,35 @@ test_that("data-frame with missing value makes inference fails with explicit mes
   )
 
 })
+
+test_that("configuration with categorical_embedding_dimension vector works", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2, config=config),
+    regexp = NA
+  )
+})
+
+test_that("explicit error message when categorical embedding dimension vector has wrong size", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2, config=config),
+    regexp = "number of categorical predictors"
+  )
+})
+
 test_that("inference works with missings in the response vector", {
 
   suppressPackageStartupMessages(library(recipes))

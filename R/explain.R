@@ -41,8 +41,24 @@
 #'
 #' @export
 tabnet_explain <- function(object, new_data) {
-  processed <- hardhat::forge(new_data, object$blueprint)
-  data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(new_data))))
+  UseMethod("tabnet_explain")
+}
+
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.default <- function(object, new_data) {
+  stop(
+    "`tabnet_explain()` is not defined for a '", class(object)[1], "'.",
+    call. = FALSE
+  )
+}
+
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.tabnet_fit <- function(object, new_data) {
+  processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
+  stopifnot("Error: found missing values in the predictor data frame" = sum(is.na(processed$predictors))==0)
+  data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(processed$predictors))))
   output <- explain_impl(object$fit$network, data$x)
 
   # convert stuff to matrix with colnames
@@ -52,6 +68,11 @@ tabnet_explain <- function(object, new_data) {
   class(output) <- "tabnet_explain"
   output
 }
+
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.tabnet_pretrain <- tabnet_explain.tabnet_fit
+
 
 convert_to_df <- function(x, nms) {
   x <- as.data.frame(as.matrix(x$to(device = "cpu")$detach()))
@@ -106,3 +127,4 @@ vi_model.tabnet_fit <- function(object, ...) {
   tib
 }
 
+vi_model.tabnet_pretrain <- vi_model.tabnet_fit

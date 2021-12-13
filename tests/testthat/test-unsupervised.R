@@ -1,4 +1,4 @@
-test_that("Unsupervised training with default config", {
+test_that("Unsupervised training with default config, data.frame and formula", {
 
   data("ames", package = "modeldata")
 
@@ -84,6 +84,34 @@ test_that("works with validation split", {
 
 })
 
+test_that("works with categorical embedding dimension as list", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
+
+  expect_error(
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, config=config),
+    regexp = NA
+  )
+})
+
+test_that("explicit error message when categorical embedding dimension vector has wrong size", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition
+  config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
+
+  expect_error(
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, config=config),
+    regexp = "number of categorical predictors"
+  )
+})
+
 test_that("can train from a recipe", {
 
   library(recipes)
@@ -99,7 +127,7 @@ test_that("can train from a recipe", {
 
 })
 
-test_that("data-frame with missing value makes training fails with explicit message", {
+test_that("predictors with missing value works", {
 
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -115,7 +143,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
   expect_error(
     miss_pretrain <- tabnet_pretrain(x_missing, y, epochs = 1),
-    regexp = "missing"
+    regexp = NA
   )
 
   # categorical missing
@@ -124,7 +152,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
   expect_error(
     miss_pretrain <- tabnet_pretrain(x_missing, y, epochs = 1),
-    regexp = "missing"
+    regexp = NA
   )
 
   # no error when missing in outcome
@@ -135,7 +163,7 @@ test_that("data-frame with missing value makes training fails with explicit mess
 
 })
 
-test_that("scheduler works", {
+test_that("lr scheduler works", {
 
   data("ames", package = "modeldata")
 
