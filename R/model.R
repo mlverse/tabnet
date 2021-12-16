@@ -459,7 +459,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     if (config$verbose)
       rlang::inform(message)
 
-    if (config$early_stopping && has_valid && epoch > 1) {
+    if (config$early_stopping && has_valid && epoch > 1+epoch_shift) {
       # compare to best_metric
       change <- (mean(metrics[[epoch]]$valid$loss) - best_metric) / mean(metrics[[epoch]]$valid$loss)
       if (change > config$early_stopping_tolerance){
@@ -474,7 +474,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         patience_counter <- 0L
       }
     }
-    if (config$early_stopping && has_valid && epoch == 1) {
+    if (config$early_stopping && has_valid && epoch == 1+epoch_shift) {
       # initialise best_metric
       best_metric <- mean(metrics[[epoch]]$valid$loss)
     }
