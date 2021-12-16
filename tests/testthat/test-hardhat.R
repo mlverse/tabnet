@@ -83,7 +83,7 @@ test_that("works with validation split", {
 
 })
 
-test_that("works with early stopping", {
+test_that("pretrain and fit both work with early stopping", {
 
   data("attrition", package = "modeldata")
 
@@ -91,8 +91,15 @@ test_that("works with early stopping", {
   y <- attrition[1:256, "Attrition"]
 
   expect_message(
+    pretrain <- tabnet_pretrain(x, y, epochs = 100, valid_split = 0.5, verbose=TRUE,
+                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+    "Early stopping at epoch"
+  )
+  expect_lt(length(pretrain$fit$metrics),50)
+
+  expect_message(
     fit <- tabnet_fit(x, y, epochs = 100, valid_split = 0.5, verbose=TRUE,
-                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.1),
+                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),50)
