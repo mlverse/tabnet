@@ -51,7 +51,7 @@ test_that("fit accept missing value in predictor, not in outcome", {
 
   expect_error(
     miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
-    regexp = "NA"
+    regexp = NA
   )
 
   # categorical missing
@@ -60,7 +60,7 @@ test_that("fit accept missing value in predictor, not in outcome", {
 
   expect_error(
     miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
-    regexp = "NA"
+    regexp = NA
   )
 
   # missing in outcome
