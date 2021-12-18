@@ -490,8 +490,9 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   network <- obj$fit$network
   network$eval()
 
-  splits <- torch::torch_split(data$x, split_size = 10000)
-  splits <- lapply(splits, function(x) network(x)[[1]])
+  splits <- torch::torch_split(data$x, split_size = batch_size)
+  # todo move to coro::loop for efficiency
+  splits <- lapply(splits, function(x) network(x, torch::torch_ones_like(x))[[1]])
   torch::torch_cat(splits)
 }
 
