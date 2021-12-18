@@ -185,7 +185,7 @@ resolve_loss <- function(loss, dtype) {
 
 
 batch_to_device <- function(batch, device) {
-  batch <- list(x = batch$x, y  = batch$y)
+  batch <- list(x = batch$x, na_mask=batch$na_mask, y  = batch$y)
   lapply(batch, function(x) {
     x$to(device = device)
   })
@@ -193,7 +193,7 @@ batch_to_device <- function(batch, device) {
 
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
-  output <- network(batch$x)
+  output <- network(batch$x, batch$na_mask)
   loss <- config$loss_fn(output[[1]], batch$y)
 
   # Add the overall sparsity loss
@@ -214,7 +214,7 @@ train_batch <- function(network, optimizer, batch, config) {
 
 valid_batch <- function(network, batch, config) {
   # forward pass
-  output <- network(batch$x)
+  output <- network(batch$x, batch$na_mask)
   loss <- config$loss_fn(output[[1]], batch$y)
 
   # Add the overall sparsity loss
@@ -267,13 +267,12 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
       train_y <- y[-valid_idx]
     }
 
-    valid_data <- list(x = x[valid_idx, ], y = valid_y)
+    valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na, y = valid_y)
     x <- x[-valid_idx, ]
     y <- train_y
   }
 
   # training data
-  stopifnot("Error: found missing values in the predictor initialisation data frame" = sum(is.na(x))==0)
   data <- resolve_data(x, y)
 
   # resolve loss
@@ -319,7 +318,6 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
 tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=0L) {
   stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
-  has_valid <- config$valid_split > 0
 
   if (config$device == "auto") {
     if (torch::cuda_is_available())
@@ -330,6 +328,8 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     device <- config$device
   }
 
+  # dataset to dataloaders
+  has_valid <- config$valid_split > 0
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
@@ -342,16 +342,19 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       train_y <- y[-valid_idx]
     }
 
-    valid_data <- list(x = x[valid_idx, ], y = valid_y)
+    valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na)
+    na_mask = x[-valid_idx, ] %>% is.na
     x <- x[-valid_idx, ]
     y <- train_y
   }
 
   # training data
-  stopifnot("Error: found missing values in the predictor training data frame" = sum(is.na(x))==0)
+  na_mask = x %>% is.na
   data <- resolve_data(x, y)
   dl <- torch::dataloader(
-    torch::tensor_dataset(x = data$x, y = data$y),
+    torch::tensor_dataset(x = data$x,
+                          na_mask = torch::torch_tensor(as.matrix(na_mask), dtype = torch::torch_bool()),
+                          y = data$y),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -359,10 +362,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # validation data
   if (has_valid) {
-    stopifnot("Error: found missing values in the predictor validation data frame" = sum(is.na(valid_data$x))==0)
-    valid_data <- resolve_data(valid_data$x, valid_data$y)
+    valid_data <- resolve_data(valid_lst$x, valid_lst$y)
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_data$x, y = valid_data$y),
+      torch::tensor_dataset(x = valid_lst$x,
+                            na_mask = torch::torch_tensor(as.matrix(valid_lst$na_mask), dtype = torch::torch_bool()),
+                            y = valid_lst$y),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
