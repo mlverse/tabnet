@@ -2,8 +2,8 @@ test_that("Training regression for data.frame and formula", {
 
   data("ames", package = "modeldata")
 
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
+  x <- ames[1:256,-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price[1:256]
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 1),
@@ -30,8 +30,8 @@ test_that("Training classification for data.frame", {
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 1),
@@ -54,8 +54,8 @@ test_that("errors when using an argument that do not exist", {
 
   data("ames", package = "modeldata")
 
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
+  x <- ames[1:256,-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price[1:256]
 
   expect_error(
     fit <- tabnet_fit(x, y, epochsas = 1),
@@ -68,16 +68,16 @@ test_that("works with validation split", {
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2),
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.5),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2, verbose = TRUE),
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.5, verbose = TRUE),
     regexp = NA
   )
 
@@ -92,7 +92,7 @@ test_that("can train from a recipe", {
     step_normalize(all_numeric(), -all_outcomes())
 
   expect_error(
-    fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
+    fit <- tabnet_fit(rec, attrition[1:256,], epochs = 1, valid_split = 0.25,
                     verbose = TRUE),
     regexp = NA
   )
@@ -108,8 +108,8 @@ test_that("configuration with categorical_embedding_dimension vector works", {
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
 
   expect_error(
@@ -122,8 +122,8 @@ test_that("explicit error message when categorical embedding dimension vector ha
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
 
   expect_error(

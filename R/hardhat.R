@@ -381,6 +381,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data, object$blueprint)
+  batch_size <- object$fit$config$batch_size
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
   hardhat::validate_prediction_size(out, new_data)
   out

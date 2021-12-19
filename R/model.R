@@ -342,7 +342,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       train_y <- y[-valid_idx]
     }
 
-    valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na)
+    valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na, y = valid_y)
     na_mask = x[-valid_idx, ] %>% is.na
     x <- x[-valid_idx, ]
     y <- train_y
@@ -364,9 +364,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   if (has_valid) {
     valid_data <- resolve_data(valid_lst$x, valid_lst$y)
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_lst$x,
+      torch::tensor_dataset(x = valid_data$x,
                             na_mask = torch::torch_tensor(as.matrix(valid_lst$na_mask), dtype = torch::torch_bool()),
-                            y = valid_lst$y),
+                            y = valid_data$y),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
