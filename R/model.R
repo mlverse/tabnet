@@ -272,18 +272,18 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     y <- train_y
   }
 
-  # training data
-  data <- resolve_data(x, y)
+  # training matrix
+  train_mat <- resolve_data(x, y)
 
   # resolve loss
-  config$loss_fn <- resolve_loss(config$loss, data$y$dtype)
+  config$loss_fn <- resolve_loss(config$loss, train_mat$y$dtype)
 
   # create network
   network <- tabnet_nn(
-    input_dim = data$input_dim,
-    output_dim = data$output_dim,
-    cat_idxs = data$cat_idx,
-    cat_dims = data$cat_dims,
+    input_dim = train_mat$input_dim,
+    output_dim = train_mat$output_dim,
+    cat_idxs = train_mat$cat_idx,
+    cat_dims = train_mat$cat_dims,
     n_d = config$n_d,
     n_a = config$n_a,
     n_steps = config$n_steps,
@@ -350,9 +350,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # training data
   na_mask = x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
-  data <- resolve_data(x, y)
-  dl <- torch::dataloader(
-    torch::tensor_dataset(x = data$x, na_mask = na_mask, y = data$y),
+  train_mat <- resolve_data(x, y)
+  train_dl <- torch::dataloader(
+    torch::tensor_dataset(x = train_mat$x, na_mask = na_mask, y = train_mat$y),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -360,10 +360,10 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # validation data
   if (has_valid) {
-    valid_data <- resolve_data(valid_lst$x, valid_lst$y)
+    valid_mat <- resolve_data(valid_lst$x, valid_lst$y)
     na_mask = valid_lst$na_mask %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_data$x, na_mask = na_mask, y = valid_data$y),
+      torch::tensor_dataset(x = valid_mat$x, na_mask = na_mask, y = valid_mat$y),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
@@ -371,7 +371,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # resolve loss
-  config$loss_fn <- resolve_loss(config$loss, data$y$dtype)
+  config$loss_fn <- resolve_loss(config$loss, train_mat$y$dtype)
 
   # restore network from model and send it to device
   network <- obj$fit$network
@@ -417,11 +417,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
     if (config$verbose)
       pb <- progress::progress_bar$new(
-        total = length(dl),
+        total = length(train_dl),
         format = "[:bar] loss= :loss"
       )
 
-    coro::loop(for (batch in dl) {
+    coro::loop(for (batch in train_dl) {
       m <- train_batch(network, optimizer, batch_to_device(batch, device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
@@ -456,19 +456,19 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   network$to(device = "cpu")
 
   importance_sample_size <- config$importance_sample_size
-  if (is.null(config$importance_sample_size) && data$x$shape[1] > 1e5) {
-    rlang::warn(c(glue::glue("Computing importances for a dataset with size {data$x$shape[1]}."),
+  if (is.null(config$importance_sample_size) && train_mat$x$shape[1] > 1e5) {
+    rlang::warn(c(glue::glue("Computing importances for a dataset with size {train_mat$x$shape[1]}."),
                 "This can consume too much memory. We are going to use a sample of size 1e5",
                 "You can disable this message by using the `importance_sample_size` argument."))
     importance_sample_size <- 1e5
   }
   indexes <- torch::torch_randint(
-    1, data$x$shape[1], min(importance_sample_size, data$x$shape[1]),
+    1, train_mat$x$shape[1], min(importance_sample_size, train_mat$x$shape[1]),
     dtype = torch::torch_long()
   )
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, data$x[indexes,..])
+    importance = compute_feature_importance(network, train_mat$x[indexes,..])
   )
 
   list(
