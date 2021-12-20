@@ -71,7 +71,7 @@ test_that("fit accept missing value in predictor, not in outcome", {
 
 })
 
-test_that("predict data-frame with missing value fails with explicit message", {
+test_that("predict data-frame accept missing value in predictor", {
 
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -88,7 +88,7 @@ test_that("predict data-frame with missing value fails with explicit message", {
   # predict with numerical missing
   expect_error(
     predict(fit, x_missing),
-    regexp = "missing"
+    regexp = NA
   )
   # categorical missing
   x_missing <- x
@@ -97,7 +97,40 @@ test_that("predict data-frame with missing value fails with explicit message", {
   # predict
   expect_error(
     predict(fit, x_missing),
-    regexp = "missing"
+    regexp = NA
+  )
+
+})
+
+test_that("inference works with missings in the response vector", {
+
+  suppressPackageStartupMessages(library(recipes))
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
+                    verbose = TRUE)
+  # predict with empty vector
+  attrition[["EnvironmentSatisfaction"]] <-NA
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+  # predict with wrong class
+  attrition[["EnvironmentSatisfaction"]] <-NA_character_
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
+  )
+
+  # predict with list column
+  attrition[["EnvironmentSatisfaction"]] <- list(NA)
+  expect_error(
+    predict(fit, attrition),
+    regexp = NA
   )
 
 })

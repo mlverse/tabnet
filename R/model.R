@@ -349,12 +349,10 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # training data
-  na_mask = x %>% is.na
+  na_mask = x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
   data <- resolve_data(x, y)
   dl <- torch::dataloader(
-    torch::tensor_dataset(x = data$x,
-                          na_mask = torch::torch_tensor(as.matrix(na_mask), dtype = torch::torch_bool()),
-                          y = data$y),
+    torch::tensor_dataset(x = data$x, na_mask = na_mask, y = data$y),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -363,10 +361,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   # validation data
   if (has_valid) {
     valid_data <- resolve_data(valid_lst$x, valid_lst$y)
+    na_mask = valid_lst$na_mask %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_data$x,
-                            na_mask = torch::torch_tensor(as.matrix(valid_lst$na_mask), dtype = torch::torch_bool()),
-                            y = valid_data$y),
+      torch::tensor_dataset(x = valid_data$x, na_mask = na_mask, y = valid_data$y),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
@@ -484,16 +481,24 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 }
 
 predict_impl <- function(obj, x, batch_size = 1e5) {
-  stopifnot("Error: found missing values in the predictor data frame for prediction" = sum(is.na(x))==0)
-  data <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
+  predict_mat <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
 
   network <- obj$fit$network
+  yhat <- c()
   network$eval()
 
-  splits <- torch::torch_split(data$x, split_size = batch_size)
-  # todo move to coro::loop for efficiency
-  splits <- lapply(splits, function(x) network(x, torch::torch_ones_like(x))[[1]])
-  torch::torch_cat(splits)
+  na_mask = x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
+  predict_dl <- torch::dataloader(
+    torch::tensor_dataset(x = predict_mat$x, na_mask = na_mask),
+    batch_size = batch_size,
+    drop_last = FALSE,
+    shuffle = FALSE
+  )
+  coro::loop(for (batch in predict_dl) {
+    yhat <- c(yhat, network(batch$x, batch$na_mask)[[1]])
+  })
+
+  torch::torch_cat(yhat)
 }
 
 predict_impl_numeric <- function(obj, x, batch_size) {

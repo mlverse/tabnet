@@ -132,40 +132,6 @@ test_that("explicit error message when categorical embedding dimension vector ha
   )
 })
 
-test_that("inference works with missings in the response vector", {
-
-  suppressPackageStartupMessages(library(recipes))
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
-    step_normalize(all_numeric(), -all_outcomes())
-  fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
-                    verbose = TRUE)
-  # predict with empty vector
-  attrition[["EnvironmentSatisfaction"]] <-NA
-  expect_error(
-    predict(fit, attrition),
-    regexp = NA
-  )
-
-  # predict with wrong class
-  attrition[["EnvironmentSatisfaction"]] <-NA_character_
-  expect_error(
-    predict(fit, attrition),
-    regexp = NA
-  )
-
-  # predict with list column
-  attrition[["EnvironmentSatisfaction"]] <- list(NA)
-  expect_error(
-    predict(fit, attrition),
-    regexp = NA
-  )
-
-})
-
-
 test_that("serialization with saveRDS just works", {
 
   data("ames", package = "modeldata")
