@@ -96,7 +96,10 @@
   pretraining_ratio <span class="op">=</span> <span class="fl">0.5</span>,
   verbose <span class="op">=</span> <span class="cn">FALSE</span>,
   device <span class="op">=</span> <span class="st">"auto"</span>,
-  importance_sample_size <span class="op">=</span> <span class="cn">NULL</span>
+  importance_sample_size <span class="op">=</span> <span class="cn">NULL</span>,
+  early_stopping_monitor <span class="op">=</span> <span class="st">"valid_loss"</span>,
+  early_stopping_tolerance <span class="op">=</span> <span class="fl">0</span>,
+  early_stopping_patience <span class="op">=</span> <span class="fl">0L</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -188,6 +191,13 @@ uses  to "cuda" if it's available, otherwise uses "cpu".</p></dd>
 <dd><p>sample of the dataset to compute importance metrics.
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.</p></dd>
+<dt>early_stopping_monitor</dt>
+<dd><p>Unused (defaults to "valid_loss").</p></dd>
+<dt>early_stopping_tolerance</dt>
+<dd><p>Minimum improvement to reset the patience counter.
+(default 0 for no early stopping)</p></dd>
+<dt>early_stopping_patience</dt>
+<dd><p>Number of epochs without improving until stopping training. (default=5)</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
