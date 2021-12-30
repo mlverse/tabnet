@@ -4,6 +4,7 @@
     
     -- Modules ---------------------------------------
     * embedder: <embedding_generator> #283 parameters
+    * embedder_na: <na_embedding_generator> #0 parameters
     * tabnet: <tabnet_no_embedding> #10,458 parameters
     
     -- Parameters ------------------------------------
@@ -15,6 +16,7 @@
     
     -- Modules ---------------------------------------
     * embedder: <embedding_generator> #283 parameters
+    * embedder_na: <na_embedding_generator> #0 parameters
     * tabnet: <tabnet_no_embedding> #10,458 parameters
     
     -- Parameters ------------------------------------

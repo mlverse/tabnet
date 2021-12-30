@@ -82,9 +82,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   }
   # training data
   na_mask = x %>% is.na
-  data <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
+  train_mat <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
   dl <- torch::dataloader(
-    torch::tensor_dataset(x = data$x, na_mask = torch::torch_tensor(as.matrix(na_mask), dtype = torch::torch_bool())),
+    torch::tensor_dataset(x = train_mat$x, na_mask = torch::torch_tensor(as.matrix(na_mask), dtype = torch::torch_bool())),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -92,9 +92,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   # validation data
   if (has_valid) {
-    valid_data <- resolve_data(valid_lst$x, y=matrix(rep(1, nrow(valid_lst$x)),ncol=1))
+    valid_mat <- resolve_data(valid_lst$x, y=matrix(rep(1, nrow(valid_lst$x)),ncol=1))
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_data$x, na_mask = torch::torch_tensor(as.matrix(valid_lst$na_mask), dtype = torch::torch_bool())),
+      torch::tensor_dataset(x = valid_mat$x, na_mask = torch::torch_tensor(as.matrix(valid_lst$na_mask), dtype = torch::torch_bool())),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
@@ -106,9 +106,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   # create network
   network <- tabnet_pretrainer(
-    input_dim = data$input_dim,
-    cat_idxs = data$cat_idx,
-    cat_dims = data$cat_dims,
+    input_dim = train_mat$input_dim,
+    cat_idxs = train_mat$cat_idx,
+    cat_dims = train_mat$cat_dims,
     pretraining_ratio = config$pretraining_ratio,
     n_d = config$n_d,
     n_a = config$n_a,
@@ -226,7 +226,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, data$x)
+    importance = compute_feature_importance(network, train_mat$x)
   )
 
   list(

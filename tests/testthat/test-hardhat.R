@@ -2,8 +2,8 @@ test_that("Training regression for data.frame and formula", {
 
   data("ames", package = "modeldata")
 
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
+  x <- ames[1:256,-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price[1:256]
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 1),
@@ -30,8 +30,8 @@ test_that("Training classification for data.frame", {
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 1),
@@ -54,8 +54,8 @@ test_that("errors when using an argument that do not exist", {
 
   data("ames", package = "modeldata")
 
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
+  x <- ames[1:256,-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price[1:256]
 
   expect_error(
     fit <- tabnet_fit(x, y, epochsas = 1),
@@ -68,16 +68,16 @@ test_that("works with validation split", {
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2),
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.5),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.2, verbose = TRUE),
+    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.5, verbose = TRUE),
     regexp = NA
   )
 
@@ -115,7 +115,7 @@ test_that("can train from a recipe", {
     step_normalize(all_numeric(), -all_outcomes())
 
   expect_error(
-    fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
+    fit <- tabnet_fit(rec, attrition[1:256,], epochs = 1, valid_split = 0.25,
                     verbose = TRUE),
     regexp = NA
   )
@@ -127,79 +127,12 @@ test_that("can train from a recipe", {
 
 })
 
-test_that("data-frame with missing value makes training fails with explicit message", {
-
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-  y_missing <- y
-  y_missing[1] <- NA
-
-  # numerical missing
-  x_missing <- x
-  x_missing[1,"Age"] <- NA
-
-  expect_error(
-    miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
-    regexp = "missing"
-  )
-
-  # categorical missing
-  x_missing <- x
-  x_missing[1,"BusinessTravel"] <- NA
-
-  expect_error(
-    miss_fit <- tabnet_fit(x_missing, y, epochs = 1),
-    regexp = "missing"
-  )
-
-  # missing in outcome
-  expect_error(
-    miss_fit <- tabnet_fit(x, y_missing, epochs = 1),
-    regexp = "missing"
-  )
-
-})
-
-test_that("data-frame with missing value makes inference fails with explicit message", {
-
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-  #
-  fit <- tabnet_fit(x, y, epochs = 1)
-
-  # numerical missing
-  x_missing <- x
-  x_missing[1,"Age"] <- NA
-
-  # predict with numerical missing
-  expect_error(
-    predict(fit, x_missing),
-    regexp = "missing"
-  )
-  # categorical missing
-  x_missing <- x
-  x_missing[1,"BusinessTravel"] <- NA
-
-  # predict
-  expect_error(
-    predict(fit, x_missing),
-    regexp = "missing"
-  )
-
-})
-
 test_that("configuration with categorical_embedding_dimension vector works", {
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
 
   expect_error(
@@ -212,8 +145,8 @@ test_that("explicit error message when categorical embedding dimension vector ha
 
   data("attrition", package = "modeldata")
 
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
+  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
+  y <- attrition$Attrition[1:256]
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
 
   expect_error(
@@ -221,40 +154,6 @@ test_that("explicit error message when categorical embedding dimension vector ha
     regexp = "number of categorical predictors"
   )
 })
-
-test_that("inference works with missings in the response vector", {
-
-  suppressPackageStartupMessages(library(recipes))
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
-    step_normalize(all_numeric(), -all_outcomes())
-  fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
-                    verbose = TRUE)
-  # predict with empty vector
-  attrition[["EnvironmentSatisfaction"]] <-NA
-  expect_error(
-    predict(fit, attrition),
-    regexp = NA
-  )
-
-  # predict with wrong class
-  attrition[["EnvironmentSatisfaction"]] <-NA_character_
-  expect_error(
-    predict(fit, attrition),
-    regexp = NA
-  )
-
-  # predict with list column
-  attrition[["EnvironmentSatisfaction"]] <- list(NA)
-  expect_error(
-    predict(fit, attrition),
-    regexp = NA
-  )
-
-})
-
 
 test_that("serialization with saveRDS just works", {
 
