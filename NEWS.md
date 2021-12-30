@@ -6,7 +6,9 @@
 * Improve unsupervised vignette content. (#67)
 * `tabnet_pretrain()` now allows missing values in predictors. (#68)
 * `tabnet_explain()` now works for `tabnet_pretrain` models. (#68)
+* Allow missing-values values in predictor for unsupervised training. (#68)
 * Improve performance of `random_obfuscator()` torch_nn module. (#68)
+* Add support for early stopping (#69)
 * `tabnet_fit()` and `predict()` now allow missing values in predictors. (#76)
 
 # tabnet 0.3.0

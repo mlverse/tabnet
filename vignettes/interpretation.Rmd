@@ -71,14 +71,14 @@ make_random_x <- function(n) {
   x
 }
 
-make_syn2 <- function(n = 10000) {
+make_syn2 <- function(n = 5000) {
   x <- make_random_x(n)
   logits <- rowSums(x[,3:6])
   x$y <- logit_to_y(logits)
   x
 }
 
-make_syn4 <- function(n = 10000) {
+make_syn4 <- function(n = 5000) {
   x <- make_random_x(n)
   logits <- ifelse(
     x[,10] > 0,

@@ -149,6 +149,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # initialize metrics & checkpoints
   metrics <- list()
   checkpoints <- list()
+  patience_counter <- 0L
 
   # main loop
   for (epoch in seq_len(config$epochs) + epoch_shift) {
@@ -197,6 +198,26 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
     if (config$verbose)
       rlang::inform(message)
+
+    if (config$early_stopping && has_valid && epoch > 1) {
+      # compare to best_metric
+      change <- (mean(metrics[[epoch]]$valid$loss) - best_metric) / mean(metrics[[epoch]]$valid$loss)
+      if (change > config$early_stopping_tolerance){
+        patience_counter <- patience_counter + 1
+        if (patience_counter >= config$early_stopping_patience){
+          if (config$verbose)
+            rlang::inform(sprintf("Early stopping at epoch %03d", epoch))
+          break
+        }
+      } else {
+        best_metric <- mean(metrics[[epoch]]$valid$loss)
+        patience_counter <- 0L
+      }
+    }
+    if (config$early_stopping && has_valid && epoch == 1) {
+      # initialise best_metric
+      best_metric <- mean(metrics[[epoch]]$valid$loss)
+    }
 
     scheduler$step()
   }

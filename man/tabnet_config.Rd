@@ -31,7 +31,10 @@ tabnet_config(
   pretraining_ratio = 0.5,
   verbose = FALSE,
   device = "auto",
-  importance_sample_size = NULL
+  importance_sample_size = NULL,
+  early_stopping_monitor = "valid_loss",
+  early_stopping_tolerance = 0,
+  early_stopping_patience = 0L
 )
 }
 \arguments{
@@ -120,6 +123,13 @@ uses  to "cuda" if it's available, otherwise uses "cpu".}
 \item{importance_sample_size}{sample of the dataset to compute importance metrics.
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.}
+
+\item{early_stopping_monitor}{Unused (defaults to "valid_loss").}
+
+\item{early_stopping_tolerance}{Minimum improvement to reset the patience counter.
+(default 0 for no early stopping)}
+
+\item{early_stopping_patience}{Number of epochs without improving until stopping training. (default=5)}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.
