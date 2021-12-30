@@ -367,8 +367,8 @@ tabnet_no_embedding <- torch::nn_module(
     initialize_non_glu(self$final_mapping, n_d, output_dim)
 
   },
-  forward = function(x) {
-    prior <- torch::torch_ones(size = x$shape, device = x$device)
+  forward = function(x, x_na_mask) {
+    prior <- x_na_mask$logical_not()
     self_encoder_lst <- self$encoder(x, prior)
     steps_output <- self_encoder_lst[[1]]
     M_loss <- self_encoder_lst[[2]]
@@ -416,19 +416,21 @@ tabnet_nn <- torch::nn_module(
 
     self$virtual_batch_size <- virtual_batch_size
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
+    self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$post_embed_dim <- self$embedder$post_embed_dim
     self$tabnet <- tabnet_no_embedding(self$post_embed_dim, output_dim, n_d, n_a, n_steps,
                                      gamma, n_independent, n_shared, epsilon,
                                      virtual_batch_size, momentum, mask_type)
 
   },
-  forward = function(x) {
-    x <- self$embedder(x)
-    self$tabnet(x)
+  forward = function(x, x_na_mask) {
+    embedded_x <- self$embedder(x)
+    embedded_x_na_mask <- self$embedder_na(x_na_mask)
+    self$tabnet(embedded_x, embedded_x_na_mask)
   },
   forward_masks = function(x) {
-    x <- self$embedder(x)
-    self$tabnet$forward_masks(x)
+    embedded_x <- self$embedder(x)
+    self$tabnet$forward_masks(embedded_x)
   }
 )
 
