@@ -1,5 +1,11 @@
 
-#' Transforms input data into tensors
+#' Transforms input data into a list of
+#'  3 torch_tensors being
+#' $x , $x_na_mask, $y
+#'  and
+#' cat_idx the vector of x categorical predictor index
+#' cat_dims the vector of number of levels of each x categorical predictor
+#' input_dim and output_dim
 #'
 #' @param x a data frame
 #' @param y a response vector
@@ -12,7 +18,7 @@ resolve_data <- function(x, y) {
       x_[[v]] <- as.numeric(x_[[v]])
   }
   x_tensor <- torch::torch_tensor(as.matrix(x_), dtype = torch::torch_float())
-
+  x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
   if (ncol(y) == 1)
     y <- y[[1]]
 
@@ -32,7 +38,7 @@ resolve_data <- function(x, y) {
 
   input_dim <- ncol(x)
 
-  list(x = x_tensor, y = y_tensor, cat_idx = cat_idx, output_dim = output_dim,
+  list(x = x_tensor, x_na_mask = x_na_mask, y = y_tensor, cat_idx = cat_idx, output_dim = output_dim,
        input_dim = input_dim, cat_dims = cat_dims)
 }
 
@@ -357,10 +363,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # training data
-  train_na_mask = x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
   train_mat <- resolve_data(x, y)
   train_dl <- torch::dataloader(
-    torch::tensor_dataset(x = train_mat$x, na_mask = train_na_mask, y = train_mat$y),
+    torch::tensor_dataset(x = train_mat$x, na_mask = train_mat$x_na_mask, y = train_mat$y),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -369,9 +374,8 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   # validation data
   if (has_valid) {
     valid_mat <- resolve_data(valid_lst$x, valid_lst$y)
-    na_mask  <-  valid_lst$na_mask %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
     valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_mat$x, na_mask = na_mask, y = valid_mat$y),
+      torch::tensor_dataset(x = valid_mat$x, na_mask = valid_mat$x_na_mask, y = valid_mat$y),
       batch_size = config$batch_size,
       drop_last = FALSE,
       shuffle = FALSE
@@ -498,7 +502,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   )
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, train_mat$x[indexes,..], train_na_mask[indexes,..])
+    importance = compute_feature_importance(network, train_mat$x[indexes,..], train_mat$x_na_mask[indexes,..])
   )
 
   list(
@@ -517,9 +521,8 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   yhat <- c()
   network$eval()
 
-  na_mask = x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
   predict_dl <- torch::dataloader(
-    torch::tensor_dataset(x = predict_mat$x, na_mask = na_mask),
+    torch::tensor_dataset(x = predict_mat$x, na_mask = predict_mat$x_na_mask),
     batch_size = batch_size,
     drop_last = FALSE,
     shuffle = FALSE

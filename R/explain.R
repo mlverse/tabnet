@@ -58,8 +58,7 @@ tabnet_explain.default <- function(object, new_data) {
 tabnet_explain.tabnet_fit <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
   data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(processed$predictors))))
-  x_na_mask <- processed$predictors %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
-  output <- explain_impl(object$fit$network, data$x, x_na_mask)
+  output <- explain_impl(object$fit$network, data$x, data$x_na_mask)
 
   # convert stuff to matrix with colnames
   nms <- colnames(processed$predictors)
