@@ -76,15 +76,14 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na)
-    na_mask = x[-valid_idx, ] %>% is.na
     x <- x[-valid_idx, ]
 
   }
   # training data
-  na_mask = x %>% is.na
+  train_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor( dtype = torch::torch_bool())
   train_mat <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
   dl <- torch::dataloader(
-    torch::tensor_dataset(x = train_mat$x, na_mask = torch::torch_tensor(as.matrix(na_mask), dtype = torch::torch_bool())),
+    torch::tensor_dataset(x = train_mat$x, na_mask = train_na_mask),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -226,7 +225,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, train_mat$x)
+    importance = compute_feature_importance(network, train_mat$x, train_na_mask)
   )
 
   list(

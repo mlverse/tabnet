@@ -352,16 +352,15 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     }
 
     valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na, y = valid_y)
-    na_mask = x[-valid_idx, ] %>% is.na
     x <- x[-valid_idx, ]
     y <- train_y
   }
 
   # training data
-  na_mask = x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
+  train_na_mask = x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
   train_mat <- resolve_data(x, y)
   train_dl <- torch::dataloader(
-    torch::tensor_dataset(x = train_mat$x, na_mask = na_mask, y = train_mat$y),
+    torch::tensor_dataset(x = train_mat$x, na_mask = train_na_mask, y = train_mat$y),
     batch_size = config$batch_size,
     drop_last = config$drop_last,
     shuffle = TRUE
@@ -370,7 +369,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   # validation data
   if (has_valid) {
     valid_mat <- resolve_data(valid_lst$x, valid_lst$y)
-    na_mask = valid_lst$na_mask %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
+    na_mask  <-  valid_lst$na_mask %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
     valid_dl <- torch::dataloader(
       torch::tensor_dataset(x = valid_mat$x, na_mask = na_mask, y = valid_mat$y),
       batch_size = config$batch_size,
@@ -499,7 +498,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   )
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, train_mat$x[indexes,..])
+    importance = compute_feature_importance(network, train_mat$x[indexes,..], train_na_mask[indexes,..])
   )
 
   list(
