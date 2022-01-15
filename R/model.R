@@ -104,8 +104,8 @@ resolve_data <- function(x, y) {
 #'   If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 #'   display a warning.
 #' @param early_stopping_monitor Unused (defaults to "valid_loss").
-#' @param  early_stopping_tolerance Minimum improvement to reset the patience counter.
-#'  (default 0 for no early stopping)
+#' @param  early_stopping_tolerance Minimum relative improvement to reset the patience counter.
+#'  0.01 for 1% tolerance (default 0)
 #' @param early_stopping_patience Number of epochs without improving until stopping training. (default=5)
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'

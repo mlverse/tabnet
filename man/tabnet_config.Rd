@@ -126,8 +126,8 @@ display a warning.}
 
 \item{early_stopping_monitor}{Unused (defaults to "valid_loss").}
 
-\item{early_stopping_tolerance}{Minimum improvement to reset the patience counter.
-(default 0 for no early stopping)}
+\item{early_stopping_tolerance}{Minimum relative improvement to reset the patience counter.
+0.01 for 1\% tolerance (default 0)}
 
 \item{early_stopping_patience}{Number of epochs without improving until stopping training. (default=5)}
 }
