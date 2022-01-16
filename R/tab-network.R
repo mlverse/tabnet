@@ -133,11 +133,11 @@ tabnet_encoder <- torch::nn_module(
 
     list(res, M_loss, steps_output)
   },
-  forward_masks = function(x) {
+  forward_masks = function(x, x_na_mask) {
 
     x <- self$initial_bn(x)
 
-    prior <- torch::torch_ones(x$shape, device = x$device)
+    prior <- x_na_mask$logical_not()
     M_explain <- torch::torch_zeros(x$shape, device = x$device)
     att <- self$initial_splitter(x)[, (self$n_d+1):N]
     masks <- list()
@@ -320,9 +320,10 @@ tabnet_pretrainer <- torch::nn_module(
            embedded_x_na_mask)
     }
   },
-  forward_masks = function(x) {
+  forward_masks = function(x, x_na_mask) {
     embedded_x <- self$embedder(x)
-    self$encoder$forward_masks(embedded_x)
+    embedded_x_na_mask <- self$embedder_na(x_na_mask)
+    self$encoder$forward_masks(embedded_x, embedded_x_na_mask)
   }
 
 )
@@ -378,8 +379,8 @@ tabnet_no_embedding <- torch::nn_module(
 
     list(res, M_loss)
   },
-  forward_masks = function(x) {
-    self$encoder$forward_masks(x)
+  forward_masks = function(x, x_na_mask) {
+    self$encoder$forward_masks(x, x_na_mask)
     }
 )
 
@@ -428,9 +429,10 @@ tabnet_nn <- torch::nn_module(
     embedded_x_na_mask <- self$embedder_na(x_na_mask)
     self$tabnet(embedded_x, embedded_x_na_mask)
   },
-  forward_masks = function(x) {
+  forward_masks = function(x, x_na_mask) {
     embedded_x <- self$embedder(x)
-    self$tabnet$forward_masks(embedded_x)
+    embedded_x_na_mask <- self$embedder_na(x_na_mask)
+    self$tabnet$forward_masks(embedded_x, embedded_x_na_mask)
   }
 )
 

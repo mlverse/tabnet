@@ -11,6 +11,10 @@
 * Add support for early stopping (#69)
 * `tabnet_fit()` and `predict()` now allow missing values in predictors. (#76)
 
+## Bugfixes
+
+* `tabnet_explain()` is now correctly handling missing values in predictors. (#77)
+
 # tabnet 0.3.0
 
 * Added an `update` method for tabnet models to allow the correct usage of `finalize_workflow` (#60).

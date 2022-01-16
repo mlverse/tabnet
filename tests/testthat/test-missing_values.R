@@ -134,3 +134,33 @@ test_that("inference works with missings in the response vector", {
   )
 
 })
+
+test_that("explain works with missings in predictors", {
+
+  data("attrition", package = "modeldata")
+  ids <- sample(nrow(attrition), 256)
+
+  x <- attrition[ids,-which(names(attrition) == "Attrition")]
+  y <- attrition[ids,]$Attrition
+  #
+  fit <- tabnet_fit(x, y, epochs = 1)
+
+  # numerical missing
+  x_missing <- x
+  x_missing[1,"Age"] <- NA
+
+  # explain with numerical missing
+  expect_error(
+    tabnet_explain(fit, x_missing),
+    regexp = NA
+  )
+  # categorical missing
+  x_missing <- x
+  x_missing[1,"BusinessTravel"] <- NA
+
+  # explain with categorical missing
+  expect_error(
+    tabnet_explain(fit, x_missing),
+    regexp = NA
+  )
+})

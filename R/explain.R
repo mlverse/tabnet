@@ -57,9 +57,8 @@ tabnet_explain.default <- function(object, new_data) {
 #' @rdname tabnet_explain
 tabnet_explain.tabnet_fit <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
-  stopifnot("Error: found missing values in the predictor data frame" = sum(is.na(processed$predictors))==0)
   data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(processed$predictors))))
-  output <- explain_impl(object$fit$network, data$x)
+  output <- explain_impl(object$fit$network, data$x, data$x_na_mask)
 
   # convert stuff to matrix with colnames
   nms <- colnames(processed$predictors)
@@ -80,9 +79,9 @@ convert_to_df <- function(x, nms) {
   tibble::as_tibble(x)
 }
 
-explain_impl <- function(network, x) {
+explain_impl <- function(network, x, x_na_mask) {
 
-  outputs <- network$forward_masks(x)
+  outputs <- network$forward_masks(x, x_na_mask)
 
   # summarize the categorical embeddedings into 1 column
   # per variable
@@ -104,8 +103,8 @@ explain_impl <- function(network, x) {
   list(M_explain = M_explain, masks = masks)
 }
 
-compute_feature_importance <- function(network, x) {
-  out <- explain_impl(network, x)
+compute_feature_importance <- function(network, x, x_na_mask) {
+  out <- explain_impl(network, x, x_na_mask)
   m <- as.numeric(as.matrix(out$M_explain$sum(dim = 1)$detach()$to(device = "cpu")))
   m/sum(m)
 }
