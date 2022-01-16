@@ -32,7 +32,7 @@ tabnet_config(
   verbose = FALSE,
   device = "auto",
   importance_sample_size = NULL,
-  early_stopping_monitor = "valid_loss",
+  early_stopping_monitor = "auto",
   early_stopping_tolerance = 0,
   early_stopping_patience = 0L
 )
@@ -124,7 +124,7 @@ uses  to "cuda" if it's available, otherwise uses "cpu".}
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.}
 
-\item{early_stopping_monitor}{Unused (defaults to "valid_loss").}
+\item{early_stopping_monitor}{Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").}
 
 \item{early_stopping_tolerance}{Minimum relative improvement to reset the patience counter.
 0.01 for 1\% tolerance (default 0)}

@@ -92,7 +92,7 @@ test_that("pretrain and fit both work with early stopping", {
 
   expect_message(
     pretrain <- tabnet_pretrain(x, y, epochs = 100, valid_split = 0.5, verbose=TRUE,
-                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+                                early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
   expect_lt(length(pretrain$fit$metrics),50)
@@ -103,6 +103,47 @@ test_that("pretrain and fit both work with early stopping", {
     "Early stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),50)
+
+})
+
+test_that("early stopping works wo validation split", {
+
+  data("attrition", package = "modeldata")
+
+  x <- attrition[1:256, -which(names(attrition) == "Attrition")]
+  y <- attrition[1:256, "Attrition"]
+
+  # tabnet_pretrain
+  expect_message(
+    pretrain <- tabnet_pretrain(x, y, epochs = 100, verbose=TRUE,
+                                early_stopping_monitor="train_loss",
+                                early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+    "Early stopping at epoch"
+  )
+  expect_lt(length(pretrain$fit$metrics),50)
+
+  expect_error(
+    pretrain <- tabnet_pretrain(x, y, epochs = 100, verbose=TRUE,
+                                early_stopping_monitor="cross_validation_loss",
+                                early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+    regexp = "not a valid early stopping metric to monitor"
+  )
+
+  # tabnet_fit
+  expect_message(
+    fit <- tabnet_fit(x, y, epochs = 100, verbose=TRUE,
+                      early_stopping_monitor="train_loss",
+                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+    "Early stopping at epoch"
+  )
+  expect_lt(length(fit$fit$metrics),50)
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 100, verbose=TRUE,
+                      early_stopping_monitor="cross_validation_loss",
+                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+    regexp = "not a valid early stopping metric to monitor"
+  )
 
 })
 

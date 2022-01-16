@@ -197,9 +197,13 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     if (config$verbose)
       rlang::inform(message)
 
-    if (config$early_stopping && has_valid && epoch > 1) {
+    if (config$early_stopping && epoch > 1+epoch_shift) {
       # compare to best_metric
-      change <- (mean(metrics[[epoch]]$valid$loss) - best_metric) / mean(metrics[[epoch]]$valid$loss)
+      if (config$early_stopping_monitor=="valid_loss") {
+        change <- (mean(metrics[[epoch]]$valid$loss) - best_metric) / mean(metrics[[epoch]]$valid$loss)
+      } else {
+        change <- (mean(metrics[[epoch]]$train$loss) - best_metric) / mean(metrics[[epoch]]$train$loss)
+      }
       if (change > config$early_stopping_tolerance){
         patience_counter <- patience_counter + 1
         if (patience_counter >= config$early_stopping_patience){
@@ -208,14 +212,23 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
           break
         }
       } else {
-        best_metric <- mean(metrics[[epoch]]$valid$loss)
+        if (config$early_stopping_monitor=="valid_loss") {
+          best_metric <- mean(metrics[[epoch]]$valid$loss)
+        } else {
+          best_metric <- mean(metrics[[epoch]]$train$loss)
+        }
         patience_counter <- 0L
       }
     }
-    if (config$early_stopping && has_valid && epoch == 1) {
+    if (config$early_stopping && epoch == 1+epoch_shift) {
       # initialise best_metric
-      best_metric <- mean(metrics[[epoch]]$valid$loss)
+      if (config$early_stopping_monitor=="valid_loss") {
+        best_metric <- mean(metrics[[epoch]]$valid$loss)
+      } else {
+        best_metric <- mean(metrics[[epoch]]$train$loss)
+      }
     }
+
 
     scheduler$step()
   }

@@ -103,7 +103,7 @@ resolve_data <- function(x, y) {
 #' @param importance_sample_size sample of the dataset to compute importance metrics.
 #'   If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 #'   display a warning.
-#' @param early_stopping_monitor Unused (defaults to "valid_loss").
+#' @param early_stopping_monitor Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").
 #' @param  early_stopping_tolerance Minimum relative improvement to reset the patience counter.
 #'  0.01 for 1% tolerance (default 0)
 #' @param early_stopping_patience Number of epochs without improving until stopping training. (default=5)
@@ -137,7 +137,7 @@ tabnet_config <- function(batch_size = 256,
                           verbose = FALSE,
                           device = "auto",
                           importance_sample_size = NULL,
-                          early_stopping_monitor = "valid_loss",
+                          early_stopping_monitor = "auto",
                           early_stopping_tolerance = 0,
                           early_stopping_patience = 0L) {
   if (is.null(decision_width) && is.null(attention_width)) {
@@ -178,7 +178,7 @@ tabnet_config <- function(batch_size = 256,
     verbose = verbose,
     device = device,
     importance_sample_size = importance_sample_size,
-    early_stopping_monitor = early_stopping_monitor,
+    early_stopping_monitor = resolve_early_stop_monitor(early_stopping_monitor, valid_split),
     early_stopping_tolerance = early_stopping_tolerance,
     early_stopping_patience = early_stopping_patience,
     early_stopping = !(early_stopping_tolerance==0 || early_stopping_patience==0)
@@ -196,6 +196,17 @@ resolve_loss <- function(loss, dtype) {
     rlang::abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
 
   loss_fn
+}
+
+resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
+  if (early_stopping_monitor %in% c("valid_loss", "auto") && valid_split > 0)
+    early_stopping_monitor <- "valid_loss"
+  else if (early_stopping_monitor %in% c("train_loss", "auto"))
+    early_stopping_monitor <- "train_loss"
+  else
+    rlang::abort(paste0(early_stopping_monitor," is not a valid early stopping metric to monitor with `valid_split`=",valid_split))
+
+  early_stopping_monitor
 }
 
 
@@ -463,9 +474,13 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     if (config$verbose)
       rlang::inform(message)
 
-    if (config$early_stopping && has_valid && epoch > 1+epoch_shift) {
+    if (config$early_stopping && epoch > 1+epoch_shift) {
       # compare to best_metric
-      change <- (mean(metrics[[epoch]]$valid$loss) - best_metric) / mean(metrics[[epoch]]$valid$loss)
+      if (config$early_stopping_monitor=="valid_loss") {
+        change <- (mean(metrics[[epoch]]$valid$loss) - best_metric) / mean(metrics[[epoch]]$valid$loss)
+      } else {
+        change <- (mean(metrics[[epoch]]$train$loss) - best_metric) / mean(metrics[[epoch]]$train$loss)
+      }
       if (change > config$early_stopping_tolerance){
         patience_counter <- patience_counter + 1
         if (patience_counter >= config$early_stopping_patience){
@@ -474,13 +489,21 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
           break
         }
       } else {
-        best_metric <- mean(metrics[[epoch]]$valid$loss)
+        if (config$early_stopping_monitor=="valid_loss") {
+          best_metric <- mean(metrics[[epoch]]$valid$loss)
+        } else {
+          best_metric <- mean(metrics[[epoch]]$train$loss)
+        }
         patience_counter <- 0L
       }
     }
-    if (config$early_stopping && has_valid && epoch == 1+epoch_shift) {
+    if (config$early_stopping && epoch == 1+epoch_shift) {
       # initialise best_metric
-      best_metric <- mean(metrics[[epoch]]$valid$loss)
+      if (config$early_stopping_monitor=="valid_loss") {
+        best_metric <- mean(metrics[[epoch]]$valid$loss)
+      } else {
+        best_metric <- mean(metrics[[epoch]]$train$loss)
+      }
     }
 
 
