@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 Real-life training dataset usually contains missing data. The vast majority of deep-learning networks do not handle missing data and thus either stop or crash when values are missing in the predictors.
 
-But Tabnet use a masking mechanism that can be adapted to cover the missing data in the training set.
+But Tabnet use a masking mechanism that we can reuse to cover the missing data in the training set.
 
 As we enter the world of missing-data, we have to question the type of missing-data we deal with. We could have missing data at random (MAR), like for example some transmission errors on a sensor data dataset, or missing not at random (MNAR) when some interactions exists between the missing data and other predictors values for the same sample. The later is a more complex topic to cover, and we will try to investiate it here through the `ames` dataset.
 
@@ -29,7 +29,8 @@ As we enter the world of missing-data, we have to question the type of missing-d
 
 ## Ames missings understanding
 
-The `ames` dataset from  `{modeldata}`  contains a lot of null values that the human analysis clearly interprete as a implicit missing object described by that value. We have for example pool surface of 0 square meters means "no pool", basement surface of 0 square meters means "no basement", ...A lot of them can be detected visually by inspecting the distribution of the values like for the `Masonry veneer area` predictor :
+The `ames` dataset from  `{modeldata}`  contains a lot of _null values_ that the human analysis clearly interprete as an implicit _"missing object"_ described by that value. We have for example pool surface of 0 square meters means "no pool", basement surface of 0 square meters means "no basement", ...  
+Many of those variables can be detected visually by inspecting the distribution of the values like, for example, the `Masonry veneer area` predictor :
 ```{r}
 library(tidymodels, quietly = TRUE)
 library(tabnet)
@@ -37,11 +38,11 @@ data("ames", package = "modeldata")
 qplot(ames$Mas_Vnr_Area)
 ```
 ![ames variable Mas_Vnr_Area histogram showing high occurence of value zero](ames_mas_vnr_hist.png)
-We know that it will be extremely difficult for a model to capture an internal representation of such distribution, and thus we want to avoid the zero values to penalize the model internal representation.
+We know that it will be extremely difficult for a model to capture an internal representation of such distribution, and thus we want to avoid the null values to penalize the model internal representation.
 
 ## While keeping some room for freedom
 
-A lot of those variables come as a pair in the `ames` dataset, one for the qualitative aspect,  the other for the quantitative aspect. We have for exemple `Pool_QC` for pool condition, that has a "no_pool" level with `Pool_Area=0` in that case.  
+Many of those variables come as a pair in the `ames` dataset, one for the qualitative aspect, the other for the quantitative aspect. We have for exemple `Pool_QC` for pool condition, that has a "no_pool" level with `Pool_Area=0` in that case.  
 As human, we have the intuition that knowing if a pool is present is important for the modelling task. So we want the model to get an internal representation of the implicit `has_pool=FALSE` without having it explicit in the dataset. In order to do so, we have to let the model some freedom to infer the "no_pool" state and thus we should not mutate both variables in the pair `Pool_Area=NA` and `Pool_QC=NA` at the same time.  
 
 
@@ -213,4 +214,9 @@ vip_color(ames_missing_fit, col_with_missings)
 ![ames_fit model training variable importance plot](ames_missing_fit_vip.png)
 Here we can see one predictors `Garage_Area` with 5 % missingness in the top 10.
 
+# Conclusion
+
+Even if the models trained here have a huge variability in the variable importance along trainings, we have the intuition that model trained with explicit missing data will provide better result that its counterpart trained with zero-imputed variables.
+
+In any case, having the capability to pretrain and fit tabnet models with MAR dataset or MNAR dataset is of high convenience for the real-life use-cases. 
 
