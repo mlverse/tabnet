@@ -13,7 +13,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = TRUE
+  eval = FALSE
 )
 ```
 
@@ -31,7 +31,7 @@ As we enter the world of missing-data, we have to question the type of missing-d
 
 The `ames` dataset from  `{modeldata}`  contains a lot of null values that the human analysis clearly interprete as a implicit missing object described by that value. We have for example pool surface of 0 square meters means "no pool", basement surface of 0 square meters means "no basement", ...A lot of them can be detected visually by inspecting the distribution of the values like for the `Masonry veneer area` predictor :
 ```{r}
-library(tidymodels, warn.conflicts = FALSE)
+library(tidymodels, quietly = TRUE)
 library(tabnet)
 data("ames", package = "modeldata")
 qplot(ames$Mas_Vnr_Area)
@@ -64,6 +64,7 @@ ames_missing <- ames %>% mutate_at(col_with_zero_as_na, na_if, 0) %>%
   mutate_at("Fence", na_if, "No_Fence") %>% 
   mutate_at(c("Garage_Cond", "Garage_Finish"), na_if, "No_Garage") %>% 
   mutate_at(c("Bsmt_Exposure", "BsmtFin_Type_1", "BsmtFin_Type_2"), na_if, "No_Basement")
+
 visdat::vis_miss(ames_missing)
 ```
 ![ames missing values visualisation showing few variables with more than 90% missingness with a global 13% missing](vis_miss_ames.png)
@@ -84,34 +85,58 @@ ames_rec <- recipe(Sale_Price ~ ., data=ames) %>%
 
 cat_emb_dim <- map_dbl(ames %>% select_if(is.factor), ~log2(nlevels(.x)) %>% round)
 
-ames_fit <- tabnet_pretrain(ames_rec, data=ames,  epoch=50, cat_emb_dim = cat_emb_dim,
+ames_pretrain <- tabnet_pretrain(ames_rec, data=ames,  epoch=50, cat_emb_dim = cat_emb_dim,
                             valid_split = 0.2, verbose=TRUE, batch=2930, 
-                            early_stopping_patience = 3L, early_stopping_tolerance = 0.005)
-autoplot(ames_fit)
+                            early_stopping_patience = 3L, early_stopping_tolerance = 1e-4)
+autoplot(ames_pretrain)
 ```
 
 ```
-[Epoch 001] Loss: 71.368286 Valid loss: 13.013237
-[Epoch 002] Loss: 44.926559 Valid loss: 10.259305
-[Epoch 003] Loss: 32.995518 Valid loss: 8.719707
-[Epoch 004] Loss: 24.650784 Valid loss: 7.821852
-[Epoch 005] Loss: 19.996607 Valid loss: 7.105954
-[Epoch 006] Loss: 16.715664 Valid loss: 6.449599
-...
-[Epoch 047] Loss: 8.792793 Valid loss: 4.818432
-[Epoch 048] Loss: 8.997622 Valid loss: 4.869482
-[Epoch 049] Loss: 8.352752 Valid loss: 4.914999
-[Epoch 050] Loss: 8.924073 Valid loss: 4.946170
+[Epoch 001] Loss: 43.708794 Valid loss: 8066126.500000
+[Epoch 002] Loss: 31.463089 Valid loss: 5631984.000000
+[Epoch 003] Loss: 23.396217 Valid loss: 3901085.500000
+[Epoch 004] Loss: 19.241619 Valid loss: 2947481.750000
+[Epoch 005] Loss: 15.032537 Valid loss: 2250338.000000
+[Epoch 006] Loss: 12.991020 Valid loss: 1815583.125000
+[Epoch 007] Loss: 11.044646 Valid loss: 1533597.875000
+[Epoch 008] Loss: 9.114124 Valid loss: 1395840.000000
+[Epoch 009] Loss: 8.362211 Valid loss: 1258169.375000
+[Epoch 010] Loss: 7.549719 Valid loss: 1064599.500000
+[Epoch 011] Loss: 6.808529 Valid loss: 998335.625000
+[Epoch 012] Loss: 6.569450 Valid loss: 1047418.500000
+[Epoch 013] Loss: 6.606429 Valid loss: 1048583.625000
+[Epoch 014] Loss: 6.742617 Valid loss: 993241.312500
+[Epoch 015] Loss: 6.806847 Valid loss: 995705.875000
+[Epoch 016] Loss: 6.618536 Valid loss: 1026789.625000
+[Epoch 017] Loss: 6.593469 Valid loss: 1033726.437500
+Early stopping at epoch 017
 ```
 
 ![ames_fit model training diagnostic plot](ames_pretrain.png)
 
+Now we capture the columns with missings, and create a convenience function to color the `vip::vip()` plot output according to the missingness quality of the column
+
 ```{r}
-vip::vip(ames_fit)
+col_with_missings <- ames_missing %>%
+  summarise_all(~sum(is.na(.))>0) %>%
+  t %>% enframe(name="Variable") %>% 
+  rename(has_missing="value")
+
+vip_color <- function(object, col_has_missing) {
+  vip_data <- vip::vip(object)$data %>% arrange(Importance)
+  vis_miss_plus <- left_join(vip_data, col_has_missing , by="Variable") %>%
+    mutate(Variable=factor(Variable, levels = vip_data$Variable))
+  vis_miss_plus
+  ggplot(vis_miss_plus, aes(x=Variable, y=Importance, fill=has_missing)) +
+    geom_col() + coord_flip() + scale_fill_grey()
+}
+vip_color(ames_pretrain, col_with_missings)
 ```
 ![ames_fit model variable importance plot](ames_pretrain_vip.png)
 
-Training loss evolution is almost correct and we get `Alley` and `Pool_QC` variables in the top ten important variables according to the pretrained model. Those two variables have been screened as having a very important missing rate.
+We get `BsmtFin_Type_1`, `BsmtFin_SF_1` and `Bsmt_Exposure` variables in the top ten important variables according to this run of pretraining the model. Those variables has been screened as having few missing values.
+
+Note that this result varies a lot from run to run. The captured result here depends a lot on your initialisation conditions.
 
 ## Variable importance with `ames_missing` dataset
 
@@ -121,34 +146,71 @@ In order to compensate the 13% missingness already present in the `ames_missing`
 ```{r}
 ames_missing_rec <- recipe(Sale_Price ~ ., data=ames_missing) %>% 
   step_normalize(all_numeric())
-ames_missing_fit <- tabnet_pretrain(ames_missing_rec, data=ames_missing, epoch=50, 
+ames_missing_pretrain <- tabnet_pretrain(ames_missing_rec, data=ames_missing, epoch=50, 
                                     cat_emb_dim = cat_emb_dim,
                                     valid_split = 0.2, verbose=TRUE, batch=2930, 
                                     pretraining_ratio=0.37, 
-                                    early_stopping_patience = 3L, early_stopping_tolerance = 0.005)
-autoplot(ames_missing_fit)
-vip::vip(ames_missing_fit)
+                                    early_stopping_patience = 3L, early_stopping_tolerance = 1e-4)
+autoplot(ames_missing_pretrain)
+vip_color(ames_missing_pretrain, col_with_missings)
 ```
 ```
-[Epoch 001] Loss: 41.925888 Valid loss: 11.546161
-[Epoch 002] Loss: 32.214478 Valid loss: 10.309987
-[Epoch 003] Loss: 24.262951 Valid loss: 9.479233
-[Epoch 004] Loss: 19.042051 Valid loss: 8.434237
-[Epoch 005] Loss: 15.512108 Valid loss: 7.437159
-[Epoch 006] Loss: 12.279278 Valid loss: 6.486411
-[Epoch 007] Loss: 10.196947 Valid loss: 5.815371
-[Epoch 008] Loss: 9.259965 Valid loss: 5.111839
+[Epoch 001] Loss: 56.250610 Valid loss: 40321308.000000
+[Epoch 002] Loss: 44.254524 Valid loss: 39138240.000000
+[Epoch 003] Loss: 33.992207 Valid loss: 38648800.000000
+[Epoch 004] Loss: 26.421488 Valid loss: 37445656.000000
+[Epoch 005] Loss: 22.290133 Valid loss: 35814052.000000
 ...
-[Epoch 045] Loss: 6.641933 Valid loss: 4.190426
-[Epoch 046] Loss: 6.781425 Valid loss: 4.186747
-[Epoch 047] Loss: 6.599716 Valid loss: 4.178854
-[Epoch 048] Loss: 6.766137 Valid loss: 4.275692
-[Epoch 049] Loss: 7.051480 Valid loss: 4.244986
-[Epoch 050] Loss: 6.723494 Valid loss: 4.215664
-
+[Epoch 021] Loss: 10.877335 Valid loss: 20903176.000000
+[Epoch 022] Loss: 11.023649 Valid loss: 20772972.000000
+[Epoch 023] Loss: 10.819239 Valid loss: 20642806.000000
+[Epoch 024] Loss: 10.994371 Valid loss: 20575458.000000
+[Epoch 025] Loss: 10.700000 Valid loss: 20449918.000000
+[Epoch 026] Loss: 10.902529 Valid loss: 20680102.000000
+[Epoch 027] Loss: 10.791571 Valid loss: 20849496.000000
+[Epoch 028] Loss: 11.102308 Valid loss: 20995910.000000
+Early stopping at epoch 028
 ```
-![ames_missing_fit model training diagnostic plot](ames_missing_pretrain.png)
-![ames_missing_fit model variable importance plot](ames_missing_pretrain_vip.png)
+![ames_missing_pretrain model training diagnostic plot](ames_missing_pretrain.png)
+![ames_missing_pretrain model variable importance plot](ames_missing_pretrain_vip.png)
 
-The model is slightly overfitting here, but we can see here no variables with high missingness is present in the top 10 important variables. This seems to be a good sign of the model having captured proper interactions between variables.
+We can see here no variables with high missingness is present in the top 10 important variables. This seems to be a good sign of the model having captured proper interactions between variables.
+
+
+# Model training
+
+## Variable importance with raw `ames` dataset
+
+```{r}
+ames_fit <- tabnet_pretrain(ames_rec, data=ames,  tabnet_model = ames_pretrain, 
+                            epoch=50, cat_emb_dim = cat_emb_dim,
+                            valid_split = 0.2, verbose=TRUE, batch=2930, 
+                            early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
+autoplot(ames_fit)
+vip_color(ames_fit, col_with_missings)
+```
+
+![ames_fit model training diagnostic plot](ames_fit.png)
+
+![ames_fit model training variable importance plot](ames_fit_vip_.png)
+Here again, the model uses two predictors `BasmFin_SF_2` and `Garage_Finish` that have respectively 88 % and 5 % missingness.
+
+
+
+## Variable importance with `ames_missing` dataset
+
+```{r}
+ames_missing_fit <- tabnet_pretrain(ames_rec, data=ames_missing,  tabnet_model = ames_missing_pretrain, 
+                            epoch=50, cat_emb_dim = cat_emb_dim,
+                            valid_split = 0.2, verbose=TRUE, batch=2930, 
+                            early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
+autoplot(ames_missing_fit)
+vip_color(ames_missing_fit, col_with_missings)
+```
+
+![ames_fit model training diagnostic plot](ames_missing_fit.png)
+
+![ames_fit model training variable importance plot](ames_missing_fit_vip.png)
+Here we can see one predictors `Garage_Area` with 5 % missingness in the top 10.
+
 
