@@ -34,7 +34,8 @@ tabnet_config(
   importance_sample_size = NULL,
   early_stopping_monitor = "auto",
   early_stopping_tolerance = 0,
-  early_stopping_patience = 0L
+  early_stopping_patience = 0L,
+  num_workers = 0L
 )
 }
 \arguments{
@@ -130,6 +131,10 @@ display a warning.}
 0.01 for 1\% tolerance (default 0)}
 
 \item{early_stopping_patience}{Number of epochs without improving until stopping training. (default=5)}
+
+\item{num_workers}{(int, optional): how many subprocesses to use for data
+loading. 0 means that the data will be loaded in the main process.
+(default: \code{0})}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.
