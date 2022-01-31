@@ -548,6 +548,7 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   predict_mat <- resolve_data(x, y = data.frame(rep(1, nrow(x))))
 
   network <- obj$fit$network
+  num_workers <- obj$fit$config$num_workers
   yhat <- c()
   network$eval()
 
@@ -556,7 +557,7 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
     batch_size = batch_size,
     drop_last = FALSE,
     shuffle = FALSE ,
-    num_workers = config$num_workers
+    num_workers = num_workers
   )
   coro::loop(for (batch in predict_dl) {
     yhat <- c(yhat, network(batch$x, batch$na_mask)[[1]])

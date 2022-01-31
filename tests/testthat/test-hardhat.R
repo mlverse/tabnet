@@ -430,3 +430,29 @@ test_that("config$loss can be a function", {
   expect_equal(fit_auto$fit$config$loss_fn, torch::nn_poisson_nll_loss(), ignore_function_env = TRUE)
 
 })
+
+test_that("num_workers works", {
+
+  data("ames", package = "modeldata")
+
+  x <- ames[-which(names(ames) == "Sale_Price")]
+  y <- ames$Sale_Price
+
+  expect_error(
+    pretrain <- tabnet_pretrain(x, y, epochs = 3, num_workers=2L),
+    regexp = NA
+  )
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, num_workers=2L),
+    regexp = NA
+  )
+
+  expect_error(
+    predic <- predict(fit, x, num_workers=2L),
+    regexp = NA
+  )
+
+
+})
+
