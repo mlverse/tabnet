@@ -77,7 +77,13 @@
       </tr><tr><td>
           <p><code><a href="resolve_data.html">resolve_data()</a></code> </p>
         </td>
-        <td><p>Transforms input data into tensors</p></td>
+        <td><p>Transforms input data into a list of
+3 torch_tensors being
+$x , $x_na_mask, $y
+and
+cat_idx the vector of x categorical predictor index
+cat_dims the vector of number of levels of each x categorical predictor
+input_dim and output_dim</p></td>
       </tr><tr><td>
           <p><code><a href="tabnet.html">tabnet()</a></code> </p>
         </td>
