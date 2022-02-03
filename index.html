@@ -134,16 +134,16 @@
 <span class="co">#&gt; # A tibble: 3 × 3</span>
 <span class="co">#&gt;   .metric   .estimator .estimate</span>
 <span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;          &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 accuracy  binary         0.837</span>
-<span class="co">#&gt; 2 precision binary         0.849</span>
-<span class="co">#&gt; 3 recall    binary         0.980</span>
+<span class="co">#&gt; 1 accuracy  binary         0.850</span>
+<span class="co">#&gt; 2 precision binary         0.883</span>
+<span class="co">#&gt; 3 recall    binary         0.947</span>
   
 <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">roc_auc</a></span><span class="op">(</span><span class="va">Attrition</span>, <span class="va">.pred_No</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 1 × 3</span>
 <span class="co">#&gt;   .metric .estimator .estimate</span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 roc_auc binary         0.695</span></code></pre></div>
+<span class="co">#&gt; 1 roc_auc binary         0.742</span></code></pre></div>
 </div>
 </div>
   </div>
