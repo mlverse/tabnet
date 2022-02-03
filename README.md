@@ -72,14 +72,14 @@ cbind(test, predict(fit, test)) %>%
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.837
-#> 2 precision binary         0.849
-#> 3 recall    binary         0.980
+#> 1 accuracy  binary         0.850
+#> 2 precision binary         0.883
+#> 3 recall    binary         0.947
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.695
+#> 1 roc_auc binary         0.742
 ```
