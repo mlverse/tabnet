@@ -186,9 +186,18 @@ test_that("num_workers works", {
     pretrain <- tabnet_pretrain(x, y, epochs = 3, num_workers=2L),
     regexp = NA
   )
+  expect_error(
+    pretrain <- tabnet_pretrain(x, y, epochs = 3, num_workers=2L, valid_split=0.2),
+    regexp = NA
+  )
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 3, num_workers=2L),
+    regexp = NA
+  )
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, num_workers=2L, valid_split=0.2),
     regexp = NA
   )
 
