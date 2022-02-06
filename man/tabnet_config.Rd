@@ -5,7 +5,7 @@
 \title{Configuration for TabNet models}
 \usage{
 tabnet_config(
-  batch_size = 256,
+  batch_size = 1024^2,
   penalty = 0.001,
   clip_value = NULL,
   loss = "auto",
@@ -16,7 +16,7 @@ tabnet_config(
   num_steps = 3,
   feature_reusage = 1.3,
   mask_type = "sparsemax",
-  virtual_batch_size = 128,
+  virtual_batch_size = 256^2,
   valid_split = 0,
   learn_rate = 0.02,
   optimizer = "adam",
@@ -40,7 +40,7 @@ tabnet_config(
 }
 \arguments{
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024)}
+recommended. (default: 1024^2)}
 
 \item{penalty}{This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
@@ -76,7 +76,7 @@ Values range from 1.0 to 2.0.}
 block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax"}.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=128)}
+"Ghost Batch Normalization" (default=256^2)}
 
 \item{valid_split}{(float) The fraction of the dataset used for validation.}
 
