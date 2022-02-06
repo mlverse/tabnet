@@ -62,10 +62,11 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   torch::torch_manual_seed(sample.int(1e6, 1))
 
   if (config$device == "auto") {
-    if (torch::cuda_is_available())
+    if (torch::cuda_is_available()){
       device <- "cuda"
-    else
+    } else {
       device <- "cpu"
+    }
   } else {
     device <- config$device
   }
@@ -170,7 +171,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
     if (config$verbose)
       pb <- progress::progress_bar$new(
-        total = length(dl),
+        total = length(train_dl),
         format = "[:bar] loss= :loss"
       )
 
