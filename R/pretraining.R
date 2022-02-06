@@ -70,14 +70,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     device <- config$device
   }
 
-  # dataset to dataloaders
-  # simplify y into vector
-  if (!is.atomic(y)) {
-    # currently not supporting multilabel
-    y <- y[[1]]
-  }
-
   # validation dataset & dataloaders
+  has_valid <- config$valid_split > 0
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
@@ -101,7 +95,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # training dataset & dataloader
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], y[batch], device=device)},
+    .getbatch = function(batch) {resolve_data(x[batch,], rep(1, length(batch)), device=device)},
     .length = function() {nrow(x)}
   )()
   # we can get training_set parameters from the 2 first samples
@@ -180,7 +174,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
         format = "[:bar] loss= :loss"
       )
 
-    coro::loop(for (batch in dl) {
+    coro::loop(for (batch in train_dl) {
       m <- train_batch_un(network, optimizer, batch, config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
@@ -247,9 +241,24 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   network$to(device = "cpu")
 
+  importance_sample_size <- config$importance_sample_size
+  if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
+    rlang::warn(c(glue::glue("Computing importances for a dataset with size {train_ds$.length()}."),
+                  "This can consume too much memory. We are going to use a sample of size 1e5",
+                  "You can disable this message by using the `importance_sample_size` argument."))
+    importance_sample_size <- 1e5
+  }
+  indexes <- as.numeric(torch::torch_randint(
+    1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
+    dtype = torch::torch_long()
+  ))
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(network, train_mat$x, train_mat$x_na_mask)
+    importance = compute_feature_importance(
+      network,
+      train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
+      train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu")
+    )
   )
 
   list(

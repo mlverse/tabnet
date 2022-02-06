@@ -175,7 +175,7 @@ test_that("print module works even after a reload from disk", {
 })
 
 
-test_that("num_workers works", {
+test_that("num_workers works for pretrain, fit an predict", {
 
   data("ames", package = "modeldata")
 
@@ -183,21 +183,21 @@ test_that("num_workers works", {
   y <- ames$Sale_Price
 
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 3, num_workers=2L),
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=2L),
     regexp = NA
   )
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 3, num_workers=2L, valid_split=0.2),
-    regexp = NA
-  )
-
-  expect_error(
-    fit <- tabnet_fit(x, y, epochs = 3, num_workers=2L),
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=2L, valid_split=0.2),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 3, num_workers=2L, valid_split=0.2),
+    fit <- tabnet_fit(x, y, epochs = 1, num_workers=2L),
+    regexp = NA
+  )
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 1, num_workers=2L, valid_split=0.2),
     regexp = NA
   )
 

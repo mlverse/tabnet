@@ -57,7 +57,7 @@ tabnet_explain.default <- function(object, new_data) {
 #' @rdname tabnet_explain
 tabnet_explain.tabnet_fit <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
-  data <- resolve_data(processed$predictors, y = data.frame(rep(1, nrow(processed$predictors))))
+  data <- resolve_data(processed$predictors, y = rep(1, nrow(processed$predictors)), device=object$fit$config$device)
   output <- explain_impl(object$fit$network, data$x, data$x_na_mask)
 
   # convert stuff to matrix with colnames
