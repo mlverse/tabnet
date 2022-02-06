@@ -211,14 +211,6 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   early_stopping_monitor
 }
 
-#
-# batch_to_device <- function(batch, device) {
-#   batch <- list(x = batch$x, na_mask=batch$na_mask, y  = batch$y)
-#   lapply(batch, function(x) {
-#     x$to(device = device)
-#   })
-# }
-
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
@@ -294,16 +286,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_x <- x[valid_idx, ]
-
-    # if (is.data.frame(y)) {
-    #   # currently not supporting multilabel
-    #   valid_y <- y[valid_idx,][[1]]
-    #   train_y <- y[-valid_idx,][[1]]
-    # } else if (is.numeric(y) || is.factor(y)) {
-      valid_y <- y[valid_idx]
-      train_y <- y[-valid_idx]
-    # }
-
+    valid_y <- y[valid_idx]
+    train_y <- y[-valid_idx]
     valid_ds <-   torch::dataset(
       initialize = function() {},
       .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch], device=device)},
@@ -381,32 +365,32 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     y <- y[[1]]
   }
 
-  # dataset to dataloaders
+  # validation dataset & dataloaders
   has_valid <- config$valid_split > 0
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_x <- x[valid_idx, ]
-
-    # if (is.data.frame(y)) {
-    #   # currently not supporting multilabel
-    #   valid_y <- y[valid_idx,][[1]]
-    #   train_y <- y[-valid_idx,][[1]]
-    # } else if (is.numeric(y) || is.factor(y)) {
-      valid_y <- y[valid_idx]
-      train_y <- y[-valid_idx]
-    # }
-    # validation dataset
+    valid_y <- y[valid_idx]
+    train_y <- y[-valid_idx]
     valid_ds <-   torch::dataset(
       initialize = function() {},
       .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch], device=device)},
       .length = function() {nrow(valid_x)}
     )()
+
+    valid_dl <- torch::dataloader(
+      valid_ds,
+      batch_size = config$batch_size,
+      shuffle = FALSE ,
+      num_workers = config$num_workers
+    )
+
     x <- x[-valid_idx, ]
     y <- train_y
   }
 
-  # training dataset
+  # training dataset & dataloader
   train_ds <-   torch::dataset(
     initialize = function() {},
     .getbatch = function(batch) {resolve_data(x[batch,], y[batch], device=device)},
@@ -420,18 +404,6 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     shuffle = TRUE ,
     num_workers = config$num_workers
   )
-
-  # validation data
-  if (has_valid) {
-    # valid_mat <- resolve_data(valid_lst$x, valid_lst$y, device=device)
-    valid_dl <- torch::dataloader(
-      valid_ds,
-      batch_size = config$batch_size,
-      drop_last = FALSE,
-      shuffle = FALSE ,
-      num_workers = config$num_workers
-    )
-  }
 
   # resolve loss
   config$loss_fn <- resolve_loss(config$loss, train_ds$.getbatch(batch = c(1:2))$y$dtype)

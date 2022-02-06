@@ -1,6 +1,6 @@
-train_batch_un <- function(network, optimizer, batch, batch_na_mask, config) {
+train_batch_un <- function(network, optimizer, batch, config) {
   # forward pass
-  output <- network(batch, batch_na_mask)
+  output <- network(batch$x, batch$x_na_mask)
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
 
   # step of the backward pass and optimization
@@ -16,9 +16,9 @@ train_batch_un <- function(network, optimizer, batch, batch_na_mask, config) {
   )
 }
 
-valid_batch_un <- function(network, batch, batch_na_mask, config) {
+valid_batch_un <- function(network, batch, config) {
   # forward pass
-  output <- network(batch, batch_na_mask)
+  output <- network(batch$x, batch$x_na_mask)
   # we inverse the batch_na_mask here to avoid nan in the loss
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]]$logical_not())
 
@@ -71,42 +71,58 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   }
 
   # dataset to dataloaders
-  has_valid <- config$valid_split > 0
+  # simplify y into vector
+  if (!is.atomic(y)) {
+    # currently not supporting multilabel
+    y <- y[[1]]
+  }
+
+  # validation dataset & dataloaders
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
-    valid_lst <- list(x = x[valid_idx, ], na_mask = x[valid_idx, ] %>% is.na)
-    x <- x[-valid_idx, ]
+    valid_x <- x[valid_idx, ]
+    valid_ds <-   torch::dataset(
+      initialize = function() {},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], rep(1, length(batch)), device=device)},
+      .length = function() {nrow(valid_x)}
+    )()
 
+    valid_dl <- torch::dataloader(
+      valid_ds,
+      batch_size = config$batch_size,
+      shuffle = FALSE ,
+      num_workers = config$num_workers
+    )
+
+    x <- x[-valid_idx, ]
   }
-  # training data
-  train_mat <- resolve_data(x, y=matrix(rep(1, nrow(x)),ncol=1))
-  dl <- torch::dataloader(
-    torch::tensor_dataset(x = train_mat$x, na_mask = train_mat$x_na_mask),
+
+  # training dataset & dataloader
+  train_ds <-   torch::dataset(
+    initialize = function() {},
+    .getbatch = function(batch) {resolve_data(x[batch,], y[batch], device=device)},
+    .length = function() {nrow(x)}
+  )()
+  # we can get training_set parameters from the 2 first samples
+  train <- train_ds$.getbatch(batch = c(1:2))
+
+  train_dl <- torch::dataloader(
+    train_ds,
     batch_size = config$batch_size,
     drop_last = config$drop_last,
-    shuffle = TRUE
+    shuffle = TRUE ,
+    num_workers = config$num_workers
   )
-
-  # validation data
-  if (has_valid) {
-    valid_mat <- resolve_data(valid_lst$x, y=matrix(rep(1, nrow(valid_lst$x)),ncol=1))
-    valid_dl <- torch::dataloader(
-      torch::tensor_dataset(x = valid_mat$x, na_mask = valid_mat$x_na_mask),
-      batch_size = config$batch_size,
-      drop_last = FALSE,
-      shuffle = FALSE
-    )
-  }
 
   # resolve loss (shortcutted from config)
   config$loss_fn <- unsupervised_loss
 
   # create network
   network <- tabnet_pretrainer(
-    input_dim = train_mat$input_dim,
-    cat_idxs = train_mat$cat_idx,
-    cat_dims = train_mat$cat_dims,
+    input_dim = as.integer(train$input_dim$to(device="cpu")),
+    cat_idxs = as.integer(train$cat_idx$to(device="cpu")),
+    cat_dims = as.integer(train$cat_dims$to(device="cpu")),
     pretraining_ratio = config$pretraining_ratio,
     n_d = config$n_d,
     n_a = config$n_a,
@@ -165,9 +181,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
       )
 
     coro::loop(for (batch in dl) {
-      batch_x_to_device <- batch$x$to(device=device)
-      batch_na_to_device <- batch$na_mask$to(device=device)
-      m <- train_batch_un(network, optimizer, batch_x_to_device, batch_na_to_device, config)
+      m <- train_batch_un(network, optimizer, batch, config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     })
@@ -182,9 +196,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     network$eval()
     if (has_valid) {
       coro::loop(for (batch in valid_dl) {
-        batch_x_to_device <- batch$x$to(device=device)
-        batch_na_to_device <- batch$na_mask$to(device=device)
-        m <- valid_batch_un(network, batch_x_to_device, batch_na_to_device, config)
+        m <- valid_batch_un(network, batch, config)
         valid_metrics <- c(valid_metrics, m)
       })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
