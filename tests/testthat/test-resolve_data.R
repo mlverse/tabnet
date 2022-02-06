@@ -57,7 +57,7 @@ test_that("resolve_data gives expected output through a dataloader", {
 
 })
 
-test_that("resolve_data gives expected output with challenging datatypes", {
+test_that("resolve_data gives expected output without nominal variables", {
   n <- 1000
   x <- data.frame(
     x = rnorm(n),

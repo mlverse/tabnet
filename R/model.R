@@ -14,8 +14,13 @@ resolve_data <- function(x, y, device) {
   cat_idx <- which(sapply(x, is.factor))
   cat_dims <- sapply(cat_idx, function(i) nlevels(x[[i]]))
   # convert factors to integers
-  x[,cat_idx] <- sapply(cat_idx, function(i) as.integer(x[[i]]))
-
+  if (length(cat_idx)) {
+    x[,cat_idx] <- sapply(cat_idx, function(i) as.integer(x[[i]]))
+  } else {
+    # prevent empty cat idx
+    cat_idx <- 0L
+    cat_dims <- 0L
+  }
   x_tensor <- torch::torch_tensor(as.matrix(x), dtype = torch::torch_float(), device = device)
   x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool(), device = device)
 
@@ -42,7 +47,7 @@ resolve_data <- function(x, y, device) {
 #' Configuration for TabNet models
 #'
 #' @param batch_size (int) Number of examples per batch, large batch sizes are
-#'   recommended. (default: 1024)
+#'   recommended. (default: 1024^2)
 #' @param penalty This is the extra sparsity loss coefficient as proposed
 #'   in the original paper. The bigger this coefficient is, the sparser your model
 #'   will be in terms of feature selection. Depending on the difficulty of your
@@ -67,7 +72,7 @@ resolve_data <- function(x, y, device) {
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
 #'   block, either `"sparsemax"` or `"entmax"`.Defaults to `"sparsemax"`.
 #' @param virtual_batch_size (int) Size of the mini batches used for
-#'   "Ghost Batch Normalization" (default=128)
+#'   "Ghost Batch Normalization" (default=256^2)
 #' @param learn_rate initial learning rate for the optimizer.
 #' @param optimizer the optimization method. currently only 'adam' is supported,
 #'   you can also pass any torch optimizer function.
@@ -110,7 +115,7 @@ resolve_data <- function(x, y, device) {
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
 #' @export
-tabnet_config <- function(batch_size = 256,
+tabnet_config <- function(batch_size = 1024^2,
                           penalty = 1e-3,
                           clip_value = NULL,
                           loss = "auto",
@@ -121,7 +126,7 @@ tabnet_config <- function(batch_size = 256,
                           num_steps = 3,
                           feature_reusage = 1.3,
                           mask_type = "sparsemax",
-                          virtual_batch_size = 128,
+                          virtual_batch_size = 256^2,
                           valid_split = 0,
                           learn_rate = 2e-2,
                           optimizer = "adam",
