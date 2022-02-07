@@ -200,14 +200,14 @@ test_that("config$loss=`auto` adapt to recipe outcome str()", {
   # nominal outcome
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+  fit_auto <- tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss="auto"))
   expect_equal(fit_auto$fit$config$loss_fn, torch::nn_cross_entropy_loss(), ignore_function_env = TRUE)
 
   # numerical outcome
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+  fit_auto <- tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss="auto"))
   expect_equal(fit_auto$fit$config$loss_fn, torch::nn_mse_loss(), ignore_function_env = TRUE)
 
@@ -222,14 +222,14 @@ test_that("config$loss not adapted to recipe outcome raise an explicit error", {
   # nominal outcome with numerical loss
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  expect_error(tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+  expect_error(tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
                           config = tabnet_config( loss="mse")),
               regexp = "is not a valid loss for outcome of type"
   )
   # numerical outcome
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  expect_error(tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+  expect_error(tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss="cross_entropy")),
                regexp = "is not a valid loss for outcome of type"
   )
@@ -245,14 +245,14 @@ test_that("config$loss can be a function", {
   # nominal outcome loss
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+  fit_auto <- tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss=torch::nn_nll_loss()))
   expect_equal(fit_auto$fit$config$loss_fn, torch::nn_nll_loss(), ignore_function_env = TRUE)
 
   # numerical outcome loss
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
-  fit_auto <- tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+  fit_auto <- tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
                       config = tabnet_config( loss=torch::nn_poisson_nll_loss()))
   expect_equal(fit_auto$fit$config$loss_fn, torch::nn_poisson_nll_loss(), ignore_function_env = TRUE)
 
