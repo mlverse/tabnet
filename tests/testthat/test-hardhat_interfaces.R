@@ -183,26 +183,31 @@ test_that("num_workers works for pretrain, fit an predict", {
   y <- ames$Sale_Price
 
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=2L),
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=1L,
+                                batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=2L, valid_split=0.2),
-    regexp = NA
-  )
-
-  expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, num_workers=2L),
+    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
+                                batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, num_workers=2L, valid_split=0.2),
+    fit <- tabnet_fit(x, y, epochs = 1, num_workers=1L,
+                      batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
 
   expect_error(
-    predic <- predict(fit, x, num_workers=2L),
+    fit <- tabnet_fit(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
+                      batch_size=65e3, virtual_batch_size=8192),
+    regexp = NA
+  )
+
+  expect_error(
+    predic <- predict(fit, x, num_workers=1L,
+                      batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
 
