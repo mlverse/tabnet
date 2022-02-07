@@ -1,9 +1,9 @@
 test_that("explain provides correct result with data.frame", {
 
-  set.seed(2)
-  torch::torch_manual_seed(2)
+  set.seed(2022)
+  torch::torch_manual_seed(2022)
 
-  n <- 1000
+  n <- 2000
   x <- data.frame(
     x = rnorm(n),
     y = rnorm(n),
@@ -12,7 +12,7 @@ test_that("explain provides correct result with data.frame", {
 
   y <- x$x
 
-  fit <- tabnet_fit(x, y, epochs = 10,
+  fit <- tabnet_fit(x, y, epochs = 15,
                     num_steps = 1,
                     batch_size = 512,
                     attention_width = 1,
