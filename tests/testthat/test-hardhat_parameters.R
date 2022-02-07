@@ -240,6 +240,7 @@ test_that("config$loss not adapted to recipe outcome raise an explicit error", {
 
 test_that("config$loss can be a function", {
 
+  testthat::skip_on_ci()
   suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
