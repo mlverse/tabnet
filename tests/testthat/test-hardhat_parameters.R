@@ -49,7 +49,7 @@ test_that("early stopping works wo validation split", {
                                 early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
-  expect_lt(length(pretrain$fit$metrics),50)
+  expect_lt(length(pretrain$fit$metrics),100)
 
   expect_error(
     pretrain <- tabnet_pretrain(x, y, epochs = 100, verbose=TRUE,
@@ -65,7 +65,7 @@ test_that("early stopping works wo validation split", {
                       early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
-  expect_lt(length(fit$fit$metrics),50)
+  expect_lt(length(fit$fit$metrics),100)
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 100, verbose=TRUE,
@@ -193,7 +193,7 @@ test_that("fit raise an error with non-supported mask-type", {
 
 test_that("config$loss=`auto` adapt to recipe outcome str()", {
 
-  testthat::skip_on_ci("prevent Error: Node stack overflow")
+  testthat::skip_on_ci()
   suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -216,7 +216,7 @@ test_that("config$loss=`auto` adapt to recipe outcome str()", {
 
 test_that("config$loss not adapted to recipe outcome raise an explicit error", {
 
-  testthat::skip_on_ci("prevent Error: Node stack overflow")
+  testthat::skip_on_ci()
   library(recipes)
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
