@@ -1,23 +1,13 @@
 
 test_that("Autoplot with unsupervised training, w and wo valid_split", {
 
-  library(ggplot2)
-
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-
-  tabnet_pretrained <- tabnet_pretrain(x, y, epochs = 12)
   expect_error(
-    print(autoplot(tabnet_pretrained)),
+    print(autoplot(attr_pretrained)),
     regexp = NA
   )
 
-  tabnet_pretrained <- tabnet_pretrain(x, y, epochs = 12, valid_split=0.3)
   expect_error(
-    print(autoplot(tabnet_pretrained)),
+    print(autoplot(attr_pretrained_vsplit)),
     regexp = NA
   )
 
@@ -25,24 +15,13 @@ test_that("Autoplot with unsupervised training, w and wo valid_split", {
 
 test_that("Autoplot with supervised training, w and wo valid_split", {
 
-
-  library(ggplot2)
-
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-
-  tabnet_fitted <- tabnet_fit(x, y, epochs = 12)
   expect_error(
-    print(autoplot(tabnet_fitted)),
+    print(autoplot(attr_fitted)),
     regexp = NA
   )
 
-  tabnet_fitted <- tabnet_fit(x, y, epochs = 12, valid_split=0.3)
   expect_error(
-    print(autoplot(tabnet_fitted)),
+    print(autoplot(attr_fitted_vsplit)),
     regexp = NA
   )
 
@@ -50,33 +29,25 @@ test_that("Autoplot with supervised training, w and wo valid_split", {
 
 test_that("Autoplot a model without checkpoint", {
 
-  library(ggplot2)
-
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-
-  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3)
+  tabnet_pretrain <- tabnet_pretrain(attrix, attriy, epochs = 3)
   expect_error(
     print(autoplot(tabnet_pretrain)),
     regexp = NA
   )
 
-  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3, valid_split=0.3)
+  tabnet_pretrain <- tabnet_pretrain(attrix, attriy, epochs = 3, valid_split=0.3)
   expect_error(
     print(autoplot(tabnet_pretrain)),
     regexp = NA
   )
 
-  tabnet_fit <- tabnet_fit(x, y, epochs = 3)
+  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3)
   expect_error(
     print(autoplot(tabnet_fit)),
     regexp = NA
   )
 
-  tabnet_fit <- tabnet_fit(x, y, epochs = 3, valid_split=0.3)
+  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3, valid_split=0.3)
   expect_error(
     print(autoplot(tabnet_fit)),
     regexp = NA
@@ -86,16 +57,7 @@ test_that("Autoplot a model without checkpoint", {
 
 test_that("Autoplot of pretrain then fit scenario", {
 
-  library(ggplot2)
-
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-
-  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 12, valid_split=.2)
-  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 12)
+  tabnet_fit <- tabnet_fit(attrix, attriy, tabnet_model=attr_pretrained_vsplit, epochs = 12)
 
   expect_error(
     print(autoplot(tabnet_fit)),
@@ -106,18 +68,8 @@ test_that("Autoplot of pretrain then fit scenario", {
 
 test_that("Autoplot of tabnet_explain works for pretrain and fitted model", {
 
-  library(ggplot2)
-
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-
-  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 12, valid_split=.2)
-  explain_pretrain <- tabnet_explain(tabnet_pretrain, x)
-  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 12)
-  explain_fit <- tabnet_explain(tabnet_fit, x)
+  explain_pretrain <- tabnet_explain(attr_pretrained_vsplit, attrix)
+  explain_fit <- tabnet_explain(attr_fitted_vsplit, attrix)
 
   expect_error(
     print(autoplot(explain_pretrain)),

@@ -1,10 +1,5 @@
 test_that("Training regression for data.frame and formula", {
 
-  data("ames", package = "modeldata")
-
-  x <- ames[1:256,-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price[1:256]
-
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 1),
     regexp = NA
@@ -28,23 +23,18 @@ test_that("Training regression for data.frame and formula", {
 
 test_that("Training classification for data.frame", {
 
-  data("attrition", package = "modeldata")
-
-  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition[1:256]
-
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1),
+    fit <- tabnet_fit(attrix, attriy, epochs = 1),
     regexp = NA
   )
 
   expect_error(
-    predict(fit, x, type = "prob"),
+    predict(fit, attrix, type = "prob"),
     regexp = NA
   )
 
   expect_error(
-    predict(fit, x),
+    predict(fit, attrix),
     regexp = NA
   )
 
@@ -52,18 +42,13 @@ test_that("Training classification for data.frame", {
 
 test_that("works with validation split", {
 
-  data("attrition", package = "modeldata")
-
-  x <- attrition[1:256,-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition[1:256]
-
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.5),
+    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.5),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, valid_split = 0.5, verbose = TRUE),
+    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.5, verbose = TRUE),
     regexp = NA
   )
 
@@ -71,9 +56,6 @@ test_that("works with validation split", {
 
 
 test_that("can train from a recipe", {
-
-  suppressPackageStartupMessages(library(recipes))
-  data("attrition", package = "modeldata")
 
   rec <- recipe(Attrition ~ ., data = attrition) %>%
     step_normalize(all_numeric(), -all_outcomes())
@@ -93,18 +75,12 @@ test_that("can train from a recipe", {
 
 test_that("serialization with saveRDS just works", {
 
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-
-  fit <- tabnet_fit(x, y, epochs = 1)
-  predictions <-  predict(fit, ames)
+  predictions <-  predict(ames_fit, ames)
 
   tmp <- tempfile("model", fileext = "rds")
-  saveRDS(fit, tmp)
+  withr::local_file(saveRDS(ames_fit, tmp))
 
-  rm(fit)
+  # rm(fit)
   gc()
 
   fit2 <- readRDS(tmp)
@@ -119,11 +95,6 @@ test_that("serialization with saveRDS just works", {
 })
 
 test_that("checkpoints works for inference", {
-
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 3, checkpoint_epochs = 1),
@@ -154,18 +125,11 @@ test_that("print module works even after a reload from disk", {
   testthat::skip_on_os("linux")
   testthat::skip_on_os("windows")
 
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-
-  fit <- tabnet_fit(x, y, epochs = 1)
-
   withr::with_options(new = c(cli.width = 50),
-                      expect_snapshot_output(fit))
+                      expect_snapshot_output(ames_fit))
 
   tmp <- tempfile("model", fileext = "rds")
-  saveRDS(fit, tmp)
+  withr::local_file(saveRDS(ames_fit, tmp))
   fit2 <- readRDS(tmp)
 
   withr::with_options(new = c(cli.width = 50),
@@ -177,36 +141,31 @@ test_that("print module works even after a reload from disk", {
 
 test_that("num_workers works for pretrain, fit an predict", {
 
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=1L,
+    tabnet_pretrain(x, y, epochs = 1, num_workers=1L,
                                 batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
+    tabnet_pretrain(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
                                 batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, num_workers=1L,
+    tabnet_fit(x, y, epochs = 1, num_workers=1L,
                       batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
 
   expect_error(
-    fit <- tabnet_fit(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
+    tabnet_fit(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
                       batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )
 
   expect_error(
-    predic <- predict(fit, x, num_workers=1L,
+    predict(ames_fit, x, num_workers=1L,
                       batch_size=65e3, virtual_batch_size=8192),
     regexp = NA
   )

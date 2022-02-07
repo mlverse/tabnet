@@ -33,41 +33,26 @@ test_that("explain provides correct result with data.frame", {
 
 test_that("explain works for dataframe, formula and recipe", {
 
-  suppressPackageStartupMessages(library(recipes))
-  data("ames", package = "modeldata")
-  ids <- sample(nrow(ames),256)
-  small_ames <- ames[ids,]
-
   # data.frame, regression
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3, valid_split=.2,
-                                     num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
-    tabnet_explain(tabnet_pretrain, new_data=small_ames),
+    tabnet_explain(ames_pretrain_vsplit, new_data=small_ames),
     regexp = NA
   )
 
-  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 3,
-                           num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_error(
-    tabnet_explain(tabnet_fit, new_data=small_ames),
+    tabnet_explain(ames_fit_vsplit, new_data=small_ames),
     regexp = NA
   )
 
   # data.frame, classification
-  data("attrition", package = "modeldata")
-  ids <- sample(nrow(attrition), 256)
-
-  x <- attrition[ids,-which(names(attrition) == "Attrition")]
-  y <- attrition[ids,]$Attrition
-
-  tabnet_pretrain <- tabnet_pretrain(x, y, epochs = 3, valid_split=.2,
-                                     num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  explain_pretrain <- tabnet_explain(tabnet_pretrain, x)
-  tabnet_fit <- tabnet_fit(x, y, tabnet_model=tabnet_pretrain, epochs = 3,
-                           num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  explain_fit <- tabnet_explain(tabnet_fit, x)
+  expect_error(
+    tabnet_explain(attr_pretrained_vsplit, attrix),
+    regexp = NA
+  )
+  expect_error(
+    tabnet_explain(attr_fitted_vsplit, attrix),
+    regexp = NA
+  )
 
 
   # formula
