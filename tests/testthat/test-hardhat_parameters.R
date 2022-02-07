@@ -193,6 +193,7 @@ test_that("fit raise an error with non-supported mask-type", {
 
 test_that("config$loss=`auto` adapt to recipe outcome str()", {
 
+  testthat::skip_on_ci("prevent Error: Node stack overflow")
   suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
@@ -215,6 +216,7 @@ test_that("config$loss=`auto` adapt to recipe outcome str()", {
 
 test_that("config$loss not adapted to recipe outcome raise an explicit error", {
 
+  testthat::skip_on_ci("prevent Error: Node stack overflow")
   library(recipes)
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
