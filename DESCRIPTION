@@ -27,7 +27,7 @@ Imports:
     coro,
     vctrs
 Suggests: 
-    testthat,
+    testthat (>= 3.0.0),
     modeldata,
     recipes,
     parsnip,
