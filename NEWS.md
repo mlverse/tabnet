@@ -12,13 +12,10 @@
 * Improve performance of `random_obfuscator()` torch_nn module. (#68)
 * Add support for early stopping (#69)
 * `tabnet_fit()` and `predict()` now allow missing values in predictors. (#76)
-* `tabnet_config()` now supports a `num_workers=` parameters to control parallel dataloading (#83)
 
 ## Bugfixes
 
 * `tabnet_explain()` is now correctly handling missing values in predictors. (#77)
-* `dataloader` can now use `num_workers>0` (#83)
-* new default values for `batch_size` and `virtual_batch_size` do not limit performance on mid-range devices.
 
 # tabnet 0.3.0
 
