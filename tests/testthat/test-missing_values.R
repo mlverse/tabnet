@@ -94,7 +94,7 @@ test_that("predict data-frame accept missing value in predictor", {
   x_missing <- x
   x_missing[1,"BusinessTravel"] <- NA
 
-  # predict
+  # predict with categorical missing
   expect_error(
     predict(fit, x_missing),
     regexp = NA
