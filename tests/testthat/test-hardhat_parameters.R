@@ -11,14 +11,14 @@ test_that("pretrain and fit both work with early stopping", {
 
   expect_message(
     pretrain <- tabnet_pretrain(attrix, attriy, epochs = 100, valid_split = 0.5, verbose=TRUE,
-                                early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+                                early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
-  expect_lt(length(pretrain$fit$metrics),50)
+  expect_lt(length(pretrain$fit$metrics),100)
 
   expect_message(
     fit <- tabnet_fit(attrix, attriy, epochs = 100, valid_split = 0.5, verbose=TRUE,
-                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+                      early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),100)
@@ -31,7 +31,7 @@ test_that("early stopping works wo validation split", {
   expect_message(
     pretrain <- tabnet_pretrain(attrix, attriy, epochs = 100, verbose=TRUE,
                                 early_stopping_monitor="train_loss",
-                                early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+                                early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
   expect_lt(length(pretrain$fit$metrics),100)
@@ -39,7 +39,7 @@ test_that("early stopping works wo validation split", {
   expect_error(
     tabnet_pretrain(attrix, attriy, epochs = 100, verbose=TRUE,
                                 early_stopping_monitor="cross_validation_loss",
-                                early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+                                early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
     regexp = "not a valid early stopping metric to monitor"
   )
 
@@ -47,7 +47,7 @@ test_that("early stopping works wo validation split", {
   expect_message(
     fit <- tabnet_fit(attrix, attriy, epochs = 100, verbose=TRUE,
                       early_stopping_monitor="train_loss",
-                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+                      early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
     "Early stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),100)
@@ -55,7 +55,7 @@ test_that("early stopping works wo validation split", {
   expect_error(
     tabnet_fit(attrix, attriy, epochs = 100, verbose=TRUE,
                       early_stopping_monitor="cross_validation_loss",
-                      early_stopping_tolerance=0.001, early_stopping_patience=3, learn_rate = 0.2),
+                      early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
     regexp = "not a valid early stopping metric to monitor"
   )
 
