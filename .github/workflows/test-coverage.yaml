@@ -10,9 +10,18 @@ name: test-coverage
 
 jobs:
   test-coverage:
-    runs-on: ubuntu-latest
+    runs-on: ['self-hosted', 'gpu']
+
+    container:
+      image: nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04
+      options: --gpus all
+
     env:
+      RSPM: https://packagemanager.rstudio.com/cran/__linux__/bionic/latest
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      TORCH_INSTALL: 1
+      TORCH_TEST: 1
+      DEBIAN_FRONTEND: 'noninteractive'
 
     steps:
       - uses: actions/checkout@v2
