@@ -93,7 +93,7 @@ jobs:
     name: 'gpu'
 
     container:
-      image: nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
+      image: nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04
       options: --gpus all
 
     env:
