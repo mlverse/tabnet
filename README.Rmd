@@ -65,11 +65,15 @@ suppressWarnings(autoplot(fit))
 
 
 ```{r}
+prediction <- predict(fit, test)
 metrics <- metric_set(accuracy, precision, recall)
-cbind(test, predict(fit, test)) %>% 
+cbind(test, prediction) %>% 
   metrics(Attrition, estimate = .pred_class)
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
+
+explaination <- tabnet_explain(fit, new_data = test)
+autoplot(explaination, quantile = 0.99)
 ```
 

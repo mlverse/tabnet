@@ -4,7 +4,7 @@ author: "Christophe Regouby"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{pretrain from dataset with missing-values}
+  %\VignetteIndexEntry{Training a Tabnet model from missing-values dataset}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

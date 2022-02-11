@@ -60,26 +60,91 @@ rec <- recipe(Attrition ~ ., data = train) %>%
 
 fit <- tabnet_fit(rec, train, epochs = 30)
 suppressWarnings(autoplot(fit))
-#> Warning: Removed 30 row(s) containing missing values (geom_path).
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
+#> New names:
+#> * `` -> ...1
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 ``` r
+prediction <- predict(fit, test)
 metrics <- metric_set(accuracy, precision, recall)
-cbind(test, predict(fit, test)) %>% 
+cbind(test, prediction) %>% 
   metrics(Attrition, estimate = .pred_class)
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.850
-#> 2 precision binary         0.883
-#> 3 recall    binary         0.947
+#> 1 accuracy  binary         0.837
+#> 2 precision binary         0.837
+#> 3 recall    binary         1
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.742
+#> 1 roc_auc binary         0.484
+
+explaination <- tabnet_explain(fit, new_data = test)
+autoplot(explaination, quantile = 0.99)
 ```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
