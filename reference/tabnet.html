@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
+    </li>
+    <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
@@ -100,7 +103,7 @@ will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help.</p></dd>
 <dt>batch_size</dt>
 <dd><p>(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024)</p></dd>
+recommended. (default: 1024^2)</p></dd>
 <dt>learn_rate</dt>
 <dd><p>initial learning rate for the optimizer.</p></dd>
 <dt>decision_width</dt>
@@ -119,7 +122,7 @@ A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.</p></dd>
 <dt>virtual_batch_size</dt>
 <dd><p>(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=128)</p></dd>
+"Ghost Batch Normalization" (default=256^2)</p></dd>
 <dt>num_independent</dt>
 <dd><p>Number of independent Gated Linear Units layers at each step.
 Usual values range from 1 to 5.</p></dd>
@@ -164,7 +167,7 @@ available threads by default.</p>
 <span class="r-in"><span class="op">}</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> parsnip model object</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fit time:  26.9s </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fit time:  8.5s </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `nn_module` containing 10,742 parameters.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Modules ─────────────────────────────────────────────────────────────────────</span>
@@ -185,7 +188,7 @@ available threads by default.</p>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Daniel Falbel.</p>
+  <p></p><p>Developed by Daniel Falbel, Christophe Regouby.</p>
 </div>
 
 <div class="pkgdown">

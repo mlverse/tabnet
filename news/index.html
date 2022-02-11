@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
+    </li>
+    <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
@@ -81,11 +84,16 @@
 <li>Add support for early stopping (<a href="https://github.com/mlverse/tabnet/issues/69" class="external-link">#69</a>)</li>
 <li>
 <code><a href="../reference/tabnet_fit.html">tabnet_fit()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> now allow missing values in predictors. (<a href="https://github.com/mlverse/tabnet/issues/76" class="external-link">#76</a>)</li>
+<li>
+<code><a href="../reference/tabnet_config.html">tabnet_config()</a></code> now supports a <code>num_workers=</code> parameters to control parallel dataloading (<a href="https://github.com/mlverse/tabnet/issues/83" class="external-link">#83</a>)</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bugfixes-0-4-0">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-0-4-0"></a></h3>
 <ul><li>
 <code><a href="../reference/tabnet_explain.html">tabnet_explain()</a></code> is now correctly handling missing values in predictors. (<a href="https://github.com/mlverse/tabnet/issues/77" class="external-link">#77</a>)</li>
+<li>
+<code>dataloader</code> can now use <code>num_workers&gt;0</code> (<a href="https://github.com/mlverse/tabnet/issues/83" class="external-link">#83</a>)</li>
+<li>new default values for <code>batch_size</code> and <code>virtual_batch_size</code> do not limit performance on mid-range devices.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -130,7 +138,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Daniel Falbel.</p>
+  <p></p><p>Developed by Daniel Falbel, Christophe Regouby.</p>
 </div>
 
 <div class="pkgdown">

@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
+    </li>
+    <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
@@ -70,7 +73,7 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tabnet_config</span><span class="op">(</span>
-  batch_size <span class="op">=</span> <span class="fl">256</span>,
+  batch_size <span class="op">=</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">2</span>,
   penalty <span class="op">=</span> <span class="fl">0.001</span>,
   clip_value <span class="op">=</span> <span class="cn">NULL</span>,
   loss <span class="op">=</span> <span class="st">"auto"</span>,
@@ -81,7 +84,7 @@
   num_steps <span class="op">=</span> <span class="fl">3</span>,
   feature_reusage <span class="op">=</span> <span class="fl">1.3</span>,
   mask_type <span class="op">=</span> <span class="st">"sparsemax"</span>,
-  virtual_batch_size <span class="op">=</span> <span class="fl">128</span>,
+  virtual_batch_size <span class="op">=</span> <span class="fl">256</span><span class="op">^</span><span class="fl">2</span>,
   valid_split <span class="op">=</span> <span class="fl">0</span>,
   learn_rate <span class="op">=</span> <span class="fl">0.02</span>,
   optimizer <span class="op">=</span> <span class="st">"adam"</span>,
@@ -97,9 +100,10 @@
   verbose <span class="op">=</span> <span class="cn">FALSE</span>,
   device <span class="op">=</span> <span class="st">"auto"</span>,
   importance_sample_size <span class="op">=</span> <span class="cn">NULL</span>,
-  early_stopping_monitor <span class="op">=</span> <span class="st">"valid_loss"</span>,
+  early_stopping_monitor <span class="op">=</span> <span class="st">"auto"</span>,
   early_stopping_tolerance <span class="op">=</span> <span class="fl">0</span>,
-  early_stopping_patience <span class="op">=</span> <span class="fl">0L</span>
+  early_stopping_patience <span class="op">=</span> <span class="fl">0L</span>,
+  num_workers <span class="op">=</span> <span class="fl">0L</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -107,7 +111,7 @@
     <h2>Arguments</h2>
     <dl><dt>batch_size</dt>
 <dd><p>(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024)</p></dd>
+recommended. (default: 1024^2)</p></dd>
 <dt>penalty</dt>
 <dd><p>This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
@@ -143,7 +147,7 @@ Values range from 1.0 to 2.0.</p></dd>
 block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
 <dt>virtual_batch_size</dt>
 <dd><p>(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=128)</p></dd>
+"Ghost Batch Normalization" (default=256^2)</p></dd>
 <dt>valid_split</dt>
 <dd><p>(float) The fraction of the dataset used for validation.</p></dd>
 <dt>learn_rate</dt>
@@ -192,12 +196,16 @@ uses  to "cuda" if it's available, otherwise uses "cpu".</p></dd>
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.</p></dd>
 <dt>early_stopping_monitor</dt>
-<dd><p>Unused (defaults to "valid_loss").</p></dd>
+<dd><p>Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").</p></dd>
 <dt>early_stopping_tolerance</dt>
-<dd><p>Minimum improvement to reset the patience counter.
-(default 0 for no early stopping)</p></dd>
+<dd><p>Minimum relative improvement to reset the patience counter.
+0.01 for 1% tolerance (default 0)</p></dd>
 <dt>early_stopping_patience</dt>
 <dd><p>Number of epochs without improving until stopping training. (default=5)</p></dd>
+<dt>num_workers</dt>
+<dd><p>(int, optional): how many subprocesses to use for data
+loading. 0 means that the data will be loaded in the main process.
+(default: <code>0</code>)</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -212,7 +220,7 @@ display a warning.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Daniel Falbel.</p>
+  <p></p><p>Developed by Daniel Falbel, Christophe Regouby.</p>
 </div>
 
 <div class="pkgdown">
