@@ -32,7 +32,7 @@ will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help.}
 
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024)}
+recommended. (default: 1024^2)}
 
 \item{learn_rate}{initial learning rate for the optimizer.}
 
@@ -51,7 +51,7 @@ A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=128)}
+"Ghost Batch Normalization" (default=256^2)}
 
 \item{num_independent}{Number of independent Gated Linear Units layers at each step.
 Usual values range from 1 to 5.}

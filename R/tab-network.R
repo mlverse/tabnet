@@ -609,6 +609,7 @@ embedding_generator <- torch::nn_module(
     }
 
     self$skip_embedding <- FALSE
+    self$cat_dims <- cat_dims
 
     if (length(cat_emb_dim) == 1)
       self$cat_emb_dims <- rep(cat_emb_dim, length(cat_idxs))
@@ -659,8 +660,13 @@ embedding_generator <- torch::nn_module(
         # impute nan with 0s
         cols[[i]] <- x[,i]$nan_to_num(0)$to(dtype = torch::torch_float())$view(c(-1, 1))
       } else {
+        # nan mask
+        mask <- x[, i]$ge(1)$bitwise_and(x[, i]$le(self$cat_dims[cat_feat_counter]))$to(dtype = torch::torch_long())
         # impute nan with 1s (categorical vars are 1-indexed)
-        cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$nan_to_num(1)$to(dtype = torch::torch_long()))
+        # obsolete
+        # cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$nan_to_num(1)$to(dtype = torch::torch_long()))
+        imputed_xi <- x[, i]$mul(mask) + (1-mask)
+        cols[[i]] <- self$embeddings[[cat_feat_counter]](imputed_xi$to(dtype = torch::torch_long()))
         cat_feat_counter <- cat_feat_counter + 1
       }
 

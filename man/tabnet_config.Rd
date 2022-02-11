@@ -5,7 +5,7 @@
 \title{Configuration for TabNet models}
 \usage{
 tabnet_config(
-  batch_size = 256,
+  batch_size = 1024^2,
   penalty = 0.001,
   clip_value = NULL,
   loss = "auto",
@@ -16,7 +16,7 @@ tabnet_config(
   num_steps = 3,
   feature_reusage = 1.3,
   mask_type = "sparsemax",
-  virtual_batch_size = 128,
+  virtual_batch_size = 256^2,
   valid_split = 0,
   learn_rate = 0.02,
   optimizer = "adam",
@@ -32,14 +32,15 @@ tabnet_config(
   verbose = FALSE,
   device = "auto",
   importance_sample_size = NULL,
-  early_stopping_monitor = "valid_loss",
+  early_stopping_monitor = "auto",
   early_stopping_tolerance = 0,
-  early_stopping_patience = 0L
+  early_stopping_patience = 0L,
+  num_workers = 0L
 )
 }
 \arguments{
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024)}
+recommended. (default: 1024^2)}
 
 \item{penalty}{This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
@@ -75,7 +76,7 @@ Values range from 1.0 to 2.0.}
 block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax"}.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=128)}
+"Ghost Batch Normalization" (default=256^2)}
 
 \item{valid_split}{(float) The fraction of the dataset used for validation.}
 
@@ -124,12 +125,16 @@ uses  to "cuda" if it's available, otherwise uses "cpu".}
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.}
 
-\item{early_stopping_monitor}{Unused (defaults to "valid_loss").}
+\item{early_stopping_monitor}{Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").}
 
-\item{early_stopping_tolerance}{Minimum improvement to reset the patience counter.
-(default 0 for no early stopping)}
+\item{early_stopping_tolerance}{Minimum relative improvement to reset the patience counter.
+0.01 for 1\% tolerance (default 0)}
 
 \item{early_stopping_patience}{Number of epochs without improving until stopping training. (default=5)}
+
+\item{num_workers}{(int, optional): how many subprocesses to use for data
+loading. 0 means that the data will be loaded in the main process.
+(default: \code{0})}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.

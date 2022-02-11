@@ -1,10 +1,5 @@
 test_that("Unsupervised training with default config, data.frame and formula", {
 
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-
   expect_error(
     fit <- tabnet_pretrain(x, y, epochs = 1),
     regexp = NA
@@ -19,13 +14,8 @@ test_that("Unsupervised training with default config, data.frame and formula", {
 
 test_that("Unsupervised training with pretraining_ratio", {
 
-  data("attrition", package = "modeldata")
-
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
-
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2),
+    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, pretraining_ratio=0.2),
     regexp = NA
   )
 
@@ -33,30 +23,21 @@ test_that("Unsupervised training with pretraining_ratio", {
 
 test_that("Unsupervised training prevent predict with an explicit message", {
 
-  data("attrition", package = "modeldata")
-
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
-  pretrain <- tabnet_pretrain(x, y, epochs = 1, pretraining_ratio=0.2)
+  pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, pretraining_ratio=0.2)
 
   expect_error(
-    predict(pretrain, x, type = "prob"),
+    predict(pretrain, attrix, type = "prob"),
     regexp = "tabnet_pretrain"
   )
 
   expect_error(
-    predict(pretrain, x),
+    predict(pretrain, attrix),
     regexp = "tabnet_pretrain"
   )
 
 })
 
 test_that("errors when using an argument that do not exist", {
-
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
 
   expect_error(
     pretrain <- tabnet_pretrain(x, y, pretraining_ratiosas = 1-1e5),
@@ -67,18 +48,13 @@ test_that("errors when using an argument that do not exist", {
 
 test_that("works with validation split", {
 
-  data("attrition", package = "modeldata")
-
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
-
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2),
+    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, valid_split = 0.2),
     regexp = NA
   )
 
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, verbose = TRUE),
+    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, valid_split = 0.2, verbose = TRUE),
     regexp = NA
   )
 
@@ -86,36 +62,25 @@ test_that("works with validation split", {
 
 test_that("works with categorical embedding dimension as list", {
 
-  data("attrition", package = "modeldata")
-
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
 
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, config=config),
+    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, valid_split = 0.2, config=config),
     regexp = NA
   )
 })
 
 test_that("explicit error message when categorical embedding dimension vector has wrong size", {
 
-  data("attrition", package = "modeldata")
-
-  x <- attrition[-which(names(attrition) == "Attrition")]
-  y <- attrition$Attrition
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
 
   expect_error(
-    pretrain <- tabnet_pretrain(x, y, epochs = 1, valid_split = 0.2, config=config),
+    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, valid_split = 0.2, config=config),
     regexp = "number of categorical predictors"
   )
 })
 
 test_that("can train from a recipe", {
-
-  library(recipes)
-  data("attrition", package = "modeldata")
 
   rec <- recipe(Attrition ~ ., data = attrition) %>%
     step_normalize(all_numeric(), -all_outcomes())
@@ -128,11 +93,6 @@ test_that("can train from a recipe", {
 })
 
 test_that("lr scheduler works", {
-
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
 
   expect_error(
     fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = "step",
@@ -154,11 +114,6 @@ test_that("lr scheduler works", {
 
 test_that("checkpoints works", {
 
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
-
   expect_error(
     pretrain <- tabnet_pretrain(x, y, epochs = 3, checkpoint_epochs = 1),
     regexp = NA
@@ -175,11 +130,6 @@ test_that("print module works", {
   testthat::local_edition(3)
   testthat::skip_on_os("linux")
   testthat::skip_on_os("windows")
-
-  data("ames", package = "modeldata")
-
-  x <- ames[-which(names(ames) == "Sale_Price")]
-  y <- ames$Sale_Price
 
   expect_error(
     fit <- tabnet_pretrain(x, y, epochs = 1),

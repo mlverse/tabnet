@@ -39,9 +39,9 @@ set.seed(2021)
 
 n <- 1000
 x <- data.frame(
-  x = runif(n),
-  y = runif(n),
-  z = runif(n)
+  x = rnorm(n),
+  y = rnorm(n),
+  z = rnorm(n)
 )
 
 y <- x$x
