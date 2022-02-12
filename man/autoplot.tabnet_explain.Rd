@@ -35,8 +35,8 @@ low values. \code{quantile=1}, the default, do not clip any values.
 \donttest{
 library(ggplot2)
 data("attrition", package = "modeldata")
-attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
-attrition_explain <- tabnet_explain(attrition_fit, attrition)
+attrition_fit <- tabnet_fit(Attrition ~. , data=attrition[1:256,], epoch=10)
+attrition_explain <- tabnet_explain(attrition_fit, attrition[257:512,])
 # Plot the model aggregated mask interpretation heatmap
 autoplot(attrition_explain)
 }

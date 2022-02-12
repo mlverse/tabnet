@@ -46,9 +46,8 @@ x <- data.frame(
 
 y <- x$x
 
-fit <- tabnet_fit(x, y, epochs = 20,
+fit <- tabnet_fit(x, y, epochs = 10,
                   num_steps = 1,
-                  batch_size = 512,
                   attention_width = 1,
                   num_shared = 1,
                   num_independent = 1)
