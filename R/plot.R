@@ -11,12 +11,14 @@
 #'
 #' @examples
 #' \donttest{
+#' if (torch::torch_is_installed()) {
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")
 #' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=15)
 #'
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
+#' }
 #' }
 #' @importFrom rlang .data
 #'
@@ -74,6 +76,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #'
 #' @examples
 #' \donttest{
+#' if (torch::torch_is_installed()) {
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")
 #' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition[1:256,], epoch=10)
@@ -81,7 +84,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' # Plot the model aggregated mask interpretation heatmap
 #' autoplot(attrition_explain)
 #' }
-#'
+#' }
 #'
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)

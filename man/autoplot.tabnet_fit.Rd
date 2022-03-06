@@ -5,9 +5,9 @@
 \alias{autoplot.tabnet_pretrain}
 \title{Plot tabnet_fit model loss along epochs}
 \usage{
-\method{autoplot}{tabnet_fit}(object, ...)
+autoplot.tabnet_fit(object, ...)
 
-\method{autoplot}{tabnet_pretrain}(object, ...)
+autoplot.tabnet_pretrain(object, ...)
 }
 \arguments{
 \item{object}{A \code{tabnet_fit} or \code{tabnet_pretrain} object as a result of
@@ -28,11 +28,13 @@ the choice of \code{from_epoch} value for later model training resume.
 }
 \examples{
 \donttest{
+if (torch::torch_is_installed()) {
 library(ggplot2)
 data("attrition", package = "modeldata")
 attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=15)
 
 # Plot the model loss over epochs
 autoplot(attrition_fit)
+}
 }
 }
