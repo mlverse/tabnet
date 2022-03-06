@@ -102,3 +102,15 @@ test_that("Autoplot of tabnet_explain works for pretrain and fitted model", {
   )
 
 })
+
+test_that("Autoplot of small batchsize", {
+
+  tabnet_fit <- tabnet_fit(attrix, attriy, tabnet_model=attr_pretrained_vsplit, batch_size=16, epochs = 12)
+
+  expect_error(
+    print(autoplot(tabnet_fit)),
+    regexp = NA
+  )
+
+})
+

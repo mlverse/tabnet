@@ -29,7 +29,8 @@ valid_batch_un <- function(network, batch, config) {
 
 transpose_metrics <- function(metrics) {
   nms <- names(metrics[1])
-  out <- vector(mode = "list", length = length(nms))
+  # out <- vector(mode = "list", length = length(nms))
+  out <- list()
   for (nm in nms) {
     out[[nm]] <- vector("numeric", length = length(metrics))
   }
