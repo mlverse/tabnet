@@ -121,3 +121,42 @@ test_that("support for vip on tabnet_fit and tabnet_pretrain", {
   expect_error(vip::vip(fit), regexp = NA)
 
 })
+
+
+test_that("Importance is skipped if skip_importance flag is used", {
+
+  set.seed(2022)
+  torch::torch_manual_seed(2022)
+
+  n <- 1000
+  x <- data.frame(
+    x = rnorm(n),
+    y = rnorm(n),
+    z = rnorm(n)
+  )
+
+  y <- x$x
+
+  fit <- tabnet_fit(x, y, epochs = 15,
+                    num_steps = 1,
+                    batch_size = 512,
+                    attention_width = 1,
+                    num_shared = 1,
+                    num_independent = 1,
+                    skip_importance = TRUE)
+
+  expect_equal(fit$fit$importances, NULL)
+
+  fit <- tabnet_fit(x, y, epochs = 15,
+                    num_steps = 1,
+                    batch_size = 512,
+                    attention_width = 1,
+                    num_shared = 1,
+                    num_independent = 1,
+                    skip_importance = FALSE)
+
+
+  expect_equal(which.max(fit$fit$importances$importance), 1)
+  expect_equal(fit$fit$importances$variables, colnames(x))
+
+})
