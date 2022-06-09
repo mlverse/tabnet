@@ -112,6 +112,7 @@ resolve_data <- function(x, y, device) {
 #' @param num_workers (int, optional): how many subprocesses to use for data
 #'   loading. 0 means that the data will be loaded in the main process.
 #'   (default: `0`)
+#' @param skip_importance `FALSE` if feature importance calculation should be skipped
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
 #' @export
@@ -145,7 +146,8 @@ tabnet_config <- function(batch_size = 1024^2,
                           early_stopping_monitor = "auto",
                           early_stopping_tolerance = 0,
                           early_stopping_patience = 0L,
-                          num_workers=0L) {
+                          num_workers=0L,
+                          skip_importance = FALSE) {
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
   }
@@ -188,7 +190,8 @@ tabnet_config <- function(batch_size = 1024^2,
     early_stopping_tolerance = early_stopping_tolerance,
     early_stopping_patience = early_stopping_patience,
     early_stopping = !(early_stopping_tolerance==0 || early_stopping_patience==0),
-    num_workers = num_workers
+    num_workers = num_workers,
+    skip_importance = skip_importance
   )
 }
 
@@ -525,26 +528,28 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   network$to(device = "cpu")
-
-  importance_sample_size <- config$importance_sample_size
-  if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
-    rlang::warn(c(glue::glue("Computing importances for a dataset with size {train_ds$.length()}."),
-                "This can consume too much memory. We are going to use a sample of size 1e5",
-                "You can disable this message by using the `importance_sample_size` argument."))
-    importance_sample_size <- 1e5
+  if(!config$skip_importance) {
+    importance_sample_size <- config$importance_sample_size
+    if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
+      rlang::warn(c(glue::glue("Computing importances for a dataset with size {train_ds$.length()}."),
+                  "This can consume too much memory. We are going to use a sample of size 1e5",
+                  "You can disable this message by using the `importance_sample_size` argument."))
+      importance_sample_size <- 1e5
+    }
+    indexes <- as.numeric(torch::torch_randint(
+      1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
+      dtype = torch::torch_long()
+    ))
+    importances <- tibble::tibble(
+      variables = colnames(x),
+      importance = compute_feature_importance(
+        network,
+        train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
+        train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu"))
+    )
+  } else {
+    importances <- NULL
   }
-  indexes <- as.numeric(torch::torch_randint(
-    1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
-    dtype = torch::torch_long()
-  ))
-  importances <- tibble::tibble(
-    variables = colnames(x),
-    importance = compute_feature_importance(
-      network,
-      train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
-      train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu"))
-  )
-
   list(
     network = network,
     metrics = metrics,
