@@ -35,7 +35,8 @@ tabnet_config(
   early_stopping_monitor = "auto",
   early_stopping_tolerance = 0,
   early_stopping_patience = 0L,
-  num_workers = 0L
+  num_workers = 0L,
+  skip_importance = FALSE
 )
 }
 \arguments{
@@ -135,6 +136,8 @@ display a warning.}
 \item{num_workers}{(int, optional): how many subprocesses to use for data
 loading. 0 means that the data will be loaded in the main process.
 (default: \code{0})}
+
+\item{skip_importance}{\code{FALSE} if feature importance calculation should be skipped}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.
