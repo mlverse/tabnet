@@ -112,7 +112,7 @@ resolve_data <- function(x, y, device) {
 #' @param num_workers (int, optional): how many subprocesses to use for data
 #'   loading. 0 means that the data will be loaded in the main process.
 #'   (default: `0`)
-#' @param skip_importance `FALSE` if feature importance calculation should be skipped
+#' @param skip_importance if feature importance calculation should be skipped (default: `FALSE`)
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
 #' @export

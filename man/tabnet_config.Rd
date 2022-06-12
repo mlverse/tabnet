@@ -137,7 +137,7 @@ display a warning.}
 loading. 0 means that the data will be loaded in the main process.
 (default: \code{0})}
 
-\item{skip_importance}{\code{FALSE} if feature importance calculation should be skipped}
+\item{skip_importance}{if feature importance calculation should be skipped (default: \code{FALSE})}
 }
 \value{
 A named list with all hyperparameters of the TabNet implementation.
