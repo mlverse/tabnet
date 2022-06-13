@@ -43,7 +43,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -101,15 +101,15 @@
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2</span> 3.3.5     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr  </span> 0.3.4</span>
-<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble </span> 3.1.6     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr  </span> 1.0.8</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2</span> 3.3.6     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr  </span> 0.3.4</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble </span> 3.1.7     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr  </span> 1.0.9</span>
 <span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr  </span> 1.2.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr</span> 1.4.0</span>
 <span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr  </span> 2.1.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats</span> 0.5.1</span>
 <span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ────────────────────────────────────────── tidyverse_conflicts() ──</span>
 <span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span> masks <span style="color: #0000BB;">stats</span>::filter()</span>
 <span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>    masks <span style="color: #0000BB;">stats</span>::lag()</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
-<span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_manual_seed.html" class="external-link">torch_manual_seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_manual_seed.html" class="external-link">torch_manual_seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p>TabNet claims to be an interpretable model because the underlying neural network architecture uses feature selection masks that can help identify which features were used at each step.</p>
 <p>The paper also defines an aggregate measure that combines the masks of each step into a single measure.</p>
 <p>Note that the selection of important features in the masks is done instance-wise. Thus, you can identify, for each observation, which features were considered relevant .</p>
@@ -167,16 +167,16 @@
 <p>Let’s fit a TabNet model to the <code>syn2</code> dataset and analyze the interpretation metrics.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn2</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; [Epoch 001] Loss: 1.044367</span>
+<span class="co">#&gt; [Epoch 001] Loss: 1.044368</span>
 <span class="co">#&gt; [Epoch 002] Loss: 0.784014</span>
-<span class="co">#&gt; [Epoch 003] Loss: 0.676509</span>
-<span class="co">#&gt; [Epoch 004] Loss: 0.639687</span>
-<span class="co">#&gt; [Epoch 005] Loss: 0.611612</span>
-<span class="co">#&gt; [Epoch 006] Loss: 0.584896</span>
-<span class="co">#&gt; [Epoch 007] Loss: 0.548098</span>
-<span class="co">#&gt; [Epoch 008] Loss: 0.516502</span>
-<span class="co">#&gt; [Epoch 009] Loss: 0.487536</span>
-<span class="co">#&gt; [Epoch 010] Loss: 0.463885</span></code></pre></div>
+<span class="co">#&gt; [Epoch 003] Loss: 0.676508</span>
+<span class="co">#&gt; [Epoch 004] Loss: 0.639699</span>
+<span class="co">#&gt; [Epoch 005] Loss: 0.611894</span>
+<span class="co">#&gt; [Epoch 006] Loss: 0.582541</span>
+<span class="co">#&gt; [Epoch 007] Loss: 0.549005</span>
+<span class="co">#&gt; [Epoch 008] Loss: 0.513190</span>
+<span class="co">#&gt; [Epoch 009] Loss: 0.483106</span>
+<span class="co">#&gt; [Epoch 010] Loss: 0.460212</span></code></pre></div>
 <p>In the feature importance plot we can see that, as expected, features <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn2</span><span class="op">)</span></code></pre></div>
@@ -204,15 +204,15 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="co">#&gt; [Epoch 001] Loss: 1.289555</span>
-<span class="co">#&gt; [Epoch 002] Loss: 0.929620</span>
-<span class="co">#&gt; [Epoch 003] Loss: 0.745366</span>
-<span class="co">#&gt; [Epoch 004] Loss: 0.686489</span>
-<span class="co">#&gt; [Epoch 005] Loss: 0.662547</span>
-<span class="co">#&gt; [Epoch 006] Loss: 0.644296</span>
-<span class="co">#&gt; [Epoch 007] Loss: 0.630764</span>
-<span class="co">#&gt; [Epoch 008] Loss: 0.618119</span>
-<span class="co">#&gt; [Epoch 009] Loss: 0.604485</span>
-<span class="co">#&gt; [Epoch 010] Loss: 0.591561</span></code></pre></div>
+<span class="co">#&gt; [Epoch 002] Loss: 0.929649</span>
+<span class="co">#&gt; [Epoch 003] Loss: 0.747063</span>
+<span class="co">#&gt; [Epoch 004] Loss: 0.690081</span>
+<span class="co">#&gt; [Epoch 005] Loss: 0.663854</span>
+<span class="co">#&gt; [Epoch 006] Loss: 0.648425</span>
+<span class="co">#&gt; [Epoch 007] Loss: 0.632819</span>
+<span class="co">#&gt; [Epoch 008] Loss: 0.616526</span>
+<span class="co">#&gt; [Epoch 009] Loss: 0.601708</span>
+<span class="co">#&gt; [Epoch 010] Loss: 0.589848</span></code></pre></div>
 <p>In the feature importance plot we have, as expected, strong importance for <code>V10</code>, and the other features that are used conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn4</span><span class="op">)</span></code></pre></div>
@@ -250,7 +250,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer>

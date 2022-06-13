@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -94,48 +94,75 @@
     <dl><dt>mode</dt>
 <dd><p>A single character string for the type of model. Possible values
 for this model are "unknown", "regression", or "classification".</p></dd>
+
+
 <dt>epochs</dt>
 <dd><p>(int) Number of training epochs.</p></dd>
+
+
 <dt>penalty</dt>
 <dd><p>This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help.</p></dd>
+
+
 <dt>batch_size</dt>
 <dd><p>(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024^2)</p></dd>
+
+
 <dt>learn_rate</dt>
 <dd><p>initial learning rate for the optimizer.</p></dd>
+
+
 <dt>decision_width</dt>
 <dd><p>(int) Width of the decision prediction layer. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.</p></dd>
+
+
 <dt>attention_width</dt>
 <dd><p>(int) Width of the attention embedding for each mask. According to
 the paper n_d=n_a is usually a good choice. (default=8)</p></dd>
+
+
 <dt>num_steps</dt>
 <dd><p>(int) Number of steps in the architecture
 (usually between 3 and 10)</p></dd>
+
+
 <dt>feature_reusage</dt>
 <dd><p>(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.</p></dd>
+
+
 <dt>virtual_batch_size</dt>
 <dd><p>(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)</p></dd>
+
+
 <dt>num_independent</dt>
 <dd><p>Number of independent Gated Linear Units layers at each step.
 Usual values range from 1 to 5.</p></dd>
+
+
 <dt>num_shared</dt>
 <dd><p>Number of shared Gated Linear Units at each step Usual values
 range from 1 to 5</p></dd>
+
+
 <dt>momentum</dt>
 <dd><p>Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A TabNet <code>parsnip</code> instance. It can be used to fit tabnet models using
+    
+
+<p>A TabNet <code>parsnip</code> instance. It can be used to fit tabnet models using
 <code>parsnip</code> machinery.</p>
     </div>
     <div id="threading">
@@ -145,8 +172,8 @@ to 0.4 (default=0.02)</p></dd>
 
 <p>TabNet uses <code>torch</code> as its backend for computation and <code>torch</code> uses all
 available threads by default.</p>
-<p>You can control the number of threads used by <code>torch</code> with:</p><div class="sourceCode"><pre><code><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/threads.html" class="external-link">torch_set_num_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
-<span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/threads.html" class="external-link">torch_set_num_interop_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<p>You can control the number of threads used by <code>torch</code> with:</p><div class="sourceCode"><pre><code><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
+<span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_interop_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 
     </div>
     <div id="see-also">
@@ -156,8 +183,8 @@ available threads by default.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://parsnip.tidymodels.org" class="external-link">parsnip</a></span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">tabnet</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
 <span class="r-in">  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
@@ -167,7 +194,6 @@ available threads by default.</p>
 <span class="r-in"><span class="op">}</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> parsnip model object</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fit time:  8.5s </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `nn_module` containing 10,742 parameters.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Modules ─────────────────────────────────────────────────────────────────────</span>
@@ -192,7 +218,7 @@ available threads by default.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

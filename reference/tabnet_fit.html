@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -118,35 +118,52 @@ created from <code><a href="https://recipes.tidymodels.org/reference/recipe.html
 </ul><p>The predictor data should be standardized (e.g. centered or scaled).
 The model treats categorical predictors internally thus, you don't need to
 make any treatment.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Model hyperparameters.
 Any hyperparameters set here will update those set by the config argument.
 See <code><a href="tabnet_config.html">tabnet_config()</a></code> for a list of all possible hyperparameters.</p></dd>
+
+
 <dt>y</dt>
 <dd><p>When <code>x</code> is a <strong>data frame</strong> or <strong>matrix</strong>, <code>y</code> is the outcome
 specified as:</p><ul><li><p>A <strong>data frame</strong> with 1 numeric column.</p></li>
 <li><p>A <strong>matrix</strong> with 1 numeric column.</p></li>
 <li><p>A numeric <strong>vector</strong>.</p></li>
 </ul></dd>
+
+
 <dt>tabnet_model</dt>
 <dd><p>A previously fitted TabNet model object to continue the fitting on.
 if <code>NULL</code> (the default) a brand new model is initialized.</p></dd>
+
+
 <dt>config</dt>
 <dd><p>A set of hyperparameters created using the <code>tabnet_config</code> function.
 If no argument is supplied, this will use the default values in <code><a href="tabnet_config.html">tabnet_config()</a></code>.</p></dd>
+
+
 <dt>from_epoch</dt>
 <dd><p>When a <code>tabnet_model</code> is provided, restore the network weights from a specific epoch.
 Default is last available checkpoint for restored model, or last epoch for in-memory model.</p></dd>
+
+
 <dt>formula</dt>
 <dd><p>A formula specifying the outcome terms on the left-hand side,
 and the predictor terms on the right-hand side.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>When a <strong>recipe</strong> or <strong>formula</strong> is used, <code>data</code> is specified as:</p><ul><li><p>A <strong>data frame</strong> containing both the predictors and the outcome.</p></li>
 </ul></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A TabNet model object. It can be used for serialization, predictions, or further fitting.</p>
+    
+
+<p>A TabNet model object. It can be used for serialization, predictions, or further fitting.</p>
     </div>
     <div id="fitting-a-pre-trained-model">
     <h2>Fitting a pre-trained model</h2>
@@ -166,14 +183,14 @@ The model fitting metrics append on top of the parent metrics in the returned Ta
 
 <p>TabNet uses <code>torch</code> as its backend for computation and <code>torch</code> uses all
 available threads by default.</p>
-<p>You can control the number of threads used by <code>torch</code> with:</p><div class="sourceCode"><pre><code><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/threads.html" class="external-link">torch_set_num_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
-<span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/threads.html" class="external-link">torch_set_num_interop_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<p>You can control the number of threads used by <code>torch</code> with:</p><div class="sourceCode"><pre><code><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
+<span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_interop_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">tabnet_fit</span><span class="op">(</span><span class="va">Sale_Price</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">ames</span>, epochs <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
@@ -192,7 +209,7 @@ available threads by default.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

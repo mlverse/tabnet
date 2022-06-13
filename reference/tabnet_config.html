@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -103,7 +103,8 @@
   early_stopping_monitor <span class="op">=</span> <span class="st">"auto"</span>,
   early_stopping_tolerance <span class="op">=</span> <span class="fl">0</span>,
   early_stopping_patience <span class="op">=</span> <span class="fl">0L</span>,
-  num_workers <span class="op">=</span> <span class="fl">0L</span>
+  num_workers <span class="op">=</span> <span class="fl">0L</span>,
+  skip_importance <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -112,104 +113,171 @@
     <dl><dt>batch_size</dt>
 <dd><p>(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024^2)</p></dd>
+
+
 <dt>penalty</dt>
 <dd><p>This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help.</p></dd>
+
+
 <dt>clip_value</dt>
 <dd><p>If a float is given this will clip the gradient at
 clip_value. Pass <code>NULL</code> to not clip.</p></dd>
+
+
 <dt>loss</dt>
 <dd><p>(character or function) Loss function for training (default to mse
 for regression and cross entropy for classification)</p></dd>
+
+
 <dt>epochs</dt>
 <dd><p>(int) Number of training epochs.</p></dd>
+
+
 <dt>drop_last</dt>
 <dd><p>(bool) Whether to drop last batch if not complete during
 training</p></dd>
+
+
 <dt>decision_width</dt>
 <dd><p>(int) Width of the decision prediction layer. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.</p></dd>
+
+
 <dt>attention_width</dt>
 <dd><p>(int) Width of the attention embedding for each mask. According to
 the paper n_d=n_a is usually a good choice. (default=8)</p></dd>
+
+
 <dt>num_steps</dt>
 <dd><p>(int) Number of steps in the architecture
 (usually between 3 and 10)</p></dd>
+
+
 <dt>feature_reusage</dt>
 <dd><p>(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.</p></dd>
+
+
 <dt>mask_type</dt>
 <dd><p>(character) Final layer of feature selector in the attentive_transformer
 block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
+
+
 <dt>virtual_batch_size</dt>
 <dd><p>(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)</p></dd>
+
+
 <dt>valid_split</dt>
 <dd><p>(float) The fraction of the dataset used for validation.</p></dd>
+
+
 <dt>learn_rate</dt>
 <dd><p>initial learning rate for the optimizer.</p></dd>
+
+
 <dt>optimizer</dt>
 <dd><p>the optimization method. currently only 'adam' is supported,
 you can also pass any torch optimizer function.</p></dd>
+
+
 <dt>lr_scheduler</dt>
 <dd><p>if <code>NULL</code>, no learning rate decay is used. if "step"
 decays the learning rate by <code>lr_decay</code> every <code>step_size</code> epochs. It can
-also be a <a href="https://torch.mlverse.org/docs/reference/lr_scheduler.html" class="external-link">torch::lr_scheduler</a> function that only takes the optimizer
+also be a <a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a> function that only takes the optimizer
 as parameter. The <code>step</code> method is called once per epoch.</p></dd>
+
+
 <dt>lr_decay</dt>
 <dd><p>multiplies the initial learning rate by <code>lr_decay</code> every
-<code>step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://torch.mlverse.org/docs/reference/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
+<code>step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
 or <code>NULL</code>.</p></dd>
+
+
 <dt>step_size</dt>
 <dd><p>the learning rate scheduler step size. Unused if
-<code>lr_scheduler</code> is a <code><a href="https://torch.mlverse.org/docs/reference/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code> or <code>NULL</code>.</p></dd>
+<code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code> or <code>NULL</code>.</p></dd>
+
+
 <dt>checkpoint_epochs</dt>
 <dd><p>checkpoint model weights and architecture every
 <code>checkpoint_epochs</code>. (default is 10). This may cause large memory usage.
 Use <code>0</code> to disable checkpoints.</p></dd>
+
+
 <dt>cat_emb_dim</dt>
 <dd><p>Embedding size for categorial features (default=1)</p></dd>
+
+
 <dt>num_independent</dt>
 <dd><p>Number of independent Gated Linear Units layers at each step.
 Usual values range from 1 to 5.</p></dd>
+
+
 <dt>num_shared</dt>
 <dd><p>Number of shared Gated Linear Units at each step Usual values
 range from 1 to 5</p></dd>
+
+
 <dt>momentum</dt>
 <dd><p>Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)</p></dd>
+
+
 <dt>pretraining_ratio</dt>
 <dd><p>Ratio of features to mask for reconstruction during
 pretraining.  Ranges from 0 to 1 (default=0.5)</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>(bool) wether to print progress and loss values during
 training.</p></dd>
+
+
 <dt>device</dt>
 <dd><p>the device to use for training. "cpu" or "cuda". The default ("auto")
 uses  to "cuda" if it's available, otherwise uses "cpu".</p></dd>
+
+
 <dt>importance_sample_size</dt>
 <dd><p>sample of the dataset to compute importance metrics.
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.</p></dd>
+
+
 <dt>early_stopping_monitor</dt>
 <dd><p>Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").</p></dd>
+
+
 <dt>early_stopping_tolerance</dt>
 <dd><p>Minimum relative improvement to reset the patience counter.
 0.01 for 1% tolerance (default 0)</p></dd>
+
+
 <dt>early_stopping_patience</dt>
 <dd><p>Number of epochs without improving until stopping training. (default=5)</p></dd>
+
+
 <dt>num_workers</dt>
 <dd><p>(int, optional): how many subprocesses to use for data
 loading. 0 means that the data will be loaded in the main process.
 (default: <code>0</code>)</p></dd>
+
+
+<dt>skip_importance</dt>
+<dd><p>if feature importance calculation should be skipped (default: <code>FALSE</code>)</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A named list with all hyperparameters of the TabNet implementation.</p>
+    
+
+<p>A named list with all hyperparameters of the TabNet implementation.</p>
     </div>
 
   </div>
@@ -224,7 +292,7 @@ loading. 0 means that the data will be loaded in the main process.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>
