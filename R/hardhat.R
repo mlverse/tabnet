@@ -329,7 +329,9 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   }
   if (task == "supervised") {
-    stopifnot("Error: found missing values in the response vector" = sum(is.na(outcomes))==0)
+    if (sum(is.na(outcomes))>0) {
+      rlang::abort("Error: found missing values in the response vector")
+    }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
       tabnet_model_lst <- tabnet_initialize(predictors, outcomes, config = config)
