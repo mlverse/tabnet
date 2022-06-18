@@ -95,5 +95,5 @@ test_that("Check we can finalize a workflow from a tune_grid", {
     regexp = NA
   )
 
-  expect_equal(rlang::eval_tidy(final_wf$fit$actions$model$spec$args$epochs), 3)
+  expect_equal(rlang::eval_tidy(final_wf$fit$actions$model$spec$args$epochs), 2)
 })
