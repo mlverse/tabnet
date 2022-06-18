@@ -62,3 +62,38 @@ test_that("Check we can finalize a workflow", {
   expect_equal(rlang::eval_tidy(wf$fit$actions$model$spec$args$penalty), 0.01)
   expect_equal(rlang::eval_tidy(wf$fit$actions$model$spec$args$epochs), 1)
 })
+
+test_that("Check we can finalize a workflow from a tune_grid", {
+
+  library(parsnip)
+  data("ames", package = "modeldata")
+
+  model <- tabnet(epochs = tune()) %>%
+    set_mode("regression") %>%
+    set_engine("torch")
+
+  wf <- workflows::workflow() %>%
+    workflows::add_model(model) %>%
+    workflows::add_formula(Sale_Price ~ .)
+
+  custom_grid <- tidyr::crossing(epochs = c(1,2,3))
+  cv_folds <- ames %>%
+    rsample::vfold_cv(v = 2, repeats = 1)
+
+  at <- tune::tune_grid(
+    object = wf,
+    resamples = cv_folds,
+    grid = custom_grid,
+    metrics = yardstick::metric_set(yardstick::rmse),
+    control = tune::control_grid(verbose = F)
+  )
+
+  best_rmse <- tune::select_best(at, "rmse")
+
+  expect_error(
+    final_wf <- tune::finalize_workflow(wf, best_rmse),
+    regexp = NA
+  )
+
+  expect_equal(rlang::eval_tidy(final_wf$fit$actions$model$spec$args$epochs), 3)
+})
