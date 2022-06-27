@@ -518,3 +518,25 @@ print.tabnet_fit <- function(x, ...) {
 }
 #' @export
 print.tabnet_pretrain <- print.tabnet_fit
+
+#' @export
+nn_prune_head.tabnet_fit <- function(x, ...) {
+  if (check_net_is_empty_ptr(x)) {
+    net <- reload_model(x$serialized_net)
+  } else {
+    net <- x$fit$network
+  }
+  # TODO here we assemble nn_prune_head(x, 1) with nn_prune_head(x$tabnet, 1)
+
+  invisible(x)
+}
+#' @export
+nn_prune_head.tabnet_pretrain <- function(x, ...) {
+  if (check_net_is_empty_ptr(x)) {
+    torch::nn_prune_head(reload_model(x$serialized_net),...)
+  } else {
+    torch::nn_prune_head(x$fit$network, ...)
+  }
+  invisible(x)
+}
+

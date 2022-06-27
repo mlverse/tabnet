@@ -104,3 +104,13 @@ test_that("serialization of tabnet_pretrain with saveRDS just works", {
 
 })
 
+test_that("we can prune head of tabnet pretrain and tabnet fit models", {
+
+  expect_error(pruned_pretrain <- torch::nn_prune_head(ames_pretrain, 1),
+               NA)
+
+  expect_error(pruned_fit <- torch::nn_prune_head(ames_fit, 1),
+               NA)
+
+})
+
