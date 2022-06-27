@@ -173,3 +173,19 @@ test_that("num_workers works for pretrain, fit an predict", {
 
 })
 
+
+test_that("we can prune head of tabnet pretrain and tabnet fit models", {
+
+  expect_error(pruned_pretrain <- torch::nn_prune_head(ames_pretrain, 1),
+               NA)
+  test_that("decoder has been removed from the list of modules", {expect_equal(all(stringr::str_detect("decoder", names(pruned_pretrain$children))),FALSE)})
+
+
+  expect_error(pruned_fit <- torch::nn_prune_head(ames_fit, 1),
+               NA)
+  test_that("decoder has been removed from the list of modules", {expect_equal(all(stringr::str_detect("final_mapping", names(pruned_pretrain$children))),FALSE)})
+
+
+})
+
+

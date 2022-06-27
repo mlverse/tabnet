@@ -526,9 +526,10 @@ nn_prune_head.tabnet_fit <- function(x, ...) {
   } else {
     net <- x$fit$network
   }
-  # TODO here we assemble nn_prune_head(x, 1) with nn_prune_head(x$tabnet, 1)
+  # here we assemble nn_prune_head(x, 1) with nn_prune_head(x$tabnet, 1)
+  x <- torch::nn_prune_head(net, 1)
+  x$add_module(name= "tabnet", module=torch::nn_prune_head(net$tabnet,...))
 
-  invisible(x)
 }
 #' @export
 nn_prune_head.tabnet_pretrain <- function(x, ...) {
@@ -537,6 +538,6 @@ nn_prune_head.tabnet_pretrain <- function(x, ...) {
   } else {
     torch::nn_prune_head(x$fit$network, ...)
   }
-  invisible(x)
+
 }
 
