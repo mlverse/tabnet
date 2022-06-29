@@ -43,6 +43,7 @@ Suggests:
     dplyr,
     tidyr,
     purrr,
+    stringr,
     tune,
     workflows,
     yardstick

@@ -519,6 +519,15 @@ print.tabnet_fit <- function(x, ...) {
 #' @export
 print.tabnet_pretrain <- print.tabnet_fit
 
+#' Prune top layer(s) of a tabnet network
+#'
+#' Prune `head_size` last layers of a tabnet network in order to
+#'  use the pruned module as a sequential embedding module.
+#' @param x nn_network to prune
+#' @param head_size number of nn_layers to prune, should be less than 2
+#'
+#' @return a tabnet network with the top nn_layer removed
+#' @rdname nn_prune_head
 #' @export
 nn_prune_head.tabnet_fit <- function(x, ...) {
   if (check_net_is_empty_ptr(x)) {
@@ -531,6 +540,7 @@ nn_prune_head.tabnet_fit <- function(x, ...) {
   x$add_module(name= "tabnet", module=torch::nn_prune_head(net$tabnet,...))
 
 }
+#' @rdname nn_prune_head
 #' @export
 nn_prune_head.tabnet_pretrain <- function(x, ...) {
   if (check_net_is_empty_ptr(x)) {
