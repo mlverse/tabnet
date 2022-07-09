@@ -307,7 +307,7 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
                           num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
                           num_independent = NULL, num_shared = NULL, momentum = NULL, ...) {
   rlang::check_installed("parsnip")
-  eng_args <- parsnip::update_engine_parameters(object$eng_args, ...)
+  eng_args <- parsnip::update_engine_parameters(object$eng_args, fresh=TRUE, ...)
   args <- list(
     epochs = rlang::enquo(epochs),
     penalty = rlang::enquo(penalty),
