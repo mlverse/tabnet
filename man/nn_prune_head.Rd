@@ -5,9 +5,9 @@
 \alias{nn_prune_head.tabnet_pretrain}
 \title{Prune top layer(s) of a tabnet network}
 \usage{
-nn_prune_head.tabnet_fit(x, ...)
+nn_prune_head.tabnet_fit(x, head_size)
 
-nn_prune_head.tabnet_pretrain(x, ...)
+nn_prune_head.tabnet_pretrain(x, head_size)
 }
 \arguments{
 \item{x}{nn_network to prune}
