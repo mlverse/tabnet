@@ -103,4 +103,3 @@ test_that("serialization of tabnet_pretrain with saveRDS just works", {
   expect_equal(as.numeric(fit2$fit$network$.check), 1)
 
 })
-
