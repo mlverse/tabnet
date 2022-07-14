@@ -72,21 +72,21 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tabnet</span><span class="op">(</span>
-  mode <span class="op">=</span> <span class="st">"unknown"</span>,
-  epochs <span class="op">=</span> <span class="cn">NULL</span>,
-  penalty <span class="op">=</span> <span class="cn">NULL</span>,
-  batch_size <span class="op">=</span> <span class="cn">NULL</span>,
-  learn_rate <span class="op">=</span> <span class="cn">NULL</span>,
-  decision_width <span class="op">=</span> <span class="cn">NULL</span>,
-  attention_width <span class="op">=</span> <span class="cn">NULL</span>,
-  num_steps <span class="op">=</span> <span class="cn">NULL</span>,
-  feature_reusage <span class="op">=</span> <span class="cn">NULL</span>,
-  virtual_batch_size <span class="op">=</span> <span class="cn">NULL</span>,
-  num_independent <span class="op">=</span> <span class="cn">NULL</span>,
-  num_shared <span class="op">=</span> <span class="cn">NULL</span>,
-  momentum <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tabnet</span><span class="op">(</span></span>
+<span>  mode <span class="op">=</span> <span class="st">"unknown"</span>,</span>
+<span>  epochs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  penalty <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  learn_rate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  decision_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  attention_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  num_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  feature_reusage <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  virtual_batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  num_independent <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  num_shared <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  momentum <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -172,8 +172,8 @@ to 0.4 (default=0.02)</p></dd>
 
 <p>TabNet uses <code>torch</code> as its backend for computation and <code>torch</code> uses all
 available threads by default.</p>
-<p>You can control the number of threads used by <code>torch</code> with:</p><div class="sourceCode"><pre><code><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
-<span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_interop_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<p>You can control the number of threads used by <code>torch</code> with:</p><div class="sourceCode"><pre><code><span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_interop_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 
     </div>
     <div id="see-also">
@@ -183,15 +183,15 @@ available threads by default.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">tabnet</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"torch"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">model</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">Sale_Price</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">ames</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">tabnet</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"torch"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">Sale_Price</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">ames</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> parsnip model object</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `nn_module` containing 10,742 parameters.</span>
@@ -203,7 +203,7 @@ available threads by default.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Parameters ──────────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> • .check: Float [1:1]</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -218,7 +218,7 @@ available threads by default.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

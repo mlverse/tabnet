@@ -72,40 +72,40 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tabnet_config</span><span class="op">(</span>
-  batch_size <span class="op">=</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">2</span>,
-  penalty <span class="op">=</span> <span class="fl">0.001</span>,
-  clip_value <span class="op">=</span> <span class="cn">NULL</span>,
-  loss <span class="op">=</span> <span class="st">"auto"</span>,
-  epochs <span class="op">=</span> <span class="fl">5</span>,
-  drop_last <span class="op">=</span> <span class="cn">FALSE</span>,
-  decision_width <span class="op">=</span> <span class="cn">NULL</span>,
-  attention_width <span class="op">=</span> <span class="cn">NULL</span>,
-  num_steps <span class="op">=</span> <span class="fl">3</span>,
-  feature_reusage <span class="op">=</span> <span class="fl">1.3</span>,
-  mask_type <span class="op">=</span> <span class="st">"sparsemax"</span>,
-  virtual_batch_size <span class="op">=</span> <span class="fl">256</span><span class="op">^</span><span class="fl">2</span>,
-  valid_split <span class="op">=</span> <span class="fl">0</span>,
-  learn_rate <span class="op">=</span> <span class="fl">0.02</span>,
-  optimizer <span class="op">=</span> <span class="st">"adam"</span>,
-  lr_scheduler <span class="op">=</span> <span class="cn">NULL</span>,
-  lr_decay <span class="op">=</span> <span class="fl">0.1</span>,
-  step_size <span class="op">=</span> <span class="fl">30</span>,
-  checkpoint_epochs <span class="op">=</span> <span class="fl">10</span>,
-  cat_emb_dim <span class="op">=</span> <span class="fl">1</span>,
-  num_independent <span class="op">=</span> <span class="fl">2</span>,
-  num_shared <span class="op">=</span> <span class="fl">2</span>,
-  momentum <span class="op">=</span> <span class="fl">0.02</span>,
-  pretraining_ratio <span class="op">=</span> <span class="fl">0.5</span>,
-  verbose <span class="op">=</span> <span class="cn">FALSE</span>,
-  device <span class="op">=</span> <span class="st">"auto"</span>,
-  importance_sample_size <span class="op">=</span> <span class="cn">NULL</span>,
-  early_stopping_monitor <span class="op">=</span> <span class="st">"auto"</span>,
-  early_stopping_tolerance <span class="op">=</span> <span class="fl">0</span>,
-  early_stopping_patience <span class="op">=</span> <span class="fl">0L</span>,
-  num_workers <span class="op">=</span> <span class="fl">0L</span>,
-  skip_importance <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tabnet_config</span><span class="op">(</span></span>
+<span>  batch_size <span class="op">=</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">2</span>,</span>
+<span>  penalty <span class="op">=</span> <span class="fl">0.001</span>,</span>
+<span>  clip_value <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  loss <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  epochs <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  drop_last <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  decision_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  attention_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  num_steps <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  feature_reusage <span class="op">=</span> <span class="fl">1.3</span>,</span>
+<span>  mask_type <span class="op">=</span> <span class="st">"sparsemax"</span>,</span>
+<span>  virtual_batch_size <span class="op">=</span> <span class="fl">256</span><span class="op">^</span><span class="fl">2</span>,</span>
+<span>  valid_split <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  learn_rate <span class="op">=</span> <span class="fl">0.02</span>,</span>
+<span>  optimizer <span class="op">=</span> <span class="st">"adam"</span>,</span>
+<span>  lr_scheduler <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lr_decay <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  step_size <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  checkpoint_epochs <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  cat_emb_dim <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  num_independent <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  num_shared <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  momentum <span class="op">=</span> <span class="fl">0.02</span>,</span>
+<span>  pretraining_ratio <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  device <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  importance_sample_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  early_stopping_monitor <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  early_stopping_tolerance <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  early_stopping_patience <span class="op">=</span> <span class="fl">0L</span>,</span>
+<span>  num_workers <span class="op">=</span> <span class="fl">0L</span>,</span>
+<span>  skip_importance <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -292,7 +292,7 @@ loading. 0 means that the data will be loaded in the main process.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>
