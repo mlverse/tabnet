@@ -70,7 +70,7 @@ test_that("Check we can finalize a workflow from a tune_grid", {
 
   model <- tabnet(epochs = tune()) %>%
     set_mode("regression") %>%
-    set_engine("torch")
+    set_engine("torch", checkpoint_epochs = 1)
 
   wf <- workflows::workflow() %>%
     workflows::add_model(model) %>%

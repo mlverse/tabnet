@@ -333,3 +333,4 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
   )
 }
 
+min_grid.tabnet <- function(x, grid, ...) tune::fit_max_value(x, grid, ...)
