@@ -95,3 +95,89 @@ test_that("Check we can finalize a workflow from a tune_grid", {
     regexp = NA
   )
 })
+
+test_that("tabnet grid reduction - torch", {
+
+  library(tune)
+
+  mod <- tabnet() %>%
+    parsnip::set_engine("torch")
+
+  # A typical grid
+  reg_grid <- expand.grid(epochs = 1:3, penalty = 1:2)
+  reg_grid_smol <- min_grid(mod, reg_grid)
+
+  expect_equal(reg_grid_smol$epochs, rep(3, 2))
+  expect_equal(reg_grid_smol$penalty, 1:2)
+  for (i in 1:nrow(reg_grid_smol)) {
+    expect_equal(reg_grid_smol$.submodels[[i]], list(epochs = 1:2))
+  }
+
+  # Unbalanced grid
+  reg_ish_grid <- expand.grid(epochs = 1:3, penalty = 1:2)[-3, ]
+  reg_ish_grid_smol <- min_grid(mod, reg_ish_grid)
+
+  expect_equal(reg_ish_grid_smol$epochs, 2:3)
+  expect_equal(reg_ish_grid_smol$penalty, 1:2)
+  for (i in 2:nrow(reg_ish_grid_smol)) {
+    expect_equal(reg_ish_grid_smol$.submodels[[i]], list(epochs = 1:2))
+  }
+
+  # Grid with a third parameter
+  reg_grid_extra <- expand.grid(epochs = 1:3, penalty = 1:2, batch_size = 10:12)
+  reg_grid_extra_smol <- min_grid(mod, reg_grid_extra)
+
+  expect_equal(reg_grid_extra_smol$epochs, rep(3, 6))
+  expect_equal(reg_grid_extra_smol$penalty, rep(1:2, each = 3))
+  expect_equal(reg_grid_extra_smol$batch_size, rep(10:12, 2))
+  for (i in 1:nrow(reg_grid_extra_smol)) {
+    expect_equal(reg_grid_extra_smol$.submodels[[i]], list(epochs = 1:2))
+  }
+
+  # Only epochs
+  only_epochs <- expand.grid(epochs = 1:3)
+  only_epochs_smol <- min_grid(mod, only_epochs)
+
+  expect_equal(only_epochs_smol$epochs, 3)
+  expect_equal(only_epochs_smol$.submodels, list(list(epochs = 1:2)))
+
+  # No submodels
+  no_sub <- tibble::tibble(epochs = 1, penalty = 1:2)
+  no_sub_smol <- min_grid(mod, no_sub)
+
+  expect_equal(no_sub_smol$epochs, rep(1, 2))
+  expect_equal(no_sub_smol$penalty, 1:2)
+  for (i in 1:nrow(no_sub_smol)) {
+    expect_length(no_sub_smol$.submodels[[i]], 0)
+  }
+
+  # different id names
+  mod_1 <- tabnet(epochs = tune("Amos")) %>%
+    parsnip::set_engine("torch")
+  reg_grid <- expand.grid(Amos = 1:3, penalty = 1:2)
+  reg_grid_smol <- min_grid(mod_1, reg_grid)
+
+  expect_equal(reg_grid_smol$Amos, rep(3, 2))
+  expect_equal(reg_grid_smol$penalty, 1:2)
+  for (i in 1:nrow(reg_grid_smol)) {
+    expect_equal(reg_grid_smol$.submodels[[i]], list(Amos = 1:2))
+  }
+
+  all_sub <- expand.grid(Amos = 1:3)
+  all_sub_smol <- min_grid(mod_1, all_sub)
+
+  expect_equal(all_sub_smol$Amos, 3)
+  expect_equal(all_sub_smol$.submodels[[1]], list(Amos = 1:2))
+
+  mod_2 <- tabnet(epochs = tune("Ade Tukunbo")) %>%
+    parsnip::set_engine("torch")
+  reg_grid <- expand.grid(`Ade Tukunbo` = 1:3, penalty = 1:2, ` \t123` = 10:11)
+  reg_grid_smol <- min_grid(mod_2, reg_grid)
+
+  expect_equal(reg_grid_smol$`Ade Tukunbo`, rep(3, 4))
+  expect_equal(reg_grid_smol$penalty, rep(1:2, each = 2))
+  expect_equal(reg_grid_smol$` \t123`, rep(10:11, 2))
+  for (i in 1:nrow(reg_grid_smol)) {
+    expect_equal(reg_grid_smol$.submodels[[i]], list(`Ade Tukunbo` = 1:2))
+  }
+})
