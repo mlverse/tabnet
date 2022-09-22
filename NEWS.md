@@ -13,8 +13,9 @@
 * Add support for early stopping (#69)
 * `tabnet_fit()` and `predict()` now allow missing values in predictors. (#76)
 * `tabnet_config()` now supports a `num_workers=` parameters to control parallel dataloading (#83)
-* `tabnet_config() now has a flag `skip_importance` to skip calculating feature importance (@egillax, #91)
+* `tabnet_config()` now has a flag `skip_importance` to skip calculating feature importance (@egillax, #91)
 * Export and document `tabnet_nn`
+* Added `min_grid.tabnet` method for `tune` (@cphaarmeyer, #107)
 
 ## Bugfixes
 
