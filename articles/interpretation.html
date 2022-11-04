@@ -101,10 +101,10 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ─────────────────────────────────────── tidyverse 1.3.2 ──</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2</span> 3.3.6      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr  </span> 0.3.4 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2</span> 3.4.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr  </span> 0.3.5 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble </span> 3.1.8      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr  </span> 1.0.10</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr  </span> 1.2.1      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr</span> 1.4.1 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr  </span> 2.1.2      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats</span> 0.5.2 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr  </span> 2.1.3      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats</span> 0.5.2 </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span> masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>    masks <span style="color: #0000BB;">stats</span>::lag()</span></span>
@@ -169,14 +169,14 @@
 <code class="sourceCode R"><span><span class="va">fit_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn2</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.044368</span></span>
 <span><span class="co">#&gt; [Epoch 002] Loss: 0.784014</span></span>
-<span><span class="co">#&gt; [Epoch 003] Loss: 0.676508</span></span>
-<span><span class="co">#&gt; [Epoch 004] Loss: 0.639699</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.611894</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.582541</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.549005</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.513190</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.483106</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.460212</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 003] Loss: 0.676509</span></span>
+<span><span class="co">#&gt; [Epoch 004] Loss: 0.639686</span></span>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.611664</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.584767</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.549939</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.515130</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.487141</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.461185</span></span></code></pre></div>
 <p>In the feature importance plot we can see that, as expected, features <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn2</span><span class="op">)</span></span></code></pre></div>
@@ -204,15 +204,15 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.289555</span></span>
-<span><span class="co">#&gt; [Epoch 002] Loss: 0.929649</span></span>
-<span><span class="co">#&gt; [Epoch 003] Loss: 0.747063</span></span>
-<span><span class="co">#&gt; [Epoch 004] Loss: 0.690081</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.663854</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.648425</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.632819</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.616526</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.601708</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.589848</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 002] Loss: 0.929693</span></span>
+<span><span class="co">#&gt; [Epoch 003] Loss: 0.747763</span></span>
+<span><span class="co">#&gt; [Epoch 004] Loss: 0.687549</span></span>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.661784</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.647172</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.634579</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.624223</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.613581</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.599905</span></span></code></pre></div>
 <p>In the feature importance plot we have, as expected, strong importance for <code>V10</code>, and the other features that are used conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn4</span><span class="op">)</span></span></code></pre></div>
