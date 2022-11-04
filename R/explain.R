@@ -72,6 +72,11 @@ tabnet_explain.tabnet_fit <- function(object, new_data) {
 #' @rdname tabnet_explain
 tabnet_explain.tabnet_pretrain <- tabnet_explain.tabnet_fit
 
+#' @export
+#' @rdname tabnet_explain
+tabnet_explain.model_fit <- function(object, new_data) {
+  tabnet_explain(parsnip::extract_fit_engine(object), new_data)
+}
 
 convert_to_df <- function(x, nms) {
   x <- as.data.frame(as.matrix(x$to(device = "cpu")$detach()))

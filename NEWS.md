@@ -16,6 +16,7 @@
 * `tabnet_config()` now has a flag `skip_importance` to skip calculating feature importance (@egillax, #91)
 * Export and document `tabnet_nn`
 * Added `min_grid.tabnet` method for `tune` (@cphaarmeyer, #107)
+* Added `tabnet_explain()` method for parsnip models (@cphaarmeyer, #108)
 
 ## Bugfixes
 

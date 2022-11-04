@@ -5,6 +5,7 @@
 \alias{tabnet_explain.default}
 \alias{tabnet_explain.tabnet_fit}
 \alias{tabnet_explain.tabnet_pretrain}
+\alias{tabnet_explain.model_fit}
 \title{Interpretation metrics from a TabNet model}
 \usage{
 tabnet_explain(object, new_data)
@@ -14,6 +15,8 @@ tabnet_explain(object, new_data)
 \method{tabnet_explain}{tabnet_fit}(object, new_data)
 
 \method{tabnet_explain}{tabnet_pretrain}(object, new_data)
+
+\method{tabnet_explain}{model_fit}(object, new_data)
 }
 \arguments{
 \item{object}{a TabNet fit object}
