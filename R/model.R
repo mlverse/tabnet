@@ -253,22 +253,6 @@ valid_batch <- function(network, batch, config) {
   )
 }
 
-transpose_metrics <- function(metrics) {
-  nms <- names(metrics[1])
-  out <- vector(mode = "list", length = length(nms))
-  for (nm in nms) {
-    out[[nm]] <- vector("numeric", length = length(metrics))
-  }
-
-  for (i in seq_along(metrics)) {
-    for (nm in nms) {
-      out[[nm]][i] <- metrics[i][[nm]]
-    }
-  }
-
-  out
-}
-
 tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
   torch::torch_manual_seed(sample.int(1e6, 1))
@@ -453,11 +437,10 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   patience_counter <- 0L
 
   # main loop
-  for (epoch in seq_len(config$epochs)+epoch_shift) {
+  train_metrics <- c()
+  valid_metrics <- c()
+  for (epoch in seq_len(config$epochs) + epoch_shift) {
 
-    metrics[[epoch]] <- list(train = NULL, valid = NULL)
-    train_metrics <- c()
-    valid_metrics <- c()
 
     network$train()
 
@@ -466,6 +449,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         total = length(train_dl),
         format = "[:bar] loss= :loss"
       )
+    metrics[[epoch]] <- list()
 
     coro::loop(for (batch in train_dl) {
       m <- train_batch(network, optimizer, batch, config)

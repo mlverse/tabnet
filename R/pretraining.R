@@ -40,7 +40,7 @@ transpose_metrics <- function(metrics) {
     }
   }
 
-  out
+  out[-1]
 }
 
 unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
@@ -163,7 +163,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # main loop
   for (epoch in seq_len(config$epochs) + epoch_shift) {
 
-    metrics[[epoch]] <- list(train = NULL, valid = NULL)
+    metrics[[epoch]] <- list()
     train_metrics <- c()
     valid_metrics <- c()
 
