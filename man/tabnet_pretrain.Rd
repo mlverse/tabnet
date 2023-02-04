@@ -108,9 +108,11 @@ The model pretraining metrics append on top of the parent metrics in the returne
 TabNet uses \code{torch} as its backend for computation and \code{torch} uses all
 available threads by default.
 
-You can control the number of threads used by \code{torch} with:\preformatted{torch::torch_set_num_threads(1)
+You can control the number of threads used by \code{torch} with:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{torch::torch_set_num_threads(1)
 torch::torch_set_num_interop_threads(1)
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{

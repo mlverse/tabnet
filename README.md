@@ -38,7 +38,7 @@ The development version can be installed from
 remotes::install_github("mlverse/tabnet")
 ```
 
-## Example
+## Basic Example
 
 ``` r
 library(tabnet)
@@ -58,12 +58,75 @@ test <- attrition[test_idx,]
 rec <- recipe(Attrition ~ ., data = train) %>% 
   step_normalize(all_numeric(), -all_outcomes())
 
-fit <- tabnet_fit(rec, train, epochs = 30)
-suppressWarnings(autoplot(fit))
-#> Warning: Removed 30 row(s) containing missing values (geom_path).
+fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1)
+autoplot(fit)
+#> New names:
+#> • `` -> `...1`
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> New names:
+#> • `` -> `...1`
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-model fit-1.png" width="100%" />
+
+## Results
 
 ``` r
 metrics <- metric_set(accuracy, precision, recall)
@@ -72,14 +135,33 @@ cbind(test, predict(fit, test)) %>%
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.850
-#> 2 precision binary         0.883
-#> 3 recall    binary         0.947
+#> 1 accuracy  binary         0.813
+#> 2 precision binary         0.840
+#> 3 recall    binary         0.959
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.742
+#> 1 roc_auc binary         0.587
 ```
+
+## Explain model on test-set with attention map
+
+either aggregated
+
+``` r
+explain <- tabnet_explain(fit, test)
+autoplot(explain)
+```
+
+<img src="man/figures/README-model explain-1.png" width="100%" />
+
+or at each layer
+
+``` r
+autoplot(explain, type="steps")
+```
+
+<img src="man/figures/README-step explain-1.png" width="100%" />
