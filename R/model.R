@@ -81,7 +81,7 @@ resolve_data <- function(x, y, device) {
 #'   Usual values range from 1 to 5.
 #' @param num_shared Number of shared Gated Linear Units at each step Usual values
 #'   range from 1 to 5
-#' @param verbose (logical) whether to print progress and loss values during
+#' @param verbose (logical) Whether to print progress and loss values during
 #'   training.
 #' @param lr_scheduler if `NULL`, no learning rate decay is used. if "step"
 #'   decays the learning rate by `lr_decay` every `step_size` epochs. It can
@@ -437,10 +437,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   patience_counter <- 0L
 
   # main loop
-  train_metrics <- c()
-  valid_metrics <- c()
   for (epoch in seq_len(config$epochs) + epoch_shift) {
 
+    metrics[[epoch]] <- list()
+    train_metrics <- c()
+    valid_metrics <- c()
 
     network$train()
 

@@ -60,68 +60,6 @@ rec <- recipe(Attrition ~ ., data = train) %>%
 
 fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1)
 autoplot(fit)
-#> New names:
-#> • `` -> `...1`
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> New names:
-#> • `` -> `...1`
 ```
 
 <img src="man/figures/README-model fit-1.png" width="100%" />

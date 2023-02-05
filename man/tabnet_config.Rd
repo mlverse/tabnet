@@ -116,7 +116,7 @@ to 0.4 (default=0.02)}
 \item{pretraining_ratio}{Ratio of features to mask for reconstruction during
 pretraining.  Ranges from 0 to 1 (default=0.5)}
 
-\item{verbose}{(logical) whether to print progress and loss values during
+\item{verbose}{(logical) Whether to print progress and loss values during
 training.}
 
 \item{device}{the device to use for training. "cpu" or "cuda". The default ("auto")
