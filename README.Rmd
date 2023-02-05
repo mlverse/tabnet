@@ -43,7 +43,7 @@ remotes::install_github("mlverse/tabnet")
 
 ## Basic Example
 
-```{r model fit}
+```{r model-fit}
 library(tabnet)
 suppressPackageStartupMessages(library(recipes))
 library(yardstick)
@@ -59,11 +59,13 @@ test <- attrition[test_idx,]
 rec <- recipe(Attrition ~ ., data = train) %>% 
   step_normalize(all_numeric(), -all_outcomes())
 
-fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1)
+fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1, learn_rate = 5e-3)
 autoplot(fit)
 ```
 
-## Results
+## Model performance results
+
+Model performance results are easy to compute: 
 
 ```{r}
 metrics <- metric_set(accuracy, precision, recall)
@@ -76,14 +78,14 @@ cbind(test, predict(fit, test, type = "prob")) %>%
 
 ## Explain model on test-set with attention map
 
-either aggregated
-```{r model explain}
+TabNet has intrinsic explainability feature through the visualization of attention map, either **aggregated**: 
+```{r model-explain}
 explain <- tabnet_explain(fit, test)
 autoplot(explain)
 ```
 
-or at each layer
-```{r step explain}
-autoplot(explain, type="steps")
+or at **each layer** through the `type = "steps"` option:
+```{r step-explain}
+autoplot(explain, type = "steps")
 ```
 

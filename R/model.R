@@ -450,7 +450,6 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         total = length(train_dl),
         format = "[:bar] loss= :loss"
       )
-    metrics[[epoch]] <- list()
 
     coro::loop(for (batch in train_dl) {
       m <- train_batch(network, optimizer, batch, config)
