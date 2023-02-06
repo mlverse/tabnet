@@ -192,18 +192,18 @@ But historical model weights are only available for checkpoint-ed epoch , so in 
 [Epoch 088] Loss: 0.097304 Valid loss: 0.338525                                                                                    
 [Epoch 089] Loss: 0.091212 Valid loss: 0.341918                                                                                    
 [Epoch 090] Loss: 0.087092 Valid loss: 0.361795 </code></pre>
-<p>The training continue starting at epoch 41 as experted and ending at epoch 90.<br>
+<p>The training continue starting at epoch 41 as expected and ending at epoch 90.<br>
 Now let’s diagnose the model training with a new <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model_fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pretrained_model.png" alt="training and validation loss plot for pretrained tabnet"> We can see that model starts to overfit after epoch 52 as the validation-set loss reaches its minimum. If we consider epoch 54 to be the epoch to move to production, we can redo the training from checkpoint 50 for 4 epochs :</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model <span class="op">=</span> <span class="va">model_fit</span>, from_epoch<span class="op">=</span><span class="fl">50</span>, epochs <span class="op">=</span> <span class="fl">4</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>Now, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and <code><a href="../reference/tabnet_explain.html">tabnet_explain()</a></code> functions will use the model from last epoch beeing epoch 54.<br>
+<p>Now, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and <code><a href="../reference/tabnet_explain.html">tabnet_explain()</a></code> functions will use the model from last epoch, being here epoch 54.<br>
 Finally, we can measure the results against our test set:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">bind_cols</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_bad</span><span class="op">)</span></span></code></pre></div>
@@ -246,11 +246,11 @@ Finally, we can measure the results against our test set:</p>
 </code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vanillia_model.png" alt="Training and validation loss plot for vanillia tabnet"> The model overfits around epoch 20, we will restore it at checkpoint epoch 20 and retrain for 1 epoch , and proceed to prediction :</p>
+<p><img src="vanillia_model.png" alt="Training and validation loss plot for vanilla tabnet"> The model overfits around epoch 20, we will restore it at checkpoint epoch 20 and retrain for 1 epoch , and proceed to prediction :</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vanilla_model_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span> , tabnet_model<span class="op">=</span> <span class="va">vanilla_model_fit</span>, from_epoch<span class="op">=</span><span class="fl">20</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span>, epochs <span class="op">=</span> <span class="fl">1</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">bind_cols</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">vanilla_model_fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">roc_auc</a></span><span class="op">(</span><span class="va">Class</span>, <span class="va">.pred_good</span><span class="op">)</span></span></code></pre></div>
@@ -279,7 +279,7 @@ Finally, we can measure the results against our test set:</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

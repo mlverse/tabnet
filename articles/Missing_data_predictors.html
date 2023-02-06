@@ -90,7 +90,7 @@
       <h1 data-toc-skip>Training a Tabnet model from missing-values dataset</h1>
                         <h4 data-toc-skip class="author">Christophe Regouby</h4>
             
-            <h4 data-toc-skip class="date">2022-11-04</h4>
+            <h4 data-toc-skip class="date">2023-02-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/HEAD/vignettes/Missing_data_predictors.Rmd" class="external-link"><code>vignettes/Missing_data_predictors.Rmd</code></a></small>
       <div class="hidden name"><code>Missing_data_predictors.Rmd</code></div>
@@ -104,7 +104,7 @@
 </h2>
 <p>Real-life training dataset usually contains missing data. The vast majority of deep-learning networks do not handle missing data and thus either stop or crash when values are missing in the predictors.</p>
 <p>But Tabnet use a masking mechanism that we can reuse to cover the missing data in the training set.</p>
-<p>As we enter the world of missing-data, we have to question the type of missing-data we deal with. We could have missing data at random (MAR), like for example some transmission errors on a sensor data dataset, or missing not at random (MNAR) when some interactions exists between the missing data and other predictors values for the same sample. The later is a more complex topic to cover, and we will try to investiate it here through the <code>ames</code> dataset.</p>
+<p>As we enter the world of missing-data, we have to question the type of missing-data we deal with. We could have missing data at random (MAR), like for example some transmission errors on a sensor data dataset, or missing not at random (MNAR) when some interactions exists between the missing data and other predictors values for the same sample. The later is a more complex topic to cover, and we will try to investigate it here through the <code>ames</code> dataset.</p>
 </div>
 <div class="section level2">
 <h2 id="missing-data-dataset-creation">Missing-data dataset creation<a class="anchor" aria-label="anchor" href="#missing-data-dataset-creation"></a>
@@ -112,30 +112,30 @@
 <div class="section level3">
 <h3 id="ames-missings-understanding">Ames missings understanding<a class="anchor" aria-label="anchor" href="#ames-missings-understanding"></a>
 </h3>
-<p>The <code>ames</code> dataset from <a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a> contains a lot of <em>null values</em> that the human analysis clearly interprete as an implicit <em>“missing object”</em> described by that value. We have for example pool surface of 0 square meters means “no pool”, basement surface of 0 square meters means “no basement”, …<br>
+<p>The <code>ames</code> dataset from <a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a> contains a lot of <em>null values</em> that the human analysis clearly understand as an implicit <em>“missing object”</em> described by that value. We have for example pool surface of 0 square meters means “no pool”, basement surface of 0 square meters means “no basement”, …<br>
 Many of those variables can be detected visually by inspecting the distribution of the values like, for example, the <code>Masonry veneer area</code> predictor :</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="va">ames</span><span class="op">$</span><span class="va">Mas_Vnr_Area</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ames_mas_vnr_hist.png" alt="ames variable Mas_Vnr_Area histogram showing high occurence of value zero"> We know that it will be extremely difficult for a model to capture an internal representation of such distribution, and thus we want to avoid the null values to penalize the model internal representation.</p>
+<p><img src="ames_mas_vnr_hist.png" alt="ames variable Mas_Vnr_Area histogram showing high occurrence of value zero"> We know that it will be extremely difficult for a model to capture an internal representation of such distribution, and thus we want to avoid the null values to penalize the model internal representation.</p>
 </div>
 <div class="section level3">
 <h3 id="while-keeping-some-room-for-freedom">While keeping some room for freedom<a class="anchor" aria-label="anchor" href="#while-keeping-some-room-for-freedom"></a>
 </h3>
-<p>Many of those variables come as a pair in the <code>ames</code> dataset, one for the qualitative aspect, the other for the quantitative aspect. We have for exemple <code>Pool_QC</code> for pool condition, that has a “no_pool” level with <code>Pool_Area=0</code> in that case.<br>
-As human, we have the intuition that knowing if a pool is present is important for the modelling task. So we want the model to get an internal representation of the implicit <code>has_pool=FALSE</code> without having it explicit in the dataset. In order to do so, we have to let the model some freedom to infer the “no_pool” state and thus we should not mutate both variables in the pair <code>Pool_Area=NA</code> and <code>Pool_QC=NA</code> at the same time.</p>
+<p>Many of those variables come as a pair in the <code>ames</code> dataset, one for the qualitative aspect, the other for the quantitative aspect. We have for example <code>Pool_QC</code> for pool condition, that has a “no_pool” level with <code>Pool_Area=0</code> in that case.<br>
+As human, we have the intuition that knowing if a pool is present is important for the modeling task. So we want the model to get an internal representation of the implicit <code>has_pool=FALSE</code> without having it explicit in the dataset. In order to do so, we have to let the model some freedom to infer the “no_pool” state and thus we should not mutate both variables in the pair <code>Pool_Area=NA</code> and <code>Pool_QC=NA</code> at the same time.</p>
 </div>
 <div class="section level3">
 <h3 id="ames-with-missing-data">Ames with missing data<a class="anchor" aria-label="anchor" href="#ames-with-missing-data"></a>
 </h3>
-<p>Let’s turn those missing objects data explicitely into <code>NAs</code> in an new <code>ames_missing</code> dataset :</p>
+<p>Let’s turn those missing objects data explicitly into <code>NAs</code> in an new <code>ames_missing</code> dataset :</p>
 <p>A quick and dirty way to achieve this on numerical predictors is to <code><a href="https://dplyr.tidyverse.org/reference/na_if.html" class="external-link">na_if()</a></code> zeros on any column which name is related to surface and area.<br>
 Then, according to the keep room for freedom rule, do it carefully on the matching categorical predictors</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">col_with_zero_as_na</span> <span class="op">&lt;-</span> <span class="va">ames</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu">where</span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">"_SF|Area|Misc_Val|[Pp]orch$"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise_each.html" class="external-link">summarise_each</a></span><span class="op">(</span><span class="va">min</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select_all.html" class="external-link">select_if</a></span><span class="op">(</span><span class="op">~</span><span class="va">.x</span><span class="op">==</span><span class="fl">0</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
@@ -148,16 +148,16 @@ Then, according to the keep room for freedom rule, do it carefully on the matchi
 <span></span>
 <span><span class="fu">visdat</span><span class="fu">::</span><span class="fu">vis_miss</span><span class="op">(</span><span class="va">ames_missing</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="vis_miss_ames.png" alt=""><p class="caption">ames missing values visualisation showing few variables with more than 90% missingness with a global 13% missing</p>
+<img src="vis_miss_ames.png" alt=""><p class="caption">ames missing values visualization showing few variables with more than 90% missingness with a global 13% missing</p>
 </div>
 <p>We can see here that variable are not missing at random, and thus we can expect the model to capture the missingness relation during the pretraining phase.</p>
-<p>Note: A better way to achieve proper value mutation to explicit NAs would be to also check if the qualitative column in the pair refers to <code>none</code> or to zero occurence of the equipment. But this is beyond the scope of this vignette.</p>
+<p>Note: A better way to achieve proper value mutation to explicit NAs would be to also check if the qualitative column in the pair refers to <code>none</code> or to zero occurrence of the equipment. But this is beyond the scope of this vignette.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="model-pretraining">Model pretraining<a class="anchor" aria-label="anchor" href="#model-pretraining"></a>
 </h2>
-<p>Let’s pretrain one model for each of those dataset, and analyse variable importance that emerge after the unsupervised representation learning step:</p>
+<p>Let’s pretrain one model for each of those dataset, and analyze variable importance that emerge after the unsupervised representation learning step:</p>
 <div class="section level3">
 <h3 id="variable-importance-with-raw-ames-dataset">Variable importance with raw <code>ames</code> dataset<a class="anchor" aria-label="anchor" href="#variable-importance-with-raw-ames-dataset"></a>
 </h3>
@@ -212,7 +212,7 @@ Early stopping at epoch 017</code></pre>
 <img src="ames_pretrain_vip.png" alt=""><p class="caption">ames_fit model variable importance plot</p>
 </div>
 <p>We get <code>BsmtFin_Type_1</code>, <code>BsmtFin_SF_1</code> and <code>Bsmt_Exposure</code> variables in the top ten important variables according to this run of pretraining the model. Those variables has been screened as having few missing values.</p>
-<p>Note that this result varies a lot from run to run. The captured result here depends a lot on your initialisation conditions.</p>
+<p>Note that this result varies a lot from run to run. The captured result here depends a lot on your initialization conditions.</p>
 </div>
 <div class="section level3">
 <h3 id="variable-importance-with-ames_missing-dataset">Variable importance with <code>ames_missing</code> dataset<a class="anchor" aria-label="anchor" href="#variable-importance-with-ames_missing-dataset"></a>
@@ -285,8 +285,8 @@ Early stopping at epoch 028</code></pre>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>Even if the models trained here have a huge variability in the variable importance along trainings, we have the intuition that model trained with explicit missing data will provide better result that its counterpart trained with zero-imputed variables.</p>
-<p>In any case, having the capability to pretrain and fit tabnet models with MAR dataset or MNAR dataset is of high convenience for the real-life use-cases.</p>
+<p>Even if the models have a huge variability in the variable importance among different training, we have the intuition that model trained with explicit missing data will provide better result than its counterpart trained with zero-imputed variables.</p>
+<p>In any case, having the capability to pretrain and fit TabNet models with MAR dataset or MNAR dataset is of high convenience for the real-life use-cases.</p>
 </div>
   </div>
 
@@ -307,7 +307,7 @@ Early stopping at epoch 028</code></pre>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

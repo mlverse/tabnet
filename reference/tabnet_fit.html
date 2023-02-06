@@ -183,9 +183,9 @@ The model fitting metrics append on top of the parent metrics in the returned Ta
 
 <p>TabNet uses <code>torch</code> as its backend for computation and <code>torch</code> uses all
 available threads by default.</p>
-<p>You can control the number of threads used by <code>torch</code> with:</p><div class="sourceCode"><pre><code><span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/threads.html" class="external-link">torch_set_num_interop_threads</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-
+<p>You can control the number of threads used by <code>torch</code> with:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>torch<span class="op">::</span><span class="kw">torch_set_num_threads</span>(<span class="dv">1</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a>torch<span class="op">::</span><span class="kw">torch_set_num_interop_threads</span>(<span class="dv">1</span>)</span></code></pre><p></p></div>
     </div>
 
     <div id="ref-examples">
@@ -209,7 +209,7 @@ available threads by default.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
