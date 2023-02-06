@@ -38,14 +38,12 @@ The development version can be installed from
 remotes::install_github("mlverse/tabnet")
 ```
 
-## Example
+## Basic Example
 
 ``` r
 library(tabnet)
 suppressPackageStartupMessages(library(recipes))
 library(yardstick)
-#> For binary classification, the first factor level is assumed to be the event.
-#> Use the argument `event_level = "second"` to alter this as needed.
 library(ggplot2)
 set.seed(1)
 
@@ -58,12 +56,15 @@ test <- attrition[test_idx,]
 rec <- recipe(Attrition ~ ., data = train) %>% 
   step_normalize(all_numeric(), -all_outcomes())
 
-fit <- tabnet_fit(rec, train, epochs = 30)
-suppressWarnings(autoplot(fit))
-#> Warning: Removed 30 row(s) containing missing values (geom_path).
+fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1, learn_rate = 5e-3)
+autoplot(fit)
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-model-fit-1.png" width="100%" />
+
+## Model performance results
+
+Model performance results are easy to compute:
 
 ``` r
 metrics <- metric_set(accuracy, precision, recall)
@@ -72,14 +73,34 @@ cbind(test, predict(fit, test)) %>%
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.850
-#> 2 precision binary         0.883
-#> 3 recall    binary         0.947
+#> 1 accuracy  binary         0.837
+#> 2 precision binary         0.837
+#> 3 recall    binary         1
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.742
+#> 1 roc_auc binary         0.554
 ```
+
+## Explain model on test-set with attention map
+
+TabNet has intrinsic explainability feature through the visualization of
+attention map, either **aggregated**:
+
+``` r
+explain <- tabnet_explain(fit, test)
+autoplot(explain)
+```
+
+<img src="man/figures/README-model-explain-1.png" width="100%" />
+
+or at **each layer** through the `type = "steps"` option:
+
+``` r
+autoplot(explain, type = "steps")
+```
+
+<img src="man/figures/README-step-explain-1.png" width="100%" />

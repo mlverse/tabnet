@@ -57,7 +57,7 @@ resolve_data <- function(x, y, device) {
 #' @param loss (character or function) Loss function for training (default to mse
 #'   for regression and cross entropy for classification)
 #' @param epochs (int) Number of training epochs.
-#' @param drop_last (bool) Whether to drop last batch if not complete during
+#' @param drop_last (logical) Whether to drop last batch if not complete during
 #'   training
 #' @param decision_width (int) Width of the decision prediction layer. Bigger values gives
 #'   more capacity to the model with the risk of overfitting. Values typically
@@ -81,7 +81,7 @@ resolve_data <- function(x, y, device) {
 #'   Usual values range from 1 to 5.
 #' @param num_shared Number of shared Gated Linear Units at each step Usual values
 #'   range from 1 to 5
-#' @param verbose (bool) wether to print progress and loss values during
+#' @param verbose (logical) Whether to print progress and loss values during
 #'   training.
 #' @param lr_scheduler if `NULL`, no learning rate decay is used. if "step"
 #'   decays the learning rate by `lr_decay` every `step_size` epochs. It can
@@ -92,7 +92,7 @@ resolve_data <- function(x, y, device) {
 #'   or `NULL`.
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
-#' @param cat_emb_dim Embedding size for categorial features (default=1)
+#' @param cat_emb_dim Embedding size for categorical features (default=1)
 #' @param momentum Momentum for batch normalization, typically ranges from 0.01
 #'   to 0.4 (default=0.02)
 #' @param pretraining_ratio Ratio of features to mask for reconstruction during
@@ -251,22 +251,6 @@ valid_batch <- function(network, batch, config) {
   list(
     loss = loss$item()
   )
-}
-
-transpose_metrics <- function(metrics) {
-  nms <- names(metrics[1])
-  out <- vector(mode = "list", length = length(nms))
-  for (nm in nms) {
-    out[[nm]] <- vector("numeric", length = length(metrics))
-  }
-
-  for (i in seq_along(metrics)) {
-    for (nm in nms) {
-      out[[nm]][i] <- metrics[i][[nm]]
-    }
-  }
-
-  out
 }
 
 tabnet_initialize <- function(x, y, config = tabnet_config()) {
@@ -453,9 +437,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   patience_counter <- 0L
 
   # main loop
-  for (epoch in seq_len(config$epochs)+epoch_shift) {
+  for (epoch in seq_len(config$epochs) + epoch_shift) {
 
-    metrics[[epoch]] <- list(train = NULL, valid = NULL)
+    metrics[[epoch]] <- list()
     train_metrics <- c()
     valid_metrics <- c()
 

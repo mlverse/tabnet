@@ -36,7 +36,7 @@ train <- training(split)
 test  <- testing(split)
 ```
 
-We now define our pre-processing steps. Note that tabnet handles categorical variables, so we don't need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.
+We now define our pre-processing steps. Note that TabNet handles categorical variables, so we don't need to do any kind of transformation to them. Normalizing the numeric variables is a good idea though.
 
 ```{r}
 rec <- recipe(Class ~ ., train) %>%

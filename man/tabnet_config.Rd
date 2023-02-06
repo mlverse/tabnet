@@ -56,7 +56,7 @@ for regression and cross entropy for classification)}
 
 \item{epochs}{(int) Number of training epochs.}
 
-\item{drop_last}{(bool) Whether to drop last batch if not complete during
+\item{drop_last}{(logical) Whether to drop last batch if not complete during
 training}
 
 \item{decision_width}{(int) Width of the decision prediction layer. Bigger values gives
@@ -102,7 +102,7 @@ or \code{NULL}.}
 \code{checkpoint_epochs}. (default is 10). This may cause large memory usage.
 Use \code{0} to disable checkpoints.}
 
-\item{cat_emb_dim}{Embedding size for categorial features (default=1)}
+\item{cat_emb_dim}{Embedding size for categorical features (default=1)}
 
 \item{num_independent}{Number of independent Gated Linear Units layers at each step.
 Usual values range from 1 to 5.}
@@ -116,7 +116,7 @@ to 0.4 (default=0.02)}
 \item{pretraining_ratio}{Ratio of features to mask for reconstruction during
 pretraining.  Ranges from 0 to 1 (default=0.5)}
 
-\item{verbose}{(bool) wether to print progress and loss values during
+\item{verbose}{(logical) Whether to print progress and loss values during
 training.}
 
 \item{device}{the device to use for training. "cpu" or "cuda". The default ("auto")
