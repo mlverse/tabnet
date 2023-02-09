@@ -89,11 +89,11 @@ jobs:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
   GPU:
-    runs-on: ['self-hosted', 'gpu']
+    runs-on: ['self-hosted', 'gce', 'gpu']
     name: 'gpu'
 
     container:
-      image: nvidia/cuda:11.2.2-cudnn8-devel-ubuntu18.04
+      image: nvidia/cuda:11.6.0-cudnn8-devel-ubuntu18.04
       options: --gpus all
 
     env:
