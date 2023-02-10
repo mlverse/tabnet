@@ -9,7 +9,6 @@
 #'
 #' @param x a data frame
 #' @param y a response vector
-#' @param device torch_device to send the tensor to
 resolve_data <- function(x, y) {
   cat_idx <- which(sapply(x, is.factor))
   cat_dims <- sapply(cat_idx, function(i) nlevels(x[[i]]))

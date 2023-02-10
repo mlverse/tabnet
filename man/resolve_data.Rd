@@ -16,8 +16,6 @@ resolve_data(x, y)
 \item{x}{a data frame}
 
 \item{y}{a response vector}
-
-\item{device}{torch_device to send the tensor to}
 }
 \description{
 Transforms input data into a list of
