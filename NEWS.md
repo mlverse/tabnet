@@ -23,6 +23,9 @@
 * `tabnet_explain()` is now correctly handling missing values in predictors. (#77)
 * `dataloader` can now use `num_workers>0` (#83)
 * new default values for `batch_size` and `virtual_batch_size` do not limit performance on mid-range devices.
+* add default `engine="torch"` to tabnet parsnip model (#114)
+* fix `autoplot()` warnings turned into errors with {ggplot2} v3.4 (#113)
+
 
 # tabnet 0.3.0
 
