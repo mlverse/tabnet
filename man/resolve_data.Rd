@@ -10,14 +10,12 @@ cat_idx the vector of x categorical predictor index
 cat_dims the vector of number of levels of each x categorical predictor
 input_dim and output_dim}
 \usage{
-resolve_data(x, y, device)
+resolve_data(x, y)
 }
 \arguments{
 \item{x}{a data frame}
 
 \item{y}{a response vector}
-
-\item{device}{torch_device to send the tensor to}
 }
 \description{
 Transforms input data into a list of

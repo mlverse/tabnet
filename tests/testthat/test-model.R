@@ -19,7 +19,7 @@ test_that("resolve_data gives expected output through a dataloader", {
   # dataset are R6 class and shall be instanciated
   train_ds <- torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], y[batch], device=device)},
+    .getbatch = function(batch) {resolve_data(x[batch,], y[batch])},
     .length = function() {nrow(x)}
   )()
   # dataloader
@@ -69,7 +69,7 @@ test_that("resolve_data gives expected output without nominal variables", {
   # dataset are R6 class and shall be instanciated
   train_ds <- torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], y[batch], device=device)},
+    .getbatch = function(batch) {resolve_data(x[batch,], y[batch])},
     .length = function() {nrow(x)}
   )()
   # dataloader

@@ -57,7 +57,9 @@ tabnet_explain.default <- function(object, new_data) {
 #' @rdname tabnet_explain
 tabnet_explain.tabnet_fit <- function(object, new_data) {
   processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
-  data <- resolve_data(processed$predictors, y = rep(1, nrow(processed$predictors)), device=object$fit$config$device)
+  data <- resolve_data(processed$predictors, y = rep(1, nrow(processed$predictors)))
+  device <- get_device_from_config(object$fit$config)
+  data <- to_device(data, device)
   output <- explain_impl(object$fit$network, data$x, data$x_na_mask)
 
   # convert stuff to matrix with colnames
@@ -85,7 +87,11 @@ convert_to_df <- function(x, nms) {
 }
 
 explain_impl <- function(network, x, x_na_mask) {
-
+  curr_device <- network$.check$device
+  withr::defer({
+    network$to(device = curr_device)
+  })
+  network$to(device=x$device)
   outputs <- network$forward_masks(x, x_na_mask)
 
   # summarize the categorical embeddedings into 1 column
@@ -105,7 +111,7 @@ explain_impl <- function(network, x, x_na_mask) {
     cat_emb_dim = network$cat_emb_dim
   )
 
-  list(M_explain = M_explain, masks = masks)
+  list(M_explain = M_explain$to(device="cpu"), masks = to_device(masks, "cpu"))
 }
 
 compute_feature_importance <- function(network, x, x_na_mask) {
