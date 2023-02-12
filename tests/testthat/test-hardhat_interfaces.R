@@ -218,4 +218,39 @@ test_that("we can prune head of restored models from disk", {
 
 })
 
+test_that("Training multi-output regression for data.frame and formula", {
+
+  expect_error(
+    fit <- tabnet_fit(x, data.frame(y=y, z=y+1), epochs = 1),
+    regexp = NA
+  )
+
+  expect_error(
+    result <- predict(fit, x),
+    regexp = NA
+  )
+  expect_equal(ncol(result), 2)
+})
+
+test_that("Training multilabel classification for data.frame", {
+
+  expect_error(
+    fit <- tabnet_fit(attrix, data.frame(y=attriy, z=attriy), epochs = 1),
+    regexp = NA
+  )
+
+  expect_error(
+    result <- predict(fit, attrix, type = "prob"),
+    regexp = NA
+  )
+  expect_equal(ncol(result), 4)
+
+  expect_error(
+    result <- predict(fit, attrix),
+    regexp = NA
+  )
+  expect_equal(ncol(result), 2)
+
+})
+
 
