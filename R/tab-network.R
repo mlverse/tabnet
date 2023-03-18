@@ -339,7 +339,7 @@ tabnet_no_embedding <- torch::nn_module(
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
-    self$is_multi_task <- !is.atomic(output_dim)
+    self$is_multi_output <- !is.atomic(output_dim)
     self$n_d <- n_d
     self$n_a <- n_a
     self$n_steps <- n_steps
@@ -365,16 +365,16 @@ tabnet_no_embedding <- torch::nn_module(
       momentum = momentum,
       mask_type = mask_type
     )
-    if (self$is_multi_task) {
-      self$multi_task_mappings <- torch::nn_module_list()
+    if (self$is_multi_output) {
+      self$multi_output_mapping <- torch::nn_module_list()
       for (task_dim in output_dim) {
         task_mapping <- torch::nn_linear(n_d, task_dim, bias = FALSE)
         initialize_non_glu(task_mapping, n_d, task_dim)
-        self$multi_task_mappings$append(task_mapping)
+        self$multi_output_mapping$append(task_mapping)
       }
     }
-    self$final_mapping <- torch::nn_linear(n_d, output_dim, bias = FALSE)
-    initialize_non_glu(self$final_mapping, n_d, output_dim)
+    self$final_mapping <- torch::nn_linear(n_d, sum(output_dim), bias = FALSE)
+    initialize_non_glu(self$final_mapping, n_d, sum(output_dim))
 
   },
   forward = function(x, x_na_mask) {
@@ -383,8 +383,8 @@ tabnet_no_embedding <- torch::nn_module(
     steps_output <- self_encoder_lst[[1]]
     M_loss <- self_encoder_lst[[2]]
     res <- torch::torch_sum(torch::torch_stack(steps_output, dim=1), dim=1)
-    if (self$is_multi_task) {
-      out <- torch::torch_stack(purrr::map(self$multi_task_mappings, exec, !!!res), dim=2)$squeeze(3)
+    if (self$is_multi_output) {
+      out <- torch::torch_stack(purrr::map(self$multi_output_mapping, exec, !!!res), dim=2)$squeeze(3)
     } else {
       out <- self$final_mapping(res)
     }
@@ -404,7 +404,7 @@ tabnet_no_embedding <- torch::nn_module(
 #'
 #' @param input_dim Initial number of features.
 #' @param output_dim Dimension of network output examples : one for regression, 2 for
-#'   binary classification etc..
+#'   binary classification etc.. Vector of those dimensions in case of multi-output.
 #' @param n_d Dimension of the prediction  layer (usually between 4 and 64).
 #' @param n_a Dimension of the attention  layer (usually between 4 and 64).
 #' @param n_steps Number of successive steps in the network (usually between 3 and 10).
@@ -479,9 +479,9 @@ attentive_transformer <- torch::nn_module(
                         virtual_batch_size = 128,
                         momentum = 0.02,
                         mask_type="sparsemax") {
-    self$fc <- torch::nn_linear(input_dim, output_dim, bias=FALSE)
-    initialize_non_glu(self$fc, input_dim, output_dim)
-    self$bn <- gbn(output_dim, virtual_batch_size=virtual_batch_size,
+    self$fc <- torch::nn_linear(input_dim, sum(output_dim), bias=FALSE)
+    initialize_non_glu(self$fc, input_dim, sum(output_dim))
+    self$bn <- gbn(sum(output_dim), virtual_batch_size=virtual_batch_size,
                   momentum = momentum)
 
 
@@ -558,8 +558,8 @@ glu_block <- torch::nn_module(
     self$glu_layers <- torch::nn_module_list()
 
     params = list(
-      'virtual_batch_size'= virtual_batch_size,
-      'momentum'= momentum
+      'virtual_batch_size' = virtual_batch_size,
+      'momentum' = momentum
     )
 
     if (length(shared_layers) > 0)
@@ -567,10 +567,10 @@ glu_block <- torch::nn_module(
     else
       fc <- NULL
 
-    self$glu_layers$append(do.call(glu_layer, append(
-      list(input_dim, output_dim, fc = fc),
-      params
-    )))
+    self$glu_layers$append(do.call(
+      glu_layer,
+      append(list(input_dim, output_dim, fc = fc), params)
+    ))
 
     if (self$n_glu >= 2) {
       for (glu_id in 2:(self$n_glu)) {
@@ -580,10 +580,10 @@ glu_block <- torch::nn_module(
         else
           fc <- NULL
 
-        self$glu_layers$append(do.call(glu_layer, append(
-          list(output_dim, output_dim, fc = fc),
-          params
-        )))
+        self$glu_layers$append(do.call(
+          glu_layer,
+          append(list(output_dim, output_dim, fc = fc), params)
+        ))
 
       }
     }
@@ -612,16 +612,16 @@ glu_layer <- torch::nn_module(
   "glu_layer",
   initialize = function(input_dim, output_dim, fc=NULL,
                         virtual_batch_size=128, momentum = 0.02) {
-    self$output_dim <- output_dim
+    self$output_dim <- sum(output_dim)
 
     if (!is.null(fc))
       self$fc <- fc
     else
-      self$fc <- torch::nn_linear(input_dim, 2*output_dim, bias = FALSE)
+      self$fc <- torch::nn_linear(input_dim, 2 * self$output_dim, bias = FALSE)
 
-    initialize_glu(self$fc, input_dim, 2*output_dim)
+    initialize_glu(self$fc, input_dim, 2 * self$output_dim)
 
-    self$bn <- gbn(2*output_dim, virtual_batch_size = virtual_batch_size,
+    self$bn <- gbn(2 * self$output_dim, virtual_batch_size = virtual_batch_size,
                   momentum = momentum)
   },
   forward = function(x) {

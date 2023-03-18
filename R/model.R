@@ -12,8 +12,8 @@
 resolve_data <- function(x, y) {
   cat_idx <- which(sapply(x, is.factor))
   cat_dims <- sapply(cat_idx, function(i) nlevels(x[[i]]))
-  # convert factors to integers
-  if (length(cat_idx)) {
+  # convert factors into integers
+  if (length(cat_idx) > 0) {
     x[,cat_idx] <- sapply(cat_idx, function(i) as.integer(x[[i]]))
   } else {
     # prevent empty cat idx
@@ -24,20 +24,21 @@ resolve_data <- function(x, y) {
   x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
 
   # convert factors to integers, based on the class of target first column
+  # TODO do not assume but assert type-consistency of all y cols
   if (is.factor(y[[1]])) {
     y_tensor <- torch::torch_tensor(sapply(y, function(i) as.integer(i)), dtype = torch::torch_long())
-    output_dim <- ifelse(is.atomic(y), nlevels(y), sum(sapply(y, function(i) nlevels(i))))
+    output_dim <- ifelse(is.atomic(y), nlevels(y), sapply(y, function(i) nlevels(i)))
   } else {
     y_tensor <- torch::torch_tensor(as.matrix(y), dtype = torch::torch_float())
     output_dim <- ncol(y)
   }
 
-  input_dim <- torch::torch_tensor(ncol(x))
+  input_dim <- ncol(x)
 
   list(x = x_tensor, x_na_mask = x_na_mask, y = y_tensor,
-       cat_idx = torch::torch_tensor(cat_idx),
-       output_dim = torch::torch_tensor(output_dim),
-       input_dim = input_dim, cat_dims = torch::torch_tensor(cat_dims))
+       cat_idx = cat_idx,
+       output_dim = output_dim,
+       input_dim = input_dim, cat_dims = cat_dims)
 }
 
 #' Configuration for TabNet models
@@ -218,8 +219,24 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
-  loss <- config$loss_fn(output[[1]], batch$y)
-
+  # if target is_multi_output, loss has to be applied to each label-group
+  if (max(batch$output_dim$shape) > 1) {
+    # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
+    loss <- torch::torch_sum(
+      pmap(list(torch::torch_split(output[[1]], batch$output_dim),
+                torch::torch_split(batch$y, len(batch$output_dim))),
+           ~config$loss_fn(.x, .y)
+      ),
+      dim = 1
+    )
+  } else {
+    if (batch$y$dtype == torch::torch_long()) {
+      # classifier needs a squeeze for bce loss
+      loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
+    } else {
+      loss <- config$loss_fn(output[[1]], batch$y)
+    }
+  }
   # Add the overall sparsity loss
   loss <- loss - config$lambda_sparse * output[[2]]
 
@@ -239,8 +256,24 @@ train_batch <- function(network, optimizer, batch, config) {
 valid_batch <- function(network, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
-  loss <- config$loss_fn(output[[1]], batch$y)
-
+  # loss has to be applied to each label-group when output_dim is a vector
+  if (max(batch$output_dim$shape) > 1) {
+    # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
+    loss <- torch::torch_sum(
+      pmap(list(torch::torch_split(output[[1]], batch$output_dim),
+                torch::torch_split(batch$y, len(batch$output_dim))),
+           ~config$loss_fn(.x, .y$squeeze(2))
+      ),
+      dim = 1
+    )
+  } else {
+    if (batch$y$dtype == torch::torch_long()) {
+      # classifier needs a squeeze for bce loss
+      loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
+    } else {
+      loss <- config$loss_fn(output[[1]], batch$y)
+    }
+  }
   # Add the overall sparsity loss
   loss <- loss - config$lambda_sparse * output[[2]]
 
@@ -271,11 +304,6 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
   device <- get_device_from_config(config)
 
-  # prevent y to be an atomic vector
-  if (is.atomic(y)) {
-    y <- data.frame(target = y)
-  }
-
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
@@ -305,10 +333,10 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
   # create network
   network <- tabnet_nn(
-    input_dim = as.integer(train$input_dim$to(device="cpu")),
-    output_dim = as.integer(train$output_dim$to(device="cpu")),
-    cat_idxs = as.integer(train$cat_idx$to(device="cpu")),
-    cat_dims = as.integer(train$cat_dims$to(device="cpu")),
+    input_dim = train$input_dim,
+    output_dim = train$output_dim,
+    cat_idxs = train$cat_idx,
+    cat_dims = train$cat_dims,
     n_d = config$n_d,
     n_a = config$n_a,
     n_steps = config$n_steps,
@@ -346,11 +374,6 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   device <- get_device_from_config(config)
 
-  # prevent y to be an atomic vector
-  if (is.atomic(y)) {
-    y <- data.frame(target = y)
-  }
-
   # validation dataset & dataloaders
   has_valid <- config$valid_split > 0
   if (has_valid) {
@@ -359,6 +382,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     valid_x <- x[valid_idx, ]
     valid_y <- y[valid_idx, ]
     train_y <- y[-valid_idx, ]
+
     valid_ds <-   torch::dataset(
       initialize = function() {},
       .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch,])},

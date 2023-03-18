@@ -107,9 +107,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   # create network
   network <- tabnet_pretrainer(
-    input_dim = as.integer(train$input_dim$to(device="cpu")),
-    cat_idxs = as.integer(train$cat_idx$to(device="cpu")),
-    cat_dims = as.integer(train$cat_dims$to(device="cpu")),
+    input_dim = train$input_dim,
+    cat_idxs = train$cat_idx,
+    cat_dims = train$cat_dims,
     pretraining_ratio = config$pretraining_ratio,
     n_d = config$n_d,
     n_a = config$n_a,
