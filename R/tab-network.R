@@ -13,15 +13,15 @@ initialize_glu <- function(module, input_dim, output_dim) {
 #
 gbn <- torch::nn_module(
   "gbn",
-  initialize = function(input_dim, virtual_batch_size=128, momentum=0.01) {
+  initialize = function(input_dim, virtual_batch_size=128, momentum = 0.02) {
     self$input_dim <- input_dim
     self$virtual_batch_size <- virtual_batch_size
-    self$bn = torch::nn_batch_norm1d(self$input_dim, momentum=momentum)
+    self$bn = torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
   },
   forward = function(x) {
     chunks <- x$chunk(as.integer(ceiling(x$shape[1] / self$virtual_batch_size)), 1)
     res <- lapply(chunks, self$bn)
-    torch::torch_cat(res, dim=1)
+    torch::torch_cat(res, dim = 1)
   }
 )
 
@@ -34,7 +34,7 @@ tabnet_encoder <- torch::nn_module(
                         n_d=8, n_a=8,
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum=0.01,
+                        virtual_batch_size=128, momentum = 0.02,
                         mask_type="sparsemax") {
 
     self$input_dim <- input_dim
@@ -48,7 +48,7 @@ tabnet_encoder <- torch::nn_module(
     self$n_shared <- n_shared
     self$virtual_batch_size <- virtual_batch_size
     self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=momentum)
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
     if (self$n_shared > 0) {
       shared_feat_transform <- torch::nn_module_list()
@@ -72,10 +72,10 @@ tabnet_encoder <- torch::nn_module(
     }
 
     self$initial_splitter <- feat_transformer(
-      self$input_dim, n_d+n_a, shared_feat_transform,
-      n_glu_independent=self$n_independent,
-      virtual_batch_size=self$virtual_batch_size,
-      momentum=momentum
+      self$input_dim, n_d + n_a, shared_feat_transform,
+      n_glu_independent = self$n_independent,
+      virtual_batch_size = self$virtual_batch_size,
+      momentum = momentum
     )
 
     self$feat_transformers <- torch::nn_module_list()
@@ -83,14 +83,14 @@ tabnet_encoder <- torch::nn_module(
 
     for (step in seq_len(n_steps)) {
 
-      transformer <- feat_transformer(self$input_dim, n_d+n_a, shared_feat_transform,
-                                      n_glu_independent=self$n_independent,
-                                      virtual_batch_size=self$virtual_batch_size,
-                                      momentum=momentum)
+      transformer <- feat_transformer(self$input_dim, n_d + n_a, shared_feat_transform,
+                                      n_glu_independent = self$n_independent,
+                                      virtual_batch_size = self$virtual_batch_size,
+                                      momentum = momentum)
       attention <- attentive_transformer(n_a, self$input_dim,
-                                         virtual_batch_size=self$virtual_batch_size,
-                                         momentum=momentum,
-                                         mask_type=self$mask_type)
+                                         virtual_batch_size = self$virtual_batch_size,
+                                         momentum = momentum,
+                                         mask_type = self$mask_type)
 
       self$feat_transformers$append(transformer)
       self$att_transformers$append(attention)
@@ -129,7 +129,7 @@ tabnet_encoder <- torch::nn_module(
 
     }
 
-    M_loss <- M_loss/self$n_steps
+    M_loss <- M_loss / self$n_steps
 
     list(res, M_loss, steps_output)
   },
@@ -172,7 +172,7 @@ tabnet_decoder <- torch::nn_module(
   "tabnet_decoder",
   initialize = function(input_dim, n_d=8,
                         n_steps=3, n_independent=2, n_shared=2,
-                        virtual_batch_size=128, momentum=0.02) {
+                        virtual_batch_size = 128, momentum = 0.02) {
 
     self$input_dim <- input_dim
     self$n_d <- n_d
@@ -208,7 +208,7 @@ tabnet_decoder <- torch::nn_module(
       transformer <- feat_transformer(n_d, n_d, shared_feat_transform,
                                       n_glu_independent=self$n_independent,
                                       virtual_batch_size=self$virtual_batch_size,
-                                      momentum=momentum)
+                                      momentum = momentum)
 
       self$feat_transformers$append(transformer)
       reconstruction_layer <- torch::nn_linear(n_d, self$input_dim, bias = FALSE)
@@ -240,7 +240,7 @@ tabnet_pretrainer <- torch::nn_module(
                         cat_idxs=c(), cat_dims=c(),
                         cat_emb_dim=1, n_independent=2,
                         n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum=0.01,
+                        virtual_batch_size=128, momentum = 0.02,
                         mask_type="sparsemax") {
 
     self$input_dim <- input_dim
@@ -260,7 +260,7 @@ tabnet_pretrainer <- torch::nn_module(
     self$n_independent <- n_independent
     self$n_shared <- n_shared
     self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=momentum)
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
     if (self$n_steps <= 0)
       stop("n_steps should be a positive integer.")
@@ -273,27 +273,27 @@ tabnet_pretrainer <- torch::nn_module(
     self$post_embed_dim <- self$embedder$post_embed_dim
     self$masker = random_obfuscator(self$pretraining_ratio)
     self$encoder = tabnet_encoder(
-      input_dim=self$post_embed_dim,
-      output_dim=self$post_embed_dim,
-      n_d=n_d,
-      n_a=n_a,
-      n_steps=n_steps,
-      gamma=gamma,
-      n_independent=n_independent,
-      n_shared=n_shared,
-      epsilon=epsilon,
-      virtual_batch_size=virtual_batch_size,
-      momentum=momentum,
-      mask_type=mask_type
+      input_dim = self$post_embed_dim,
+      output_dim = self$post_embed_dim,
+      n_d = n_d,
+      n_a = n_a,
+      n_steps = n_steps,
+      gamma = gamma,
+      n_independent = n_independent,
+      n_shared = n_shared,
+      epsilon = epsilon,
+      virtual_batch_size = virtual_batch_size,
+      momentum = momentum,
+      mask_type = mask_type
     )
     self$decoder = tabnet_decoder(
       self$post_embed_dim,
-      n_d=n_d,
-      n_steps=n_steps,
-      n_independent=n_independent,
-      n_shared=n_shared,
-      virtual_batch_size=virtual_batch_size,
-      momentum=momentum
+      n_d = n_d,
+      n_steps = n_steps,
+      n_independent = n_independent,
+      n_shared = n_shared,
+      virtual_batch_size = virtual_batch_size,
+      momentum = momentum
     )
 
   },
@@ -334,11 +334,12 @@ tabnet_no_embedding <- torch::nn_module(
                         n_d=8, n_a=8,
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum=0.02,
+                        virtual_batch_size=128, momentum = 0.02,
                         mask_type="sparsemax") {
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
+    self$is_multi_task <- !is.atomic(output_dim)
     self$n_d <- n_d
     self$n_a <- n_a
     self$n_steps <- n_steps
@@ -348,23 +349,31 @@ tabnet_no_embedding <- torch::nn_module(
     self$n_shared <- n_shared
     self$virtual_batch_size <- virtual_batch_size
     self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum=0.01)
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
     self$encoder <- tabnet_encoder(
-      input_dim=input_dim,
-      output_dim=output_dim,
-      n_d=n_d,
-      n_a=n_a,
-      n_steps=n_steps,
-      gamma=gamma,
-      n_independent=n_independent,
-      n_shared=n_shared,
-      epsilon=epsilon,
-      virtual_batch_size=virtual_batch_size,
-      momentum=momentum,
-      mask_type=mask_type
+      input_dim = input_dim,
+      output_dim = output_dim,
+      n_d = n_d,
+      n_a = n_a,
+      n_steps = n_steps,
+      gamma = gamma,
+      n_independent = n_independent,
+      n_shared = n_shared,
+      epsilon = epsilon,
+      virtual_batch_size = virtual_batch_size,
+      momentum = momentum,
+      mask_type = mask_type
     )
-    self$final_mapping <- torch::nn_linear(n_d, output_dim, bias=FALSE)
+    if (self$is_multi_task) {
+      self$multi_task_mappings <- torch::nn_module_list()
+      for (task_dim in output_dim) {
+        task_mapping <- torch::nn_linear(n_d, task_dim, bias = FALSE)
+        initialize_non_glu(task_mapping, n_d, task_dim)
+        self$multi_task_mappings$append(task_mapping)
+      }
+    }
+    self$final_mapping <- torch::nn_linear(n_d, output_dim, bias = FALSE)
     initialize_non_glu(self$final_mapping, n_d, output_dim)
 
   },
@@ -373,11 +382,14 @@ tabnet_no_embedding <- torch::nn_module(
     self_encoder_lst <- self$encoder(x, prior)
     steps_output <- self_encoder_lst[[1]]
     M_loss <- self_encoder_lst[[2]]
-    # TODO added operation TBC
     res <- torch::torch_sum(torch::torch_stack(steps_output, dim=1), dim=1)
-    res <- self$final_mapping(res)
+    if (self$is_multi_task) {
+      out <- torch::torch_stack(purrr::map(self$multi_task_mappings, exec, !!!res), dim=2)$squeeze(3)
+    } else {
+      out <- self$final_mapping(res)
+    }
 
-    list(res, M_loss)
+    list(out, M_loss)
   },
   forward_masks = function(x, x_na_mask) {
     self$encoder$forward_masks(x, x_na_mask)
@@ -414,7 +426,7 @@ tabnet_nn <- torch::nn_module(
   initialize = function(input_dim, output_dim, n_d=8, n_a=8,
                         n_steps=3, gamma=1.3, cat_idxs=c(), cat_dims=c(), cat_emb_dim=1,
                         n_independent=2, n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum=0.02,
+                        virtual_batch_size = 128, momentum = 0.02,
                         mask_type="sparsemax") {
     self$cat_idxs <- cat_idxs
     self$cat_dims <- cat_dims
@@ -464,19 +476,19 @@ tabnet_nn <- torch::nn_module(
 attentive_transformer <- torch::nn_module(
   "attentive_transformer",
   initialize = function(input_dim, output_dim,
-                        virtual_batch_size=128,
-                        momentum=0.02,
+                        virtual_batch_size = 128,
+                        momentum = 0.02,
                         mask_type="sparsemax") {
     self$fc <- torch::nn_linear(input_dim, output_dim, bias=FALSE)
     initialize_non_glu(self$fc, input_dim, output_dim)
     self$bn <- gbn(output_dim, virtual_batch_size=virtual_batch_size,
-                  momentum=momentum)
+                  momentum = momentum)
 
 
     if (mask_type == "sparsemax")
-      self$selector <- torch::nn_contrib_sparsemax(dim=-1)
+      self$selector <- torch::nn_contrib_sparsemax(dim =-1)
     else if (mask_type == "entmax")
-      self$selector <- entmax(dim=-1)
+      self$selector <- entmax(dim = -1)
     else
       stop("Please choose either sparsemax or entmax as masktype")
 
@@ -493,7 +505,7 @@ attentive_transformer <- torch::nn_module(
 feat_transformer <- torch::nn_module(
   "feat_transformer",
   initialize = function(input_dim, output_dim, shared_layers, n_glu_independent,
-                        virtual_batch_size=128, momentum=0.02) {
+                        virtual_batch_size=128, momentum = 0.02) {
 
     params <- list(
       'n_glu'= n_glu_independent,
@@ -510,7 +522,7 @@ feat_transformer <- torch::nn_module(
                                shared_layers=shared_layers,
                                n_glu=length(shared_layers),
                                virtual_batch_size=virtual_batch_size,
-                               momentum=momentum)
+                               momentum = momentum)
       is_first <- FALSE
     }
 
@@ -538,7 +550,7 @@ glu_block <- torch::nn_module(
   "glu_block",
   initialize = function(input_dim, output_dim, n_glu=2, first=FALSE,
                         shared_layers=NULL,
-                        virtual_batch_size=128, momentum=0.02) {
+                        virtual_batch_size=128, momentum = 0.02) {
 
     self$first <- first
     self$shared_layers <- shared_layers
@@ -599,7 +611,7 @@ glu_block <- torch::nn_module(
 glu_layer <- torch::nn_module(
   "glu_layer",
   initialize = function(input_dim, output_dim, fc=NULL,
-                        virtual_batch_size=128, momentum=0.02) {
+                        virtual_batch_size=128, momentum = 0.02) {
     self$output_dim <- output_dim
 
     if (!is.null(fc))
@@ -609,15 +621,15 @@ glu_layer <- torch::nn_module(
 
     initialize_glu(self$fc, input_dim, 2*output_dim)
 
-    self$bn <- gbn(2*output_dim, virtual_batch_size=virtual_batch_size,
-                  momentum=momentum)
+    self$bn <- gbn(2*output_dim, virtual_batch_size = virtual_batch_size,
+                  momentum = momentum)
   },
   forward = function(x) {
     x <- self$fc(x)
     x <- self$bn(x)
     out <- torch::torch_mul(
       x[, 1:self$output_dim],
-      torch::torch_sigmoid(x[, (self$output_dim+1):N])
+      torch::torch_sigmoid(x[, (self$output_dim + 1):N])
     )
     out
   }

@@ -23,17 +23,14 @@ resolve_data <- function(x, y) {
   x_tensor <- torch::torch_tensor(as.matrix(x), dtype = torch::torch_float())
   x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
 
-  if (is.factor(y)) {
-    y_tensor <- torch::torch_tensor(as.integer(y), dtype = torch::torch_long())
+  # convert factors to integers, based on the class of target first column
+  if (is.factor(y[[1]])) {
+    y_tensor <- torch::torch_tensor(sapply(y, function(i) as.integer(i)), dtype = torch::torch_long())
+    output_dim <- ifelse(is.atomic(y), nlevels(y), sum(sapply(y, function(i) nlevels(i))))
   } else {
-    y_tensor <- torch::torch_tensor(y, dtype = torch::torch_float())$unsqueeze(2)
+    y_tensor <- torch::torch_tensor(as.matrix(y), dtype = torch::torch_float())
+    output_dim <- ncol(y)
   }
-
-  # TODO put that initialization  apart
-  if (is.factor(y))
-    output_dim <- nlevels(y)
-  else
-    output_dim <- 1L
 
   input_dim <- torch::torch_tensor(ncol(x))
 
@@ -274,21 +271,20 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
   device <- get_device_from_config(config)
 
-  # simplify y into vector
-  if (!is.atomic(y)) {
-    # currently not supporting multilabel
-    y <- y[[1]]
+  # prevent y to be an atomic vector
+  if (is.atomic(y)) {
+    y <- data.frame(target = y)
   }
 
   if (has_valid) {
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_x <- x[valid_idx, ]
-    valid_y <- y[valid_idx]
-    train_y <- y[-valid_idx]
+    valid_y <- y[valid_idx, ]
+    train_y <- y[-valid_idx, ]
     valid_ds <-   torch::dataset(
       initialize = function() {},
-      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch])},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch, ])},
       .length = function() {nrow(valid_x)}
     )()
     x <- x[-valid_idx, ]
@@ -298,7 +294,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   # training dataset
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], y[batch])},
+    .getbatch = function(batch) {resolve_data(x[batch, ], y[batch, ])},
     .length = function() {nrow(x)}
   )()
   # we can get training_set parameters from the 2 first samples
@@ -344,16 +340,15 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   )
 }
 
-tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift=0L) {
-  stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
+tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift = 0L) {
+  stopifnot("tabnet_model shall be initialised or pretrained" = (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
 
   device <- get_device_from_config(config)
 
-  # simplify y into vector
-  if (!is.atomic(y)) {
-    # currently not supporting multilabel
-    y <- y[[1]]
+  # prevent y to be an atomic vector
+  if (is.atomic(y)) {
+    y <- data.frame(target = y)
   }
 
   # validation dataset & dataloaders
@@ -362,18 +357,18 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_x <- x[valid_idx, ]
-    valid_y <- y[valid_idx]
-    train_y <- y[-valid_idx]
+    valid_y <- y[valid_idx, ]
+    train_y <- y[-valid_idx, ]
     valid_ds <-   torch::dataset(
       initialize = function() {},
-      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch])},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch,])},
       .length = function() {nrow(valid_x)}
     )()
 
     valid_dl <- torch::dataloader(
       valid_ds,
       batch_size = config$batch_size,
-      shuffle = FALSE ,
+      shuffle = FALSE,
       num_workers = config$num_workers
     )
 
@@ -384,7 +379,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   # training dataset & dataloader
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], y[batch])},
+    .getbatch = function(batch) {resolve_data(x[batch,], y[batch,])},
     .length = function() {nrow(x)}
   )()
 
@@ -581,7 +576,7 @@ get_blueprint_levels <- function(obj) {
 
 predict_impl_prob <- function(obj, x, batch_size) {
   p <- predict_impl(obj, x, batch_size)
-  p <- torch::nnf_softmax(p, dim = 2)
+  p <- torch::nnf_softmax(p, dim = 2)$squeeze(3)
   p <- as.matrix(p)
   hardhat::spruce_prob(get_blueprint_levels(obj), p)
 }
