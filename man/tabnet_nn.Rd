@@ -26,7 +26,7 @@ tabnet_nn(
 \item{input_dim}{Initial number of features.}
 
 \item{output_dim}{Dimension of network output examples : one for regression, 2 for
-binary classification etc..}
+binary classification etc.. Vector of those dimensions in case of multi-output.}
 
 \item{n_d}{Dimension of the prediction  layer (usually between 4 and 64).}
 

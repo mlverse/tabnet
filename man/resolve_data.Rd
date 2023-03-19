@@ -8,7 +8,10 @@ $x , $x_na_mask, $y
 and
 cat_idx the vector of x categorical predictor index
 cat_dims the vector of number of levels of each x categorical predictor
-input_dim and output_dim}
+input_dim  the number of col in \code{x}
+output_dim the \code{ncol(y)} in case of (multi-outcome) regression or
+the \code{nlevels(y)} in case of classification or
+the vector of \code{nlevels(y)} in case of multi-outcome classification}
 \usage{
 resolve_data(x, y)
 }
@@ -24,5 +27,8 @@ $x , $x_na_mask, $y
 and
 cat_idx the vector of x categorical predictor index
 cat_dims the vector of number of levels of each x categorical predictor
-input_dim and output_dim
+input_dim  the number of col in \code{x}
+output_dim the \code{ncol(y)} in case of (multi-outcome) regression or
+the \code{nlevels(y)} in case of classification or
+the vector of \code{nlevels(y)} in case of multi-outcome classification
 }

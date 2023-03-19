@@ -421,6 +421,7 @@ check_type <- function(model, type) {
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   type <- check_type(object, type)
+  is_multi_outcome <- ncol(object$blueprint$ptypes$outcomes) > 1
 
   if (!is.null(epoch)) {
 
@@ -442,9 +443,9 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   switch(
     type,
-    numeric = predict_impl_numeric(object, predictors, batch_size),
-    prob    = predict_impl_prob(object, predictors, batch_size),
-    class   = predict_impl_class(object, predictors, batch_size)
+    numeric = predict_impl_numeric(object, predictors, batch_size, is_multi_outcome),
+    prob    = predict_impl_prob(object, predictors, batch_size, is_multi_outcome),
+    class   = predict_impl_class(object, predictors, batch_size, is_multi_outcome)
   )
 }
 

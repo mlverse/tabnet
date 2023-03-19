@@ -339,7 +339,7 @@ tabnet_no_embedding <- torch::nn_module(
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
-    self$is_multi_output <- !is.atomic(output_dim)
+    self$is_multi_outcome <- !is.atomic(output_dim)
     self$n_d <- n_d
     self$n_a <- n_a
     self$n_steps <- n_steps
@@ -365,12 +365,12 @@ tabnet_no_embedding <- torch::nn_module(
       momentum = momentum,
       mask_type = mask_type
     )
-    if (self$is_multi_output) {
-      self$multi_output_mapping <- torch::nn_module_list()
+    if (self$is_multi_outcome) {
+      self$multi_outcome_mapping <- torch::nn_module_list()
       for (task_dim in output_dim) {
         task_mapping <- torch::nn_linear(n_d, task_dim, bias = FALSE)
         initialize_non_glu(task_mapping, n_d, task_dim)
-        self$multi_output_mapping$append(task_mapping)
+        self$multi_outcome_mapping$append(task_mapping)
       }
     }
     self$final_mapping <- torch::nn_linear(n_d, sum(output_dim), bias = FALSE)
@@ -383,8 +383,8 @@ tabnet_no_embedding <- torch::nn_module(
     steps_output <- self_encoder_lst[[1]]
     M_loss <- self_encoder_lst[[2]]
     res <- torch::torch_sum(torch::torch_stack(steps_output, dim=1), dim=1)
-    if (self$is_multi_output) {
-      out <- torch::torch_stack(purrr::map(self$multi_output_mapping, exec, !!!res), dim=2)$squeeze(3)
+    if (self$is_multi_outcome) {
+      out <- torch::torch_stack(purrr::map(self$multi_outcome_mapping, exec, !!!res), dim=2)$squeeze(3)
     } else {
       out <- self$final_mapping(res)
     }

@@ -5,7 +5,10 @@
 #'  and
 #' cat_idx the vector of x categorical predictor index
 #' cat_dims the vector of number of levels of each x categorical predictor
-#' input_dim and output_dim
+#' input_dim  the number of col in `x`
+#' output_dim the `ncol(y)` in case of (multi-outcome) regression or
+#'            the `nlevels(y)` in case of classification or
+#'            the vector of `nlevels(y)` in case of multi-outcome classification
 #'
 #' @param x a data frame
 #' @param y a response vector
@@ -25,9 +28,14 @@ resolve_data <- function(x, y) {
 
   # convert factors to integers, based on the class of target first column
   # TODO do not assume but assert type-consistency of all y cols
+  # and record output_dim
   if (is.factor(y[[1]])) {
     y_tensor <- torch::torch_tensor(sapply(y, function(i) as.integer(i)), dtype = torch::torch_long())
-    output_dim <- ifelse(is.atomic(y), nlevels(y), sapply(y, function(i) nlevels(i)))
+    if (is.atomic(y)) {
+      output_dim <- nlevels(y)
+    } else {
+      output_dim <- sapply(y, function(i) nlevels(i))
+    }
   } else {
     y_tensor <- torch::torch_tensor(as.matrix(y), dtype = torch::torch_float())
     output_dim <- ncol(y)
@@ -219,16 +227,18 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
-  # if target is_multi_output, loss has to be applied to each label-group
+  # if target is_multi_outcome, loss has to be applied to each label-group
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
-    loss <- torch::torch_sum(
-      pmap(list(torch::torch_split(output[[1]], batch$output_dim),
-                torch::torch_split(batch$y, len(batch$output_dim))),
-           ~config$loss_fn(.x, .y)
+    output_dim <- as.numeric(batch$output_dim)
+    loss <- torch::torch_sum(purrr::pmap(
+      list(
+        torch::torch_split(output[[1]], output_dim, dim = 2),
+        torch::torch_split(batch$y, rep(1, length(output_dim)), dim = 2)
       ),
-      dim = 1
-    )
+      ~ config$loss_fn(.x, .y)
+    ),
+    dim = 1)
   } else {
     if (batch$y$dtype == torch::torch_long()) {
       # classifier needs a squeeze for bce loss
@@ -259,13 +269,15 @@ valid_batch <- function(network, batch, config) {
   # loss has to be applied to each label-group when output_dim is a vector
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
-    loss <- torch::torch_sum(
-      pmap(list(torch::torch_split(output[[1]], batch$output_dim),
-                torch::torch_split(batch$y, len(batch$output_dim))),
-           ~config$loss_fn(.x, .y$squeeze(2))
+    output_dim <- as.numeric(batch$output_dim)
+    loss <- torch::torch_sum(purrr::pmap(
+      list(
+        torch::torch_split(output[[1]], output_dim, dim = 2),
+        torch::torch_split(batch$y, rep(1, length(output_dim)), dim = 2)
       ),
-      dim = 1
-    )
+      ~ config$loss_fn(.x, .y)
+    ),
+    dim = 1)
   } else {
     if (batch$y$dtype == torch::torch_long()) {
       # classifier needs a squeeze for bce loss
@@ -585,33 +597,45 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
     batch <- to_device(batch, device)
     yhat <- c(yhat, network(batch$x, batch$x_na_mask)[[1]])
   })
-
+  # bind rows of the batches
   torch::torch_cat(yhat)
 }
 
-predict_impl_numeric <- function(obj, x, batch_size) {
-  p <- as.numeric(predict_impl(obj, x, batch_size))
-  hardhat::spruce_numeric(p)
+predict_impl_numeric <- function(obj, x, batch_size, is_multi_outcome) {
+  p <- as.matrix(predict_impl(obj, x, batch_size))
+  if (is_multi_outcome) {
+    hardhat::spruce_numeric_multi(tibble::as_tibble(p, .name_repair = "minimal"))
+  } else {
+    hardhat::spruce_numeric(p)
+  }
 }
 
 get_blueprint_levels <- function(obj) {
   levels(obj$blueprint$ptypes$outcomes[[1]])
 }
 
-predict_impl_prob <- function(obj, x, batch_size) {
+predict_impl_prob <- function(obj, x, batch_size, is_multi_outcome) {
   p <- predict_impl(obj, x, batch_size)
-  p <- torch::nnf_softmax(p, dim = 2)$squeeze(3)
+  p <- torch::nnf_softmax(p, dim = 2)
   p <- as.matrix(p)
-  hardhat::spruce_prob(get_blueprint_levels(obj), p)
+  if (is_multi_outcome) {
+    hardhat::spruce_prob_multi(get_blueprint_levels(obj), tibble::as_tibble(p, .name_repair = "minimal"))
+  } else {
+    hardhat::spruce_prob(get_blueprint_levels(obj), p)
+  }
 }
 
-predict_impl_class <- function(obj, x, batch_size) {
+predict_impl_class <- function(obj, x, batch_size, is_multi_outcome) {
   p <- predict_impl(obj, x, batch_size)
   p <- torch::torch_max(p, dim = 2)
   p <- as.integer(p[[2]])
   p <- get_blueprint_levels(obj)[p]
   p <- factor(p, levels = get_blueprint_levels(obj))
-  hardhat::spruce_class(p)
+  if (is_multi_outcome) {
+    hardhat::spruce_class_multi(p)
+  } else {
+    hardhat::spruce_class(p)
+  }
 
 }
 
