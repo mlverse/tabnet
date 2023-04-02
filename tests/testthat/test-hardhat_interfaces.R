@@ -208,9 +208,8 @@ test_that("Training multi-output regression for data.frame and formula", {
 
 test_that("Training multilabel classification for data.frame", {
 
-  attriw <- attrix[-which(names(attrix) == "JobSatisfaction")]
   expect_no_error(
-    fit <- tabnet_fit(attriw, data.frame(y = attriy, z = attriy, sat = attrix$JobSatisfaction), epochs = 1)
+    fit <- tabnet_fit(attrix, data.frame(y = attriy, z = attriy, sat = attrix$JobSatisfaction), epochs = 1)
   )
 
   expect_no_error(
