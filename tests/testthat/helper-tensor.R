@@ -17,18 +17,18 @@ skip_if_not_m1_mac <- function() {
   if (!grepl("darwin", R.version$os)) {
     skip("Not on MacOS")
   }
-  
+
   if (R.version$arch != "aarch64") {
     skip("Not an M1 Mac")
-  }  
+  }
 }
 
 expect_equal_to_tensor <- function(object, expected, ...) {
-  expect_equal(as_array(object), as_array(expected), ...)
+  expect_equal(torch::as_array(object), torch::as_array(expected), ...)
 }
 
 expect_not_equal_to_tensor <- function(object, expected) {
-  expect_false(isTRUE(all.equal(as_array(object), as_array(expected))))
+  expect_false(isTRUE(all.equal(torch::as_array(object), torch::as_array(expected))))
 }
 
 expect_no_error <- function(object, ...) {
@@ -36,12 +36,12 @@ expect_no_error <- function(object, ...) {
 }
 
 expect_tensor <- function(object) {
-  expect_true(is_torch_tensor(object))
-  expect_no_error(as_array(object$to(device = "cpu")))
+  expect_true(torch:::is_torch_tensor(object))
+  expect_no_error(torch::as_array(object$to(device = "cpu")))
 }
 
 expect_equal_to_r <- function(object, expected, ...) {
-  expect_equal(as_array(object$cpu()), expected, ...)
+  expect_equal(torch::as_array(object$cpu()), expected, ...)
 }
 
 expect_tensor_shape <- function(object, expected) {

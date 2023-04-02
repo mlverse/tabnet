@@ -392,26 +392,31 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
 
 check_type <- function(model, type) {
 
-  outcome_ptype <- model$blueprint$ptypes$outcomes[[1]]
+  outcome_ptype <- model$blueprint$ptypes$outcomes
+  outcome_all_factor <- all(purrr::map_lgl(outcome_ptype, is.factor))
+  outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
 
   if (is.null(type)) {
-    if (is.factor(outcome_ptype))
+    if (outcome_all_factor)
       type <- "class"
-    else if (is.numeric(outcome_ptype))
+    else if (outcome_all_numeric)
       type <- "numeric"
-    else
+    else if (ncol(outcome_ptype) == 1)
       rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
   }
 
   type <- rlang::arg_match(type, c("numeric", "prob", "class"))
 
-  if (is.factor(outcome_ptype)) {
+  if (outcome_all_factor) {
     if (!type %in% c("prob", "class"))
       rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
-  } else if (is.numeric(outcome_ptype)) {
+  } else if (outcome_all_numeric) {
     if (type != "numeric")
       rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
   }
+
+  if (!outcome_all_numeric && !outcome_all_factor)
+    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
 
   type
 }
