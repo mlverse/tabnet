@@ -601,14 +601,15 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   torch::torch_cat(yhat)
 }
 
-predict_impl_numeric <- function(obj, x, batch_size, is_multi_outcome) {
+predict_impl_numeric <- function(obj, x, batch_size) {
   p <- as.matrix(predict_impl(obj, x, batch_size))
-  if (is_multi_outcome) {
-    # TODO use a cleaner function to turn matrix into vectors
-    hardhat::spruce_numeric_multiple(!!!purrr::map(1:ncol(p), ~p[,.x]))
-  } else {
-    hardhat::spruce_numeric(as.numeric(p))
-  }
+  hardhat::spruce_numeric(as.numeric(p))
+}
+
+predict_impl_numeric_multiple <- function(obj, x, batch_size) {
+  p <- as.matrix(predict_impl(obj, x, batch_size))
+  # TODO use a cleaner function to turn matrix into vectors
+  hardhat::spruce_numeric_multiple(!!!purrr::map(1:ncol(p), ~p[,.x]))
 }
 
 #' single-outcome level blueprint
@@ -633,41 +634,49 @@ get_blueprint_levels_multiple <- function(obj) {
     rlang::set_names(names(obj$blueprint$ptypes$outcomes))
 }
 
-predict_impl_prob <- function(obj, x, batch_size, is_multi_outcome, outcome_nlevels) {
+predict_impl_prob <- function(obj, x, batch_size) {
   p <- predict_impl(obj, x, batch_size)
   p <- torch::nnf_softmax(p, dim = 2)
   p <- as.matrix(p)
-  if (is_multi_outcome) {
-    # TODO use a cleaner function to turn matrix into vectors
-    hardhat::spruce_prob_multiple(
-      get_blueprint_levels_multiple(obj, outcome_nlevels),
-      !!!purrr::map(1:ncol(p), ~p[,.x])
-      )
-  } else {
-    hardhat::spruce_prob(get_blueprint_levels(obj), p)
-  }
+  hardhat::spruce_prob(get_blueprint_levels(obj), p)
 }
 
-predict_impl_class <- function(obj, x, batch_size, is_multi_outcome, outcome_nlevels) {
+predict_impl_prob_multiple <- function(obj, x, batch_size, outcome_nlevels) {
   p <- predict_impl(obj, x, batch_size)
-  if (is_multi_outcome) {
-    p_levels <- get_blueprint_levels_multiple(obj)
-    p_idx <- purrr::map(
-      torch::torch_split(p, outcome_nlevels, dim = 2),
-      ~as.integer(torch::torch_max(.x, dim = 2)[[2]])
-      ) %>% rlang::set_names(names(p_levels))
-    p_factor_lst <- purrr::pmap(
-      list(p_idx, p_levels),
-      ~factor(.x, labels = .y)
+  p <- torch::nnf_softmax(p, dim = 2)
+  p <- as.matrix(p)
+  # TODO use a cleaner function to turn matrix into vectors
+  p_blueprint <- get_blueprint_levels_multiple(obj)
+  p_probs <- purrr::map(torch::torch_split(p, outcome_nlevels, dim = 2),
+                        as.matrix)
+  hardhat::spruce_prob_multiple(!!!purrr::pmap(
+    list(p_blueprint, p_probs),
+    # TODO BUG each element of `...` must be a tibble, not a list.
+    ~hardhat::spruce_prob(.x, .y)) %>%
+      rlang::set_names(names(p_blueprint))
     )
-    hardhat::spruce_class_multiple(!!!p_factor_lst)
-  } else {
-    p_idx <- as.integer(torch::torch_max(p, dim = 2)[[2]])
-    p_idx <- get_blueprint_levels(obj)[p_idx]
-    p <- factor(p_idx, levels = get_blueprint_levels(obj))
-    hardhat::spruce_class(p)
-  }
+}
 
+predict_impl_class <- function(obj, x, batch_size) {
+  p <- predict_impl(obj, x, batch_size)
+  p_idx <- as.integer(torch::torch_max(p, dim = 2)[[2]])
+  p_idx <- get_blueprint_levels(obj)[p_idx]
+  p <- factor(p_idx, levels = get_blueprint_levels(obj))
+  hardhat::spruce_class(p)
+}
+
+predict_impl_class_multiple <- function(obj, x, batch_size, outcome_nlevels) {
+  p <- predict_impl(obj, x, batch_size)
+  p_levels <- get_blueprint_levels_multiple(obj)
+  p_idx <- purrr::map(
+    torch::torch_split(p, outcome_nlevels, dim = 2),
+    ~as.integer(torch::torch_max(.x, dim = 2)[[2]])
+    ) %>% rlang::set_names(names(p_levels))
+  p_factor_lst <- purrr::pmap(
+    list(p_idx, p_levels),
+    ~factor(.x, labels = .y)
+  )
+  hardhat::spruce_class_multiple(!!!p_factor_lst)
 }
 
 to_device <- function(x, device) {

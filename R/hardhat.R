@@ -445,11 +445,15 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
     object$fit$network$load_state_dict(m$state_dict())
   }
 
+  type_multioutcome <- paste0(type, "_", is_multi_outcome)
   switch(
-    type,
-    numeric = predict_impl_numeric(object, predictors, batch_size, is_multi_outcome),
-    prob    = predict_impl_prob(object, predictors, batch_size, is_multi_outcome, outcome_nlevels),
-    class   = predict_impl_class(object, predictors, batch_size, is_multi_outcome, outcome_nlevels)
+    type_multioutcome,
+    numeric_FALSE = predict_impl_numeric(object, predictors, batch_size),
+    numeric_TRUE  = predict_impl_numeric_multiple(object, predictors, batch_size),
+    prob_FALSE    = predict_impl_prob(object, predictors, batch_size),
+    prob_TRUE     = predict_impl_prob_multiple(object, predictors, batch_size, outcome_nlevels),
+    class_FALSE   = predict_impl_class(object, predictors, batch_size),
+    class_TRUE    = predict_impl_class_multiple(object, predictors, batch_size, outcome_nlevels)
   )
 }
 

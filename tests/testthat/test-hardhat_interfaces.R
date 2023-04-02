@@ -208,19 +208,25 @@ test_that("Training multi-output regression for data.frame and formula", {
 
 test_that("Training multilabel classification for data.frame", {
 
+  attriw <- attrix %>% select(-JobSatisfaction)
   expect_no_error(
-    fit <- tabnet_fit(attrix, data.frame(y=attriy, z=attriy), epochs = 1)
+    fit <- tabnet_fit(attriw, data.frame(y=attriy, z=attriy, sat=attrix$JobSatisfaction), epochs = 1)
   )
 
   expect_no_error(
-    result <- predict(fit, attrix, type = "prob")
+    result <- predict(fit, attriw, type = "prob")
   )
-  expect_equal(ncol(result), 4)
+
+  expect_equal(ncol(result), 3)
+
+  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
+  expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
 
   expect_no_error(
     result <- predict(fit, attrix)
   )
-  expect_equal(ncol(result), 2)
+  expect_equal(ncol(result), 3)
 
 })
 
