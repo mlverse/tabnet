@@ -11,12 +11,13 @@
 * Allow missing-values values in predictor for unsupervised training. (#68)
 * Improve performance of `random_obfuscator()` torch_nn module. (#68)
 * Add support for early stopping (#69)
-* `tabnet_fit()` and `predict()` now allow missing values in predictors. (#76)
+* `tabnet_fit()` and `predict()` now allow **missing values** in predictors. (#76)
 * `tabnet_config()` now supports a `num_workers=` parameters to control parallel dataloading (#83)
 * `tabnet_config()` now has a flag `skip_importance` to skip calculating feature importance (@egillax, #91)
 * Export and document `tabnet_nn`
 * Added `min_grid.tabnet` method for `tune` (@cphaarmeyer, #107)
 * Added `tabnet_explain()` method for parsnip models (@cphaarmeyer, #108)
+* `tabnet_fit()` and `predict()` now allow **multi-outcome**, all numeric or all factors but not mixed. (#116)
 
 ## Bugfixes
 

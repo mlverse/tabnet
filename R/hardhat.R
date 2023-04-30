@@ -16,9 +16,9 @@
 #' @param y When `x` is a __data frame__ or __matrix__, `y` is the outcome
 #' specified as:
 #'
-#'   * A __data frame__ with 1 numeric column.
-#'   * A __matrix__ with 1 numeric column.
-#'   * A numeric __vector__.
+#'   * A __data frame__ with 1 or many numeric column (regression) or 1 or many categorical columns (classification) .
+#'   * A __matrix__ with 1 column.
+#'   * A __vector__, either numeric or categorical.
 #'
 #' @param data When a __recipe__ or __formula__ is used, `data` is specified as:
 #'
@@ -45,6 +45,11 @@
 #'    * the epoch related to a checkpoint matching or preceding the `from_epoch` value if provided
 #' The model fitting metrics append on top of the parent metrics in the returned TabNet model.
 #'
+#' @section Multi-outcome:
+#'
+#' TabNet allows multi-outcome prediction, the outcomes must all be numeric or all be categorical,
+#' and the __data frame__ method shall be used for `x` and `y`.
+#'
 #' @section Threading:
 #'
 #' TabNet uses `torch` as its backend for computation and `torch` uses all
@@ -59,8 +64,15 @@
 #'
 #' @examples
 #' if (torch::torch_is_installed()) {
+#'
+#' # regression using formula specification
 #' data("ames", package = "modeldata")
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
+#'
+#' # classification using data-frame specification
+#' data("attrition", package = "modeldata")
+#' attrition_x <- attrition[ids,-which(names(attrition) == "Attrition")]
+#' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1)
 #' }
 #'
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
