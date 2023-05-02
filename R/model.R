@@ -625,7 +625,6 @@ get_blueprint_levels <- function(obj) {
 #' multi-outcome levels blueprint
 #'
 #' @param obj : a tabnet object
-#' @param outcome_nlevels : a vector of the number of levels for each outcome
 #'
 #' @return : a list of levels vectors for each outcome
 #' @noRd
@@ -674,7 +673,7 @@ predict_impl_class_multiple <- function(obj, x, batch_size, outcome_nlevels) {
     ) %>% rlang::set_names(names(p_levels))
   p_factor_lst <- purrr::pmap(
     list(p_idx, p_levels),
-    ~factor(.x, labels = .y)
+    ~factor(.y[.x], levels = .y)
   )
   hardhat::spruce_class_multiple(!!!p_factor_lst)
 }

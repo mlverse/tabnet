@@ -14,8 +14,6 @@ test_that("Training multi-output regression for data.frame", {
 
 test_that("Training multilabel classification for data.frame", {
 
-
-  attri_mult_x <- attrix[-which(names(attrix) == "JobSatisfaction")]
   expect_no_error(
     fit <- tabnet_fit(attri_mult_x, data.frame(y = attriy, z = attriy, sat = attrix$JobSatisfaction),
                       epochs = 1)
@@ -26,15 +24,19 @@ test_that("Training multilabel classification for data.frame", {
   )
 
   expect_equal(ncol(result), 3)
-
   outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
-  expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
+  # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
+
+  # result columns are tibbles of resp 2, 2, 4 columns
+  expect_true(all(purrr::map_lgl(result, tibble::is_tibble)))
+  expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
 
   expect_no_error(
     result <- predict(fit, attri_mult_x)
   )
   expect_equal(ncol(result), 3)
+  expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(outcome_nlevels))
 
 })
 
@@ -52,14 +54,19 @@ test_that("Training multilabel classification for data.frame with validation spl
   expect_equal(ncol(result), 3)
 
   outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
-  expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
+  # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
+
+  # result columns are tibbles of resp 2, 2, 4 columns
+  expect_true(all(purrr::map_lgl(result, tibble::is_tibble)))
+  expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
 
   expect_no_error(
     result <- predict(fit, attri_mult_x)
   )
   expect_equal(ncol(result), 3)
 
+  # we get back outcomes vars with a `.pred_class_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(fit$blueprint$ptypes$outcomes))
 })
 

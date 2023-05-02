@@ -71,7 +71,7 @@
 #'
 #' # classification using data-frame specification
 #' data("attrition", package = "modeldata")
-#' attrition_x <- attrition[ids,-which(names(attrition) == "Attrition")]
+#' attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
 #' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1)
 #' }
 #'
