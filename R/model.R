@@ -1,8 +1,9 @@
 
-#' Transforms input data into a list of
-#'  3 torch_tensors being
+#' Transforms input data into a list of_tensors and parameters for model input
+#'
+#' The 3 torch tensors being
 #' $x , $x_na_mask, $y
-#'  and
+#'  and parameters being
 #' cat_idx the vector of x categorical predictor index
 #' cat_dims the vector of number of levels of each x categorical predictor
 #' input_dim  the number of col in `x`

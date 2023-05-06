@@ -2,16 +2,7 @@
 % Please edit documentation in R/model.R
 \name{resolve_data}
 \alias{resolve_data}
-\title{Transforms input data into a list of
-3 torch_tensors being
-$x , $x_na_mask, $y
-and
-cat_idx the vector of x categorical predictor index
-cat_dims the vector of number of levels of each x categorical predictor
-input_dim  the number of col in \code{x}
-output_dim the \code{ncol(y)} in case of (multi-outcome) regression or
-the \code{nlevels(y)} in case of classification or
-the vector of \code{nlevels(y)} in case of multi-outcome classification}
+\title{Transforms input data into a list of_tensors and parameters for model input}
 \usage{
 resolve_data(x, y)
 }
@@ -21,10 +12,9 @@ resolve_data(x, y)
 \item{y}{a response vector}
 }
 \description{
-Transforms input data into a list of
-3 torch_tensors being
+The 3 torch tensors being
 $x , $x_na_mask, $y
-and
+and parameters being
 cat_idx the vector of x categorical predictor index
 cat_dims the vector of number of levels of each x categorical predictor
 input_dim  the number of col in \code{x}
