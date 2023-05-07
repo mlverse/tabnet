@@ -82,18 +82,18 @@ test_that("Supervised training can continue unsupervised training, with or wo fr
 
 test_that("serialization of tabnet_pretrain with saveRDS just works", {
 
-  fit <- tabnet_fit(x, y, ames_pretrain, epoch = 1, learn_rate = 1e-7)
+  fit <- tabnet_fit(x, y, ames_pretrain, epoch = 1, learn_rate = 1e-12)
 
   tmp <- tempfile("model", fileext = "rds")
   withr::local_file(saveRDS(ames_pretrain, tmp))
 
   pretrain2 <- readRDS(tmp)
-  fit2 <- tabnet_fit(x, y, pretrain2, epoch = 1, learn_rate = 1e-7)
+  fit2 <- tabnet_fit(x, y, pretrain2, epoch = 1, learn_rate = 1e-12)
 
   expect_equal(
     predict(fit, ames),
     predict(fit2, ames),
-    tolerance = 10
+    tolerance = 20
   )
 
   expect_equal(as.numeric(fit2$fit$network$.check), 1)

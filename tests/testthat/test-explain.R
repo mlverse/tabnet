@@ -155,13 +155,11 @@ test_that("Importance is skipped if skip_importance flag is used", {
 
 test_that("explain works for parsnip model", {
 
-  library(parsnip)
-
   model <- tabnet() %>%
-    set_mode("regression") %>%
-    set_engine("torch")
+    parsnip::set_mode("regression") %>%
+    parsnip::set_engine("torch")
   fit <- model %>%
-    fit(Sale_Price ~ ., data = small_ames)
+    parsnip::fit(Sale_Price ~ ., data = small_ames)
 
   expect_no_error(
     tabnet_explain(fit, new_data = small_ames),

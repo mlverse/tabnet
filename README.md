@@ -13,6 +13,7 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org/package=tabnet)
 [![](https://cranlogs.r-pkg.org/badges/tabnet)](https://cran.r-project.org/package=tabnet)
 [![Discord](https://img.shields.io/discord/837019024499277855?logo=discord)](https://discord.com/invite/s3D5cKhBkx)
+
 <!-- badges: end -->
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular
@@ -38,7 +39,10 @@ The development version can be installed from
 remotes::install_github("mlverse/tabnet")
 ```
 
-## Basic Example
+## Basic Binary Classification Example
+
+Here we show a **binary classification** example of the `attrition`
+dataset, using a **recipe** for dataset input specification.
 
 ``` r
 library(tabnet)
@@ -62,9 +66,19 @@ autoplot(fit)
 
 <img src="man/figures/README-model-fit-1.png" width="100%" />
 
+The plots gives you an immediate insight about model overfitting, and if
+any, the available model checkpoints available before the overfitting
+
+Keep in mind that **regression** as well as **multi-class
+classification** are also available, and that you can specify dataset
+through **data.frame** and **formula** as well. You will find them in
+the package vignettes.
+
 ## Model performance results
 
-Model performance results are easy to compute:
+As the standard method `predict()` is used, you can rely on your usual
+metric functions for model performance results. Here we use {yardstick}
+:
 
 ``` r
 metrics <- metric_set(accuracy, precision, recall)
@@ -104,3 +118,28 @@ autoplot(explain, type = "steps")
 ```
 
 <img src="man/figures/README-step-explain-1.png" width="100%" />
+
+## Self-supervised pretraining
+
+For cases when a consistent part of your dataset has no outcome, TabNet
+offers a self-supervised training step allowing to model to capture
+predictors intrinsic features and predictors interactions, upfront the
+supervised task.
+
+``` r
+pretrain <- tabnet_pretrain(rec, train, epochs = 50, valid_split=0.1, learn_rate = 1e-2)
+autoplot(pretrain)
+```
+
+<img src="man/figures/README-step-pretrain-1.png" width="100%" />
+
+The exemple here is a toy example as the `train` dataset does actually
+contain outcomes. The vignette on [Unsupervised training and
+fine-tuning](https://mlverse.github.io/tabnet/articles/unsupervised_training.html)
+will gives you the complete correct workflow step-by-step.
+
+## Missing data in predictors
+
+{tabnet} leverage the masking mechanism to deal with missing data, so
+you don’t have to remove the entries in your dataset with some missing
+values in the predictors variables.

@@ -13,6 +13,7 @@
 * Add support for early stopping (#69)
 * `tabnet_fit()` and `predict()` now allow **missing values** in predictors. (#76)
 * `tabnet_config()` now supports a `num_workers=` parameters to control parallel dataloading (#83)
+* Add a vignette on missing data (#83)
 * `tabnet_config()` now has a flag `skip_importance` to skip calculating feature importance (@egillax, #91)
 * Export and document `tabnet_nn`
 * Added `min_grid.tabnet` method for `tune` (@cphaarmeyer, #107)
@@ -23,7 +24,7 @@
 
 * `tabnet_explain()` is now correctly handling missing values in predictors. (#77)
 * `dataloader` can now use `num_workers>0` (#83)
-* new default values for `batch_size` and `virtual_batch_size` do not limit performance on mid-range devices.
+* new default values for `batch_size` and `virtual_batch_size` improves performance on mid-range devices.
 * add default `engine="torch"` to tabnet parsnip model (#114)
 * fix `autoplot()` warnings turned into errors with {ggplot2} v3.4 (#113)
 
