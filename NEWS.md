@@ -1,4 +1,4 @@
-# tabnet (development version)
+# tabnet 0.4.0
 
 # tabnet 0.4.0
 
