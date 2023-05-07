@@ -9,8 +9,7 @@
 #'
 #' @param x a data frame
 #' @param y a response vector
-#' @param device torch_device to send the tensor to
-resolve_data <- function(x, y, device) {
+resolve_data <- function(x, y) {
   cat_idx <- which(sapply(x, is.factor))
   cat_dims <- sapply(cat_idx, function(i) nlevels(x[[i]]))
   # convert factors to integers
@@ -21,13 +20,13 @@ resolve_data <- function(x, y, device) {
     cat_idx <- 0L
     cat_dims <- 0L
   }
-  x_tensor <- torch::torch_tensor(as.matrix(x), dtype = torch::torch_float(), device = device)
-  x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool(), device = device)
+  x_tensor <- torch::torch_tensor(as.matrix(x), dtype = torch::torch_float())
+  x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
 
   if (is.factor(y)) {
-    y_tensor <- torch::torch_tensor(as.integer(y), dtype = torch::torch_long(), device = device)
+    y_tensor <- torch::torch_tensor(as.integer(y), dtype = torch::torch_long())
   } else {
-    y_tensor <- torch::torch_tensor(y, dtype = torch::torch_float(), device = device)$unsqueeze(2)
+    y_tensor <- torch::torch_tensor(y, dtype = torch::torch_float())$unsqueeze(2)
   }
 
   # TODO put that initialization  apart
@@ -36,12 +35,12 @@ resolve_data <- function(x, y, device) {
   else
     output_dim <- 1L
 
-  input_dim <- torch::torch_tensor(ncol(x), device=device)
+  input_dim <- torch::torch_tensor(ncol(x))
 
   list(x = x_tensor, x_na_mask = x_na_mask, y = y_tensor,
-       cat_idx = torch::torch_tensor(cat_idx, device=device),
-       output_dim = torch::torch_tensor(output_dim, device=device),
-       input_dim = input_dim, cat_dims = torch::torch_tensor(cat_dims, device=device))
+       cat_idx = torch::torch_tensor(cat_idx),
+       output_dim = torch::torch_tensor(output_dim),
+       input_dim = input_dim, cat_dims = torch::torch_tensor(cat_dims))
 }
 
 #' Configuration for TabNet models
@@ -57,7 +56,7 @@ resolve_data <- function(x, y, device) {
 #' @param loss (character or function) Loss function for training (default to mse
 #'   for regression and cross entropy for classification)
 #' @param epochs (int) Number of training epochs.
-#' @param drop_last (bool) Whether to drop last batch if not complete during
+#' @param drop_last (logical) Whether to drop last batch if not complete during
 #'   training
 #' @param decision_width (int) Width of the decision prediction layer. Bigger values gives
 #'   more capacity to the model with the risk of overfitting. Values typically
@@ -81,7 +80,7 @@ resolve_data <- function(x, y, device) {
 #'   Usual values range from 1 to 5.
 #' @param num_shared Number of shared Gated Linear Units at each step Usual values
 #'   range from 1 to 5
-#' @param verbose (bool) wether to print progress and loss values during
+#' @param verbose (logical) Whether to print progress and loss values during
 #'   training.
 #' @param lr_scheduler if `NULL`, no learning rate decay is used. if "step"
 #'   decays the learning rate by `lr_decay` every `step_size` epochs. It can
@@ -92,7 +91,7 @@ resolve_data <- function(x, y, device) {
 #'   or `NULL`.
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
-#' @param cat_emb_dim Embedding size for categorial features (default=1)
+#' @param cat_emb_dim Embedding size for categorical features (default=1)
 #' @param momentum Momentum for batch normalization, typically ranges from 0.01
 #'   to 0.4 (default=0.02)
 #' @param pretraining_ratio Ratio of features to mask for reconstruction during
@@ -253,20 +252,19 @@ valid_batch <- function(network, batch, config) {
   )
 }
 
-transpose_metrics <- function(metrics) {
-  nms <- names(metrics[1])
-  out <- list()
-  for (nm in nms) {
-    out[[nm]] <- vector("numeric", length = length(metrics))
-  }
-
-  for (i in seq_along(metrics)) {
-    for (nm in nms) {
-      out[[nm]][i] <- metrics[i][[nm]]
+get_device_from_config <- function(config) {
+  if (config$device == "auto") {
+    if (torch::cuda_is_available()){
+      device <- "cuda"
+    } else if (torch::backends_mps_is_available()) {
+      device <- "mps"
+    } else {
+      device <- "cpu"
     }
+  } else {
+    device <- config$device
   }
-
-  out
+  device
 }
 
 tabnet_initialize <- function(x, y, config = tabnet_config()) {
@@ -274,16 +272,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
 
-
-  if (config$device == "auto") {
-    if (torch::cuda_is_available()){
-      device <- "cuda"
-    } else {
-      device <- "cpu"
-    }
-  } else {
-    device <- config$device
-  }
+  device <- get_device_from_config(config)
 
   # simplify y into vector
   if (!is.atomic(y)) {
@@ -299,7 +288,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     train_y <- y[-valid_idx]
     valid_ds <-   torch::dataset(
       initialize = function() {},
-      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch], device=device)},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch])},
       .length = function() {nrow(valid_x)}
     )()
     x <- x[-valid_idx, ]
@@ -309,7 +298,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   # training dataset
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], y[batch], device=device)},
+    .getbatch = function(batch) {resolve_data(x[batch,], y[batch])},
     .length = function() {nrow(x)}
   )()
   # we can get training_set parameters from the 2 first samples
@@ -359,15 +348,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   stopifnot("tabnet_model shall be initialised or pretrained"= (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
 
-  if (config$device == "auto") {
-    if (torch::cuda_is_available()){
-      device <- "cuda"
-    } else {
-      device <- "cpu"
-    }
-  } else {
-    device <- config$device
-  }
+  device <- get_device_from_config(config)
 
   # simplify y into vector
   if (!is.atomic(y)) {
@@ -385,7 +366,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     train_y <- y[-valid_idx]
     valid_ds <-   torch::dataset(
       initialize = function() {},
-      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch], device=device)},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch])},
       .length = function() {nrow(valid_x)}
     )()
 
@@ -403,7 +384,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   # training dataset & dataloader
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], y[batch], device=device)},
+    .getbatch = function(batch) {resolve_data(x[batch,], y[batch])},
     .length = function() {nrow(x)}
   )()
 
@@ -453,9 +434,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   patience_counter <- 0L
 
   # main loop
-  for (epoch in seq_len(config$epochs)+epoch_shift) {
+  for (epoch in seq_len(config$epochs) + epoch_shift) {
 
-    metrics[[epoch]] <- list(train = NULL, valid = NULL)
+    metrics[[epoch]] <- list()
     train_metrics <- c()
     valid_metrics <- c()
 
@@ -468,7 +449,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       )
 
     coro::loop(for (batch in train_dl) {
-      m <- train_batch(network, optimizer, batch, config)
+      m <- train_batch(network, optimizer, to_device(batch, device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     })
@@ -483,7 +464,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     network$eval()
     if (has_valid) {
       coro::loop(for (batch in valid_dl) {
-        m <- valid_batch(network, batch, config)
+        m <- valid_batch(network, to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
       })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
@@ -564,7 +545,7 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   device = obj$fit$config$device
   predict_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], rep(1, nrow(x)), device=device)},
+    .getbatch = function(batch) {resolve_data(x[batch,], rep(1, nrow(x)))},
     .length = function() {nrow(x)}
   )()
 
@@ -582,6 +563,7 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
     num_workers = 0L
   )
   coro::loop(for (batch in predict_dl) {
+    batch <- to_device(batch, device)
     yhat <- c(yhat, network(batch$x, batch$x_na_mask)[[1]])
   })
 
@@ -612,4 +594,16 @@ predict_impl_class <- function(obj, x, batch_size) {
   p <- factor(p, levels = get_blueprint_levels(obj))
   hardhat::spruce_class(p)
 
+}
+
+to_device <- function(x, device) {
+  lapply(x, function(x) {
+    if (inherits(x, "torch_tensor")) {
+      x$to(device=device)
+    } else if (is.list(x)) {
+      lapply(x, to_device)
+    } else {
+      x
+    }
+  })
 }

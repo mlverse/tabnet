@@ -41,7 +41,7 @@ transpose_metrics <- function(metrics) {
     }
   }
 
-  out
+  out[-1]
 }
 
 unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
@@ -62,15 +62,7 @@ unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) 
 tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift = 0L) {
   torch::torch_manual_seed(sample.int(1e6, 1))
 
-  if (config$device == "auto") {
-    if (torch::cuda_is_available()){
-      device <- "cuda"
-    } else {
-      device <- "cpu"
-    }
-  } else {
-    device <- config$device
-  }
+  device <- get_device_from_config(config)
 
   # validation dataset & dataloaders
   has_valid <- config$valid_split > 0
@@ -80,7 +72,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     valid_x <- x[valid_idx, ]
     valid_ds <-   torch::dataset(
       initialize = function() {},
-      .getbatch = function(batch) {resolve_data(valid_x[batch,], rep(1, length(batch)), device=device)},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], rep(1, length(batch)))},
       .length = function() {nrow(valid_x)}
     )()
 
@@ -97,7 +89,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # training dataset & dataloader
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], rep(1, length(batch)), device=device)},
+    .getbatch = function(batch) {resolve_data(x[batch,], rep(1, length(batch)))},
     .length = function() {nrow(x)}
   )()
   # we can get training_set parameters from the 2 first samples
@@ -164,7 +156,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # main loop
   for (epoch in seq_len(config$epochs) + epoch_shift) {
 
-    metrics[[epoch]] <- list(train = NULL, valid = NULL)
+    metrics[[epoch]] <- list()
     train_metrics <- c()
     valid_metrics <- c()
 
@@ -177,7 +169,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
       )
 
     coro::loop(for (batch in train_dl) {
-      m <- train_batch_un(network, optimizer, batch, config)
+      m <- train_batch_un(network, optimizer, to_device(batch, device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     })
@@ -192,7 +184,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     network$eval()
     if (has_valid) {
       coro::loop(for (batch in valid_dl) {
-        m <- valid_batch_un(network, batch, config)
+        m <- valid_batch_un(network, to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
       })
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)

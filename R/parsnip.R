@@ -269,7 +269,7 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
 
   # Save some empty slots for future parts of the specification
   out <- list(args = args, eng_args = NULL,
-              mode = mode, method = NULL, engine = NULL)
+              mode = mode, method = NULL, engine = "torch")
 
   # set classes in the correct order
   class(out) <- parsnip::make_classes("tabnet")
@@ -333,3 +333,4 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
   )
 }
 
+min_grid.tabnet <- function(x, grid, ...) tune::fit_max_value(x, grid, ...)

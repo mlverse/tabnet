@@ -23,13 +23,13 @@ Real-life training dataset usually contains missing data. The vast majority of d
 
 But Tabnet use a masking mechanism that we can reuse to cover the missing data in the training set.
 
-As we enter the world of missing-data, we have to question the type of missing-data we deal with. We could have missing data at random (MAR), like for example some transmission errors on a sensor data dataset, or missing not at random (MNAR) when some interactions exists between the missing data and other predictors values for the same sample. The later is a more complex topic to cover, and we will try to investiate it here through the `ames` dataset.
+As we enter the world of missing-data, we have to question the type of missing-data we deal with. We could have missing data at random (MAR), like for example some transmission errors on a sensor data dataset, or missing not at random (MNAR) when some interactions exists between the missing data and other predictors values for the same sample. The later is a more complex topic to cover, and we will try to investigate it here through the `ames` dataset.
 
 # Missing-data dataset creation
 
 ## Ames missings understanding
 
-The `ames` dataset from  `{modeldata}`  contains a lot of _null values_ that the human analysis clearly interprete as an implicit _"missing object"_ described by that value. We have for example pool surface of 0 square meters means "no pool", basement surface of 0 square meters means "no basement", ...  
+The `ames` dataset from  `{modeldata}`  contains a lot of _null values_ that the human analysis clearly understand as an implicit _"missing object"_ described by that value. We have for example pool surface of 0 square meters means "no pool", basement surface of 0 square meters means "no basement", ...  
 Many of those variables can be detected visually by inspecting the distribution of the values like, for example, the `Masonry veneer area` predictor :
 ```{r}
 library(tidymodels, quietly = TRUE)
@@ -37,18 +37,18 @@ library(tabnet)
 data("ames", package = "modeldata")
 qplot(ames$Mas_Vnr_Area)
 ```
-![ames variable Mas_Vnr_Area histogram showing high occurence of value zero](ames_mas_vnr_hist.png)
+![ames variable `Mas_Vnr_Area` histogram showing high occurrence of value zero](ames_mas_vnr_hist.png)
 We know that it will be extremely difficult for a model to capture an internal representation of such distribution, and thus we want to avoid the null values to penalize the model internal representation.
 
 ## While keeping some room for freedom
 
-Many of those variables come as a pair in the `ames` dataset, one for the qualitative aspect, the other for the quantitative aspect. We have for exemple `Pool_QC` for pool condition, that has a "no_pool" level with `Pool_Area=0` in that case.  
-As human, we have the intuition that knowing if a pool is present is important for the modelling task. So we want the model to get an internal representation of the implicit `has_pool=FALSE` without having it explicit in the dataset. In order to do so, we have to let the model some freedom to infer the "no_pool" state and thus we should not mutate both variables in the pair `Pool_Area=NA` and `Pool_QC=NA` at the same time.  
+Many of those variables come as a pair in the `ames` dataset, one for the qualitative aspect, the other for the quantitative aspect. We have for example `Pool_QC` for pool condition, that has a "no_pool" level with `Pool_Area=0` in that case.  
+As human, we have the intuition that knowing if a pool is present is important for the modeling task. So we want the model to get an internal representation of the implicit `has_pool=FALSE` without having it explicit in the dataset. In order to do so, we have to let the model some freedom to infer the "no_pool" state and thus we should not mutate both variables in the pair `Pool_Area=NA` and `Pool_QC=NA` at the same time.  
 
 
 ## Ames with missing data
 
-Let's turn those missing objects data explicitely into `NAs` in an new `ames_missing` dataset :
+Let's turn those missing objects data explicitly into `NAs` in an new `ames_missing` dataset :
 
 A quick and dirty way to achieve this on numerical predictors is to `na_if()` zeros on any column which name is related to surface and area.  
 Then, according to the keep room for freedom rule, do it carefully on the matching categorical predictors
@@ -68,15 +68,15 @@ ames_missing <- ames %>% mutate_at(col_with_zero_as_na, na_if, 0) %>%
 
 visdat::vis_miss(ames_missing)
 ```
-![ames missing values visualisation showing few variables with more than 90% missingness with a global 13% missing](vis_miss_ames.png)
+![ames missing values visualization showing few variables with more than 90% missingness with a global 13% missing](vis_miss_ames.png)
 
 We can see here that variable are not missing at random, and thus we can expect the model to capture the missingness relation during the pretraining phase.
 
-Note: A better way to achieve proper value mutation to explicit NAs would be to also check if the qualitative column in the pair refers to `none` or to zero occurence of the equipment. But this is beyond the scope of this vignette.
+Note: A better way to achieve proper value mutation to explicit NAs would be to also check if the qualitative column in the pair refers to `none` or to zero occurrence of the equipment. But this is beyond the scope of this vignette.
 
 # Model pretraining
 
-Let's pretrain one model for each of those dataset, and analyse variable importance that emerge after the unsupervised representation learning step:   
+Let's pretrain one model for each of those dataset, and analyze variable importance that emerge after the unsupervised representation learning step:   
 
 ## Variable importance with raw `ames` dataset
 
@@ -137,7 +137,7 @@ vip_color(ames_pretrain, col_with_missings)
 
 We get `BsmtFin_Type_1`, `BsmtFin_SF_1` and `Bsmt_Exposure` variables in the top ten important variables according to this run of pretraining the model. Those variables has been screened as having few missing values.
 
-Note that this result varies a lot from run to run. The captured result here depends a lot on your initialisation conditions.
+Note that this result varies a lot from run to run. The captured result here depends a lot on your initialization conditions.
 
 ## Variable importance with `ames_missing` dataset
 
@@ -216,7 +216,7 @@ Here we can see one predictors `Garage_Area` with 5 % missingness in the top 10.
 
 # Conclusion
 
-Even if the models trained here have a huge variability in the variable importance along trainings, we have the intuition that model trained with explicit missing data will provide better result that its counterpart trained with zero-imputed variables.
+Even if the models have a huge variability in the variable importance among different training, we have the intuition that model trained with explicit missing data will provide better result than its counterpart trained with zero-imputed variables.
 
-In any case, having the capability to pretrain and fit tabnet models with MAR dataset or MNAR dataset is of high convenience for the real-life use-cases. 
+In any case, having the capability to pretrain and fit TabNet models with MAR dataset or MNAR dataset is of high convenience for the real-life use-cases. 
 

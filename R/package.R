@@ -5,6 +5,7 @@
   vctrs::s3_register("ggplot2::autoplot", "tabnet_fit")
   vctrs::s3_register("ggplot2::autoplot", "tabnet_pretrain")
   vctrs::s3_register("ggplot2::autoplot", "tabnet_explain")
+  vctrs::s3_register("tune::min_grid", "tabnet")
 }
 
 

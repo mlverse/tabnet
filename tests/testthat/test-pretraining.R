@@ -1,3 +1,19 @@
+test_that("transpose_metrics is not adding an unnamed entry on top of the list", {
+
+  metrics <- list(loss = 1, loss = 2, loss = 3, loss = 4)
+
+  expect_error(
+    tabnet:::transpose_metrics(metrics),
+    regexp = NA
+  )
+
+  expect_equal(
+    tabnet:::transpose_metrics(metrics),
+    list(loss = c(1, 2, 3, 4))
+  )
+
+})
+
 test_that("Unsupervised training with default config, data.frame and formula", {
 
   expect_error(
