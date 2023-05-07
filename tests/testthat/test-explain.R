@@ -34,40 +34,34 @@ test_that("explain provides correct result with data.frame", {
 test_that("explain works for dataframe, formula and recipe", {
 
   # data.frame, regression
-  expect_error(
-    tabnet_explain(ames_pretrain_vsplit, new_data=small_ames),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(ames_pretrain_vsplit, new_data=small_ames)
   )
 
-  expect_error(
-    tabnet_explain(ames_fit_vsplit, new_data=small_ames),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(ames_fit_vsplit, new_data=small_ames)
   )
 
   # data.frame, classification
-  expect_error(
-    tabnet_explain(attr_pretrained_vsplit, attrix),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(attr_pretrained_vsplit, attrix)
   )
-  expect_error(
-    tabnet_explain(attr_fitted_vsplit, attrix),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(attr_fitted_vsplit, attrix)
   )
 
 
   # formula
   tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 3, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  expect_error(
-    tabnet_explain(tabnet_pretrain, new_data=small_ames),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(tabnet_pretrain, new_data=small_ames)
   )
 
   tabnet_fit <- tabnet_fit(Sale_Price ~., data=small_ames, tabnet_model=tabnet_pretrain, epochs = 3,
                            num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  expect_error(
-    tabnet_explain(tabnet_fit, new_data=small_ames),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(tabnet_fit, new_data=small_ames)
   )
 
   # recipe
@@ -77,16 +71,14 @@ test_that("explain works for dataframe, formula and recipe", {
 
   tabnet_pretrain <- tabnet_pretrain(rec, data=small_ames, epochs = 3, valid_split=.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  expect_error(
-    tabnet_explain(tabnet_pretrain, new_data=small_ames),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(tabnet_pretrain, new_data=small_ames)
   )
 
   tabnet_fit <- tabnet_fit(rec, data=small_ames, tabnet_model=tabnet_pretrain, epochs = 3,
                            num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-  expect_error(
-    tabnet_explain(tabnet_fit, new_data=small_ames),
-    regexp = NA
+  expect_no_error(
+    tabnet_explain(tabnet_fit, new_data=small_ames)
   )
 })
 
@@ -117,8 +109,8 @@ test_that("support for vip on tabnet_fit and tabnet_pretrain", {
                     num_shared = 1,
                     num_independent = 1)
 
-  expect_error(vip::vip(pretrain), regexp = NA)
-  expect_error(vip::vip(fit), regexp = NA)
+  expect_no_error(vip::vip(pretrain))
+  expect_no_error(vip::vip(fit))
 
 })
 
@@ -158,5 +150,27 @@ test_that("Importance is skipped if skip_importance flag is used", {
 
   expect_equal(which.max(fit$fit$importances$importance), 1)
   expect_equal(fit$fit$importances$variables, colnames(x))
+
+})
+
+test_that("explain works for parsnip model", {
+
+  model <- tabnet() %>%
+    parsnip::set_mode("regression") %>%
+    parsnip::set_engine("torch")
+  fit <- model %>%
+    parsnip::fit(Sale_Price ~ ., data = small_ames)
+
+  expect_no_error(
+    tabnet_explain(fit, new_data = small_ames),
+  )
+
+})
+
+test_that("explain works for multi-outcome classification model", {
+
+  fit <- tabnet_fit(x, data.frame(y = y, z = y + 1), epochs = 1)
+
+  expect_no_error(tabnet_explain(fit, new_data = x))
 
 })

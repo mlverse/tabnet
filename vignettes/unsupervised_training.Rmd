@@ -65,7 +65,7 @@ We now have the normalized dataset ready for unsupervised training.
 ## Unsupervised training step  
 
 Next, we pre-train our model with a [self-supervised learning](https://paperswithcode.com/task/self-supervised-learning) task. This step will gives us a `tabnet_pretrain` object that will contain a representation of the dataset variables and their interactions.  
-We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.
+We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.
 
 ```{r}
 mod <- tabnet_pretrain(rec, unsupervised, epochs = 50, valid_split = 0.2, batch_size = 5000, verbose = TRUE)
@@ -136,7 +136,7 @@ model_fit <- tabnet_fit(rec, train , tabnet_model = mod, from_epoch=40, valid_sp
 [Epoch 089] Loss: 0.091212 Valid loss: 0.341918                                                                                    
 [Epoch 090] Loss: 0.087092 Valid loss: 0.361795 
 ```
-The training continue starting at epoch 41 as experted and ending at epoch 90.  
+The training continue starting at epoch 41 as expected and ending at epoch 90.  
 Now let's diagnose the model training with a new `autoplot()`:
 
 ```{r}
@@ -151,7 +151,7 @@ We can see that model starts to overfit after epoch 52 as the validation-set los
 model_fit <- tabnet_fit(rec, train , tabnet_model = model_fit, from_epoch=50, epochs = 4, valid_split = 0.2, verbose=TRUE)
 ```
 
-Now, `predict()` and `tabnet_explain()` functions will use the model from last epoch beeing epoch 54.  
+Now, `predict()` and `tabnet_explain()` functions will use the model from last epoch, being here epoch 54.  
 Finally, we can measure the results against our test set:
 
 ```{r}
@@ -210,7 +210,7 @@ vanilla_model_fit <- tabnet_fit(rec, train , valid_split = 0.2, epochs = 50, ver
 ```{r}
 autoplot(vanilla_model_fit)
 ```
-![Training and validation loss plot for vanillia tabnet](vanillia_model.png)
+![Training and validation loss plot for vanilla tabnet](vanillia_model.png)
 The model overfits around epoch 20, we will restore it at checkpoint epoch 20 and retrain for 1 epoch , and proceed to prediction : 
 ```{r}
 vanilla_model_fit <- tabnet_fit(rec, train , tabnet_model= vanilla_model_fit, from_epoch=20, valid_split = 0.2, epochs = 1, verbose=TRUE)

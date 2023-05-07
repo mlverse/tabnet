@@ -5,3 +5,5 @@ inst/doc
 .venv
 activate
 .V8history
+/doc/
+/Meta/
