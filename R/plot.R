@@ -11,12 +11,14 @@
 #'
 #' @examples
 #' \donttest{
+#' if (torch::torch_is_installed()) {
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")
-#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=15)
+#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=11)
 #'
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
+#' }
 #' }
 #' @importFrom rlang .data
 #'
