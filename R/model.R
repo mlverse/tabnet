@@ -232,7 +232,7 @@ train_batch <- function(network, optimizer, batch, config) {
   # if target is_multi_outcome, loss has to be applied to each label-group
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
-    outcome_nlevels <- as.numeric(batch$output_dim)
+    outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
     loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
       list(
         torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
@@ -271,7 +271,7 @@ valid_batch <- function(network, batch, config) {
   # loss has to be applied to each label-group when output_dim is a vector
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
-    outcome_nlevels <- as.numeric(batch$output_dim)
+    outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
     loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
       list(
         torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
