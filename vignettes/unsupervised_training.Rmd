@@ -65,7 +65,7 @@ We now have the normalized dataset ready for unsupervised training.
 ## Unsupervised training step  
 
 Next, we pre-train our model with a [self-supervised learning](https://paperswithcode.com/task/self-supervised-learning) task. This step will gives us a `tabnet_pretrain` object that will contain a representation of the dataset variables and their interactions.  
-We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.
+We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.
 
 ```{r}
 mod <- tabnet_pretrain(rec, unsupervised, epochs = 50, valid_split = 0.2, batch_size = 5000, verbose = TRUE)

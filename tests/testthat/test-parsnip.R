@@ -1,17 +1,17 @@
 test_that("multiplication works", {
-  library(parsnip)
+
   data("ames", package = "modeldata")
 
   expect_error(
     model <- tabnet() %>%
-      set_mode("regression") %>%
-      set_engine("torch"),
+      parsnip::set_mode("regression") %>%
+      parsnip::set_engine("torch"),
     regexp = NA
   )
 
   expect_error(
     fit <- model %>%
-      fit(Sale_Price ~ ., data = ames),
+      parsnip::fit(Sale_Price ~ ., data = ames),
     regexp = NA
   )
 
@@ -19,21 +19,19 @@ test_that("multiplication works", {
 
 test_that("multi_predict works as expected", {
 
-  library(parsnip)
-
   model <- tabnet() %>%
-    set_mode("regression") %>%
-    set_engine("torch", checkpoint_epochs = 1)
+    parsnip::set_mode("regression") %>%
+    parsnip::set_engine("torch", checkpoint_epochs = 1)
 
   data("ames", package = "modeldata")
 
   expect_error(
     fit <- model %>%
-      fit(Sale_Price ~ ., data = ames),
+      parsnip::fit(Sale_Price ~ ., data = ames),
     regexp = NA
   )
 
-  preds <- multi_predict(fit, ames, epochs = c(1,2,3,4,5))
+  preds <- parsnip::multi_predict(fit, ames, epochs = c(1,2,3,4,5))
 
   expect_equal(nrow(preds), nrow(ames))
   expect_equal(nrow(preds$.pred[[1]]), 5)
@@ -41,12 +39,11 @@ test_that("multi_predict works as expected", {
 
 test_that("Check we can finalize a workflow", {
 
-  library(parsnip)
   data("ames", package = "modeldata")
 
   model <- tabnet(penalty = tune(), epochs = tune()) %>%
-    set_mode("regression") %>%
-    set_engine("torch")
+    parsnip::set_mode("regression") %>%
+    parsnip::set_engine("torch")
 
   wf <- workflows::workflow() %>%
     workflows::add_model(model) %>%
@@ -55,7 +52,7 @@ test_that("Check we can finalize a workflow", {
   wf <- tune::finalize_workflow(wf, tibble::tibble(penalty = 0.01, epochs = 1))
 
   expect_error(
-    fit <- wf %>% fit(data = ames),
+    fit <- wf %>% parsnip::fit(data = ames),
     regexp = NA
   )
 
@@ -65,12 +62,11 @@ test_that("Check we can finalize a workflow", {
 
 test_that("Check we can finalize a workflow from a tune_grid", {
 
-  library(parsnip)
   data("ames", package = "modeldata")
 
   model <- tabnet(epochs = tune()) %>%
-    set_mode("regression") %>%
-    set_engine("torch", checkpoint_epochs = 1)
+    parsnip::set_mode("regression") %>%
+    parsnip::set_engine("torch", checkpoint_epochs = 1)
 
   wf <- workflows::workflow() %>%
     workflows::add_model(model) %>%
@@ -98,14 +94,12 @@ test_that("Check we can finalize a workflow from a tune_grid", {
 
 test_that("tabnet grid reduction - torch", {
 
-  library(tune)
-
   mod <- tabnet() %>%
     parsnip::set_engine("torch")
 
   # A typical grid
   reg_grid <- expand.grid(epochs = 1:3, penalty = 1:2)
-  reg_grid_smol <- min_grid(mod, reg_grid)
+  reg_grid_smol <- tune::min_grid(mod, reg_grid)
 
   expect_equal(reg_grid_smol$epochs, rep(3, 2))
   expect_equal(reg_grid_smol$penalty, 1:2)
@@ -115,7 +109,7 @@ test_that("tabnet grid reduction - torch", {
 
   # Unbalanced grid
   reg_ish_grid <- expand.grid(epochs = 1:3, penalty = 1:2)[-3, ]
-  reg_ish_grid_smol <- min_grid(mod, reg_ish_grid)
+  reg_ish_grid_smol <- tune::min_grid(mod, reg_ish_grid)
 
   expect_equal(reg_ish_grid_smol$epochs, 2:3)
   expect_equal(reg_ish_grid_smol$penalty, 1:2)
@@ -125,7 +119,7 @@ test_that("tabnet grid reduction - torch", {
 
   # Grid with a third parameter
   reg_grid_extra <- expand.grid(epochs = 1:3, penalty = 1:2, batch_size = 10:12)
-  reg_grid_extra_smol <- min_grid(mod, reg_grid_extra)
+  reg_grid_extra_smol <- tune::min_grid(mod, reg_grid_extra)
 
   expect_equal(reg_grid_extra_smol$epochs, rep(3, 6))
   expect_equal(reg_grid_extra_smol$penalty, rep(1:2, each = 3))
@@ -136,14 +130,14 @@ test_that("tabnet grid reduction - torch", {
 
   # Only epochs
   only_epochs <- expand.grid(epochs = 1:3)
-  only_epochs_smol <- min_grid(mod, only_epochs)
+  only_epochs_smol <- tune::min_grid(mod, only_epochs)
 
   expect_equal(only_epochs_smol$epochs, 3)
   expect_equal(only_epochs_smol$.submodels, list(list(epochs = 1:2)))
 
   # No submodels
   no_sub <- tibble::tibble(epochs = 1, penalty = 1:2)
-  no_sub_smol <- min_grid(mod, no_sub)
+  no_sub_smol <- tune::min_grid(mod, no_sub)
 
   expect_equal(no_sub_smol$epochs, rep(1, 2))
   expect_equal(no_sub_smol$penalty, 1:2)
@@ -155,7 +149,7 @@ test_that("tabnet grid reduction - torch", {
   mod_1 <- tabnet(epochs = tune("Amos")) %>%
     parsnip::set_engine("torch")
   reg_grid <- expand.grid(Amos = 1:3, penalty = 1:2)
-  reg_grid_smol <- min_grid(mod_1, reg_grid)
+  reg_grid_smol <- tune::min_grid(mod_1, reg_grid)
 
   expect_equal(reg_grid_smol$Amos, rep(3, 2))
   expect_equal(reg_grid_smol$penalty, 1:2)
@@ -164,7 +158,7 @@ test_that("tabnet grid reduction - torch", {
   }
 
   all_sub <- expand.grid(Amos = 1:3)
-  all_sub_smol <- min_grid(mod_1, all_sub)
+  all_sub_smol <- tune::min_grid(mod_1, all_sub)
 
   expect_equal(all_sub_smol$Amos, 3)
   expect_equal(all_sub_smol$.submodels[[1]], list(Amos = 1:2))
@@ -172,7 +166,7 @@ test_that("tabnet grid reduction - torch", {
   mod_2 <- tabnet(epochs = tune("Ade Tukunbo")) %>%
     parsnip::set_engine("torch")
   reg_grid <- expand.grid(`Ade Tukunbo` = 1:3, penalty = 1:2, ` \t123` = 10:11)
-  reg_grid_smol <- min_grid(mod_2, reg_grid)
+  reg_grid_smol <- tune::min_grid(mod_2, reg_grid)
 
   expect_equal(reg_grid_smol$`Ade Tukunbo`, rep(3, 4))
   expect_equal(reg_grid_smol$penalty, rep(1:2, each = 2))

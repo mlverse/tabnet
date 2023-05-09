@@ -9,3 +9,5 @@
 ^cran-comments\.md$
 ^CRAN-RELEASE$
 ^.V8*
+^doc$
+^Meta$

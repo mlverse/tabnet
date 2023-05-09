@@ -24,6 +24,8 @@ ids <- sample(nrow(attrition), 256)
 
 # attrition common models
 attrix <- attrition[ids,-which(names(attrition) == "Attrition")]
+attri_mult_x <- attrix[-which(names(attrix) == "JobSatisfaction")]
+
 attriy <- attrition[ids,]$Attrition
 
 attr_pretrained <- tabnet_pretrain(attrix, attriy, epochs = 12)

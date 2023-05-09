@@ -59,9 +59,9 @@ See \code{\link[=tabnet_config]{tabnet_config()}} for a list of all possible hyp
 \item{y}{When \code{x} is a \strong{data frame} or \strong{matrix}, \code{y} is the outcome
 specified as:
 \itemize{
-\item A \strong{data frame} with 1 numeric column.
-\item A \strong{matrix} with 1 numeric column.
-\item A numeric \strong{vector}.
+\item A \strong{data frame} with 1 or many numeric column (regression) or 1 or many categorical columns (classification) .
+\item A \strong{matrix} with 1 column.
+\item A \strong{vector}, either numeric or categorical.
 }}
 
 \item{tabnet_model}{A previously fitted TabNet model object to continue the fitting on.
@@ -100,6 +100,13 @@ The model fitting metrics append on top of the parent metrics in the returned Ta
 }
 }
 
+\section{Multi-outcome}{
+
+
+TabNet allows multi-outcome prediction, the outcomes must all be numeric or all be categorical,
+and the \strong{data frame} method shall be used for \code{x} and \code{y}.
+}
+
 \section{Threading}{
 
 
@@ -115,8 +122,15 @@ torch::torch_set_num_interop_threads(1)
 
 \examples{
 if (torch::torch_is_installed()) {
+
+# regression using formula specification
 data("ames", package = "modeldata")
 fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
+
+# classification using data-frame specification
+data("attrition", package = "modeldata")
+attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
+fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1)
 }
 
 }

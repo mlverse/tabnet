@@ -38,13 +38,14 @@ low values. \code{quantile=1}, the default, do not clip any values.
 }
 \examples{
 \donttest{
+if (torch::torch_is_installed()) {
 library(ggplot2)
 data("attrition", package = "modeldata")
-attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=15)
+attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=11)
 attrition_explain <- tabnet_explain(attrition_fit, attrition)
 # Plot the model aggregated mask interpretation heatmap
 autoplot(attrition_explain)
 }
-
+}
 
 }

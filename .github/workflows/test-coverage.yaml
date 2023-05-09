@@ -13,8 +13,10 @@ jobs:
     runs-on: ['self-hosted', 'gce', 'gpu']
 
     container:
-      image: nvidia/cuda:11.6.0-cudnn8-devel-ubuntu18.04
-      options: --gpus all
+      image: 'nvidia/cuda:11.6.0-cudnn8-devel-ubuntu18.04'
+      options: '--gpus all --runtime=nvidia'
+
+    timeout-minutes: 120
 
     env:
       RSPM: https://packagemanager.rstudio.com/cran/__linux__/bionic/latest
@@ -24,42 +26,39 @@ jobs:
       DEBIAN_FRONTEND: 'noninteractive'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - run: |
           apt-get update -y
           apt-get install -y sudo software-properties-common dialog apt-utils tzdata
-      - uses: r-lib/actions/setup-r@v1
-        id: install-r
 
-      - name: Install pak and query dependencies
-        run: |
-          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps("local::.", dependencies = TRUE), ".github/r-depends.rds")
-        shell: Rscript {0}
+      - uses: r-lib/actions/setup-r@v2
 
-      - name: Restore R package cache
-        uses: actions/cache@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          path: |
-            ${{ env.R_LIBS_USER }}/*
-            !${{ env.R_LIBS_USER }}/pak
-          key: ubuntu-18.04-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ubuntu-18.04-${{ steps.install-r.outputs.installed-r-version }}-1-
-
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          pak::local_system_requirements(execute = TRUE)
-          pak::pkg_system_requirements("covr", execute = TRUE)
-        shell: Rscript {0}
-
-      - name: Install dependencies
-        run: |
-          pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("covr")
-        shell: Rscript {0}
+          extra-packages: |
+            any::covr
 
       - name: Test coverage
-        run: covr::codecov()
+        run: |
+          covr::codecov(
+            quiet = FALSE,
+            clean = FALSE,
+            install_path = file.path(Sys.getenv("RUNNER_TEMP"), "package")
+          )
         shell: Rscript {0}
+
+      - name: Show testthat output
+        if: always()
+        run: |
+          ## --------------------------------------------------------------------
+          find ${{ runner.temp }}/package -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-test-failures
+          path: ${{ runner.temp }}/package
+

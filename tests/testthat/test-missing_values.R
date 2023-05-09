@@ -104,7 +104,6 @@ test_that("predict data-frame accept missing value in predictor", {
 
 test_that("inference works with missings in the response vector", {
 
-  suppressPackageStartupMessages(library(recipes))
   data("attrition", package = "modeldata")
   ids <- sample(nrow(attrition), 256)
 

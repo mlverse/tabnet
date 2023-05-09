@@ -16,9 +16,9 @@
 #' @param y When `x` is a __data frame__ or __matrix__, `y` is the outcome
 #' specified as:
 #'
-#'   * A __data frame__ with 1 numeric column.
-#'   * A __matrix__ with 1 numeric column.
-#'   * A numeric __vector__.
+#'   * A __data frame__ with 1 or many numeric column (regression) or 1 or many categorical columns (classification) .
+#'   * A __matrix__ with 1 column.
+#'   * A __vector__, either numeric or categorical.
 #'
 #' @param data When a __recipe__ or __formula__ is used, `data` is specified as:
 #'
@@ -45,6 +45,11 @@
 #'    * the epoch related to a checkpoint matching or preceding the `from_epoch` value if provided
 #' The model fitting metrics append on top of the parent metrics in the returned TabNet model.
 #'
+#' @section Multi-outcome:
+#'
+#' TabNet allows multi-outcome prediction, the outcomes must all be numeric or all be categorical,
+#' and the __data frame__ method shall be used for `x` and `y`.
+#'
 #' @section Threading:
 #'
 #' TabNet uses `torch` as its backend for computation and `torch` uses all
@@ -59,8 +64,15 @@
 #'
 #' @examples
 #' if (torch::torch_is_installed()) {
+#'
+#' # regression using formula specification
 #' data("ames", package = "modeldata")
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
+#'
+#' # classification using data-frame specification
+#' data("attrition", package = "modeldata")
+#' attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
+#' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1)
 #' }
 #'
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
@@ -83,6 +95,7 @@ tabnet_fit.default <- function(x, ...) {
 #' @rdname tabnet_fit
 tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
+  check_type(processed$outcomes)
 
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
@@ -107,6 +120,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
       intercept = FALSE
     )
   )
+  check_type(processed$outcomes)
 
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
@@ -125,6 +139,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
 #' @rdname tabnet_fit
 tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
+  check_type(processed$outcomes)
 
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
@@ -329,8 +344,8 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   }
   if (task == "supervised") {
-    if (sum(is.na(outcomes))>0) {
-      rlang::abort("Error: found missing values in the response vector")
+    if (sum(is.na(outcomes)) > 0) {
+      rlang::abort("Error: found missing values in the outcome data.")
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -390,37 +405,58 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
   out
 }
 
-check_type <- function(model, type) {
+#' Check consistency between modeling-task type and class of outcomes vars.
+#'
+#' infer default modeling-task type from the outcome vars class if needed.
+#'
+#' @param outcome_ptype shall be `model$blueprint$ptypes$outcomes` when called from
+#'  a model object, or `processed$outcomes` from the result of a `mold()`
+#' @param type expected type within  `c("numeric", "prob", "class")`
+#'
+#' @return valid type within `c("numeric", "prob", "class")` for repectively regression,
+#' class probabilities, or classification
+#' @noRd
+check_type <- function(outcome_ptype, type = NULL) {
 
-  outcome_ptype <- model$blueprint$ptypes$outcomes[[1]]
+  # outcome_ptype <- model$blueprint$ptypes$outcomes when called from model
+  outcome_all_factor <- all(purrr::map_lgl(outcome_ptype, is.factor))
+  outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
+
+  if (!outcome_all_numeric && !outcome_all_factor)
+    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
 
   if (is.null(type)) {
-    if (is.factor(outcome_ptype))
+    if (outcome_all_factor)
       type <- "class"
-    else if (is.numeric(outcome_ptype))
+    else if (outcome_all_numeric)
       type <- "numeric"
-    else
+    else if (ncol(outcome_ptype) == 1)
       rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
   }
 
   type <- rlang::arg_match(type, c("numeric", "prob", "class"))
 
-  if (is.factor(outcome_ptype)) {
+  if (outcome_all_factor) {
     if (!type %in% c("prob", "class"))
       rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
-  } else if (is.numeric(outcome_ptype)) {
+  } else if (outcome_all_numeric) {
     if (type != "numeric")
       rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
   }
 
-  type
+  invisible(type)
 }
 
 
 
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
-  type <- check_type(object, type)
+  type <- check_type(object$blueprint$ptypes$outcomes, type)
+  is_multi_outcome <- ncol(object$blueprint$ptypes$outcomes) > 1
+  outcome_nlevels <- NULL
+  if (is_multi_outcome & type != "numeric") {
+    outcome_nlevels <- purrr::map_dbl(object$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  }
 
   if (!is.null(epoch)) {
 
@@ -440,11 +476,15 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
     object$fit$network$load_state_dict(m$state_dict())
   }
 
+  type_multioutcome <- paste0(type, "_", is_multi_outcome)
   switch(
-    type,
-    numeric = predict_impl_numeric(object, predictors, batch_size),
-    prob    = predict_impl_prob(object, predictors, batch_size),
-    class   = predict_impl_class(object, predictors, batch_size)
+    type_multioutcome,
+    numeric_FALSE = predict_impl_numeric(object, predictors, batch_size),
+    numeric_TRUE  = predict_impl_numeric_multiple(object, predictors, batch_size),
+    prob_FALSE    = predict_impl_prob(object, predictors, batch_size),
+    prob_TRUE     = predict_impl_prob_multiple(object, predictors, batch_size, outcome_nlevels),
+    class_FALSE   = predict_impl_class(object, predictors, batch_size),
+    class_TRUE    = predict_impl_class_multiple(object, predictors, batch_size, outcome_nlevels)
   )
 }
 
