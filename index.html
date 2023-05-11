@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.0</span>
       </span>
     </div>
 
@@ -92,6 +92,8 @@
 <div class="page-header"><h1 id="tabnet">tabnet<a class="anchor" aria-label="anchor" href="#tabnet"></a>
 </h1></div>
 <!-- badges: start -->
+
+<!-- badges: end -->
 <p>An R implementation of: <a href="https://arxiv.org/abs/1908.07442" class="external-link">TabNet: Attentive Interpretable Tabular Learning</a>. The code in this repository is an R port of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> PyTorch’s implementation using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -102,11 +104,12 @@
 <p>The development version can be installed from <a href="https://github.com/mlverse/tabnet" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"mlverse/tabnet"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mlverse/tabnet"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="basic-example">Basic Example<a class="anchor" aria-label="anchor" href="#basic-example"></a>
+<h2 id="basic-binary-classification-example">Basic Binary Classification Example<a class="anchor" aria-label="anchor" href="#basic-binary-classification-example"></a>
 </h2>
+<p>Here we show a <strong>binary classification</strong> example of the <code>attrition</code> dataset, using a <strong>recipe</strong> for dataset input specification.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span><span class="op">)</span></span>
@@ -126,11 +129,13 @@
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">30</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">5e-3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-model-fit-1.png" width="100%"></p>
+<p>The plots gives you an immediate insight about model overfitting, and if any, the available model checkpoints available before the overfitting</p>
+<p>Keep in mind that <strong>regression</strong> as well as <strong>multi-class classification</strong> are also available, and that you can specify dataset through <strong>data.frame</strong> and <strong>formula</strong> as well. You will find them in the package vignettes.</p>
 </div>
 <div class="section level2">
 <h2 id="model-performance-results">Model performance results<a class="anchor" aria-label="anchor" href="#model-performance-results"></a>
 </h2>
-<p>Model performance results are easy to compute:</p>
+<p>As the standard method <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> is used, you can rely on your usual metric functions for model performance results. Here we use {yardstick} :</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">metric_set</a></span><span class="op">(</span><span class="va">accuracy</span>, <span class="va">precision</span>, <span class="va">recall</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
@@ -161,6 +166,21 @@
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">explain</span>, type <span class="op">=</span> <span class="st">"steps"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-step-explain-1.png" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="self-supervised-pretraining">Self-supervised pretraining<a class="anchor" aria-label="anchor" href="#self-supervised-pretraining"></a>
+</h2>
+<p>For cases when a consistent part of your dataset has no outcome, TabNet offers a self-supervised training step allowing to model to capture predictors intrinsic features and predictors interactions, upfront the supervised task.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pretrain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pretrain</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-step-pretrain-1.png" width="100%"></p>
+<p>The exemple here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette on <a href="https://mlverse.github.io/tabnet/articles/unsupervised_training.html" class="external-link">Unsupervised training and fine-tuning</a> will gives you the complete correct workflow step-by-step.</p>
+</div>
+<div class="section level2">
+<h2 id="missing-data-in-predictors">Missing data in predictors<a class="anchor" aria-label="anchor" href="#missing-data-in-predictors"></a>
+</h2>
+<p>{tabnet} leverage the masking mechanism to deal with missing data, so you don’t have to remove the entries in your dataset with some missing values in the predictors variables.</p>
 </div>
 </div>
   </div>

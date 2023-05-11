@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.0</span>
       </span>
     </div>
 
@@ -84,7 +84,7 @@
 
       
 
-      </header><script src="interpretation_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Interpretation tools</h1>
@@ -100,30 +100,45 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ─────────────────────────────────────── tidyverse 1.3.2 ──</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2</span> 3.4.1     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr  </span> 1.0.1</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble </span> 3.1.8     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr  </span> 1.1.0</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr  </span> 1.3.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr</span> 1.5.0</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr  </span> 2.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats</span> 1.0.0</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.4</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.0</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.4.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.2.1</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.0</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr    </span> 1.0.1     </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span> masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>    masks <span style="color: #0000BB;">stats</span>::lag()</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use the conflicted package (<span style="color: #0000BB; font-style: italic;">&lt;http://conflicted.r-lib.org/&gt;</span>) to force all conflicts to become errors</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_manual_seed.html" class="external-link">torch_manual_seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>TabNet claims to be an interpretable model because the underlying neural network architecture uses feature selection masks that can help identify which features were used at each step.</p>
-<p>The paper also defines an aggregate measure that combines the masks of each step into a single measure.</p>
-<p>Note that the selection of important features in the masks is done instance-wise. Thus, you can identify, for each observation, which features were considered relevant .</p>
+<p>TabNet claims to be an interpretable model because the underlying
+neural network architecture uses feature selection masks that can help
+identify which features were used at each step.</p>
+<p>The paper also defines an aggregate measure that combines the masks
+of each step into a single measure.</p>
+<p>Note that the selection of important features in the masks is done
+instance-wise. Thus, you can identify, for each observation, which
+features were considered relevant .</p>
 <div class="section level2">
 <h2 id="experiments">Experiments<a class="anchor" aria-label="anchor" href="#experiments"></a>
 </h2>
-<p>To show how to use the interpretation tools of <code>tabnet</code>, we are going to perform 2 experiments using synthetic datasets very similar to those that were used in the paper.</p>
+<p>To show how to use the interpretation tools of <code>tabnet</code>,
+we are going to perform 2 experiments using synthetic datasets very
+similar to those that were used in the paper.</p>
 <div class="section level3">
 <h3 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a>
 </h3>
-<p>First, let’s define the functions that we will use to generate data:</p>
+<p>First, let’s define the functions that we will use to generate
+data:</p>
 <ul>
-<li><p><code>make_syn2</code> will generate a dataset with 10 columns, but only columns 3-6 are used to calculate the <code>y</code> response vector. This is similar to <em>Syn2</em> in the paper.</p></li>
-<li><p><code>make_syn4</code> will generate a dataset with 10 columns too. The response vector depends on column 10: if the value is greater than 0, we use columns 1-2 to compute the logits, otherwise we use columns 5-6.</p></li>
+<li><p><code>make_syn2</code> will generate a dataset with 10 columns,
+but only columns 3-6 are used to calculate the <code>y</code> response
+vector. This is similar to <em>Syn2</em> in the paper.</p></li>
+<li><p><code>make_syn4</code> will generate a dataset with 10 columns
+too. The response vector depends on column 10: if the value is greater
+than 0, we use columns 1-2 to compute the logits, otherwise we use
+columns 5-6.</p></li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">logit_to_y</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">logits</span><span class="op">)</span> <span class="op">{</span></span>
@@ -164,72 +179,96 @@
 <div class="section level3">
 <h3 id="syn2">Syn2<a class="anchor" aria-label="anchor" href="#syn2"></a>
 </h3>
-<p>Let’s fit a TabNet model to the <code>syn2</code> dataset and analyze the interpretation metrics.</p>
+<p>Let’s fit a TabNet model to the <code>syn2</code> dataset and analyze
+the interpretation metrics.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn2</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.044368</span></span>
 <span><span class="co">#&gt; [Epoch 002] Loss: 0.784014</span></span>
 <span><span class="co">#&gt; [Epoch 003] Loss: 0.676509</span></span>
-<span><span class="co">#&gt; [Epoch 004] Loss: 0.639686</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.611664</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.584767</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.549939</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.515130</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.487141</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.461185</span></span></code></pre></div>
-<p>In the feature importance plot we can see that, as expected, features <code>V03-V06</code> are by far the most important ones.</p>
+<span><span class="co">#&gt; [Epoch 004] Loss: 0.639690</span></span>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.611586</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.585089</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.552268</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.517715</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.490631</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.463379</span></span></code></pre></div>
+<p>In the feature importance plot we can see that, as expected, features
+<code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-5-1.png" width="100%" height="300px"></p>
-<p>Now let’s visualize the aggregated-masks plot. In this figure we see each observation on the x axis and each variable on the y axis. The colors represent the importance of the feature in predicting the value for each observation.</p>
+<p>Now let’s visualize the aggregated-masks plot. In this figure we see
+each observation on the x axis and each variable on the y axis. The
+colors represent the importance of the feature in predicting the value
+for each observation.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="va">ex_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit_syn2</span>, <span class="va">syn2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ex_syn2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-6-1.png" width="100%" height="300px"></p>
-<p>We can see that the region between V03 and V06 concentrates most of the higher intensity colors, and the other variables are close to 0. This is expected because those are the variables that we considered when building the dataset.</p>
-<p>Next, we can visualize the attention masks for each step in the architecture.</p>
+<p>We can see that the region between V03 and V06 concentrates most of
+the higher intensity colors, and the other variables are close to 0.
+This is expected because those are the variables that we considered when
+building the dataset.</p>
+<p>Next, we can visualize the attention masks for each step in the
+architecture.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ex_syn2</span>, type<span class="op">=</span><span class="st">"steps"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-7-1.png" width="100%" height="300px"></p>
-<p>We see that the first step captures a lot of noise, but the other 2 steps focus specifically on the important features.</p>
+<p>We see that the first step captures a lot of noise, but the other 2
+steps focus specifically on the important features.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="syn-4">Syn 4<a class="anchor" aria-label="anchor" href="#syn-4"></a>
 </h2>
-<p>Now let’s analyze the results for the Syn4 dataset. This dataset is a little more complicated for TabNet because there’s a strong interaction between the variables. Depending on V10, different variables are used to create the response variable and we expect to see this in the masks.</p>
+<p>Now let’s analyze the results for the Syn4 dataset. This dataset is a
+little more complicated for TabNet because there’s a strong interaction
+between the variables. Depending on V10, different variables are used to
+create the response variable and we expect to see this in the masks.</p>
 <p>First we fit the model for 10 epochs.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.289555</span></span>
-<span><span class="co">#&gt; [Epoch 002] Loss: 0.929693</span></span>
-<span><span class="co">#&gt; [Epoch 003] Loss: 0.747763</span></span>
-<span><span class="co">#&gt; [Epoch 004] Loss: 0.687549</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.661784</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.647172</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.634579</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.624223</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.613581</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.599905</span></span></code></pre></div>
-<p>In the feature importance plot we have, as expected, strong importance for <code>V10</code>, and the other features that are used conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
+<span><span class="co">#&gt; [Epoch 002] Loss: 0.929622</span></span>
+<span><span class="co">#&gt; [Epoch 003] Loss: 0.745959</span></span>
+<span><span class="co">#&gt; [Epoch 004] Loss: 0.685981</span></span>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.661809</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.646003</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.632528</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.615357</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.599160</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.583839</span></span></code></pre></div>
+<p>In the feature importance plot we have, as expected, strong
+importance for <code>V10</code>, and the other features that are used
+conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn4</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-9-1.png" width="100%" height="300px"></p>
-<p>Now let’s visualize the attention masks. Notice that we arranged the dataset by <code>V10</code> so we can easily visualize the interaction effects.</p>
-<p>We also trimmed to the 99th percentile so the colors shows the importance even if there are strong outliers.</p>
+<p>Now let’s visualize the attention masks. Notice that we arranged the
+dataset by <code>V10</code> so we can easily visualize the interaction
+effects.</p>
+<p>We also trimmed to the 99th percentile so the colors shows the
+importance even if there are strong outliers.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ex_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit_syn4</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">syn4</span>, <span class="va">V10</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ex_syn4</span>, quantile<span class="op">=</span><span class="fl">.995</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-10-1.png" width="100%" height="300px"></p>
-<p>From the figure we see that V10 is important for all observations. We also see that for the first half of the dataset <code>V05</code> and <code>V06</code> is the most important feature, while for the other half, <code>V01</code> and <code>V02</code> are the important ones.</p>
+<p>From the figure we see that V10 is important for all observations. We
+also see that for the first half of the dataset <code>V05</code> and
+<code>V06</code> is the most important feature, while for the other
+half, <code>V01</code> and <code>V02</code> are the important ones.</p>
 <p>We can also visualize the masks at each step in the architecture.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ex_syn4</span>, type<span class="op">=</span><span class="st">"steps"</span>, quantile<span class="op">=</span><span class="fl">.995</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-11-1.png" width="100%" height="300px"></p>
-<p>We see that step 1 and 3 both focus on <code>V10</code>, but on different additional features, depending on <code>V10</code>. Step 2 seems to have found some noise in <code>V08</code>, but also focuses strongly on <code>V01-V02</code> and <code>V05-V06</code>.</p>
+<p>We see that step 1 and 3 both focus on <code>V10</code>, but on
+different additional features, depending on <code>V10</code>. Step 2
+seems to have found some noise in <code>V08</code>, but also focuses
+strongly on <code>V01-V02</code> and <code>V05-V06</code>.</p>
 </div>
   </div>
 
