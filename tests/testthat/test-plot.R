@@ -91,12 +91,10 @@ test_that("Autoplot of tabnet_explain works for pretrain and fitted model", {
 
 test_that("Autoplot of multi-outcome regression explainer", {
 
-  #' data("ames", package = "modeldata")
-  #' ids <- sample(nrow(ames), 256)
-  #' x <- ames[ids,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
-  #' y <- ames[ids, c("Sale_Price", "Pool_Area")]
-  #' ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
-  #' ames_explain <- tabent_explain()
+  x <- small_ames[,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
+  y <- small_ames[, c("Sale_Price", "Pool_Area")]
+  ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
+  ames_explain <- tabnet_explain(ames_fit, ames)
 
   expect_no_error(
     print(autoplot(ames_explain))
