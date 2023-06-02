@@ -86,9 +86,10 @@ block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax
 \item{optimizer}{the optimization method. currently only 'adam' is supported,
 you can also pass any torch optimizer function.}
 
-\item{lr_scheduler}{if \code{NULL}, no learning rate decay is used. if "step"
-decays the learning rate by \code{lr_decay} every \code{step_size} epochs. It can
-also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
+\item{lr_scheduler}{if \code{NULL}, no learning rate decay is used. If "step"
+decays the learning rate by \code{lr_decay} every \code{step_size} epochs. If "reduce_on_plateau"
+decays the learning rate by \code{lr_decay} when no improvement after \code{step_size} epochs.
+It can #'   also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
 as parameter. The \code{step} method is called once per epoch.}
 
 \item{lr_decay}{multiplies the initial learning rate by \code{lr_decay} every
