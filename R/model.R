@@ -90,9 +90,10 @@ resolve_data <- function(x, y) {
 #'   range from 1 to 5
 #' @param verbose (logical) Whether to print progress and loss values during
 #'   training.
-#' @param lr_scheduler if `NULL`, no learning rate decay is used. if "step"
-#'   decays the learning rate by `lr_decay` every `step_size` epochs. It can
-#'   also be a [torch::lr_scheduler] function that only takes the optimizer
+#' @param lr_scheduler if `NULL`, no learning rate decay is used. If "step"
+#'   decays the learning rate by `lr_decay` every `step_size` epochs. If "reduce_on_plateau"
+#'   decays the learning rate by `lr_decay` when no improvement after `step_size` epochs.
+#'   It can #'   also be a [torch::lr_scheduler] function that only takes the optimizer
 #'   as parameter. The `step` method is called once per epoch.
 #' @param lr_decay multiplies the initial learning rate by `lr_decay` every
 #'   `step_size` epochs. Unused if `lr_scheduler` is a `torch::lr_scheduler`
