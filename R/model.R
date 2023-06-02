@@ -457,8 +457,12 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     scheduler <- list(step = function() {})
   } else if (rlang::is_function(config$lr_scheduler)) {
     scheduler <- config$lr_scheduler(optimizer)
+  } else if (config$lr_scheduler == "reduce_on_plateau") {
+    scheduler <- torch::lr_reduce_on_plateau(optimizer, factor = config$lr_decay, patience = config$step_size)
   } else if (config$lr_scheduler == "step") {
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
+  } else {
+    rlang::abort("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.")
   }
 
   # restore previous metrics & checkpoints
@@ -537,8 +541,14 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         best_metric <- current_loss
     }
 
+    if (! is.null(config$lr_scheduler)) {
+      if (config$lr_scheduler == "step") {
+        scheduler$step()
+      } else {
+        scheduler$step(current_loss)
+      }
+    }
 
-    scheduler$step()
   }
 
   network$to(device = "cpu")
