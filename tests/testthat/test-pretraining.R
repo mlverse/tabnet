@@ -108,7 +108,7 @@ test_that("can train from a recipe", {
 
 })
 
-test_that("lr scheduler works", {
+test_that("lr scheduler step works", {
 
   expect_error(
     fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = "step",
@@ -123,6 +123,26 @@ test_that("lr scheduler works", {
   expect_error(
     fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = sc_fn,
                       lr_decay = 0.1, step_size = 1),
+    regexp = NA
+  )
+
+})
+
+test_that("lr scheduler reduce_on_plateau works", {
+
+  expect_error(
+    fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = "reduce_on_plateau",
+                           lr_decay = 0.1, step_size = 1),
+    regexp = NA
+  )
+
+  sc_fn <- function(optimizer) {
+    torch::lr_step(optimizer, step_size = 1, gamma = 0.1)
+  }
+
+  expect_error(
+    fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = sc_fn,
+                           lr_decay = 0.1, step_size = 1),
     regexp = NA
   )
 
