@@ -137,7 +137,7 @@ test_that("lr scheduler reduce_on_plateau works", {
   )
 
   sc_fn <- function(optimizer) {
-    torch::lr_step(optimizer, step_size = 1, gamma = 0.1)
+    torch::lr_reduce_on_plateau(optimizer, factor = 0.1, patience = 10)
   }
 
   expect_error(
