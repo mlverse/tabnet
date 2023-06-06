@@ -542,14 +542,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         best_metric <- current_loss
     }
 
-    if (! is.null(config$lr_scheduler)) {
-      if (config$lr_scheduler == "step") {
-        scheduler$step()
-      } else {
-        scheduler$step(current_loss)
-      }
+    if ("metrics" %in% names(formals(scheduler$step))) {
+      scheduler$step(current_loss)
+    } else {
+      scheduler$step()
     }
-
   }
 
   network$to(device = "cpu")
