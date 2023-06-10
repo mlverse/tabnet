@@ -187,9 +187,10 @@ you can also pass any torch optimizer function.</p></dd>
 
 
 <dt>lr_scheduler</dt>
-<dd><p>if <code>NULL</code>, no learning rate decay is used. if "step"
-decays the learning rate by <code>lr_decay</code> every <code>step_size</code> epochs. It can
-also be a <a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a> function that only takes the optimizer
+<dd><p>if <code>NULL</code>, no learning rate decay is used. If "step"
+decays the learning rate by <code>lr_decay</code> every <code>step_size</code> epochs. If "reduce_on_plateau"
+decays the learning rate by <code>lr_decay</code> when no improvement after <code>step_size</code> epochs.
+It can #'   also be a <a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a> function that only takes the optimizer
 as parameter. The <code>step</code> method is called once per epoch.</p></dd>
 
 
