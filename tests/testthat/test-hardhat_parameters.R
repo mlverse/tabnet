@@ -82,7 +82,7 @@ test_that("explicit error message when categorical embedding dimension vector ha
   )
 })
 
-test_that("scheduler works", {
+test_that("step scheduler works", {
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "step",
@@ -102,6 +102,25 @@ test_that("scheduler works", {
 
 })
 
+test_that("reduce_on_plateau scheduler works", {
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "reduce_on_plateau",
+                      lr_decay = 0.1, step_size = 1),
+    regexp = NA
+  )
+
+  sc_fn <- function(optimizer) {
+    torch::lr_step(optimizer, step_size = 1, gamma = 0.1)
+  }
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = sc_fn,
+                      lr_decay = 0.1, step_size = 1),
+    regexp = NA
+  )
+
+})
 
 test_that("fit uses config parameters mix from config= and ...", {
 
