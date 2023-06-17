@@ -1,5 +1,8 @@
 # tabnet (development version)
 
+## New features
+* Add `reduce_on_plateau` as option for `lr_scheduler` at `tabnet_config()` (@SvenVw, #120)
+
 # tabnet 0.4.0
 
 ## New features
