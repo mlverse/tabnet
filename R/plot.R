@@ -87,7 +87,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' x <- ames[ids,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
 #' y <- ames[ids, c("Sale_Price", "Pool_Area")]
 #' ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
-#' ames_explain <- tabent_explain()
+#' ames_explain <- tabnet_explain(ames_fit, x)
 #' autoplot(ames_explain, quantile = 0.99)
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
