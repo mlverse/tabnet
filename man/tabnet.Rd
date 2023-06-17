@@ -83,7 +83,7 @@ torch::torch_set_num_interop_threads(1)
 }
 
 \examples{
-if (torch::torch_is_installed()) {
+\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(parsnip)
 data("ames", package = "modeldata")
 model <- tabnet() \%>\%
@@ -91,8 +91,7 @@ model <- tabnet() \%>\%
   set_engine("torch")
 model \%>\%
   fit(Sale_Price ~ ., data = ames)
-}
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 tabnet_fit
