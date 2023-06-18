@@ -187,12 +187,12 @@ the interpretation metrics.</p>
 <span><span class="co">#&gt; [Epoch 002] Loss: 0.784014</span></span>
 <span><span class="co">#&gt; [Epoch 003] Loss: 0.676509</span></span>
 <span><span class="co">#&gt; [Epoch 004] Loss: 0.639690</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.611586</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.585089</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.552268</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.517715</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.490631</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.463379</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.611584</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.585045</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.549735</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.513075</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.484156</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.461366</span></span></code></pre></div>
 <p>In the feature importance plot we can see that, as expected, features
 <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -233,14 +233,14 @@ create the response variable and we expect to see this in the masks.</p>
 <code class="sourceCode R"><span><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.289555</span></span>
 <span><span class="co">#&gt; [Epoch 002] Loss: 0.929622</span></span>
-<span><span class="co">#&gt; [Epoch 003] Loss: 0.745959</span></span>
-<span><span class="co">#&gt; [Epoch 004] Loss: 0.685981</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.661809</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.646003</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.632528</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.615357</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.599160</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.583839</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 003] Loss: 0.745960</span></span>
+<span><span class="co">#&gt; [Epoch 004] Loss: 0.685982</span></span>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.661789</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.645513</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.633089</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.616770</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.602258</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.589325</span></span></code></pre></div>
 <p>In the feature importance plot we have, as expected, strong
 importance for <code>V10</code>, and the other features that are used
 conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
