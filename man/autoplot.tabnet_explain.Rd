@@ -37,15 +37,23 @@ Plot the tabnet_explain object mask importance per variable along the predicted 
 low values. \code{quantile=1}, the default, do not clip any values.
 }
 \examples{
-\donttest{
-if (torch::torch_is_installed()) {
+\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(ggplot2)
 data("attrition", package = "modeldata")
+
+## Single-outcome binary classification of `Attrition` in `attrition` dataset
 attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, epoch=11)
 attrition_explain <- tabnet_explain(attrition_fit, attrition)
 # Plot the model aggregated mask interpretation heatmap
 autoplot(attrition_explain)
-}
-}
 
+## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
+data("ames", package = "modeldata")
+ids <- sample(nrow(ames), 256)
+x <- ames[ids,-which(names(ames) \%in\% c("Sale_Price", "Pool_Area"))]
+y <- ames[ids, c("Sale_Price", "Pool_Area")]
+ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
+ames_explain <- tabnet_explain(ames_fit, x)
+autoplot(ames_explain, quantile = 0.99)
+\dontshow{\}) # examplesIf}
 }

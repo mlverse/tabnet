@@ -62,19 +62,24 @@
 #' torch::torch_set_num_interop_threads(1)
 #' ```
 #'
-#' @examples
-#' if (torch::torch_is_installed()) {
+#' @examplesIf torch::torch_is_installed()
 #'
-#' # regression using formula specification
+#' ## Single-outcome regression using formula specification
 #' data("ames", package = "modeldata")
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
 #'
-#' # classification using data-frame specification
+#' ## Single-outcome classification using data-frame specification
 #' data("attrition", package = "modeldata")
 #' attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
-#' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1)
-#' }
+#' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
 #'
+#' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
+#' data("ames", package = "modeldata")
+#' ids <- sample(nrow(ames), 256)
+#' x <- ames[ids,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
+#' y <- ames[ids, c("Sale_Price", "Pool_Area")]
+#' ames_fit <- tabnet_fit(x, y, epochs = 2, valid_split = 0.2)
+
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'
 #' @export
@@ -226,11 +231,9 @@ new_tabnet_fit <- function(fit, blueprint) {
 #' torch::torch_set_num_interop_threads(1)
 #' ```
 #'
-#' @examples
-#' if (torch::torch_is_installed()) {
+#' @examplesIf torch::torch_is_installed()
 #' data("ames", package = "modeldata")
 #' pretrained <- tabnet_pretrain(Sale_Price ~ ., data = ames, epochs = 1)
-#' }
 #'
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'

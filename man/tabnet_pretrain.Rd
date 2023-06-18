@@ -116,9 +116,8 @@ torch::torch_set_num_interop_threads(1)
 }
 
 \examples{
-if (torch::torch_is_installed()) {
+\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 data("ames", package = "modeldata")
 pretrained <- tabnet_pretrain(Sale_Price ~ ., data = ames, epochs = 1)
-}
-
+\dontshow{\}) # examplesIf}
 }
