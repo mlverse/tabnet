@@ -33,6 +33,12 @@ attr_pretrained_vsplit <- tabnet_pretrain(attrix, attriy, epochs = 12, valid_spl
 attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12)
 attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
 
+# starwars hierarchical
+data("starwars", package = "dplyr")
+starwx <- starwars %>% select(-species, -homeworld, -name)
+starwy <- starwars %>%
+  mutate(pathString = paste("Starwars", species, homeworld, name, sep="/")) %>%
+  data.tree::as.Node()
 
 # Run after all tests
 withr::defer(teardown_env())

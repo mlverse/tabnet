@@ -94,6 +94,17 @@ tabnet_fit.default <- function(x, ...) {
 #' @export
 #' @rdname tabnet_fit
 tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+  # extract data.tree outcome info if any
+  if (inherits(y, "Node") && length(data.tree::Get(y$leaves, "name")) > 0) {
+    yy <- data.tree::Clone(y)
+    # TODO produce the M matrix
+    M <-  data.tree::ToDataFrameNetwork(yy)
+    y <-  data.tree::Get(yy$leaves, "name") %>% as.factor
+  } else {
+    yy <- NULL
+  }
+
+
   processed <- hardhat::mold(x, y)
   check_type(processed$outcomes)
 
@@ -107,7 +118,12 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
     ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  if (!is.null(yy)) {
+    # TODO manage to bridge with the M matrix
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  } else {
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  }
 }
 
 #' @export
