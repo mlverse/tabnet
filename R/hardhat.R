@@ -159,6 +159,34 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
+#' @export
+#' @rdname tabnet_fit
+tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+  # TODO ensure there is no level_* col in the tree
+  # get tree leaves and extract attributes into data.frames
+  xy_df <- ToDataFrameTypeCol(x, x$attributesAll)
+  x_df <- xy_df %>% select(-starts_with("level_"))
+  y_df <- xy_df %>% select(starts_with("level_"))
+  processed <- hardhat::mold(x_df, y_df)
+  # embed the M matrix in Sextra
+  ancestor <- ToDataFrameNetwork(datatree) %>%
+    mutate_if(is.character, . %>% as.factor %>% as.numeric)
+  processed$extra$M <- Matrix::sparseMatrix(ancestor$from, ancestor$to, x=1)
+  check_type(processed$outcomes)
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config))
+
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+}
+
 new_tabnet_fit <- function(fit, blueprint) {
 
   serialized_net <- model_to_raw(fit$network)

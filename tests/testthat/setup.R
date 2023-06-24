@@ -33,6 +33,7 @@ attr_pretrained_vsplit <- tabnet_pretrain(attrix, attriy, epochs = 12, valid_spl
 attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12)
 attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
 
-
+# data.tree Node dataset
+data(acme, package = "data.tree")
 # Run after all tests
 withr::defer(teardown_env())
