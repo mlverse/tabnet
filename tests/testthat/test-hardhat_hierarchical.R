@@ -3,9 +3,8 @@ test_that("Training hierarchical classification for {data.tree} Node", {
   expect_no_error(
     fit <- tabnet_fit(acme, epochs = 1)
   )
-
   expect_no_error(
-    result <- predict(fit, acme, type = "prob")
+    result <- predict(fit, acme_df, type = "prob")
   )
 
   expect_equal(ncol(result), 3)
@@ -18,7 +17,7 @@ test_that("Training hierarchical classification for {data.tree} Node", {
   expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
 
   expect_no_error(
-    result <- predict(fit, attri_mult_x)
+    result <- predict(fit, acme_df)
   )
   expect_equal(ncol(result), 3)
   expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(outcome_nlevels))
@@ -28,12 +27,11 @@ test_that("Training hierarchical classification for {data.tree} Node", {
 test_that("Training hierarchical classification for {data.tree} Node with validation split", {
 
   expect_no_error(
-    fit <- tabnet_fit(acme, data.frame(y=attriy, z=attriy, sat=attrix$JobSatisfaction),
-                      valid_split = 0.2, epochs = 1)
+    fit <- tabnet_fit(acme, valid_split = 0.2, epochs = 1)
   )
 
   expect_no_error(
-    result <- predict(fit, attri_mult_x, type = "prob")
+    result <- predict(fit, acme_df, type = "prob")
   )
 
   expect_equal(ncol(result), 3)
@@ -47,7 +45,7 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
   expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
 
   expect_no_error(
-    result <- predict(fit, attri_mult_x)
+    result <- predict(fit, acme_df)
   )
   expect_equal(ncol(result), 3)
 

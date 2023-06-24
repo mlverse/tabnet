@@ -69,12 +69,14 @@ TBD
 
 ### Ensure the last hierarchy of the tree is the sample id
 
-The tree only keeps one attribute per tree leaf. Thus in order to transfer your complete dataset into the Node object, keep the last level of the hierarchy to be a unique sample identifier (last resort beeing `row_id_to_column()` to achieve it)
+The tree only keeps one attribute per tree leaf. Thus in order to transfer your complete predictors dataset into the Node object, you must keep the last level of the hierarchy to be a unique sample identifier (last resort beeing `row_id_to_column()` to achieve it).
+
+The classification will be done removing the last level of hierarchy in any case.
 
 Now let's have all those rules applied to the `starwars_tree` : 
 
 ```{r}
-# correzct Node construction
+# correct Node construction
 starwars_tree <- starwars %>% 
   rename(`_name` = "name", `_height` = "height") %>% 
   mutate(pathString = paste("StarWars_characters", species, homeworld, `_name`, sep = "/")) %>%
