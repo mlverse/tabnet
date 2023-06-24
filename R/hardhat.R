@@ -47,8 +47,9 @@
 #'
 #' @section Multi-outcome:
 #'
-#' TabNet allows multi-outcome prediction, the outcomes must all be numeric or all be categorical,
-#' and the __data frame__ method shall be used for `x` and `y`.
+#' TabNet allows multi-outcome prediction, which is usually named [multi-label classification](https://en.wikipedia.org/wiki/Multi-label_classification)
+#'   or multi-output classification when outcomes are categorical.
+#' Multi-outcome currently expect all outcomes to be either all numeric or all categorical.
 #'
 #' @section Threading:
 #'
@@ -64,21 +65,27 @@
 #'
 #' @examplesIf torch::torch_is_installed()
 #'
-#' ## Single-outcome regression using formula specification
 #' data("ames", package = "modeldata")
+#' data("attrition", package = "modeldata")
+#' ids <- sample(nrow(ames), 256)
+#'
+#' ## Single-outcome regression using formula specification
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
 #'
 #' ## Single-outcome classification using data-frame specification
-#' data("attrition", package = "modeldata")
 #' attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
 #' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
 #'
-#' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
-#' data("ames", package = "modeldata")
-#' ids <- sample(nrow(ames), 256)
-#' x <- ames[ids,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
-#' y <- ames[ids, c("Sale_Price", "Pool_Area")]
-#' ames_fit <- tabnet_fit(x, y, epochs = 2, valid_split = 0.2)
+#' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
+#' ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames[ids,], epochs = 2, valid_split = 0.2)
+
+#' ## Multi-label classification on `Attrition` and `JobSatisfaction` in `attrition` dataset using recipe,
+#' rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition[ids,]) %>%
+#'   step_normalize(all_numeric(), -all_outcomes())
+#'
+#' ames_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
+#'
+#' Note: Dataset size and number of epochs should be increased for publication-level results.
 
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'
