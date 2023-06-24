@@ -55,13 +55,13 @@ print(starwars_tree, "name","height", "mass", "eye_color", limit = 8)
 
 ```
 
-You may have notice that `name` and `height` have unexpected values according to the original data: `Human` is not part of the `name` in orginal dataset, and `height` values have been changed into the heigh of the tree. This is due to some rules we will have to follow to create the Node from data frame.
+You may have notice that `name` and `height` have unexpected values according to the original data: `Human` is not part of the `name` in orginal dataset, and `height` values have been changed into the local height of the tree. This is due to some rules we will have to follow to create the Node from data frame.
 
 ## `Node` preparation rules
 
 ### Avoid column name collision with reserved data.tree names
 
-`name` and `height` are both part of the `NODE_RESERVED_NAMES_CONST` reserved list of names for `Node` attribute names. So they must not be used as predictor names.
+`name` and `height` are both part of the `NODE_RESERVED_NAMES_CONST` reserved list of names for `Node` attribute names. So they must not be used as predictor names, as the `as.Node()` function will silently discard them.
 
 ### Avoid column named `level_*` to avoid collision with output data.tree names
 

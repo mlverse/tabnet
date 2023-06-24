@@ -55,7 +55,14 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
   expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(fit$blueprint$ptypes$outcomes))
 })
 
-test_that("Training hierarchical classification works with wierd colnames", {
+test_that("we can check with non-compliant colnames", {
+
+  # try to use starwars dataset with two forbidden column name
+  starwars_tree <- starwars %>%
+    mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/"))
+  expect_error(
+    check_compliant_node(starwars_tree)
+    ,"reserved names")
 
   # augment acme dataset with a forbidden column name
   acme$Do(function(x) {
@@ -65,8 +72,12 @@ test_that("Training hierarchical classification works with wierd colnames", {
   },
   traversal = "post-order")
   expect_error(
+    check_compliant_node(acme)
+    ,"reserved names")
+
+  expect_error(
     tabnet_fit(acme, valid_split = 0.2, epochs = 1)
-    ,"Error")
+    ,"reserved names")
 
 })
 
