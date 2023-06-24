@@ -1,4 +1,4 @@
-test_that("Training multilabel classification for {data.tree} Node", {
+test_that("Training hierarchical classification for {data.tree} Node", {
 
   expect_no_error(
     fit <- tabnet_fit(acme, epochs = 1)
@@ -25,7 +25,7 @@ test_that("Training multilabel classification for {data.tree} Node", {
 
 })
 
-test_that("Training multilabel classification for {data.tree} Node with validation split", {
+test_that("Training hierarchical classification for {data.tree} Node with validation split", {
 
   expect_no_error(
     fit <- tabnet_fit(acme, data.frame(y=attriy, z=attriy, sat=attrix$JobSatisfaction),
@@ -55,11 +55,11 @@ test_that("Training multilabel classification for {data.tree} Node with validati
   expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(fit$blueprint$ptypes$outcomes))
 })
 
-test_that("Training multilabel classification works with wierd colnames", {
+test_that("Training hierarchical classification works with wierd colnames", {
 
   # augment acme dataset with a forbidden column name
   acme$Do(function(x) {
-    x$level_4 <- Aggregate(node = x,
+    x$level_4 <- data.tree::Aggregate(node = x,
                            attribute = "p",
                            aggFun = sum)
   },
@@ -69,3 +69,4 @@ test_that("Training multilabel classification works with wierd colnames", {
     ,"Error")
 
 })
+

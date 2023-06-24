@@ -169,16 +169,18 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
 #' @export
 #' @rdname tabnet_fit
 tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  # TODO ensure there is no level_* col in the tree
+  # TODO ensure there is no level_* col in the data.tree
   # get tree leaves and extract attributes into data.frames
   xy_df <- ToDataFrameTypeCol(x, x$attributesAll)
   x_df <- xy_df %>% select(-starts_with("level_"))
-  y_df <- xy_df %>% select(starts_with("level_"))
+  y_df <- xy_df %>% select(starts_with("level_")) %>% mutate_all(as.factor)
   processed <- hardhat::mold(x_df, y_df)
-  # embed the M matrix in Sextra
-  ancestor <- ToDataFrameNetwork(datatree) %>%
-    mutate_if(is.character, . %>% as.factor %>% as.numeric)
-  processed$extra$M <- Matrix::sparseMatrix(ancestor$from, ancestor$to, x=1)
+  # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
+  ancestor <- ToDataFrameNetwork(x) %>%
+   mutate_if(is.character, . %>% as.factor %>% as.numeric)
+  # TODO check correctness
+  # embed the M matrix in $extra
+  processed$extra$M <- Matrix::sparseMatrix(ancestor$from, ancestor$to, x = 1)
   check_type(processed$outcomes)
 
   default_config <- tabnet_config()
@@ -327,7 +329,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 #' @export
@@ -345,7 +347,7 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 new_tabnet_pretrain <- function(pretrain, blueprint) {

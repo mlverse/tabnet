@@ -1,0 +1,89 @@
+---
+title: "Hierarchical_classification"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Hierarchical Classification}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tabnet)
+library(dplyr)
+library(data.tree)
+```
+
+# Hierarchical Classification
+
+## Data preparation
+
+The supported data format for hierarchical classification is the `Node` object format from package `data.tree`.
+
+This is a general purpose format that fits generic hierarchical tree encoding needs with predictor values association to Nodes available through the `attributes` object in the `Node`.
+
+ - A very basic example is the `acme` dataset to show you how the two predictors values `cost` and `p` are associates to Node attributes at each node in the hierarchy : 
+```{r}
+data(acme, package = "data.tree")
+acme$attributesAll
+print(acme, "cost", "p" , limit = 8)
+```
+
+- Multiple manual or programmatic methods to create or update predictors are available in the `vignette("data.tree", package = "data.tree")`.
+
+- a lot of native hierarchical data-format conversion from files to `Node` are covered by the`data.tree` package in the "Create tree from a file" section of the same vignette. If needed, the `ape` package covers a lot of conversion format to the `philo` format. Thus you can reach the `Node` format in maybe two transformation steps...
+
+- A quick way to achieve `Node` format from a data frame with columns being the different levels of the hierarchy consist in pasting the columns into a single string with `"/"` separator into a `pathString` column.
+This will be turn into the expected hierarchy by the `data.tree::as.Node()` command.
+
+Let's do it with `starwars` dataset as a toy example : 
+```{r}
+data(starwars, package = "dplyr")
+head(starwars, 4)
+
+# erroneous Node construction
+starwars_tree <- starwars %>% 
+  mutate(pathString = paste("StarWars_characters", species, homeworld, `name`, sep = "/")) %>%
+  as.Node()
+print(starwars_tree, "name","height", "mass", "eye_color", limit = 8)
+
+```
+
+You may have notice that `name` and `height` have unexpected values according to the original data: `Human` is not part of the `name` in orginal dataset, and `height` values have been changed into the heigh of the tree. This is due to some rules we will have to follow to create the Node from data frame.
+
+## `Node` preparation rules
+
+### Avoid column name collision with reserved data.tree names
+
+`name` and `height` are both part of the `NODE_RESERVED_NAMES_CONST` reserved list of names for `Node` attribute names. So they must not be used as predictor names.
+
+### Avoid column named `level_*` to avoid collision with output data.tree names
+
+TBD
+
+### Ensure the last hierarchy of the tree is the sample id
+
+The tree only keeps one attribute per tree leaf. Thus in order to transfer your complete dataset into the Node object, keep the last level of the hierarchy to be a unique sample identifier (last resort beeing `row_id_to_column()` to achieve it)
+
+Now let's have all those rules applied to the `starwars_tree` : 
+
+```{r}
+# correzct Node construction
+starwars_tree <- starwars %>% 
+  rename(`_name` = "name", `_height` = "height") %>% 
+  mutate(pathString = paste("StarWars_characters", species, homeworld, `_name`, sep = "/")) %>%
+  as.Node()
+print(starwars_tree, "name", "_name","_height", "mass", "eye_color", limit = 8)
+```
+
+This Node can now be used as an input for `tabnet_fit()` : 
+```{r}
+starw_model <- tabnet_fit(starwars_tree, epoch = 5)
+```
+
