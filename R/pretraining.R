@@ -1,4 +1,6 @@
 train_batch_un <- function(network, optimizer, batch, config) {
+#' @importFrom torch nn_utils_clip_grad_norm_
+train_batch_un <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
   loss <- config$loss_fn(output[[1]], output[[2]], output[[3]])
@@ -43,6 +45,7 @@ transpose_metrics <- function(metrics) {
   out[-1]
 }
 
+#' @importFrom torch torch_matmul torch_mean torch_mul torch_std torch_sum
 unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
 
   errors <- y_pred - embedded_x
@@ -58,6 +61,10 @@ unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) 
   loss
 }
 
+#' @importFrom glue glue
+#' @importFrom rlang abort inform is_function is_scalar_character warn
+#' @importFrom tibble tibble
+#' @importFrom torch dataloader dataset lr_reduce_on_plateau lr_scheduler lr_step optim_adam optimizer torch_long torch_manual_seed torch_randint
 tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift = 0L) {
   torch::torch_manual_seed(sample.int(1e6, 1))
 

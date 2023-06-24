@@ -20,7 +20,11 @@
 #' autoplot(attrition_fit)
 #' }
 #' }
-#' @importFrom rlang .data
+#' @importFrom dplyr filter mutate select select_if
+#' @importFrom ggplot2 aes element_text geom_line geom_point ggplot guide_legend guides labs scale_y_log10 theme
+#' @importFrom purrr map_dbl
+#' @importFrom tibble enframe
+#' @importFrom tidyr drop_na pivot_longer pivot_wider unnest_longer unnest_wider
 #'
 autoplot.tabnet_fit <- function(object, ...) {
 
@@ -86,6 +90,10 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' }
 #' }
 #'
+#' @importFrom dplyr group_by mutate row_number ungroup
+#' @importFrom ggplot2 aes facet_wrap geom_tile ggplot scale_fill_viridis_c theme_minimal
+#' @importFrom purrr imap_dfr
+#' @importFrom tidyr pivot_longer
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
 
@@ -117,6 +125,8 @@ autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quant
   p
 }
 
+#' @importFrom purrr map_dbl
+#' @importFrom stats quantile
 quantile_clip <- function(x, probs) {
   quantile <- quantile(x, probs = probs)
   purrr::map_dbl(x, ~min(.x, quantile))

@@ -1,0 +1,9 @@
+as.matrix = base
+filter = dplyr
+map = purrr
+mean = base
+order = base
+print = base
+select = dplyr
+set_names = magrittr
+which = base

@@ -1,4 +1,6 @@
 check_dials <- function() {
+#' @importFrom rlang abort
+check_dials <- function() {
   if (!requireNamespace("dials", quietly = TRUE))
     rlang::abort("Package \"dials\" needed for this function to work. Please install it.")
 }
@@ -125,4 +127,3 @@ mask_type <- function(values = c("sparsemax", "entmax")) {
     finalize = NULL
   )
 }
-

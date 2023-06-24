@@ -14,6 +14,7 @@
 #' @param x a data frame
 #' @param y a response vector
 #' @noRd
+#' @importFrom torch torch_bool torch_float torch_long torch_tensor
 resolve_data <- function(x, y) {
   cat_idx <- which(sapply(x, is.factor))
   cat_dims <- sapply(cat_idx, function(i) nlevels(x[[i]]))
@@ -203,6 +204,8 @@ tabnet_config <- function(batch_size = 1024^2,
   )
 }
 
+#' @importFrom rlang abort
+#' @importFrom torch nn_cross_entropy_loss nn_mse_loss torch_long
 resolve_loss <- function(loss, dtype) {
   if (is.function(loss))
     loss_fn <- loss
@@ -216,6 +219,7 @@ resolve_loss <- function(loss, dtype) {
   loss_fn
 }
 
+#' @importFrom rlang abort
 resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   if (early_stopping_monitor %in% c("valid_loss", "auto") && valid_split > 0)
     early_stopping_monitor <- "valid_loss"
@@ -227,6 +231,8 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   early_stopping_monitor
 }
 
+#' @importFrom purrr pmap
+#' @importFrom torch nn_utils_clip_grad_norm_ torch_long torch_split torch_stack torch_sum
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
@@ -266,6 +272,8 @@ train_batch <- function(network, optimizer, batch, config) {
   )
 }
 
+#' @importFrom purrr pmap
+#' @importFrom torch torch_long torch_split torch_stack torch_sum
 valid_batch <- function(network, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
@@ -297,6 +305,7 @@ valid_batch <- function(network, batch, config) {
   )
 }
 
+#' @importFrom torch backends_mps_is_available cuda_is_available
 get_device_from_config <- function(config) {
   if (config$device == "auto") {
     if (torch::cuda_is_available()){
@@ -312,6 +321,8 @@ get_device_from_config <- function(config) {
   device
 }
 
+#' @importFrom tibble tibble
+#' @importFrom torch dataset torch_manual_seed
 tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
   torch::torch_manual_seed(sample.int(1e6, 1))
@@ -383,6 +394,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   )
 }
 
+#' @importFrom tibble tibble
+#' @importFrom torch dataset torch_manual_seed
 tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift = 0L) {
   stopifnot("tabnet_model shall be initialised or pretrained" = (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
@@ -581,6 +594,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   )
 }
 
+#' @importFrom torch dataloader dataset torch_cat
 predict_impl <- function(obj, x, batch_size = 1e5) {
   # prediction dataset
   device = obj$fit$config$device
@@ -611,11 +625,14 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   torch::torch_cat(yhat)
 }
 
+#' @importFrom hardhat spruce_numeric
 predict_impl_numeric <- function(obj, x, batch_size) {
   p <- as.matrix(predict_impl(obj, x, batch_size))
   hardhat::spruce_numeric(as.numeric(p))
 }
 
+#' @importFrom hardhat spruce_numeric_multiple
+#' @importFrom purrr map
 predict_impl_numeric_multiple <- function(obj, x, batch_size) {
   p <- as.matrix(predict_impl(obj, x, batch_size))
   # TODO use a cleaner function to turn matrix into vectors
@@ -638,11 +655,15 @@ get_blueprint_levels <- function(obj) {
 #'
 #' @return : a list of levels vectors for each outcome
 #' @noRd
+#' @importFrom rlang set_names
+#' @importFrom purrr map
 get_blueprint_levels_multiple <- function(obj) {
   purrr::map(obj$blueprint$ptypes$outcomes, levels) %>%
     rlang::set_names(names(obj$blueprint$ptypes$outcomes))
 }
 
+#' @importFrom hardhat spruce_prob
+#' @importFrom torch nnf_softmax
 predict_impl_prob <- function(obj, x, batch_size) {
   p <- predict_impl(obj, x, batch_size)
   p <- torch::nnf_softmax(p, dim = 2)
@@ -650,6 +671,10 @@ predict_impl_prob <- function(obj, x, batch_size) {
   hardhat::spruce_prob(get_blueprint_levels(obj), p)
 }
 
+#' @importFrom hardhat spruce_prob spruce_prob_multiple
+#' @importFrom rlang set_names
+#' @importFrom purrr map pmap
+#' @importFrom torch nnf_softmax torch_split
 predict_impl_prob_multiple <- function(obj, x, batch_size, outcome_nlevels) {
   p <- predict_impl(obj, x, batch_size)
   p <- torch::nnf_softmax(p, dim = 2)
@@ -666,6 +691,8 @@ predict_impl_prob_multiple <- function(obj, x, batch_size, outcome_nlevels) {
     )
 }
 
+#' @importFrom hardhat spruce_class
+#' @importFrom torch torch_max
 predict_impl_class <- function(obj, x, batch_size) {
   p <- predict_impl(obj, x, batch_size)
   p_idx <- as.integer(torch::torch_max(p, dim = 2)[[2]])
@@ -674,6 +701,10 @@ predict_impl_class <- function(obj, x, batch_size) {
   hardhat::spruce_class(p)
 }
 
+#' @importFrom hardhat spruce_class_multiple
+#' @importFrom rlang set_names
+#' @importFrom purrr map pmap
+#' @importFrom torch torch_max torch_split
 predict_impl_class_multiple <- function(obj, x, batch_size, outcome_nlevels) {
   p <- predict_impl(obj, x, batch_size)
   p_levels <- get_blueprint_levels_multiple(obj)

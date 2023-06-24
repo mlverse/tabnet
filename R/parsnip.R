@@ -238,6 +238,7 @@ add_parsnip_tabnet <- function() {
 #' `parsnip` machinery.
 #'
 #' @export
+#' @importFrom rlang abort enquo
 tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
                    learn_rate = NULL, decision_width = NULL, attention_width = NULL,
                    num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
@@ -280,6 +281,8 @@ tabnet_env <- new.env()
 tabnet_env$parsnip_added <- FALSE
 
 
+#' @importFrom stats predict
+#' @importFrom tibble tibble
 multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NULL, ...) {
 
   if (is.null(epochs))
@@ -301,7 +304,7 @@ multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NU
 }
 
 #' @export
-#' @importFrom stats update
+#' @importFrom rlang check_installed enquo
 update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NULL, batch_size = NULL,
                           learn_rate = NULL, decision_width = NULL, attention_width = NULL,
                           num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,

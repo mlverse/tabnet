@@ -1,8 +1,11 @@
 initialize_non_glu <- function(module, input_dim, output_dim) {
+#' @importFrom torch nn_init_xavier_normal_
+initialize_non_glu <- function(module, input_dim, output_dim) {
   gain_value <- sqrt((input_dim + output_dim)/sqrt(4*input_dim))
   torch::nn_init_xavier_normal_(module$weight, gain = gain_value)
 }
 
+#' @importFrom torch nn_init_xavier_normal_
 initialize_glu <- function(module, input_dim, output_dim) {
   gain_value <- sqrt((input_dim + output_dim)/sqrt(input_dim))
   torch::nn_init_xavier_normal_(module$weight, gain = gain_value)
@@ -11,6 +14,7 @@ initialize_glu <- function(module, input_dim, output_dim) {
 # Ghost Batch Normalization
 # https://arxiv.org/abs/1705.08741
 #
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 gbn <- torch::nn_module(
   "gbn",
   initialize = function(input_dim, virtual_batch_size=128, momentum = 0.02) {
@@ -28,6 +32,7 @@ gbn <- torch::nn_module(
 # Defines main part of the TabNet network without the embedding layers.
 #
 #
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_mean torch_sum torch_mul torch_log
 tabnet_encoder <- torch::nn_module(
   "tabnet_encoder",
   initialize = function(input_dim, output_dim,
@@ -110,16 +115,16 @@ tabnet_encoder <- torch::nn_module(
     for (step in seq_len(self$n_steps)) {
 
       M <- self$att_transformers[[step]](prior, att)
-      M_loss <- M_loss + torch::torch_mean(torch::torch_sum(
-        torch::torch_mul(M, torch::torch_log(M + self$epsilon)),
+      M_loss <- M_loss + torch_mean(torch_sum(
+        torch_mul(M, torch_log(M + self$epsilon)),
         dim = 2
       ))
 
       # update prior
-      prior <- torch::torch_mul(self$gamma - M, prior)
+      prior <- torch_mul(self$gamma - M, prior)
 
       # output
-      masked_x <- torch::torch_mul(M, x)
+      masked_x <- torch_mul(M, x)
       out <- self$feat_transformers[[step]](masked_x)
       d <- torch::nnf_relu(out[.., 1:(self$n_d)])
       steps_output[[step]] <- d
@@ -148,16 +153,16 @@ tabnet_encoder <- torch::nn_module(
       masks[[step]] <- M
 
       # update prior
-      prior <- torch::torch_mul(self$gamma - M, prior)
+      prior <- torch_mul(self$gamma - M, prior)
 
       # output
-      masked_x <- torch::torch_mul(M, x)
+      masked_x <- torch_mul(M, x)
       out <- self$feat_transformers[[step]](masked_x)
       d <- torch::nnf_relu(out[.., 1:(self$n_d)])
 
       # explain
-      step_importance <- torch::torch_sum(d, dim=2)
-      M_explain <- M_explain + torch::torch_mul(M, step_importance$unsqueeze(dim=2))
+      step_importance <- torch_sum(d, dim=2)
+      M_explain <- M_explain + torch_mul(M, step_importance$unsqueeze(dim=2))
 
       # update attention
       att <- out[, (self$n_d+1):N]
@@ -168,6 +173,8 @@ tabnet_encoder <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 tabnet_decoder <- torch::nn_module(
   "tabnet_decoder",
   initialize = function(input_dim, n_d=8,
@@ -232,6 +239,8 @@ tabnet_decoder <- torch::nn_module(
   },
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 tabnet_pretrainer <- torch::nn_module(
   "tabnet_pretrainer",
   initialize = function(input_dim, pretraining_ratio=0.2,
@@ -328,6 +337,8 @@ tabnet_pretrainer <- torch::nn_module(
 
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 tabnet_no_embedding <- torch::nn_module(
   "tabnet_no_embedding",
   initialize = function(input_dim, output_dim,
@@ -421,6 +432,7 @@ tabnet_no_embedding <- torch::nn_module(
 #' @param momentum  Float value between 0 and 1 which will be used for momentum in all batch norm.
 #' @param mask_type Either "sparsemax" or "entmax" : this is the masking function to use.
 #' @export
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 tabnet_nn <- torch::nn_module(
   "tabnet",
   initialize = function(input_dim, output_dim, n_d=8, n_a=8,
@@ -473,6 +485,8 @@ tabnet_nn <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 attentive_transformer <- torch::nn_module(
   "attentive_transformer",
   initialize = function(input_dim, output_dim,
@@ -502,6 +516,8 @@ attentive_transformer <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 feat_transformer <- torch::nn_module(
   "feat_transformer",
   initialize = function(input_dim, output_dim, shared_layers, n_glu_independent,
@@ -546,6 +562,8 @@ feat_transformer <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 glu_block <- torch::nn_module(
   "glu_block",
   initialize = function(input_dim, output_dim, n_glu=2, first=FALSE,
@@ -608,6 +626,8 @@ glu_block <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 glu_layer <- torch::nn_module(
   "glu_layer",
   initialize = function(input_dim, output_dim, fc=NULL,
@@ -635,6 +655,8 @@ glu_layer <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 embedding_generator <- torch::nn_module(
   "embedding_generator",
   initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
@@ -715,6 +737,8 @@ embedding_generator <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 na_embedding_generator <- torch::nn_module(
   "na_embedding_generator",
   initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
@@ -769,6 +793,8 @@ na_embedding_generator <- torch::nn_module(
   }
 )
 
+
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat
 random_obfuscator <- torch::nn_module(
   "random_obfuscator",
   initialize = function(pretraining_ratio) {
