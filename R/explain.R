@@ -131,9 +131,9 @@ sum_embedding_masks <- function(mask, input_dim, cat_idx, cat_emb_dim) {
   sizes[cat_idx] <- cat_emb_dim
 
   splits <- mask$split_with_sizes(sizes, dim = 2)
-  splits <- lapply(splits, torch::torch_sum, dim = 2, keepdim = TRUE)
+  splits <- lapply(splits, torch_sum, dim = 2, keepdim = TRUE)
 
-  torch::torch_cat(splits, dim = 2)
+  torch_cat(splits, dim = 2)
 }
 
 vi_model.tabnet_fit <- function(object, ...) {

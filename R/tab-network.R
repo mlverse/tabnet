@@ -25,14 +25,14 @@ gbn <- torch::nn_module(
   forward = function(x) {
     chunks <- x$chunk(as.integer(ceiling(x$shape[1] / self$virtual_batch_size)), 1)
     res <- lapply(chunks, self$bn)
-    torch::torch_cat(res, dim = 1)
+    torch_cat(res, dim = 1)
   }
 )
 
 # Defines main part of the TabNet network without the embedding layers.
 #
 #
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_mean torch_sum torch_mul torch_log
+#' @importFrom torch nn_batch_norm1d nn_module torch_add torch_cat torch_mean torch_sum torch_tensor torch_mul torch_log torch_zeros
 tabnet_encoder <- torch::nn_module(
   "tabnet_encoder",
   initialize = function(input_dim, output_dim,
@@ -104,7 +104,7 @@ tabnet_encoder <- torch::nn_module(
 
   },
   forward = function(x, prior) {
-    res <- torch::torch_tensor(0, device = x$device)
+    res <- torch_tensor(0, device = x$device)
     x <- self$initial_bn(x)
 
     #prior <- torch::torch_ones(size = x$shape, device = x$device)
@@ -128,7 +128,7 @@ tabnet_encoder <- torch::nn_module(
       out <- self$feat_transformers[[step]](masked_x)
       d <- torch::nnf_relu(out[.., 1:(self$n_d)])
       steps_output[[step]] <- d
-      res <- torch::torch_add(res, d)
+      res <- torch_add(res, d)
       # update attention
       att <- out[, (self$n_d + 1):N]
 
@@ -143,7 +143,7 @@ tabnet_encoder <- torch::nn_module(
     x <- self$initial_bn(x)
 
     prior <- x_na_mask$logical_not()
-    M_explain <- torch::torch_zeros(x$shape, device = x$device)
+    M_explain <- torch_zeros(x$shape, device = x$device)
     att <- self$initial_splitter(x)[, (self$n_d+1):N]
     masks <- list()
 
@@ -174,7 +174,7 @@ tabnet_encoder <- torch::nn_module(
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_tensor torch_add
 tabnet_decoder <- torch::nn_module(
   "tabnet_decoder",
   initialize = function(input_dim, n_d=8,
@@ -226,12 +226,12 @@ tabnet_decoder <- torch::nn_module(
 
   },
   forward = function(steps_output) {
-    res <- torch::torch_tensor(0, device = steps_output[[1]]$device)
+    res <- torch_tensor(0, device = steps_output[[1]]$device)
     for (step_nb in seq_along(steps_output)) {
 
       x <- self$feat_transformers[[step_nb]](steps_output[[step_nb]])
       x <- self$reconstruction_layers[[step_nb]](steps_output[[step_nb]])
-      res <- torch::torch_add(res, x)
+      res <- torch_add(res, x)
 
     }
 
@@ -240,7 +240,7 @@ tabnet_decoder <- torch::nn_module(
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_tensor
 tabnet_pretrainer <- torch::nn_module(
   "tabnet_pretrainer",
   initialize = function(input_dim, pretraining_ratio=0.2,
@@ -257,7 +257,7 @@ tabnet_pretrainer <- torch::nn_module(
 
     # a check par, just to easily find out when we need to
     # reload the model
-    self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
+    self$.check <- torch::nn_parameter(torch_tensor(1, requires_grad = TRUE))
     self$n_d <- n_d
     self$n_a <- n_a
     self$n_steps <- n_steps
@@ -338,7 +338,7 @@ tabnet_pretrainer <- torch::nn_module(
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_sum torch_stack
 tabnet_no_embedding <- torch::nn_module(
   "tabnet_no_embedding",
   initialize = function(input_dim, output_dim,
@@ -393,9 +393,9 @@ tabnet_no_embedding <- torch::nn_module(
     self_encoder_lst <- self$encoder(x, prior)
     steps_output <- self_encoder_lst[[1]]
     M_loss <- self_encoder_lst[[2]]
-    res <- torch::torch_sum(torch::torch_stack(steps_output, dim=1), dim=1)
+    res <- torch_sum(torch_stack(steps_output, dim=1), dim=1)
     if (self$is_multi_outcome) {
-      out <- torch::torch_stack(purrr::map(self$multi_outcome_mapping, exec, !!!res), dim=2)$squeeze(3)
+      out <- torch_stack(purrr::map(self$multi_outcome_mapping, exec, !!!res), dim=2)$squeeze(3)
     } else {
       out <- self$final_mapping(res)
     }
@@ -432,7 +432,7 @@ tabnet_no_embedding <- torch::nn_module(
 #' @param momentum  Float value between 0 and 1 which will be used for momentum in all batch norm.
 #' @param mask_type Either "sparsemax" or "entmax" : this is the masking function to use.
 #' @export
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_tensor
 tabnet_nn <- torch::nn_module(
   "tabnet",
   initialize = function(input_dim, output_dim, n_d=8, n_a=8,
@@ -446,7 +446,7 @@ tabnet_nn <- torch::nn_module(
 
     # a check par, just to easily find out when we need to
     # reload the model
-    self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
+    self$.check <- torch::nn_parameter(torch_tensor(1, requires_grad = TRUE))
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
@@ -486,7 +486,7 @@ tabnet_nn <- torch::nn_module(
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_mul
 attentive_transformer <- torch::nn_module(
   "attentive_transformer",
   initialize = function(input_dim, output_dim,
@@ -510,7 +510,7 @@ attentive_transformer <- torch::nn_module(
   forward = function(priors, processed_feat) {
     x <- self$fc(processed_feat)
     x <- self$bn(x)
-    x <- torch::torch_mul(x, priors)
+    x <- torch_mul(x, priors)
     x <- self$selector(x)
     x
   }
@@ -563,7 +563,7 @@ feat_transformer <- torch::nn_module(
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_sqrt torch_tensor torch_add
 glu_block <- torch::nn_module(
   "glu_block",
   initialize = function(input_dim, output_dim, n_glu=2, first=FALSE,
@@ -608,7 +608,7 @@ glu_block <- torch::nn_module(
 
   },
   forward = function(x) {
-    scale <- torch::torch_sqrt(torch::torch_tensor(0.5, device = x$device))
+    scale <- torch_sqrt(torch_tensor(0.5, device = x$device))
 
     if (self$first) {
       x <- self$glu_layers[[1]](x)
@@ -618,7 +618,7 @@ glu_block <- torch::nn_module(
     }
 
     for (glu_id in layers_left) {
-      x <- torch::torch_add(x, self$glu_layers[[glu_id]](x))
+      x <- torch_add(x, self$glu_layers[[glu_id]](x))
       x <- x*scale
     }
 
@@ -627,7 +627,7 @@ glu_block <- torch::nn_module(
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_mul torch_sigmoid
 glu_layer <- torch::nn_module(
   "glu_layer",
   initialize = function(input_dim, output_dim, fc=NULL,
@@ -647,16 +647,16 @@ glu_layer <- torch::nn_module(
   forward = function(x) {
     x <- self$fc(x)
     x <- self$bn(x)
-    out <- torch::torch_mul(
+    out <- torch_mul(
       x[, 1:self$output_dim],
-      torch::torch_sigmoid(x[, (self$output_dim + 1):N])
+      torch_sigmoid(x[, (self$output_dim + 1):N])
     )
     out
   }
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_float torch_long
 embedding_generator <- torch::nn_module(
   "embedding_generator",
   initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
@@ -717,15 +717,15 @@ embedding_generator <- torch::nn_module(
 
       if (self$continuous_idx[i]) {
         # impute nan with 0s
-        cols[[i]] <- x[,i]$nan_to_num(0)$to(dtype = torch::torch_float())$view(c(-1, 1))
+        cols[[i]] <- x[,i]$nan_to_num(0)$to(dtype = torch_float())$view(c(-1, 1))
       } else {
         # nan mask
-        mask <- x[, i]$ge(1)$bitwise_and(x[, i]$le(self$cat_dims[cat_feat_counter]))$to(dtype = torch::torch_long())
+        mask <- x[, i]$ge(1)$bitwise_and(x[, i]$le(self$cat_dims[cat_feat_counter]))$to(dtype = torch_long())
         # impute nan with 1s (categorical vars are 1-indexed)
         # obsolete
-        # cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$nan_to_num(1)$to(dtype = torch::torch_long()))
+        # cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$nan_to_num(1)$to(dtype = torch_long()))
         imputed_xi <- x[, i]$mul(mask) + (1-mask)
-        cols[[i]] <- self$embeddings[[cat_feat_counter]](imputed_xi$to(dtype = torch::torch_long()))
+        cols[[i]] <- self$embeddings[[cat_feat_counter]](imputed_xi$to(dtype = torch_long()))
         cat_feat_counter <- cat_feat_counter + 1
       }
 
@@ -738,7 +738,7 @@ embedding_generator <- torch::nn_module(
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_bool torch_ones
 na_embedding_generator <- torch::nn_module(
   "na_embedding_generator",
   initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
@@ -777,24 +777,24 @@ na_embedding_generator <- torch::nn_module(
     for (i in seq_along(self$continuous_idx)) {
 
       if (self$continuous_idx[i]) {
-        cols[[i]] <- x[,i]$to(dtype = torch::torch_bool())$view(c(-1, 1))
+        cols[[i]] <- x[,i]$to(dtype = torch_bool())$view(c(-1, 1))
       } else {
         # extend the vector to match the dimention of the embedding_x via matmul
         # TODO basic tensor broadcasting function could be more efficient and have lower footprint
-        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dims[cat_feat_counter], device = x$device))
+        cols[[i]] <- x[,i:i]$logical_and(torch_ones(1,self$cat_emb_dims[cat_feat_counter], device = x$device))
         cat_feat_counter <- cat_feat_counter + 1
       }
 
     }
 
     # concat
-    post_embeddings <- torch::torch_cat(cols, dim=2)
+    post_embeddings <- torch_cat(cols, dim=2)
     post_embeddings
   }
 )
 
 
-#' @importFrom torch nn_batch_norm1d nn_module torch_cat
+#' @importFrom torch nn_batch_norm1d nn_module torch_cat torch_ones_like torch_bernoulli torch_mul
 random_obfuscator <- torch::nn_module(
   "random_obfuscator",
   initialize = function(pretraining_ratio) {
@@ -808,9 +808,9 @@ random_obfuscator <- torch::nn_module(
   },
   forward = function(x, x_na_mask) {
     # workaround while torch_bernoulli is not available in CUDA
-    ones <- torch::torch_ones_like(x, device="cpu")
-    obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)$to(device=x$device)
-    masked_input = torch::torch_mul(obfuscated_vars$logical_or(x_na_mask)$logical_not(), x)
+    ones <- torch_ones_like(x, device="cpu")
+    obfuscated_vars <- torch_bernoulli(self$pretraining_ratio * ones)$to(device=x$device)
+    masked_input <- torch_mul(obfuscated_vars$logical_or(x_na_mask)$logical_not(), x)
 
     list(masked_input, obfuscated_vars)
 

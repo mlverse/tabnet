@@ -1,4 +1,3 @@
-train_batch_un <- function(network, optimizer, batch, config) {
 #' @importFrom torch nn_utils_clip_grad_norm_
 train_batch_un <- function(network, optimizer, batch, config) {
   # forward pass
@@ -49,15 +48,15 @@ transpose_metrics <- function(metrics) {
 unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
 
   errors <- y_pred - embedded_x
-  reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)^2
-  batch_stds <- torch::torch_std(embedded_x, dim=1)^2 + eps
+  reconstruction_errors <- torch_mul(errors, obfuscation_mask)^2
+  batch_stds <- torch_std(embedded_x, dim=1)^2 + eps
 
   # compute the number of obfuscated variables to reconstruct
-  nb_reconstructed_variables <- torch::torch_sum(obfuscation_mask, dim=2)
+  nb_reconstructed_variables <- torch_sum(obfuscation_mask, dim=2)
 
   # take the mean of the reconstructed variable errors
-  features_loss <- torch::torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
-  loss <- torch::torch_mean(features_loss)
+  features_loss <- torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
+  loss <- torch_mean(features_loss)
   loss
 }
 
@@ -66,7 +65,7 @@ unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) 
 #' @importFrom tibble tibble
 #' @importFrom torch dataloader dataset lr_reduce_on_plateau lr_scheduler lr_step optim_adam optimizer torch_long torch_manual_seed torch_randint
 tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift = 0L) {
-  torch::torch_manual_seed(sample.int(1e6, 1))
+  torch_manual_seed(sample.int(1e6, 1))
 
   device <- get_device_from_config(config)
 
@@ -250,9 +249,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
                   "You can disable this message by using the `importance_sample_size` argument."))
     importance_sample_size <- 1e5
   }
-  indexes <- as.numeric(torch::torch_randint(
+  indexes <- as.numeric(torch_randint(
     1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
-    dtype = torch::torch_long()
+    dtype = torch_long()
   ))
   importances <- tibble::tibble(
     variables = colnames(x),

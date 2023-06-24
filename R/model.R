@@ -26,21 +26,21 @@ resolve_data <- function(x, y) {
     cat_idx <- 0L
     cat_dims <- 0L
   }
-  x_tensor <- torch::torch_tensor(as.matrix(x), dtype = torch::torch_float())
-  x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
+  x_tensor <- torch_tensor(as.matrix(x), dtype = torch_float())
+  x_na_mask <- x %>% is.na %>% as.matrix %>% torch_tensor(dtype = torch_bool())
 
   # convert factors to integers, based on the class of target first column
   # TODO do not assume but assert type-consistency of all y cols
   # and record output_dim
   if (is.factor(y[[1]])) {
-    y_tensor <- torch::torch_tensor(sapply(y, function(i) as.integer(i)), dtype = torch::torch_long())
+    y_tensor <- torch_tensor(sapply(y, function(i) as.integer(i)), dtype = torch_long())
     if (is.atomic(y)) {
       output_dim <- nlevels(y)
     } else {
       output_dim <- sapply(y, function(i) nlevels(i))
     }
   } else {
-    y_tensor <- torch::torch_tensor(as.matrix(y), dtype = torch::torch_float())
+    y_tensor <- torch_tensor(as.matrix(y), dtype = torch_float())
     output_dim <- ncol(y)
   }
 
@@ -209,9 +209,9 @@ tabnet_config <- function(batch_size = 1024^2,
 resolve_loss <- function(loss, dtype) {
   if (is.function(loss))
     loss_fn <- loss
-  else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
+  else if (loss %in% c("mse", "auto") && !dtype == torch_long())
     loss_fn <- torch::nn_mse_loss()
-  else if (loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long())
+  else if (loss %in% c("bce", "cross_entropy", "auto") && dtype == torch_long())
     loss_fn <- torch::nn_cross_entropy_loss()
   else
     rlang::abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
@@ -240,16 +240,16 @@ train_batch <- function(network, optimizer, batch, config) {
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+    loss <- torch_sum(torch_stack(purrr::pmap(
       list(
-        torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
-        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+        torch_split(output[[1]], outcome_nlevels, dim = 2),
+        torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
       ),
       ~config$loss_fn(.x, .y$squeeze(2))
     )),
     dim = 1)
   } else {
-    if (batch$y$dtype == torch::torch_long()) {
+    if (batch$y$dtype == torch_long()) {
       # classifier needs a squeeze for bce loss
       loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
     } else {
@@ -281,16 +281,16 @@ valid_batch <- function(network, batch, config) {
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+    loss <- torch_sum(torch_stack(purrr::pmap(
       list(
-        torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
-        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+        torch_split(output[[1]], outcome_nlevels, dim = 2),
+        torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
       ),
       ~config$loss_fn(.x, .y$squeeze(2))
     )),
     dim = 1)
   } else {
-    if (batch$y$dtype == torch::torch_long()) {
+    if (batch$y$dtype == torch_long()) {
       # classifier needs a squeeze for bce loss
       loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
     } else {
@@ -325,7 +325,7 @@ get_device_from_config <- function(config) {
 #' @importFrom torch dataset torch_manual_seed
 tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
-  torch::torch_manual_seed(sample.int(1e6, 1))
+  torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
 
   device <- get_device_from_config(config)
@@ -395,10 +395,10 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
 }
 
 #' @importFrom tibble tibble
-#' @importFrom torch dataset torch_manual_seed
+#' @importFrom torch dataset torch_long torch_manual_seed torch_randint
 tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift = 0L) {
   stopifnot("tabnet_model shall be initialised or pretrained" = (length(obj$fit$network) > 0))
-  torch::torch_manual_seed(sample.int(1e6, 1))
+  torch_manual_seed(sample.int(1e6, 1))
 
   device <- get_device_from_config(config)
 
@@ -571,9 +571,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
                   "You can disable this message by using the `importance_sample_size` argument."))
       importance_sample_size <- 1e5
     }
-    indexes <- as.numeric(torch::torch_randint(
+    indexes <- as.numeric(torch_randint(
       1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
-      dtype = torch::torch_long()
+      dtype = torch_long()
     ))
     importances <- tibble::tibble(
       variables = colnames(x),
@@ -622,7 +622,7 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
     yhat <- c(yhat, network(batch$x, batch$x_na_mask)[[1]])
   })
   # bind rows of the batches
-  torch::torch_cat(yhat)
+  torch_cat(yhat)
 }
 
 #' @importFrom hardhat spruce_numeric
@@ -681,7 +681,7 @@ predict_impl_prob_multiple <- function(obj, x, batch_size, outcome_nlevels) {
   p <- as.matrix(p)
   # TODO use a cleaner function to turn matrix into vectors
   p_blueprint <- get_blueprint_levels_multiple(obj)
-  p_probs <- purrr::map(torch::torch_split(p, outcome_nlevels, dim = 2),
+  p_probs <- purrr::map(torch_split(p, outcome_nlevels, dim = 2),
                         as.matrix)
   hardhat::spruce_prob_multiple(!!!purrr::pmap(
     list(p_blueprint, p_probs),
@@ -695,7 +695,7 @@ predict_impl_prob_multiple <- function(obj, x, batch_size, outcome_nlevels) {
 #' @importFrom torch torch_max
 predict_impl_class <- function(obj, x, batch_size) {
   p <- predict_impl(obj, x, batch_size)
-  p_idx <- as.integer(torch::torch_max(p, dim = 2)[[2]])
+  p_idx <- as.integer(torch_max(p, dim = 2)[[2]])
   p_idx <- get_blueprint_levels(obj)[p_idx]
   p <- factor(p_idx, levels = get_blueprint_levels(obj))
   hardhat::spruce_class(p)
@@ -709,8 +709,8 @@ predict_impl_class_multiple <- function(obj, x, batch_size, outcome_nlevels) {
   p <- predict_impl(obj, x, batch_size)
   p_levels <- get_blueprint_levels_multiple(obj)
   p_idx <- purrr::map(
-    torch::torch_split(p, outcome_nlevels, dim = 2),
-    ~as.integer(torch::torch_max(.x, dim = 2)[[2]])
+    torch_split(p, outcome_nlevels, dim = 2),
+    ~as.integer(torch_max(.x, dim = 2)[[2]])
     ) %>% rlang::set_names(names(p_levels))
   p_factor_lst <- purrr::pmap(
     list(p_idx, p_levels),

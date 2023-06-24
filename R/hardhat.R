@@ -513,7 +513,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 #' @importFrom torch torch_save
 model_to_raw <- function(model) {
   con <- rawConnection(raw(), open = "wr")
-  torch::torch_save(model, con)
+  torch_save(model, con)
   on.exit({close(con)}, add = TRUE)
   r <- rawConnectionValue(con)
   r
@@ -570,7 +570,7 @@ is_null_external_pointer <- function(pointer) {
 reload_model <- function(object) {
   con <- rawConnection(object)
   on.exit({close(con)}, add = TRUE)
-  module <- torch::torch_load(con)
+  module <- torch_load(con)
   module
 }
 
