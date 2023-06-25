@@ -35,8 +35,7 @@ TabNet's paper.
 Interpretation metrics from a TabNet model
 }
 \examples{
-
-if (torch::torch_is_installed()) {
+\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 set.seed(2021)
 
@@ -59,6 +58,5 @@ fit <- tabnet_fit(x, y, epochs = 20,
 
  ex <- tabnet_explain(fit, x)
 
-}
-
+\dontshow{\}) # examplesIf}
 }

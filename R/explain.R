@@ -12,9 +12,7 @@
 #'   TabNet's paper.
 #' * `masks` a list containing the masks for each step.
 #'
-#' @examples
-#'
-#' if (torch::torch_is_installed()) {
+#' @examplesIf torch::torch_is_installed()
 #'
 #' set.seed(2021)
 #'
@@ -37,7 +35,6 @@
 #'
 #'  ex <- tabnet_explain(fit, x)
 #'
-#' }
 #'
 #' @export
 tabnet_explain <- function(object, new_data) {

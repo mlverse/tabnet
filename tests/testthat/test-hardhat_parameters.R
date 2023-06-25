@@ -66,9 +66,8 @@ test_that("configuration with categorical_embedding_dimension vector works", {
 
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
 
-  expect_error(
-    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config),
-    regexp = NA
+  expect_no_error(
+    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config)
   )
 })
 
@@ -84,40 +83,36 @@ test_that("explicit error message when categorical embedding dimension vector ha
 
 test_that("step scheduler works", {
 
-  expect_error(
+  expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "step",
-                      lr_decay = 0.1, step_size = 1),
-    regexp = NA
+                      lr_decay = 0.1, step_size = 1)
   )
 
   sc_fn <- function(optimizer) {
     torch::lr_step(optimizer, step_size = 1, gamma = 0.1)
   }
 
-  expect_error(
+  expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = sc_fn,
-                      lr_decay = 0.1, step_size = 1),
-    regexp = NA
+                      lr_decay = 0.1, step_size = 1)
   )
 
 })
 
 test_that("reduce_on_plateau scheduler works", {
 
-  expect_error(
+  expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "reduce_on_plateau",
-                      lr_decay = 0.1, step_size = 1),
-    regexp = NA
+                      lr_decay = 0.1, step_size = 1)
   )
 
   sc_fn <- function(optimizer) {
-    torch::lr_step(optimizer, step_size = 1, gamma = 0.1)
+    torch::lr_reduce_on_plateau(optimizer, factor = 0.1, patience = 10)
   }
 
-  expect_error(
+  expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = sc_fn,
-                      lr_decay = 0.1, step_size = 1),
-    regexp = NA
+                      lr_decay = 0.1, step_size = 1)
   )
 
 })
@@ -128,9 +123,8 @@ test_that("fit uses config parameters mix from config= and ...", {
     step_normalize(all_numeric(), -all_outcomes())
   fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
                     config = tabnet_config(decision_width=3, attention_width=5, cat_emb_dim = 2))
-  expect_error(
-    predict(fit, attrition),
-    regexp = NA
+  expect_no_error(
+    predict(fit, attrition)
   )
 
   expect_equal(fit$fit$config$verbose, TRUE)
@@ -145,15 +139,13 @@ test_that("fit works with entmax mask-type", {
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
 
-  expect_error(
+  expect_no_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-                      config = tabnet_config( mask_type="entmax")),
-    regexp = NA
+                      config = tabnet_config( mask_type="entmax"))
   )
-  expect_error(
+  expect_no_error(
     predict(tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-                       config = tabnet_config( mask_type="entmax")), attrition),
-    regexp = NA
+                       config = tabnet_config( mask_type="entmax")), attrition)
   )
 
 })
