@@ -1,4 +1,3 @@
-check_dials <- function() {
 #' @importFrom rlang abort
 check_dials <- function() {
   if (!requireNamespace("dials", quietly = TRUE))

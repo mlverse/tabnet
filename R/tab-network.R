@@ -1,4 +1,3 @@
-initialize_non_glu <- function(module, input_dim, output_dim) {
 #' @importFrom torch nn_init_xavier_normal_
 initialize_non_glu <- function(module, input_dim, output_dim) {
   gain_value <- sqrt((input_dim + output_dim)/sqrt(4*input_dim))

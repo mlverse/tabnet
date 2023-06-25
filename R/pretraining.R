@@ -65,7 +65,7 @@ unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) 
 #' @importFrom tibble tibble
 #' @importFrom torch dataloader dataset lr_reduce_on_plateau lr_scheduler lr_step optim_adam optimizer torch_long torch_manual_seed torch_randint
 tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift = 0L) {
-  torch_manual_seed(sample.int(1e6, 1))
+  torch::torch_manual_seed(sample.int(1e6, 1))
 
   device <- get_device_from_config(config)
 
