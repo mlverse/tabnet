@@ -119,7 +119,7 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
     ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
@@ -144,7 +144,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
@@ -163,19 +163,21 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
 #' @rdname tabnet_fit
+#'
+#' @importFrom dplyr filter mutate select mutate_all mutate_if
+#' @importFrom tidyr replace_na
+#'
 tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   # ensure there is no level_* col in the data.tree
   check_compliant_node(x)
   # get tree leaves and extract attributes into data.frames
-  xy_df <- data.tree::ToDataFrameTypeCol(x, x$attributesAll)
-  x_df <- xy_df %>% select(-starts_with("level_"))
-  y_df <- xy_df %>% select(starts_with("level_")) %>% mutate_all(as.factor)
-  processed <- hardhat::mold(x_df, y_df)
+  xy_df <- node_to_df(x)
+  processed <- hardhat::mold(xy_df$x, xy_df$y)
   # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
   ancestor <- data.tree::ToDataFrameNetwork(x) %>%
    mutate_if(is.character, . %>% as.factor %>% as.numeric)
@@ -194,7 +196,7 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 new_tabnet_fit <- function(fit, blueprint) {
@@ -306,7 +308,7 @@ tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabne
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 #' @export
@@ -439,56 +441,17 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   # Enforces column order, type, column names, etc
-  processed <- hardhat::forge(new_data, object$blueprint)
+  if (inherits(new_data, "Node")) {
+    new_data_df <- node_to_df(new_data)$x
+  } else {
+    new_data_df <- new_data
+  }
+  processed <- hardhat::forge(new_data_df, object$blueprint)
   batch_size <- object$fit$config$batch_size
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
-  hardhat::validate_prediction_size(out, new_data)
+  hardhat::validate_prediction_size(out, new_data_df)
   out
 }
-
-#' Check consistency between modeling-task type and class of outcomes vars.
-#'
-#' infer default modeling-task type from the outcome vars class if needed.
-#'
-#' @param outcome_ptype shall be `model$blueprint$ptypes$outcomes` when called from
-#'  a model object, or `processed$outcomes` from the result of a `mold()`
-#' @param type expected type within  `c("numeric", "prob", "class")`
-#'
-#' @return valid type within `c("numeric", "prob", "class")` for repectively regression,
-#' class probabilities, or classification
-#' @noRd
-check_type <- function(outcome_ptype, type = NULL) {
-
-  # outcome_ptype <- model$blueprint$ptypes$outcomes when called from model
-  outcome_all_factor <- all(purrr::map_lgl(outcome_ptype, is.factor))
-  outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
-
-  if (!outcome_all_numeric && !outcome_all_factor)
-    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
-
-  if (is.null(type)) {
-    if (outcome_all_factor)
-      type <- "class"
-    else if (outcome_all_numeric)
-      type <- "numeric"
-    else if (ncol(outcome_ptype) == 1)
-      rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
-  }
-
-  type <- rlang::arg_match(type, c("numeric", "prob", "class"))
-
-  if (outcome_all_factor) {
-    if (!type %in% c("prob", "class"))
-      rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
-  } else if (outcome_all_numeric) {
-    if (type != "numeric")
-      rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
-  }
-
-  invisible(type)
-}
-
-
 
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
@@ -581,6 +544,49 @@ is_null_external_pointer <- function(pointer) {
   out
 }
 
+#' Check consistency between modeling-task type and class of outcomes vars.
+#'
+#' infer default modeling-task type from the outcome vars class if needed.
+#'
+#' @param outcome_ptype shall be `model$blueprint$ptypes$outcomes` when called from
+#'  a model object, or `processed$outcomes` from the result of a `mold()`
+#' @param type expected type within  `c("numeric", "prob", "class")`
+#'
+#' @return valid type within `c("numeric", "prob", "class")` for repectively regression,
+#' class probabilities, or classification
+#' @noRd
+check_type <- function(outcome_ptype, type = NULL) {
+
+  # outcome_ptype <- model$blueprint$ptypes$outcomes when called from model
+  outcome_all_factor <- all(purrr::map_lgl(outcome_ptype, is.factor))
+  outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
+
+  if (!outcome_all_numeric && !outcome_all_factor)
+    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
+
+  if (is.null(type)) {
+    if (outcome_all_factor)
+      type <- "class"
+    else if (outcome_all_numeric)
+      type <- "numeric"
+    else if (ncol(outcome_ptype) == 1)
+      rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
+  }
+
+  type <- rlang::arg_match(type, c("numeric", "prob", "class"))
+
+  if (outcome_all_factor) {
+    if (!type %in% c("prob", "class"))
+      rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
+  } else if (outcome_all_numeric) {
+    if (type != "numeric")
+      rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
+  }
+
+  invisible(type)
+}
+
+
 #' Check that Node object names are compliant
 #'
 #' @param node the Node object, or a dataframe ready to be parsed by `data.tree::as.Node()`
@@ -623,6 +629,32 @@ check_compliant_node <- function(node) {
   }
 
   invisible(node)
+}
+
+#' turn a Node object into predictor and outcome dataframe
+#'
+#' @param x Node object
+#' @param drop_last_level TRUE unused
+#'
+#' @return a named list of x and y, being respectively the predictor dataframe and the outcomes dataframe.
+#'
+#' @importFrom dplyr select mutate mutate_if where starts_with
+#'
+node_to_df <- function(x, drop_last_level = TRUE) {
+  xy_df <- data.tree::ToDataFrameTypeCol(x, x$attributesAll)
+  x_df <- xy_df %>%
+    select(-starts_with("level_")) %>%
+    mutate_if(is.character, as.factor)
+  y_df <- xy_df %>%
+    select(starts_with("level_")) %>%
+    # drop first (and all zero-variance) column
+    select(where(~ nlevels(as.factor(.x)) > 1 )) %>%
+    # drop last level column
+    # TODO take the drop_last_level param into account
+    select(1:(ncol(.) - 1)) %>%
+    # TODO impute "NA" with parent through coalesce() via an option
+    mutate_if(is.character, as.factor)
+  return(list(x = x_df, y = y_df))
 }
 
 reload_model <- function(object) {

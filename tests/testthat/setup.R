@@ -1,6 +1,7 @@
 # Run before any test
 suppressPackageStartupMessages(library(recipes))
 suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(data.tree))
 
 
 # ames small data
@@ -37,6 +38,11 @@ attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
 data(acme, package = "data.tree")
 acme_df <-  data.tree::ToDataFrameTypeCol(acme, acme$attributesAll) %>%
   select(-starts_with("level_"))
+
+attrition_tree <- attrition %>%
+  tibble::rowid_to_column() %>%
+  mutate(pathString = paste("attrition", Department, JobRole, rowid, sep = "/")) %>%
+  data.tree::as.Node()
 
 # Run after all tests
 withr::defer(teardown_env())

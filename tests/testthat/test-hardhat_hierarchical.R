@@ -8,19 +8,30 @@ test_that("Training hierarchical classification for {data.tree} Node", {
   )
 
   expect_equal(ncol(result), 3)
+  outcome_levels <-levels(fit$blueprint$ptypes$outcomes[[1]])
+  # we get back outcomes vars with a `.pred_` prefix
+  expect_equal(stringr::str_remove(names(result), ".pred_"), outcome_levels)
+  expect_no_error(
+    result <- predict(fit, acme_df)
+  )
+  expect_equal(ncol(result), 1)
+
+  expect_no_error(
+    fit <- tabnet_fit(attrition_tree, epochs = 1)
+  )
+  expect_no_error(
+    result <- predict(fit, attrition_tree, type = "prob")
+  )
+
+  expect_equal(ncol(result), 2) # 2 outcomes levels_
+
   outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
   # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
 
   # result columns are tibbles of resp 2, 2, 4 columns
   expect_true(all(purrr::map_lgl(result, tibble::is_tibble)))
-  expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
-
-  expect_no_error(
-    result <- predict(fit, acme_df)
-  )
-  expect_equal(ncol(result), 3)
-  expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(outcome_nlevels))
+  expect_equal(unname(purrr::map_dbl(result, ncol)), unname(outcome_nlevels), ignore_attr = TRUE)
 
 })
 
@@ -42,7 +53,7 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
 
   # result columns are tibbles of resp 2, 2, 4 columns
   expect_true(all(purrr::map_lgl(result, tibble::is_tibble)))
-  expect_equal(purrr::map_dbl(result, ncol), outcome_nlevels, ignore_attr = TRUE)
+  expect_equal(unname(purrr::map_dbl(result, ncol)), unname(outcome_nlevels), ignore_attr = TRUE)
 
   expect_no_error(
     result <- predict(fit, acme_df)

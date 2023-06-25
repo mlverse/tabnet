@@ -372,9 +372,10 @@ tabnet_no_embedding <- torch::nn_module(
         initialize_non_glu(task_mapping, n_d, task_dim)
         self$multi_outcome_mapping$append(task_mapping)
       }
+    } else {
+      self$final_mapping <- torch::nn_linear(n_d, sum(output_dim), bias = FALSE)
+      initialize_non_glu(self$final_mapping, n_d, sum(output_dim))
     }
-    self$final_mapping <- torch::nn_linear(n_d, sum(output_dim), bias = FALSE)
-    initialize_non_glu(self$final_mapping, n_d, sum(output_dim))
 
   },
   forward = function(x, x_na_mask) {
@@ -702,7 +703,7 @@ embedding_generator <- torch::nn_module(
         # impute nan with 1s (categorical vars are 1-indexed)
         # obsolete
         # cols[[i]] <- self$embeddings[[cat_feat_counter]](x[, i]$nan_to_num(1)$to(dtype = torch::torch_long()))
-        imputed_xi <- x[, i]$mul(mask) + (1-mask)
+        imputed_xi <- x[, i]$mul(mask) + (1 - mask)
         cols[[i]] <- self$embeddings[[cat_feat_counter]](imputed_xi$to(dtype = torch::torch_long()))
         cat_feat_counter <- cat_feat_counter + 1
       }
