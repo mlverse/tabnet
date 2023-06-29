@@ -1,3 +1,44 @@
+test_that("C-HMCNN get_constr_output works ", {
+  x <- torch::torch_rand(c(2,4))
+  R <- torch::torch_tril(torch::torch_zeros(c(4,4))$bernoulli(p = 0.2) + torch::torch_diag(rep(1,4)))$to(dtype = torch::torch_bool())
+  expect_no_error(
+    constr_output <- get_constr_output(x, R)
+  )
+  expect_tensor_shape(
+    constr_output, x$shape
+  )
+  # expect_equal(
+  #   constr_output$dtype, torch_tensor(0.1)$dtype
+  # )
+
+  R <- torch::torch_zeros(c(4,4))$to(dtype = torch::torch_bool())
+  expect_equal_to_tensor(
+    get_constr_output(x, R), torch::torch_zeros_like(x)
+  )
+})
+
+test_that("C-HMCNN max_constraint_output works ", {
+  output <- torch::torch_rand(c(3, 5))
+  labels <- torch::torch_diag(rep(1,5))[1:3, ]$to(dtype = torch::torch_bool())
+  ancestor <- torch::torch_tril(torch::torch_zeros(c(5, 5))$bernoulli(p = 0.2) )$to(dtype = torch::torch_bool())
+
+  expect_no_error(
+    MC_output <- max_constraint_output(output, labels, ancestor)
+  )
+  expect_tensor_shape(
+    MC_output, output$shape
+  )
+  # max_constraint_output is not identity
+  expect_not_equal_to_tensor(
+    MC_output, output
+  )
+  # max_constraint_output provides ;ore thqn 40% null values
+  expect_gte(
+    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .4 * output$shape[1] * output$shape[2]
+  )
+})
+
+
 test_that("Training hierarchical classification for {data.tree} Node", {
 
   expect_no_error(

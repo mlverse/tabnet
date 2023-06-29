@@ -182,8 +182,9 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   ancestor <- data.tree::ToDataFrameNetwork(x) %>%
    mutate_if(is.character, . %>% as.factor %>% as.numeric)
   # TODO check correctness
-  # embed the M matrix in $extra
-  processed$extra$M <- Matrix::sparseMatrix(ancestor$from, ancestor$to, x = 1)
+  # embed the M matrix in the config$ancestor variable
+  dims <- c(max(ancestor), max(ancestor))
+  ancestor_m <- Matrix::sparseMatrix(ancestor$from, ancestor$to, dims = dims, x = 1)
   check_type(processed$outcomes)
 
   default_config <- tabnet_config()
@@ -194,7 +195,7 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
       default_config,
       new_config)
   ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- utils::modifyList(config, as.list(new_config, ancestor = Matrix::t(ancestor_m)))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
@@ -369,6 +370,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   predictors <- processed$predictors
   outcomes <- processed$outcomes
   epoch_shift <- 0L
+
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
     rlang::abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
 
