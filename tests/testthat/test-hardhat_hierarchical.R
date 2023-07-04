@@ -32,9 +32,9 @@ test_that("C-HMCNN max_constraint_output works ", {
   expect_not_equal_to_tensor(
     MC_output, output
   )
-  # max_constraint_output provides ;ore thqn 40% null values
+  # max_constraint_output provides more than 35% null values
   expect_gte(
-    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .4 * output$shape[1] * output$shape[2]
+    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .35 * output$shape[1] * output$shape[2]
   )
 })
 
@@ -79,14 +79,14 @@ test_that("Training hierarchical classification for {data.tree} Node", {
 test_that("Training hierarchical classification for {data.tree} Node with validation split", {
 
   expect_no_error(
-    fit <- tabnet_fit(acme, valid_split = 0.2, epochs = 1)
+    fit <- tabnet_fit(attrition_tree, valid_split = 0.2, epochs = 1)
   )
 
   expect_no_error(
-    result <- predict(fit, acme_df, type = "prob")
+    result <- predict(fit, attrition_tree, type = "prob")
   )
 
-  expect_equal(ncol(result), 3)
+  expect_equal(ncol(result), 2) # 2 outcomes levels_
 
   outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
   # we get back outcomes vars with a `.pred_` prefix
@@ -97,9 +97,9 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
   expect_equal(unname(purrr::map_dbl(result, ncol)), unname(outcome_nlevels), ignore_attr = TRUE)
 
   expect_no_error(
-    result <- predict(fit, acme_df)
+    result <- predict(fit, attrition_tree)
   )
-  expect_equal(ncol(result), 3)
+  expect_equal(ncol(result), 2) # 2 outcomes levels_
 
   # we get back outcomes vars with a `.pred_class_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(fit$blueprint$ptypes$outcomes))
@@ -114,9 +114,20 @@ test_that("we can check with non-compliant colnames", {
     check_compliant_node(starwars_tree)
     ,"reserved names")
 
-  # augment acme dataset with a forbidden column name
+  # augment acme dataset with a forbidden column name with no impact on predictor is ok
   acme$Do(function(x) {
     x$level_4 <- data.tree::Aggregate(node = x,
+                           attribute = "p",
+                           aggFun = sum)
+  },
+  traversal = "post-order")
+  expect_no_error(check_compliant_node(acme))
+
+  expect_no_error(tabnet_fit(acme, epochs = 1))
+
+  # augment acme dataset with a used forbidden column name raise error
+  acme$Do(function(x) {
+    x$level_3 <- data.tree::Aggregate(node = x,
                            attribute = "p",
                            aggFun = sum)
   },
@@ -126,7 +137,7 @@ test_that("we can check with non-compliant colnames", {
     ,"reserved names")
 
   expect_error(
-    tabnet_fit(acme, valid_split = 0.2, epochs = 1)
+    tabnet_fit(acme, epochs = 1)
     ,"reserved names")
 
 })

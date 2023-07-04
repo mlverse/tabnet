@@ -35,7 +35,7 @@ attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12)
 attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
 
 # data.tree Node dataset
-data(acme, package = "data.tree")
+data("acme", package = "data.tree")
 acme_df <-  data.tree::ToDataFrameTypeCol(acme, acme$attributesAll) %>%
   select(-starts_with("level_"))
 

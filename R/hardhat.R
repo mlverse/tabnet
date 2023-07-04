@@ -633,12 +633,13 @@ check_compliant_node <- function(node) {
   invisible(node)
 }
 
-#' turn a Node object into predictor and outcome dataframe
+#' turn a Node object into predictor and outcome data-frame
 #'
 #' @param x Node object
 #' @param drop_last_level TRUE unused
 #'
-#' @return a named list of x and y, being respectively the predictor dataframe and the outcomes dataframe.
+#' @return a named list of x and y, being respectively the predictor data-frame and the outcomes data-frame,
+#'   as expected inputs for `hardhat::mold()` function.
 #'
 #' @importFrom dplyr select mutate mutate_if where starts_with
 #'

@@ -58,7 +58,7 @@ resolve_data <- function(x, y) {
 #' @param penalty This is the extra sparsity loss coefficient as proposed
 #'   in the original paper. The bigger this coefficient is, the sparser your model
 #'   will be in terms of feature selection. Depending on the difficulty of your
-#'   problem, reducing this value could help.
+#'   problem, reducing this value could help (default 1e-3).
 #' @param clip_value If a float is given this will clip the gradient at
 #'   clip_value. Pass `NULL` to not clip.
 #' @param loss (character or function) Loss function for training (default to mse
@@ -70,7 +70,7 @@ resolve_data <- function(x, y) {
 #'   more capacity to the model with the risk of overfitting. Values typically
 #'   range from 8 to 64.
 #' @param attention_width (int) Width of the attention embedding for each mask. According to
-#'   the paper n_d=n_a is usually a good choice. (default=8)
+#'   the paper n_d = n_a is usually a good choice. (default=8)
 #' @param num_steps (int) Number of steps in the architecture
 #'   (usually between 3 and 10)
 #' @param feature_reusage (float) This is the coefficient for feature reusage in the masks.
@@ -84,6 +84,7 @@ resolve_data <- function(x, y) {
 #' @param optimizer the optimization method. currently only 'adam' is supported,
 #'   you can also pass any torch optimizer function.
 #' @param valid_split (float) The fraction of the dataset used for validation.
+#'   (default = 0 means no split)
 #' @param num_independent Number of independent Gated Linear Units layers at each step.
 #'   Usual values range from 1 to 5.
 #' @param num_shared Number of shared Gated Linear Units at each step Usual values
@@ -93,7 +94,7 @@ resolve_data <- function(x, y) {
 #' @param lr_scheduler if `NULL`, no learning rate decay is used. If "step"
 #'   decays the learning rate by `lr_decay` every `step_size` epochs. If "reduce_on_plateau"
 #'   decays the learning rate by `lr_decay` when no improvement after `step_size` epochs.
-#'   It can #'   also be a [torch::lr_scheduler] function that only takes the optimizer
+#'   It can also be a [torch::lr_scheduler] function that only takes the optimizer
 #'   as parameter. The `step` method is called once per epoch.
 #' @param lr_decay multiplies the initial learning rate by `lr_decay` every
 #'   `step_size` epochs. Unused if `lr_scheduler` is a `torch::lr_scheduler`
@@ -252,7 +253,7 @@ train_batch <- function(network, optimizer, batch, config) {
     # multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
     if (!is.null(config$ancestor_tt)) {
-      # use `max_constraint_output`
+      # hierarchical mandates use of `max_constraint_output`
       loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
         list(
           torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
@@ -301,16 +302,29 @@ valid_batch <- function(network, batch, config) {
   output <- network(batch$x, batch$x_na_mask)
   # loss has to be applied to each label-group when output_dim is a vector
   if (max(batch$output_dim$shape) > 1) {
-    # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
+    # multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
-      list(
-        torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
-        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
-      ),
-      ~config$loss_fn(.x, .y$squeeze(2))
-    )),
-    dim = 1)
+    if (!is.null(config$ancestor_tt)) {
+      # hierarchical mandates use of `max_constraint_output`
+      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+        list(
+          torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
+          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+        ),
+        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor_tt))
+      )),
+      dim = 1)
+    } else {
+      # use `resolved_loss`
+      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+        list(
+          torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
+          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+        ),
+        ~config$loss_fn(.x, .y$squeeze(2))
+      )),
+      dim = 1)
+    }
   } else {
     if (batch$y$dtype == torch::torch_long()) {
       # classifier needs a squeeze for bce loss
@@ -351,7 +365,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
   if (has_valid) {
     n <- nrow(x)
-    valid_idx <- sample.int(n, n*config$valid_split)
+    valid_idx <- sample.int(n, n * config$valid_split)
     valid_x <- x[valid_idx, ]
     valid_y <- y[valid_idx, ]
     train_y <- y[-valid_idx, ]
@@ -423,7 +437,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   has_valid <- config$valid_split > 0
   if (has_valid) {
     n <- nrow(x)
-    valid_idx <- sample.int(n, n*config$valid_split)
+    valid_idx <- sample.int(n, n * config$valid_split)
     valid_x <- x[valid_idx, ]
     valid_y <- y[valid_idx, ]
     train_y <- y[-valid_idx, ]
