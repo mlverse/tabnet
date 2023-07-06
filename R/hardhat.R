@@ -354,6 +354,17 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
+#' @export
+#' @rdname tabnet_pretrain
+tabnet_pretrain.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+  # ensure there is no level_* col in the data.tree
+  check_compliant_node(x)
+  # get tree leaves and extract attributes into data.frames
+  xy_df <- node_to_df(x)
+  tabnet_pretrain(xy_df$x, xy_df$y, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
+
+}
+
 new_tabnet_pretrain <- function(pretrain, blueprint) {
 
   serialized_net <- model_to_raw(pretrain$network)

@@ -6,6 +6,7 @@
 \alias{tabnet_pretrain.data.frame}
 \alias{tabnet_pretrain.formula}
 \alias{tabnet_pretrain.recipe}
+\alias{tabnet_pretrain.Node}
 \title{Tabnet model}
 \usage{
 tabnet_pretrain(x, ...)
@@ -33,6 +34,14 @@ tabnet_pretrain(x, ...)
 \method{tabnet_pretrain}{recipe}(
   x,
   data,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
+
+\method{tabnet_pretrain}{Node}(
+  x,
   tabnet_model = NULL,
   config = tabnet_config(),
   ...,

@@ -29,7 +29,7 @@ for this model are "unknown", "regression", or "classification".}
 \item{penalty}{This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help (default 1e-3).}
+problem, reducing this value could help.}
 
 \item{batch_size}{(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024^2)}
@@ -41,7 +41,7 @@ more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.}
 
 \item{attention_width}{(int) Width of the attention embedding for each mask. According to
-the paper n_d = n_a is usually a good choice. (default=8)}
+the paper n_d=n_a is usually a good choice. (default=8)}
 
 \item{num_steps}{(int) Number of steps in the architecture
 (usually between 3 and 10)}
