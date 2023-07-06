@@ -65,13 +65,19 @@ You may have notice that `name` and `height` have unexpected values according to
 
 ### Avoid column named `level_*` to avoid collision with output data.tree names
 
-TBD
+Your dataset hierarchy will be turn internally into multi-outcomes named `level_1` to `level_n`, n beeing the depth of your tree. Thus column names starting with `level_` should be avoided.
 
 ### Ensure the last hierarchy of the tree is the sample id
 
 The tree only keeps one attribute per tree leaf. Thus in order to transfer your complete predictors dataset into the Node object, you must keep the last level of the hierarchy to be a unique sample identifier (last resort beeing `row_id_to_column()` to achieve it).
 
 The classification will be done removing the last level of hierarchy in any case.
+
+### Ensure there is a root level in the hierarchy
+
+The tree should have a single root for all nodes to be consistent. Thus you have to use a constant prefix to all `pathString`.
+
+The classification will be done removing the first level of hierarchy in any case.
 
 Now let's have all those rules applied to the `starwars_tree` : 
 

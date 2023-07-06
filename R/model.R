@@ -220,13 +220,13 @@ max_constraint_output <- function(output, labels, ancestor) {
 
 resolve_loss <- function(config, dtype) {
   loss <- config$loss
-  cross_entropy_reauired <- (loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long()) || !is.null(config$ancestor_tt)
 
   if (is.function(loss))
     loss_fn <- loss
   else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
     loss_fn <- torch::nn_mse_loss()
-  else if (cross_entropy_reauired)
+  else if ((loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long()) || !is.null(config$ancestor_tt))
+    # cross entropy loss is required
     loss_fn <- torch::nn_cross_entropy_loss()
   else
     rlang::abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
