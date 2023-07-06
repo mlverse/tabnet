@@ -119,7 +119,7 @@ test_that("hierarchical classification for {data.tree} Node is explainable", {
 
 })
 
-test_that("we can check with non-compliant colnames", {
+test_that("we properly check non-compliant colnames", {
 
   # try to use starwars dataset with two forbidden column name
   starwars_tree <- starwars %>%
