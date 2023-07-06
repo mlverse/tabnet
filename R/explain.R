@@ -53,7 +53,13 @@ tabnet_explain.default <- function(object, new_data) {
 #' @export
 #' @rdname tabnet_explain
 tabnet_explain.tabnet_fit <- function(object, new_data) {
-  processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
+  # Enforces column order, type, column names, etc
+  if (inherits(new_data, "Node")) {
+    new_data_df <- node_to_df(new_data)$x
+  } else {
+    new_data_df <- new_data
+  }
+  processed <- hardhat::forge(new_data_df, object$blueprint, outcomes = FALSE)
   data <- resolve_data(processed$predictors, y = rep(1, nrow(processed$predictors)))
   device <- get_device_from_config(object$fit$config)
   data <- to_device(data, device)
