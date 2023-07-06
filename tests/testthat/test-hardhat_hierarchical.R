@@ -105,6 +105,20 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
   expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(fit$blueprint$ptypes$outcomes))
 })
 
+test_that("hierarchical classification for {data.tree} Node is explainable", {
+
+    fit <- tabnet_fit(attrition_tree, epochs = 1)
+
+  expect_no_error(
+    explain <- tabnet_explain(fit, attrition_tree)
+  )
+
+  expect_no_error(
+    autoplot(explain)
+  )
+
+})
+
 test_that("we can check with non-compliant colnames", {
 
   # try to use starwars dataset with two forbidden column name
