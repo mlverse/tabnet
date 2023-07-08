@@ -98,8 +98,10 @@ tabnet_fit.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_fit
+#' @importFrom hardhat mold
+#' @importFrom utils modifyList
 tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  processed <- hardhat::mold(x, y)
+  processed <- mold(x, y)
   check_type(processed$outcomes)
 
   default_config <- tabnet_config()
@@ -110,15 +112,17 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
     default_config,
     new_config)
     ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
 #' @export
 #' @rdname tabnet_fit
+#' @importFrom hardhat default_formula_blueprint mold
+#' @importFrom utils modifyList
 tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  processed <- hardhat::mold(
+  processed <- mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
       indicators = "none",
@@ -135,15 +139,17 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
       default_config,
       new_config)
   ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
 #' @export
 #' @rdname tabnet_fit
+#' @importFrom hardhat mold
+#' @importFrom utils modifyList
 tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  processed <- hardhat::mold(x, data)
+  processed <- mold(x, data)
   check_type(processed$outcomes)
 
   default_config <- tabnet_config()
@@ -154,16 +160,17 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
       default_config,
       new_config)
   ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
 }
 
+#' @importFrom hardhat new_model
 new_tabnet_fit <- function(fit, blueprint) {
 
   serialized_net <- model_to_raw(fit$network)
 
-  hardhat::new_model(
+  new_model(
     fit = fit,
     serialized_net = serialized_net,
     blueprint = blueprint,
@@ -255,8 +262,10 @@ tabnet_pretrain.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_pretrain
+#' @importFrom hardhat mold
+#' @importFrom utils modifyList
 tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  processed <- hardhat::mold(x, y)
+  processed <- mold(x, y)
 
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
@@ -266,17 +275,19 @@ tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabne
       default_config,
       new_config)
   ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
 #' @export
 #' @rdname tabnet_pretrain
+#' @importFrom hardhat default_formula_blueprint mold
+#' @importFrom utils modifyList
 tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  processed <- hardhat::mold(
+  processed <- mold(
     formula, data,
-    blueprint = hardhat::default_formula_blueprint(
+    blueprint = default_formula_blueprint(
       indicators = "none",
       intercept = FALSE
     )
@@ -290,15 +301,17 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
       default_config,
       new_config)
   ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
 #' @export
 #' @rdname tabnet_pretrain
+#' @importFrom hardhat mold
+#' @importFrom utils modifyList
 tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  processed <- hardhat::mold(x, data)
+  processed <- mold(x, data)
 
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
@@ -308,16 +321,17 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet
       default_config,
       new_config)
   ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- modifyList(config, as.list(new_config))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
 }
 
+#' @importFrom hardhat new_model
 new_tabnet_pretrain <- function(pretrain, blueprint) {
 
   serialized_net <- model_to_raw(pretrain$network)
 
-  hardhat::new_model(
+  new_model(
     fit = pretrain,
     serialized_net = serialized_net,
     blueprint = blueprint,
@@ -325,18 +339,20 @@ new_tabnet_pretrain <- function(pretrain, blueprint) {
   )
 }
 
+#' @importFrom rlang abort
+#' @importFrom torch load_state_dict
 tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, from_epoch, task="supervised") {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
   epoch_shift <- 0L
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
-    rlang::abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
+    abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
 
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
     # model must be loaded from checkpoint
 
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-      rlang::abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
+      abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
 
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
@@ -348,7 +364,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
   if (task == "supervised") {
     if (sum(is.na(outcomes)) > 0) {
-      rlang::abort("Error: found missing values in the outcome data.")
+      abort("Error: found missing values in the outcome data.")
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -358,7 +374,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     } else if (!check_net_is_empty_ptr(tabnet_model) && inherits(tabnet_model, "tabnet_fit")) {
       # resume training from supervised
       if (!identical(processed$blueprint, tabnet_model$blueprint))
-        rlang::abort("Model dimensions don't match.")
+        abort("Model dimensions don't match.")
 
       # model is available from tabnet_model$serialized_net
       m <- reload_model(tabnet_model$serialized_net)
@@ -383,7 +399,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
-    } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
+    } else abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
 
     fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
@@ -397,14 +413,14 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 }
 
 
-#' @importFrom stats predict
+#' @importFrom hardhat forge validate_prediction_size
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   # Enforces column order, type, column names, etc
-  processed <- hardhat::forge(new_data, object$blueprint)
+  processed <- forge(new_data, object$blueprint)
   batch_size <- object$fit$config$batch_size
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
-  hardhat::validate_prediction_size(out, new_data)
+  validate_prediction_size(out, new_data)
   out
 }
 
@@ -419,14 +435,17 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
 #' @return valid type within `c("numeric", "prob", "class")` for repectively regression,
 #' class probabilities, or classification
 #' @noRd
+#' @importFrom glue glue
+#' @importFrom purrr map_lgl
+#' @importFrom rlang abort arg_match
 check_type <- function(outcome_ptype, type = NULL) {
 
   # outcome_ptype <- model$blueprint$ptypes$outcomes when called from model
-  outcome_all_factor <- all(purrr::map_lgl(outcome_ptype, is.factor))
-  outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
+  outcome_all_factor <- all(map_lgl(outcome_ptype, is.factor))
+  outcome_all_numeric <- allmap_lgl(outcome_ptype, is.numeric))
 
   if (!outcome_all_numeric && !outcome_all_factor)
-    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
+    abort(glue("Mixed multi-outcome type '{unique(map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
 
   if (is.null(type)) {
     if (outcome_all_factor)
@@ -434,17 +453,17 @@ check_type <- function(outcome_ptype, type = NULL) {
     else if (outcome_all_numeric)
       type <- "numeric"
     else if (ncol(outcome_ptype) == 1)
-      rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
+      abort(glue("Unknown outcome type '{class(outcome_ptype)}'"))
   }
 
   type <- rlang::arg_match(type, c("numeric", "prob", "class"))
 
   if (outcome_all_factor) {
     if (!type %in% c("prob", "class"))
-      rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
+      abort(glue("Outcome is factor and the prediction type is '{type}'."))
   } else if (outcome_all_numeric) {
     if (type != "numeric")
-      rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
+      abort(glue("Outcome is numeric and the prediction type is '{type}'."))
   }
 
   invisible(type)
@@ -452,19 +471,22 @@ check_type <- function(outcome_ptype, type = NULL) {
 
 
 
+#' @importFrom purrr map_dbl
+#' @importFrom rlang abort
+#' @importFrom torch load_state_dict
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   type <- check_type(object$blueprint$ptypes$outcomes, type)
   is_multi_outcome <- ncol(object$blueprint$ptypes$outcomes) > 1
   outcome_nlevels <- NULL
   if (is_multi_outcome & type != "numeric") {
-    outcome_nlevels <- purrr::map_dbl(object$blueprint$ptypes$outcomes, ~length(levels(.x)))
+    outcome_nlevels <- map_dbl(object$blueprint$ptypes$outcomes, ~length(levels(.x)))
   }
 
   if (!is.null(epoch)) {
 
     if (epoch > (length(object$fit$checkpoints) * object$fit$config$checkpoint_epoch))
-      rlang::abort(paste0("The model was trained for less than ", epoch, " epochs"))
+      abort(paste0("The model was trained for less than ", epoch, " epochs"))
 
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch
@@ -491,14 +513,17 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   )
 }
 
+#' @importFrom torch torch_save
 model_to_raw <- function(model) {
   con <- rawConnection(raw(), open = "wr")
-  torch::torch_save(model, con)
+  torch_save(model, con)
   on.exit({close(con)}, add = TRUE)
   r <- rawConnectionValue(con)
   r
 }
 
+#' @importFrom rlang abort
+#' @importFrom torch load_state_dict
 model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
 
   tabnet_model_lst <- tabnet_initialize(x, y, config)
@@ -509,7 +534,7 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
   m <- reload_model(obj$serialized_net)
 
   if (m$input_dim != tabnet_model_lst$network$input_dim)
-    rlang::abort("Model dimensions don't match.")
+    abort("Model dimensions don't match.")
 
   # perform update of selected weights into new tabnet_model
   m_stat_dict <- m$state_dict()
@@ -535,18 +560,20 @@ check_net_is_empty_ptr <- function(object) {
 }
 
 # https://stackoverflow.com/a/27350487/3297472
+#' @importFrom methods new
 is_null_external_pointer <- function(pointer) {
   a <- attributes(pointer)
   attributes(pointer) <- NULL
-  out <- identical(pointer, methods::new("externalptr"))
+  out <- identical(pointer, new("externalptr"))
   attributes(pointer) <- a
   out
 }
 
+#' @importFrom torch torch_load
 reload_model <- function(object) {
   con <- rawConnection(object)
   on.exit({close(con)}, add = TRUE)
-  module <- torch::torch_load(con)
+  module <- torch_load(con)
   module
 }
 
@@ -572,6 +599,7 @@ print.tabnet_pretrain <- print.tabnet_fit
 #' @return a tabnet network with the top nn_layer removed
 #' @rdname nn_prune_head
 #' @export
+#' @importFrom torch nn_prune_head
 nn_prune_head.tabnet_fit <- function(x, head_size) {
   if (check_net_is_empty_ptr(x)) {
     net <- reload_model(x$serialized_net)
@@ -579,18 +607,18 @@ nn_prune_head.tabnet_fit <- function(x, head_size) {
     net <- x$fit$network
   }
   # here we assemble nn_prune_head(x, 1) with nn_prune_head(x$tabnet, 1)
-  x <- torch::nn_prune_head(net, 1)
-  x$add_module(name= "tabnet", module=torch::nn_prune_head(net$tabnet,head_size=head_size))
+  x <- nn_prune_head(net, 1)
+  x$add_module(name= "tabnet", module=nn_prune_head(net$tabnet,head_size=head_size))
 
 }
 #' @rdname nn_prune_head
 #' @export
+#' @importFrom torch nn_prune_head
 nn_prune_head.tabnet_pretrain <- function(x, head_size) {
   if (check_net_is_empty_ptr(x)) {
-    torch::nn_prune_head(reload_model(x$serialized_net), head_size=head_size)
+    nn_prune_head(reload_model(x$serialized_net), head_size=head_size)
   } else {
-    torch::nn_prune_head(x$fit$network, head_size=head_size)
+    nn_prune_head(x$fit$network, head_size=head_size)
   }
 
 }
-
