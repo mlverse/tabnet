@@ -130,9 +130,9 @@ test_that("we properly check non-compliant colnames", {
 
   # augment acme dataset with a forbidden column name with no impact on predictor is ok
   acme$Do(function(x) {
-    x$level_4 <- data.tree::Aggregate(node = x,
+    x$level_4 <- as.character(data.tree::Aggregate(node = x,
                            attribute = "p",
-                           aggFun = sum)
+                           aggFun = sum))
   },
   traversal = "post-order")
   expect_no_error(check_compliant_node(acme))
