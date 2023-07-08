@@ -1,3 +1,4 @@
+#' @importFrom torch nn_utils_clip_grad_norm_
 train_batch_un <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
@@ -7,7 +8,7 @@ train_batch_un <- function(network, optimizer, batch, config) {
   optimizer$zero_grad()
   loss$backward()
   if (!is.null(config$clip_value)) {
-    torch::nn_utils_clip_grad_norm_(network$parameters, config$clip_value)
+    nn_utils_clip_grad_norm_(network$parameters, config$clip_value)
   }
   optimizer$step()
 
@@ -43,23 +44,29 @@ transpose_metrics <- function(metrics) {
   out[-1]
 }
 
+#' @importFrom torch torch_matmul torch_mean torch_mul torch_std torch_sum
 unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
 
   errors <- y_pred - embedded_x
-  reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)^2
-  batch_stds <- torch::torch_std(embedded_x, dim=1)^2 + eps
+  reconstruction_errors <- torch_mul(errors, obfuscation_mask)^2
+  batch_stds <- torch_std(embedded_x, dim=1)^2 + eps
 
   # compute the number of obfuscated variables to reconstruct
-  nb_reconstructed_variables <- torch::torch_sum(obfuscation_mask, dim=2)
+  nb_reconstructed_variables <- torch_sum(obfuscation_mask, dim=2)
 
   # take the mean of the reconstructed variable errors
-  features_loss <- torch::torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
-  loss <- torch::torch_mean(features_loss)
+  features_loss <- torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
+  loss <- torch_mean(features_loss)
   loss
 }
 
+#' @importFrom coro loop
+#' @importFrom glue glue
+#' @importFrom rlang abort inform is_function is_scalar_character warn
+#' @importFrom tibble tibble
+#' @importFrom torch dataloader dataset lr_reduce_on_plateau lr_scheduler lr_step optim_adam optimizer torch_long torch_manual_seed torch_randint
 tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift = 0L) {
-  torch::torch_manual_seed(sample.int(1e6, 1))
+  torch_manual_seed(sample.int(1e6, 1))
 
   device <- get_device_from_config(config)
 
@@ -69,13 +76,13 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     n <- nrow(x)
     valid_idx <- sample.int(n, n*config$valid_split)
     valid_x <- x[valid_idx, ]
-    valid_ds <-   torch::dataset(
+    valid_ds <-   dataset(
       initialize = function() {},
       .getbatch = function(batch) {resolve_data(valid_x[batch,], rep(1, length(batch)))},
       .length = function() {nrow(valid_x)}
     )()
 
-    valid_dl <- torch::dataloader(
+    valid_dl <- dataloader(
       valid_ds,
       batch_size = config$batch_size,
       shuffle = FALSE ,
@@ -86,7 +93,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   }
 
   # training dataset & dataloader
-  train_ds <-   torch::dataset(
+  train_ds <-   dataset(
     initialize = function() {},
     .getbatch = function(batch) {resolve_data(x[batch,], rep(1, length(batch)))},
     .length = function() {nrow(x)}
@@ -94,7 +101,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # we can get training_set parameters from the 2 first samples
   train <- train_ds$.getbatch(batch = c(1:2))
 
-  train_dl <- torch::dataloader(
+  train_dl <- dataloader(
     train_ds,
     batch_size = config$batch_size,
     drop_last = config$drop_last,
@@ -132,7 +139,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   } else if (rlang::is_scalar_character(config$optimizer)) {
 
     if (config$optimizer == "adam")
-      optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
+      optimizer <- optim_adam(network$parameters, lr = config$learn_rate)
     else
       rlang::abort("Currently only the 'adam' optimizer is supported.")
 
@@ -144,9 +151,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   } else if (rlang::is_function(config$lr_scheduler)) {
     scheduler <- config$lr_scheduler(optimizer)
   } else if (config$lr_scheduler == "reduce_on_plateau") {
-    scheduler <- torch::lr_reduce_on_plateau(optimizer, factor = config$lr_decay, patience = config$step_size)
+    scheduler <- lr_reduce_on_plateau(optimizer, factor = config$lr_decay, patience = config$step_size)
   } else if (config$lr_scheduler == "step") {
-    scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
+    scheduler <- lr_step(optimizer, config$step_size, config$lr_decay)
   } else {
     rlang::abort("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.")
   }
@@ -201,17 +208,17 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
       rlang::inform(message)
 
     # Early-stopping checks
-    if (config$early_stopping && config$early_stopping_monitor=="valid_loss"){
+    if (config$early_stopping && config$early_stopping_monitor == "valid_loss") {
       current_loss <- mean(metrics[[epoch]]$valid$loss)
     } else {
       current_loss <- mean(metrics[[epoch]]$train$loss)
     }
-    if (config$early_stopping && epoch > 1+epoch_shift) {
+    if (config$early_stopping && epoch > (1 + epoch_shift)) {
       # compute relative change, and compare to best_metric
       change <- (current_loss - best_metric) / current_loss
-      if (change > config$early_stopping_tolerance){
+      if (change > config$early_stopping_tolerance) {
         patience_counter <- patience_counter + 1
-        if (patience_counter >= config$early_stopping_patience){
+        if (patience_counter >= config$early_stopping_patience) {
           if (config$verbose)
             rlang::inform(sprintf("Early stopping at epoch %03d", epoch))
           break
@@ -222,7 +229,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
         patience_counter <- 0L
       }
     }
-    if (config$early_stopping && epoch == 1+epoch_shift) {
+    if (config$early_stopping && epoch == (1 + epoch_shift)) {
       # initialise best_metric
       best_metric <- current_loss
     }
@@ -243,11 +250,11 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
                   "You can disable this message by using the `importance_sample_size` argument."))
     importance_sample_size <- 1e5
   }
-  indexes <- as.numeric(torch::torch_randint(
+  indexes <- as.numeric(torch_randint(
     1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
-    dtype = torch::torch_long()
+    dtype = torch_long()
   ))
-  importances <- tibble::tibble(
+  importances <- tibble(
     variables = colnames(x),
     importance = compute_feature_importance(
       network,
