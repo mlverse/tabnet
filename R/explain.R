@@ -52,8 +52,9 @@ tabnet_explain.default <- function(object, new_data) {
 
 #' @export
 #' @rdname tabnet_explain
+#' @importFrom hardhat forge
 tabnet_explain.tabnet_fit <- function(object, new_data) {
-  processed <- hardhat::forge(new_data, object$blueprint, outcomes = FALSE)
+  processed <- forge(new_data, object$blueprint, outcomes = FALSE)
   data <- resolve_data(processed$predictors, y = rep(1, nrow(processed$predictors)))
   device <- get_device_from_config(object$fit$config)
   data <- to_device(data, device)
@@ -73,16 +74,19 @@ tabnet_explain.tabnet_pretrain <- tabnet_explain.tabnet_fit
 
 #' @export
 #' @rdname tabnet_explain
+#' @importFrom hardhat extract_fit_engine
 tabnet_explain.model_fit <- function(object, new_data) {
-  tabnet_explain(parsnip::extract_fit_engine(object), new_data)
+  tabnet_explain(extract_fit_engine(object), new_data)
 }
 
+#' @importFrom tibble as_tibble
 convert_to_df <- function(x, nms) {
   x <- as.data.frame(as.matrix(x$to(device = "cpu")$detach()))
   colnames(x) <- nms
-  tibble::as_tibble(x)
+  as_tibble(x)
 }
 
+#' @importFrom withr defer
 explain_impl <- function(network, x, x_na_mask) {
   curr_device <- network$.check$device
   withr::defer({
@@ -118,12 +122,13 @@ compute_feature_importance <- function(network, x, x_na_mask) {
 }
 
 # sum embeddings taking their sizes into account.
+#' @importFrom torch torch_cat
 sum_embedding_masks <- function(mask, input_dim, cat_idx, cat_emb_dim) {
   sizes <- rep(1, input_dim)
   sizes[cat_idx] <- cat_emb_dim
 
   splits <- mask$split_with_sizes(sizes, dim = 2)
-  splits <- lapply(splits, torch::torch_sum, dim = 2, keepdim = TRUE)
+  splits <- lapply(splits, torch_sum, dim = 2, keepdim = TRUE)
 
   torch::torch_cat(splits, dim = 2)
 }
