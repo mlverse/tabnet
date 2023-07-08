@@ -18,36 +18,41 @@
 #' autoplot(attrition_fit)
 #'
 #' @importFrom rlang .data
+#' @importFrom dplyr filter mutate select select_if
+#' @importFrom ggplot2 aes element_text geom_line geom_point ggplot guide_legend guides labs scale_y_log10 theme
+#' @importFrom purrr map_dbl
+#' @importFrom tibble enframe
+#' @importFrom tidyr drop_na pivot_longer pivot_wider unnest_longer unnest_wider
 #'
 autoplot.tabnet_fit <- function(object, ...) {
 
   epoch_checkpointed_seq <- seq_along(object$fit$checkpoints) * object$fit$config$checkpoint_epochs
 
   collect_metrics <- tibble::enframe(object$fit$metrics,name = "epoch") %>%
-    tidyr::unnest_longer(value,indices_to = "dataset") %>%
-    tidyr::unnest_wider(value) %>%
+    unnest_longer(value,indices_to = "dataset") %>%
+    unnest_wider(value) %>%
     # drop entries from pretrain that have missing `dataset`
-    tidyr::drop_na(dataset) %>%
-    tidyr::pivot_wider(values_from = loss, names_from = dataset) %>%
+    drop_na(dataset) %>%
+    pivot_wider(values_from = loss, names_from = dataset) %>%
     # remove the valid col if all NAs to prevent ggplot warnings
-    dplyr::select_if(function(x) {!all(is.na(x))} ) %>%
-    tidyr::pivot_longer(cols = !epoch, names_to = "dataset", values_to = "loss") %>%
+    select_if(function(x) {!all(is.na(x))} ) %>%
+    pivot_longer(cols = !epoch, names_to = "dataset", values_to = "loss") %>%
     # add checkpoints
-    dplyr::mutate(mean_loss = purrr::map_dbl(loss, mean),
+    mutate(mean_loss = map_dbl(loss, mean),
            has_checkpoint = epoch %in% (epoch_checkpointed_seq + min(epoch, na.rm=TRUE) - 1)) %>%
-    dplyr::select(-loss)
+    select(-loss)
 
   checkpoints <- collect_metrics %>%
-    dplyr::filter(has_checkpoint, dataset=="train") %>%
-    dplyr::mutate(size=2)
-  p <- ggplot2::ggplot(collect_metrics, ggplot2::aes(x=epoch, y=mean_loss, color=dataset)) +
-    ggplot2::geom_line() +
-    ggplot2::geom_point(data = checkpoints, ggplot2::aes(x=epoch, y=mean_loss, color=dataset, size = .data$size ) ) +
-    ggplot2::scale_y_log10() +
-    ggplot2::guides(colour = ggplot2::guide_legend("Dataset", order=1, override.aes = list(size=1.5, shape=" ")),
-           size= ggplot2::guide_legend("has checkpoint", order=2, override.aes = list(size=3, color="#F8766D"), label.theme = ggplot2::element_text(colour = "#FFFFFF"))) +
-    ggplot2::theme(legend.position = "bottom") +
-    ggplot2::labs(y="Mean loss (log scale)")
+    filter(has_checkpoint, dataset=="train") %>%
+    mutate(size=2)
+  p <- ggplot(collect_metrics, aes(x=epoch, y=mean_loss, color=dataset)) +
+    geom_line() +
+    geom_point(data = checkpoints, aes(x=epoch, y=mean_loss, color=dataset, size = .data$size ) ) +
+    scale_y_log10() +
+    guides(colour = guide_legend("Dataset", order=1, override.aes = list(size=1.5, shape=" ")),
+           size= guide_legend("has checkpoint", order=2, override.aes = list(size=3, color="#F8766D"), label.theme = element_text(colour = "#FFFFFF"))) +
+    theme(legend.position = "bottom") +
+    labs(y="Mean loss (log scale)")
   p
   }
 
@@ -89,38 +94,44 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
 #' ames_explain <- tabnet_explain(ames_fit, x)
 #' autoplot(ames_explain, quantile = 0.99)
+#' @importFrom dplyr group_by mutate row_number ungroup
+#' @importFrom ggplot2 aes facet_wrap geom_tile ggplot scale_fill_viridis_c theme_minimal
+#' @importFrom purrr imap_dfr
+#' @importFrom tidyr pivot_longer
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
 
   if (type == "steps") {
     .data <- object$masks %>%
-      purrr::imap_dfr(~dplyr::mutate(
+      imap_dfr(~mutate(
         .x,
         step = sprintf("Step %d", .y),
-        rowname = dplyr::row_number()
+        rowname = row_number()
       )) %>%
-      tidyr::pivot_longer(-c(rowname, step), names_to = "variable", values_to = "mask_agg") %>%
-      dplyr::group_by(step) %>%
-      dplyr::mutate(mask_agg = quantile_clip(mask_agg, probs=quantile)) %>%
-      dplyr::ungroup()
+      pivot_longer(-c(rowname, step), names_to = "variable", values_to = "mask_agg") %>%
+      group_by(step) %>%
+      mutate(mask_agg = quantile_clip(mask_agg, probs=quantile)) %>%
+      ungroup()
   } else {
 
   .data <- object$M_explain %>%
-    dplyr::mutate(rowname = dplyr::row_number()) %>%
-    tidyr::pivot_longer(-rowname, names_to = "variable", values_to = "mask_agg") %>%
-    dplyr::mutate(mask_agg = quantile_clip(mask_agg, probs=quantile),
+    mutate(rowname = row_number()) %>%
+    pivot_longer(-rowname, names_to = "variable", values_to = "mask_agg") %>%
+    mutate(mask_agg = quantile_clip(mask_agg, probs=quantile),
                   step = "mask_aggregate")
   }
 
-  p <- ggplot2::ggplot(.data, ggplot2::aes(x = rowname, y = variable, fill = mask_agg)) +
-    ggplot2::geom_tile() +
-    ggplot2::scale_fill_viridis_c() +
-    ggplot2::facet_wrap(~step) +
-    ggplot2::theme_minimal()
+  p <- ggplot(.data, aes(x = rowname, y = variable, fill = mask_agg)) +
+    geom_tile() +
+    scale_fill_viridis_c() +
+    facet_wrap(~step) +
+    theme_minimal()
   p
 }
 
+#' @importFrom purrr map_dbl
+#' @importFrom stats quantile
 quantile_clip <- function(x, probs) {
   quantile <- quantile(x, probs = probs)
-  purrr::map_dbl(x, ~min(.x, quantile))
+  map_dbl(x, ~min(.x, quantile))
 }

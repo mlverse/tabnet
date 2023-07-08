@@ -1,24 +1,25 @@
+#' @importFrom parsnip set_dependency set_encoding set_fit set_model_arg set_model_engine set_model_mode set_new_model set_pred
 add_parsnip_tabnet <- function() {
 
-  parsnip::set_new_model("tabnet")
-  parsnip::set_model_mode(model = "tabnet", mode = "classification")
-  parsnip::set_model_mode(model = "tabnet", mode = "regression")
+  set_new_model("tabnet")
+  set_model_mode(model = "tabnet", mode = "classification")
+  set_model_mode(model = "tabnet", mode = "regression")
 
-  parsnip::set_model_engine(
+  set_model_engine(
     "tabnet",
     mode = "classification",
     eng = "torch"
   )
 
-  parsnip::set_model_engine(
+  set_model_engine(
     "tabnet",
     mode = "regression",
     eng = "torch"
   )
 
-  parsnip::set_dependency("tabnet", eng = "torch", pkg = "tabnet")
+  set_dependency("tabnet", eng = "torch", pkg = "tabnet")
 
-  parsnip::set_fit(
+  set_fit(
     model = "tabnet",
     eng = "torch",
     mode = "classification",
@@ -30,7 +31,7 @@ add_parsnip_tabnet <- function() {
     )
   )
 
-  parsnip::set_fit(
+  set_fit(
     model = "tabnet",
     eng = "torch",
     mode = "regression",
@@ -42,7 +43,7 @@ add_parsnip_tabnet <- function() {
     )
   )
 
-  parsnip::set_encoding(
+  set_encoding(
     model = "tabnet",
     eng = "torch",
     mode = "regression",
@@ -54,7 +55,7 @@ add_parsnip_tabnet <- function() {
     )
   )
 
-  parsnip::set_encoding(
+  set_encoding(
     model = "tabnet",
     eng = "torch",
     mode = "classification",
@@ -80,7 +81,7 @@ add_parsnip_tabnet <- function() {
     )
   }
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "epochs",
@@ -89,7 +90,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = TRUE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "batch_size",
@@ -98,7 +99,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "penalty",
@@ -107,7 +108,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "learn_rate",
@@ -116,7 +117,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "decision_width",
@@ -125,7 +126,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "attention_width",
@@ -134,7 +135,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "num_steps",
@@ -143,7 +144,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "feature_reusage",
@@ -152,7 +153,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "virtual_batch_size",
@@ -161,7 +162,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "num_independent",
@@ -170,7 +171,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "num_shared",
@@ -179,7 +180,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_model_arg(
+  set_model_arg(
     model = "tabnet",
     eng = "torch",
     parsnip = "momentum",
@@ -188,7 +189,7 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
-  parsnip::set_pred(
+  set_pred(
     model = "tabnet",
     eng = "torch",
     mode = "classification",
@@ -196,7 +197,7 @@ add_parsnip_tabnet <- function() {
     value = make_class_info("class")
   )
 
-  parsnip::set_pred(
+  set_pred(
     model = "tabnet",
     eng = "torch",
     mode = "classification",
@@ -204,7 +205,7 @@ add_parsnip_tabnet <- function() {
     value = make_class_info("prob")
   )
 
-  parsnip::set_pred(
+  set_pred(
     model = "tabnet",
     eng = "torch",
     mode = "regression",
@@ -236,13 +237,15 @@ add_parsnip_tabnet <- function() {
 #' `parsnip` machinery.
 #'
 #' @export
+#' @importFrom parsnip make_classes
+#' @importFrom rlang abort enquo
 tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
                    learn_rate = NULL, decision_width = NULL, attention_width = NULL,
                    num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
                    num_independent = NULL, num_shared = NULL, momentum = NULL) {
 
   if (!requireNamespace("parsnip", quietly = TRUE))
-    rlang::abort("Package \"parsnip\" needed for this function to work. Please install it.")
+    abort("Package \"parsnip\" needed for this function to work. Please install it.")
 
   if (!tabnet_env$parsnip_added) {
     add_parsnip_tabnet()
@@ -251,18 +254,18 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
 
   # Capture the arguments in quosures
   args <- list(
-    epochs = rlang::enquo(epochs),
-    penalty = rlang::enquo(penalty),
-    batch_size = rlang::enquo(batch_size),
-    learn_rate = rlang::enquo(learn_rate),
-    decision_width = rlang::enquo(decision_width),
-    attention_width = rlang::enquo(attention_width),
-    num_steps = rlang::enquo(num_steps),
-    feature_reusage = rlang::enquo(feature_reusage),
-    virtual_batch_size = rlang::enquo(virtual_batch_size),
-    num_independent = rlang::enquo(num_independent),
-    num_shared = rlang::enquo(num_shared),
-    momentum = rlang::enquo(momentum)
+    epochs = enquo(epochs),
+    penalty = enquo(penalty),
+    batch_size = enquo(batch_size),
+    learn_rate = enquo(learn_rate),
+    decision_width = enquo(decision_width),
+    attention_width = enquo(attention_width),
+    num_steps = enquo(num_steps),
+    feature_reusage = enquo(feature_reusage),
+    virtual_batch_size = enquo(virtual_batch_size),
+    num_independent = enquo(num_independent),
+    num_shared = enquo(num_shared),
+    momentum = enquo(momentum)
   )
 
   # Save some empty slots for future parts of the specification
@@ -270,7 +273,7 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
               mode = mode, method = NULL, engine = "torch")
 
   # set classes in the correct order
-  class(out) <- parsnip::make_classes("tabnet")
+  class(out) <- make_classes("tabnet")
   out
 }
 
@@ -278,6 +281,7 @@ tabnet_env <- new.env()
 tabnet_env$parsnip_added <- FALSE
 
 
+#' @importFrom stats predict
 multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NULL, ...) {
 
   if (is.null(epochs))
@@ -299,29 +303,31 @@ multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NU
 }
 
 #' @export
+#' @importFrom parsnip new_model_spec update_engine_parameters update_main_parameters
+#' @importFrom rlang check_installed enquo
 #' @importFrom stats update
 update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NULL, batch_size = NULL,
                           learn_rate = NULL, decision_width = NULL, attention_width = NULL,
                           num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
                           num_independent = NULL, num_shared = NULL, momentum = NULL, ...) {
-  rlang::check_installed("parsnip")
-  eng_args <- parsnip::update_engine_parameters(object$eng_args, fresh=TRUE, ...)
+  check_installed("parsnip")
+  eng_args <- update_engine_parameters(object$eng_args, fresh=TRUE, ...)
   args <- list(
-    epochs = rlang::enquo(epochs),
-    penalty = rlang::enquo(penalty),
-    batch_size = rlang::enquo(batch_size),
-    learn_rate = rlang::enquo(learn_rate),
-    decision_width = rlang::enquo(decision_width),
-    attention_width = rlang::enquo(attention_width),
-    num_steps = rlang::enquo(num_steps),
-    feature_reusage = rlang::enquo(feature_reusage),
-    virtual_batch_size = rlang::enquo(virtual_batch_size),
-    num_independent = rlang::enquo(num_independent),
-    num_shared = rlang::enquo(num_shared),
-    momentum = rlang::enquo(momentum)
+    epochs = enquo(epochs),
+    penalty = enquo(penalty),
+    batch_size = enquo(batch_size),
+    learn_rate = enquo(learn_rate),
+    decision_width = enquo(decision_width),
+    attention_width = enquo(attention_width),
+    num_steps = enquo(num_steps),
+    feature_reusage = enquo(feature_reusage),
+    virtual_batch_size = enquo(virtual_batch_size),
+    num_independent = enquo(num_independent),
+    num_shared = enquo(num_shared),
+    momentum = enquo(momentum)
   )
-  args <- parsnip::update_main_parameters(args, parameters)
-  parsnip::new_model_spec(
+  args <- update_main_parameters(args, parameters)
+  new_model_spec(
     "tabnet",
     args = args,
     eng_args = eng_args,
