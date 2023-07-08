@@ -14,6 +14,7 @@
 #' @param x a data frame
 #' @param y a response vector
 #' @noRd
+#' @importFrom torch torch_bool torch_float torch_long torch_tensor
 resolve_data <- function(x, y) {
   cat_idx <- which(sapply(x, is.factor))
   cat_dims <- sapply(cat_idx, function(i) nlevels(x[[i]]))
@@ -21,25 +22,25 @@ resolve_data <- function(x, y) {
   if (length(cat_idx) > 0) {
     x[,cat_idx] <- sapply(cat_idx, function(i) as.integer(x[[i]]))
   } else {
-    # prevent empty cat idx
+    # prevent empty cat_idx
     cat_idx <- 0L
     cat_dims <- 0L
   }
-  x_tensor <- torch::torch_tensor(as.matrix(x), dtype = torch::torch_float())
-  x_na_mask <- x %>% is.na %>% as.matrix %>% torch::torch_tensor(dtype = torch::torch_bool())
+  x_tensor <- torch_tensor(as.matrix(x), dtype = torch_float())
+  x_na_mask <- x %>% is.na %>% as.matrix %>% torch_tensor(dtype = torch_bool())
 
   # convert factors to integers, based on the class of target first column
   # TODO do not assume but assert type-consistency of all y cols
   # and record output_dim
   if (is.factor(y[[1]])) {
-    y_tensor <- torch::torch_tensor(sapply(y, function(i) as.integer(i)), dtype = torch::torch_long())
+    y_tensor <- torch_tensor(sapply(y, function(i) as.integer(i)), dtype = torch_long())
     if (is.atomic(y)) {
       output_dim <- nlevels(y)
     } else {
       output_dim <- sapply(y, function(i) nlevels(i))
     }
   } else {
-    y_tensor <- torch::torch_tensor(as.matrix(y), dtype = torch::torch_float())
+    y_tensor <- torch_tensor(as.matrix(y), dtype = torch_float())
     output_dim <- ncol(y)
   }
 
@@ -203,30 +204,35 @@ tabnet_config <- function(batch_size = 1024^2,
   )
 }
 
+#' @importFrom rlang abort
+#' @importFrom torch nn_cross_entropy_loss nn_mse_loss torch_long
 resolve_loss <- function(loss, dtype) {
   if (is.function(loss))
     loss_fn <- loss
-  else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
-    loss_fn <- torch::nn_mse_loss()
-  else if (loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long())
-    loss_fn <- torch::nn_cross_entropy_loss()
+  else if (loss %in% c("mse", "auto") && !dtype == torch_long())
+    loss_fn <- nn_mse_loss()
+  else if (loss %in% c("bce", "cross_entropy", "auto") && dtype == torch_long())
+    loss_fn <- nn_cross_entropy_loss()
   else
-    rlang::abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
+    abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
 
   loss_fn
 }
 
+#' @importFrom rlang abort
 resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   if (early_stopping_monitor %in% c("valid_loss", "auto") && valid_split > 0)
     early_stopping_monitor <- "valid_loss"
   else if (early_stopping_monitor %in% c("train_loss", "auto"))
     early_stopping_monitor <- "train_loss"
   else
-    rlang::abort(paste0(early_stopping_monitor," is not a valid early stopping metric to monitor with `valid_split`=",valid_split))
+    abort(paste0(early_stopping_monitor," is not a valid early stopping metric to monitor with `valid_split`=",valid_split))
 
   early_stopping_monitor
 }
 
+#' @importFrom purrr pmap
+#' @importFrom torch nn_utils_clip_grad_norm_ torch_long torch_split torch_stack torch_sum
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
@@ -234,16 +240,16 @@ train_batch <- function(network, optimizer, batch, config) {
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+    loss <- torch_sum(torch_stack(pmap(
       list(
-        torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
-        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+        torch_split(output[[1]], outcome_nlevels, dim = 2),
+        torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
       ),
       ~config$loss_fn(.x, .y$squeeze(2))
     )),
     dim = 1)
   } else {
-    if (batch$y$dtype == torch::torch_long()) {
+    if (batch$y$dtype == torch_long()) {
       # classifier needs a squeeze for bce loss
       loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
     } else {
@@ -257,7 +263,7 @@ train_batch <- function(network, optimizer, batch, config) {
   optimizer$zero_grad()
   loss$backward()
   if (!is.null(config$clip_value)) {
-    torch::nn_utils_clip_grad_norm_(network$parameters, config$clip_value)
+   nn_utils_clip_grad_norm_(network$parameters, config$clip_value)
   }
   optimizer$step()
 
@@ -266,6 +272,8 @@ train_batch <- function(network, optimizer, batch, config) {
   )
 }
 
+#' @importFrom purrr pmap
+#' @importFrom torch torch_long torch_split torch_stack torch_sum
 valid_batch <- function(network, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
@@ -273,16 +281,16 @@ valid_batch <- function(network, batch, config) {
   if (max(batch$output_dim$shape) > 1) {
     # TODO maybe torch_stack here would help loss$backward and better to shift right torch_sum at the end ?
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+    loss <- torch_sum(torch_stack(pmap(
       list(
-        torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
-        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+        torch_split(output[[1]], outcome_nlevels, dim = 2),
+        torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
       ),
       ~config$loss_fn(.x, .y$squeeze(2))
     )),
     dim = 1)
   } else {
-    if (batch$y$dtype == torch::torch_long()) {
+    if (batch$y$dtype == torch_long()) {
       # classifier needs a squeeze for bce loss
       loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
     } else {
@@ -297,11 +305,12 @@ valid_batch <- function(network, batch, config) {
   )
 }
 
+#' @importFrom torch backends_mps_is_available cuda_is_available
 get_device_from_config <- function(config) {
   if (config$device == "auto") {
-    if (torch::cuda_is_available()){
+    if (cuda_is_available()){
       device <- "cuda"
-    } else if (torch::backends_mps_is_available()) {
+    } else if (backends_mps_is_available()) {
       device <- "mps"
     } else {
       device <- "cpu"
@@ -312,9 +321,11 @@ get_device_from_config <- function(config) {
   device
 }
 
+#' @importFrom tibble tibble
+#' @importFrom torch dataset torch_manual_seed
 tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
-  torch::torch_manual_seed(sample.int(1e6, 1))
+  torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
 
   device <- get_device_from_config(config)
@@ -325,7 +336,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     valid_x <- x[valid_idx, ]
     valid_y <- y[valid_idx, ]
     train_y <- y[-valid_idx, ]
-    valid_ds <-   torch::dataset(
+    valid_ds <-  dataset(
       initialize = function() {},
       .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch, ])},
       .length = function() {nrow(valid_x)}
@@ -335,7 +346,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   }
 
   # training dataset
-  train_ds <-   torch::dataset(
+  train_ds <-  dataset(
     initialize = function() {},
     .getbatch = function(batch) {resolve_data(x[batch, ], y[batch, ])},
     .length = function() {nrow(x)}
@@ -369,7 +380,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   checkpoints <- list()
 
 
-  importances <- tibble::tibble(
+  importances <- tibble(
     variables = colnames(x),
     importance = NA
   )
@@ -383,9 +394,14 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   )
 }
 
+#' @importFrom coro loop
+#' @importFrom glue glue
+#' @importFrom rlang abort inform is_function is_scalar_character warn
+#' @importFrom tibble tibble
+#' @importFrom torch dataloader dataset lr_reduce_on_plateau lr_scheduler lr_step optim_adam optimizer torch_long torch_manual_seed torch_randint
 tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift = 0L) {
   stopifnot("tabnet_model shall be initialised or pretrained" = (length(obj$fit$network) > 0))
-  torch::torch_manual_seed(sample.int(1e6, 1))
+  torch_manual_seed(sample.int(1e6, 1))
 
   device <- get_device_from_config(config)
 
@@ -398,13 +414,13 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     valid_y <- y[valid_idx, ]
     train_y <- y[-valid_idx, ]
 
-    valid_ds <-   torch::dataset(
+    valid_ds <-  dataset(
       initialize = function() {},
       .getbatch = function(batch) {resolve_data(valid_x[batch,], valid_y[batch,])},
       .length = function() {nrow(valid_x)}
     )()
 
-    valid_dl <- torch::dataloader(
+    valid_dl <-dataloader(
       valid_ds,
       batch_size = config$batch_size,
       shuffle = FALSE,
@@ -416,13 +432,13 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   }
 
   # training dataset & dataloader
-  train_ds <-   torch::dataset(
+  train_ds <-  dataset(
     initialize = function() {},
     .getbatch = function(batch) {resolve_data(x[batch,], y[batch,])},
     .length = function() {nrow(x)}
   )()
 
-  train_dl <- torch::dataloader(
+  train_dl <-dataloader(
     train_ds,
     batch_size = config$batch_size,
     drop_last = config$drop_last,
@@ -440,30 +456,30 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # define optimizer
 
-  if (rlang::is_function(config$optimizer)) {
+  if (is_function(config$optimizer)) {
 
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
 
-  } else if (rlang::is_scalar_character(config$optimizer)) {
+  } else if (is_scalar_character(config$optimizer)) {
 
     if (config$optimizer == "adam")
-      optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
+      optimizer <-optim_adam(network$parameters, lr = config$learn_rate)
     else
-      rlang::abort("Currently only the 'adam' optimizer is supported.")
+      abort("Currently only the 'adam' optimizer is supported.")
 
   }
 
   # define scheduler
   if (is.null(config$lr_scheduler)) {
     scheduler <- list(step = function() {})
-  } else if (rlang::is_function(config$lr_scheduler)) {
+  } else if (is_function(config$lr_scheduler)) {
     scheduler <- config$lr_scheduler(optimizer)
   } else if (config$lr_scheduler == "reduce_on_plateau") {
-    scheduler <- torch::lr_reduce_on_plateau(optimizer, factor = config$lr_decay, patience = config$step_size)
+    scheduler <-lr_reduce_on_plateau(optimizer, factor = config$lr_decay, patience = config$step_size)
   } else if (config$lr_scheduler == "step") {
-    scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
+    scheduler <-lr_step(optimizer, config$step_size, config$lr_decay)
   } else {
-    rlang::abort("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.")
+    abort("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.")
   }
 
   # restore previous metrics & checkpoints
@@ -486,7 +502,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         format = "[:bar] loss= :loss"
       )
 
-    coro::loop(for (batch in train_dl) {
+    loop(for (batch in train_dl) {
       m <- train_batch(network, optimizer, to_device(batch, device), config)
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
@@ -501,7 +517,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
     network$eval()
     if (has_valid) {
-      coro::loop(for (batch in valid_dl) {
+     loop(for (batch in valid_dl) {
         m <- valid_batch(network, to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
       })
@@ -513,7 +529,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       message <- paste0(message, sprintf(" Valid loss: %3f", mean(metrics[[epoch]]$valid$loss)))
 
     if (config$verbose)
-      rlang::inform(message)
+      inform(message)
 
     # Early-stopping checks
     if (config$early_stopping && config$early_stopping_monitor=="valid_loss"){
@@ -528,7 +544,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         patience_counter <- patience_counter + 1
         if (patience_counter >= config$early_stopping_patience){
           if (config$verbose)
-            rlang::inform(sprintf("Early stopping at epoch %03d", epoch))
+            inform(sprintf("Early stopping at epoch %03d", epoch))
           break
         }
       } else {
@@ -553,16 +569,16 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   if(!config$skip_importance) {
     importance_sample_size <- config$importance_sample_size
     if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
-      rlang::warn(c(glue::glue("Computing importances for a dataset with size {train_ds$.length()}."),
+      warn(c(glue("Computing importances for a dataset with size {train_ds$.length()}."),
                   "This can consume too much memory. We are going to use a sample of size 1e5",
                   "You can disable this message by using the `importance_sample_size` argument."))
       importance_sample_size <- 1e5
     }
-    indexes <- as.numeric(torch::torch_randint(
+    indexes <- as.numeric(torch_randint(
       1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
-      dtype = torch::torch_long()
+      dtype = torch_long()
     ))
-    importances <- tibble::tibble(
+    importances <- tibble(
       variables = colnames(x),
       importance = compute_feature_importance(
         network,
@@ -581,10 +597,12 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   )
 }
 
+#' @importFrom coro loop
+#' @importFrom torch dataloader dataset torch_cat
 predict_impl <- function(obj, x, batch_size = 1e5) {
   # prediction dataset
   device = obj$fit$config$device
-  predict_ds <-   torch::dataset(
+  predict_ds <-  dataset(
     initialize = function() {},
     .getbatch = function(batch) {resolve_data(x[batch,], rep(1, nrow(x)))},
     .length = function() {nrow(x)}
@@ -595,7 +613,7 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   yhat <- c()
   network$eval()
 
-  predict_dl <- torch::dataloader(
+  predict_dl <-dataloader(
     predict_ds,
     batch_size = batch_size,
     drop_last = FALSE,
@@ -603,23 +621,26 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
     # num_workers = num_workers
     num_workers = 0L
   )
-  coro::loop(for (batch in predict_dl) {
+  loop(for (batch in predict_dl) {
     batch <- to_device(batch, device)
     yhat <- c(yhat, network(batch$x, batch$x_na_mask)[[1]])
   })
   # bind rows of the batches
-  torch::torch_cat(yhat)
+  torch_cat(yhat)
 }
 
+#' @importFrom hardhat spruce_numeric
 predict_impl_numeric <- function(obj, x, batch_size) {
   p <- as.matrix(predict_impl(obj, x, batch_size))
-  hardhat::spruce_numeric(as.numeric(p))
+  spruce_numeric(as.numeric(p))
 }
 
+#' @importFrom hardhat spruce_numeric_multiple
+#' @importFrom purrr map
 predict_impl_numeric_multiple <- function(obj, x, batch_size) {
   p <- as.matrix(predict_impl(obj, x, batch_size))
   # TODO use a cleaner function to turn matrix into vectors
-  hardhat::spruce_numeric_multiple(!!!purrr::map(1:ncol(p), ~p[,.x]))
+  spruce_numeric_multiple(!!!map(1:ncol(p), ~p[,.x]))
 }
 
 #' single-outcome level blueprint
@@ -638,54 +659,68 @@ get_blueprint_levels <- function(obj) {
 #'
 #' @return : a list of levels vectors for each outcome
 #' @noRd
+#' @importFrom purrr map
+#' @importFrom rlang set_names
 get_blueprint_levels_multiple <- function(obj) {
-  purrr::map(obj$blueprint$ptypes$outcomes, levels) %>%
-    rlang::set_names(names(obj$blueprint$ptypes$outcomes))
+  map(obj$blueprint$ptypes$outcomes, levels) %>%
+    set_names(names(obj$blueprint$ptypes$outcomes))
 }
 
+#' @importFrom hardhat spruce_prob
+#' @importFrom torch nnf_softmax
 predict_impl_prob <- function(obj, x, batch_size) {
   p <- predict_impl(obj, x, batch_size)
-  p <- torch::nnf_softmax(p, dim = 2)
+  p <-nnf_softmax(p, dim = 2)
   p <- as.matrix(p)
-  hardhat::spruce_prob(get_blueprint_levels(obj), p)
+  spruce_prob(get_blueprint_levels(obj), p)
 }
 
+#' @importFrom hardhat spruce_prob spruce_prob_multiple
+#' @importFrom purrr map pmap
+#' @importFrom rlang set_names
+#' @importFrom torch nnf_softmax torch_split
 predict_impl_prob_multiple <- function(obj, x, batch_size, outcome_nlevels) {
   p <- predict_impl(obj, x, batch_size)
-  p <- torch::nnf_softmax(p, dim = 2)
+  p <- nnf_softmax(p, dim = 2)
   p <- as.matrix(p)
   # TODO use a cleaner function to turn matrix into vectors
   p_blueprint <- get_blueprint_levels_multiple(obj)
-  p_probs <- purrr::map(torch::torch_split(p, outcome_nlevels, dim = 2),
+  p_probs <- map(torch_split(p, outcome_nlevels, dim = 2),
                         as.matrix)
-  hardhat::spruce_prob_multiple(!!!purrr::pmap(
+  spruce_prob_multiple(!!!pmap(
     list(p_blueprint, p_probs),
     # TODO BUG each element of `...` must be a tibble, not a list.
-    ~hardhat::spruce_prob(.x, .y)) %>%
-      rlang::set_names(names(p_blueprint))
+    ~spruce_prob(.x, .y)) %>%
+      set_names(names(p_blueprint))
     )
 }
 
+#' @importFrom hardhat spruce_class
+#' @importFrom torch torch_max
 predict_impl_class <- function(obj, x, batch_size) {
   p <- predict_impl(obj, x, batch_size)
-  p_idx <- as.integer(torch::torch_max(p, dim = 2)[[2]])
+  p_idx <- as.integer(torch_max(p, dim = 2)[[2]])
   p_idx <- get_blueprint_levels(obj)[p_idx]
   p <- factor(p_idx, levels = get_blueprint_levels(obj))
-  hardhat::spruce_class(p)
+  spruce_class(p)
 }
 
+#' @importFrom hardhat spruce_class_multiple
+#' @importFrom purrr map pmap
+#' @importFrom rlang set_names
+#' @importFrom torch torch_max torch_split
 predict_impl_class_multiple <- function(obj, x, batch_size, outcome_nlevels) {
   p <- predict_impl(obj, x, batch_size)
   p_levels <- get_blueprint_levels_multiple(obj)
-  p_idx <- purrr::map(
-    torch::torch_split(p, outcome_nlevels, dim = 2),
-    ~as.integer(torch::torch_max(.x, dim = 2)[[2]])
-    ) %>% rlang::set_names(names(p_levels))
-  p_factor_lst <- purrr::pmap(
+  p_idx <- map(
+    torch_split(p, outcome_nlevels, dim = 2),
+    ~as.integer(torch_max(.x, dim = 2)[[2]])
+    ) %>% set_names(names(p_levels))
+  p_factor_lst <- pmap(
     list(p_idx, p_levels),
     ~factor(.y[.x], levels = .y)
   )
-  hardhat::spruce_class_multiple(!!!p_factor_lst)
+  spruce_class_multiple(!!!p_factor_lst)
 }
 
 to_device <- function(x, device) {

@@ -442,7 +442,7 @@ check_type <- function(outcome_ptype, type = NULL) {
 
   # outcome_ptype <- model$blueprint$ptypes$outcomes when called from model
   outcome_all_factor <- all(map_lgl(outcome_ptype, is.factor))
-  outcome_all_numeric <- allmap_lgl(outcome_ptype, is.numeric))
+  outcome_all_numeric <- all(map_lgl(outcome_ptype, is.numeric))
 
   if (!outcome_all_numeric && !outcome_all_factor)
     abort(glue("Mixed multi-outcome type '{unique(map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
