@@ -18,6 +18,7 @@ Check that Node object names are compliant
 \examples{
 \dontshow{if ((require("data.tree") || require("dplyr"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(dplyr)
+library(data.tree)
 data(starwars)
 starwars_tree <- starwars \%>\%
   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/"))

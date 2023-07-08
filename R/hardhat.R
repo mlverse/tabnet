@@ -49,7 +49,7 @@
 #'
 #' TabNet allows multi-outcome prediction, which is usually named [multi-label classification](https://en.wikipedia.org/wiki/Multi-label_classification)
 #'   or multi-output classification when outcomes are categorical.
-#' Multi-outcome currently expect all outcomes to be either all numeric or all categorical.
+#' Multi-outcome currently expect outcomes to be either all numeric or all categorical.
 #'
 #' @section Threading:
 #'
@@ -67,7 +67,7 @@
 #'
 #' data("ames", package = "modeldata")
 #' data("attrition", package = "modeldata")
-#' ids <- sample(nrow(ames), 256)
+#' ids <- sample(nrow(attrition), 256)
 #'
 #' ## Single-outcome regression using formula specification
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
@@ -78,15 +78,22 @@
 #'
 #' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
 #' ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames[ids,], epochs = 2, valid_split = 0.2)
-
-#' ## Multi-label classification on `Attrition` and `JobSatisfaction` in `attrition` dataset using recipe,
+#'
+#' ## Multi-label classification on `Attrition` and `JobSatisfaction` in
+#' ## `attrition` dataset using recipe
+#' library(recipes)
 #' rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition[ids,]) %>%
 #'   step_normalize(all_numeric(), -all_outcomes())
 #'
-#' ames_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
+#' attrition_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
 #'
-#' Note: Dataset size and number of epochs should be increased for publication-level results.
-
+#' ## Hierarchical classification on  `acme`
+#' data(acme, package = "data.tree")
+#'
+#' acme_fit <- tabnet_fit(acme, epochs = 2, verbose = TRUE)
+#'
+#' # Note: Dataset number of rows and model number of epochs should be increased
+#' # for publication-level results.
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'
 #' @export
@@ -173,14 +180,14 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
 #' @importFrom tidyr replace_na
 #'
 tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  # ensure there is no level_* col in the data.tree
+  # ensure there is no level_* col in the Node object
   check_compliant_node(x)
   # get tree leaves and extract attributes into data.frames
   xy_df <- node_to_df(x)
   processed <- hardhat::mold(xy_df$x, xy_df$y)
   # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
   ancestor <- data.tree::ToDataFrameNetwork(x) %>%
-   mutate_if(is.character, . %>% as.factor %>% as.numeric)
+   mutate_if(is.character, ~.x %>% as.factor %>% as.numeric)
   # TODO check correctness
   # embed the M matrix in the config$ancestor variable
   dims <- c(max(ancestor), max(ancestor))
@@ -357,7 +364,7 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet
 #' @export
 #' @rdname tabnet_pretrain
 tabnet_pretrain.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  # ensure there is no level_* col in the data.tree
+  # ensure there is no level_* col in the Node object
   check_compliant_node(x)
   # get tree leaves and extract attributes into data.frames
   xy_df <- node_to_df(x)
@@ -609,6 +616,7 @@ check_type <- function(outcome_ptype, type = NULL) {
 #'
 #' @examplesIf (require("data.tree") || require("dplyr"))
 #' library(dplyr)
+#' library(data.tree)
 #' data(starwars)
 #' starwars_tree <- starwars %>%
 #'   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/"))
@@ -665,7 +673,7 @@ node_to_df <- function(x, drop_last_level = TRUE) {
     select(where(~ nlevels(as.factor(.x)) > 1 )) %>%
     # drop last level column
     # TODO take the drop_last_level param into account
-    select(1:(ncol(.) - 1)) %>%
+    select(-length(~.x)) %>%
     # TODO impute "NA" with parent through coalesce() via an option
     mutate_if(is.character, as.factor)
   return(list(x = x_df, y = y_df))

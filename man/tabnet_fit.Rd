@@ -114,7 +114,7 @@ The model fitting metrics append on top of the parent metrics in the returned Ta
 
 TabNet allows multi-outcome prediction, which is usually named \href{https://en.wikipedia.org/wiki/Multi-label_classification}{multi-label classification}
 or multi-output classification when outcomes are categorical.
-Multi-outcome currently expect all outcomes to be either all numeric or all categorical.
+Multi-outcome currently expect outcomes to be either all numeric or all categorical.
 }
 
 \section{Threading}{
@@ -135,7 +135,7 @@ torch::torch_set_num_interop_threads(1)
 
 data("ames", package = "modeldata")
 data("attrition", package = "modeldata")
-ids <- sample(nrow(ames), 256)
+ids <- sample(nrow(attrition), 256)
 
 ## Single-outcome regression using formula specification
 fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
@@ -146,12 +146,21 @@ fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
 
 ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
 ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames[ids,], epochs = 2, valid_split = 0.2)
-## Multi-label classification on `Attrition` and `JobSatisfaction` in `attrition` dataset using recipe,
+
+## Multi-label classification on `Attrition` and `JobSatisfaction` in
+## `attrition` dataset using recipe
+library(recipes)
 rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition[ids,]) \%>\%
   step_normalize(all_numeric(), -all_outcomes())
 
-ames_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
+attrition_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
 
-Note: Dataset size and number of epochs should be increased for publication-level results.
+## Hierarchical classification on  `acme`
+data(acme, package = "data.tree")
+
+acme_fit <- tabnet_fit(acme, epochs = 2, verbose = TRUE)
+
+# Note: Dataset number of rows and model number of epochs should be increased
+# for publication-level results.
 \dontshow{\}) # examplesIf}
 }
