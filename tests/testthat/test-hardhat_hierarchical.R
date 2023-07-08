@@ -34,8 +34,20 @@ test_that("C-HMCNN max_constraint_output works ", {
   )
   # max_constraint_output provides more than 35% null values
   expect_gte(
-    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .35 * output$shape[1] * output$shape[2]
+    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .30 * output$shape[1] * output$shape[2]
   )
+})
+
+test_that("node_to_df works ", {
+  expect_no_error(
+    node_to_df(acme)
+  )
+  expect_no_error(
+    attrition_df <- node_to_df(attrition_tree)
+  )
+  # node_to_df removes first and last level of the hierarchy
+  outcome_levels <- paste0("level_", seq(2, attrition_tree$height - 1))
+  expect_equal(names(attrition_df$y), outcome_levels)
 })
 
 

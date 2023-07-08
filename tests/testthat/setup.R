@@ -42,6 +42,7 @@ acme_df <-  data.tree::ToDataFrameTypeCol(acme, acme$attributesAll) %>%
 attrition_tree <- attrition %>%
   tibble::rowid_to_column() %>%
   mutate(pathString = paste("attrition", Department, JobRole, rowid, sep = "/")) %>%
+  select(-Department, -JobRole, -rowid) %>%
   data.tree::as.Node()
 
 # Run after all tests

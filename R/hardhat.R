@@ -660,9 +660,10 @@ check_compliant_node <- function(node) {
 #' @return a named list of x and y, being respectively the predictor data-frame and the outcomes data-frame,
 #'   as expected inputs for `hardhat::mold()` function.
 #'
-#' @importFrom dplyr select mutate mutate_if where starts_with
+#' @importFrom dplyr last_col mutate mutate_if select starts_with where
 #'
 node_to_df <- function(x, drop_last_level = TRUE) {
+  # TODO get rid of all those import through base R equivalent
   xy_df <- data.tree::ToDataFrameTypeCol(x, x$attributesAll)
   x_df <- xy_df %>%
     select(-starts_with("level_")) %>%
@@ -671,9 +672,9 @@ node_to_df <- function(x, drop_last_level = TRUE) {
     select(starts_with("level_")) %>%
     # drop first (and all zero-variance) column
     select(where(~ nlevels(as.factor(.x)) > 1 )) %>%
-    # drop last level column
     # TODO take the drop_last_level param into account
-    select(-length(~.x)) %>%
+    # drop last level column
+    select(-last_col()) %>%
     # TODO impute "NA" with parent through coalesce() via an option
     mutate_if(is.character, as.factor)
   return(list(x = x_df, y = y_df))
