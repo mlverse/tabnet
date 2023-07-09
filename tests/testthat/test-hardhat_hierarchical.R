@@ -48,6 +48,19 @@ test_that("node_to_df works ", {
   # node_to_df removes first and last level of the hierarchy
   outcome_levels <- paste0("level_", seq(2, attrition_tree$height - 1))
   expect_equal(names(attrition_df$y), outcome_levels)
+
+  # node_to_df do not shuffle outcome rows
+  df <- tibble(pred_1 = seq(1,26), pred_2 = seq(26,1),
+               level_2 = factor(LETTERS[1:26]), level_3 = factor(letters[26:1]))
+  df_node_df <- df %>%
+    mutate(pathString = paste("synth", level_2, level_3, level_3, sep = "/")) %>%
+    select(-level_2, -level_3) %>%
+    as.Node() %>%
+    node_to_df()
+
+  expect_equal(df_node_df$y %>% as_tibble(), df %>% select(starts_with("level_")))
+  expect_equal(df_node_df$x %>% as_tibble(), df %>% select(starts_with("pred_")))
+
 })
 
 
