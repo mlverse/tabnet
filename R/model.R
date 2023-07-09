@@ -229,7 +229,7 @@ resolve_loss <- function(config, dtype) {
     # cross entropy loss is required
     loss_fn <- torch::nn_cross_entropy_loss()
   else
-    rlang::abort(paste0(loss," is not a valid loss for outcome of type ",dtype))
+    rlang::abort(glue::glue("{loss} is not a valid loss for outcome of type {dtype}"))
 
   loss_fn
 }
@@ -240,7 +240,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   else if (early_stopping_monitor %in% c("train_loss", "auto"))
     early_stopping_monitor <- "train_loss"
   else
-    rlang::abort(paste0(early_stopping_monitor," is not a valid early stopping metric to monitor with `valid_split`=",valid_split))
+    rlang::abort(glue::glue("{early_stopping_monitor} is not a valid early-stopping metric to monitor with `valid_split` = {valid_split}"))
 
   early_stopping_monitor
 }

@@ -390,13 +390,13 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   epoch_shift <- 0L
 
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
-    rlang::abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
+    rlang::abort(glue::glue("{tabnet_model} is not recognised as a proper TabNet model"))
 
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
     # model must be loaded from checkpoint
 
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-      rlang::abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
+      rlang::abort(glue::glue("The model was trained for less than {from_epoch} epochs"))
 
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
@@ -408,7 +408,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
   if (task == "supervised") {
     if (sum(is.na(outcomes)) > 0) {
-      rlang::abort("Error: found missing values in the outcome data.")
+      rlang::abort(glue::glue("Error: found missing values in the {names(outcomes)} outcome data."))
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -572,7 +572,7 @@ is_null_external_pointer <- function(pointer) {
 #'  a model object, or `processed$outcomes` from the result of a `mold()`
 #' @param type expected type within  `c("numeric", "prob", "class")`
 #'
-#' @return valid type within `c("numeric", "prob", "class")` for repectively regression,
+#' @return valid type within `c("numeric", "prob", "class")` for respectively regression,
 #' class probabilities, or classification
 #' @noRd
 check_type <- function(outcome_ptype, type = NULL) {

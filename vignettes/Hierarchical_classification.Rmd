@@ -67,9 +67,9 @@ You may have notice that `name` and `height` have unexpected values according to
 
 Your dataset hierarchy will be turn internally into multi-outcomes named `level_1` to `level_n`, n beeing the depth of your tree. Thus column names starting with `level_` should be avoided.
 
-### Ensure the last hierarchy of the tree is the sample id
+### Ensure the last hierarchy of the tree is the observation id
 
-The tree only keeps a single row of attributes per tree leaf. Thus in order to transfer your complete predictors dataset into the Node object, you must keep the last level of the hierarchy to be a unique sample identifier (last resort beeing `rowid_to_column()` to achieve it).
+The tree only keeps a single row of attributes per tree leaf. Thus in order to transfer your complete predictors dataset into the Node object, you must keep the last level of the hierarchy to be a unique observation identifier (last resort beeing `rowid_to_column()` to achieve it).
 
 The classification will be done **removing the last level of hierarchy** in any case.
 
@@ -153,17 +153,20 @@ vip::vip(starw_model)
 
 We can infer on the test-set
 ```{r}
-starwars_hat <- predict(starw_model, starwars_test_tree)
-starwars_hat
+starwars_hat <- bind_cols(
+    predict(starw_model, starwars_test_tree),
+    tabnet:::node_to_df(starwars_test_tree)$y
+  )
+head(starwars_hat, n = 5)
 
 ```
 
+We can see in the Warnings that the dataset is a challenge as many new levels are found in a lot of predictors in the test set.  
 
-
-We do have local feature importance on the complete dataset here : 
+We do have local feature importance on the complete dataset here :  
 ```{r}
 starwars_explain <- tabnet_explain(starw_model, starwars_test_tree)
 autoplot(starwars_explain)
 autoplot(starwars_explain, type = "steps")
 ```
-The dataset is a challenge as many new levels are found in many predictors in the testset.
+

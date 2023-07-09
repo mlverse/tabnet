@@ -1,8 +1,8 @@
 ---
-title: "Unsupervised training and fine-tuning"
+title: "Self-supervised training and fine-tuning"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Unsupervised training and fine-tuning}
+  %\VignetteIndexEntry{Self-supervised training and fine-tuning}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,29 +23,29 @@ library(ggplot2)
 ```
 
 In this vignette we show how to 
- - pretrain TabNet model with unsupervised data
- - fine-tune the pretrained TabNet model with supervised data
+ - pretrain TabNet model with a self-supervised task on unlabeled data
+ - fine-tune the pretrained TabNet model with labeled data
 
 We are going to use the `lending_club` dataset available
-in the `modeldata` package, using 90 % of it as unsupervised data.
+in the `modeldata` package, using 90 % of it as unlabeled data.
 
-First, let's split our dataset into `unsupervised` and `supervised` datasets, so we can later train the supervised step of the model:
+First, let's split our dataset into `unlabeled` and `labeled` datasets, so we can later on train the supervised step of the model:
 
 ```{r}
 set.seed(123)
 data("lending_club", package = "modeldata")
 split <- initial_split(lending_club, strata = Class, prop = 9/10)
-unsupervised <- training(split) %>% mutate(Class=factor(NA))
-supervised  <- testing(split)
+unlabeled <- training(split) %>% mutate(Class=factor(NA))
+labeled  <- testing(split)
 ```
 
-Then we proceed with the usual random split of the supervised dataset into `train` and `test` so that we can evaluate performance of our model:
+Then we proceed with the usual random split of the labeled dataset into `train` and `test` so that we can evaluate performance of our model:
 
 ```{r}
 set.seed(123)
-supervised_split <- initial_split(supervised, strata = Class)
-train <- training(supervised_split) 
-test  <- testing(supervised_split)
+labeled_split <- initial_split(labeled, strata = Class)
+train <- training(labeled_split) 
+test  <- testing(labeled_split)
 ```
 
 ## Data preprocessing
@@ -57,18 +57,18 @@ Note that tabnet handles categorical variables, so we don't need to do any kind 
 ```{r}
 rec <- recipe(Class ~ ., lending_club) %>%
   step_normalize(all_numeric())
-unsupervised_baked_df <- rec %>% prep %>% bake(new_data=unsupervised)
+unlabeled_baked_df <- rec %>% prep %>% bake(new_data=unlabeled)
 ```
 
-We now have the normalized dataset ready for unsupervised training. 
+We now have the normalized dataset ready for self-supervised training. 
 
-## Unsupervised training step  
+## Self-supervised training step  
 
 Next, we pre-train our model with a [self-supervised learning](https://paperswithcode.com/task/self-supervised-learning) task. This step will gives us a `tabnet_pretrain` object that will contain a representation of the dataset variables and their interactions.  
 We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.
 
 ```{r}
-mod <- tabnet_pretrain(rec, unsupervised, epochs = 50, valid_split = 0.2, batch_size = 5000, verbose = TRUE)
+mod <- tabnet_pretrain(rec, unlabeled, epochs = 50, valid_split = 0.2, batch_size = 5000, verbose = TRUE)
 ```
 ```
 [Epoch 001] Loss: 4.195504 Valid loss: 1.713710                                                                                    
