@@ -408,7 +408,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
   if (task == "supervised") {
     if (sum(is.na(outcomes)) > 0) {
-      rlang::abort(glue::glue("Error: found missing values in the {names(outcomes)} outcome data."))
+      rlang::abort(glue::glue("Error: found missing values in the `{names(outcomes)}` outcome column."))
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -443,7 +443,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
-    } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
+    } else rlang::abort(glue::glue("No model serialized weight can be found in {tabnet_model} check the model history"))
 
     fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
@@ -460,12 +460,12 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 #' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
-  # Enforces column order, type, column names, etc
   if (inherits(new_data, "Node")) {
     new_data_df <- node_to_df(new_data)$x
   } else {
     new_data_df <- new_data
   }
+  # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data_df, object$blueprint)
   batch_size <- object$fit$config$batch_size
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
@@ -485,7 +485,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   if (!is.null(epoch)) {
 
     if (epoch > (length(object$fit$checkpoints) * object$fit$config$checkpoint_epoch))
-      rlang::abort(paste0("The model was trained for less than ", epoch, " epochs"))
+      rlang::abort(glue::glue("The model was trained for less than {epoch} epochs"))
 
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch

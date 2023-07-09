@@ -248,7 +248,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
   output <- network(batch$x, batch$x_na_mask)
-  # if target is_multi_outcome, loss has to be applied to each label-group
+  # if target is multi-outcome, loss has to be applied to each label-group
   if (max(batch$output_dim$shape) > 1) {
     # multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
