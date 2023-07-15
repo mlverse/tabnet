@@ -20,6 +20,7 @@ library(dplyr)
 library(data.tree)
 library(ggplot2)
 library(rsample)
+library(tibble)
 ```
 
 ## Data preparation
@@ -95,10 +96,16 @@ print(starwars_tree, "name", "_name","_height", "mass", "eye_color", limit = 8)
 
 ### Data set split
 
-The dataset split here will be done upfront of the `as.Node()` transformation.
-We will use `reciepe::initial_split()` to split with a stratification on the parent category of the leaf `_name` which is `homeworld` in our hierarchy.
+The  `starwars` dataset contains list columns, hosting some variability in the predictor values. So we decide here to `unnest_longer` every list column to each of its values. This triple the size of the `starwars` dataset.  
+The dataset split here will be done upfront of the transformation into `as.Node()`.
+We will use `rsample::initial_split()` to split with a stratification on the parent category of the leaf `_name` which is `homeworld` in our hierarchy.
 ```{r}
-starw_split <- initial_split(starwars, prop = .8, strata = "homeworld")
+starw_split <- starwars %>% 
+  tidyr::unnest_longer(films) %>% 
+  tidyr::unnest_longer(vehicles, keep_empty = TRUE) %>% 
+  tidyr::unnest_longer(starships, keep_empty = TRUE) %>% 
+  mutate_if(is.character, as.factor) %>% 
+  initial_split( prop = .8, strata = "species")
 ```
 
 
@@ -109,17 +116,19 @@ starwars_train_tree <- starw_split %>%
   training() %>% 
   # avoid reserved column names
   rename(`_name` = "name", `_height` = "height") %>% 
-  mutate(pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
+  rowid_to_column() %>% 
+  mutate(pathString = paste("StarWars_characters", species, sex, rowid, sep = "/")) %>%
   # remove outcomes labels from predictors
-  select(-species, -sex, -`_name`) %>% 
+  select(-species, -sex, -`_name`, -rowid) %>% 
   # turn it as hierarchical Node
   as.Node()
 
 starwars_test_tree <- starw_split %>% 
   testing() %>% 
   rename(`_name` = "name", `_height` = "height") %>% 
-  mutate(pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
-  select(-species, -sex, -`_name`) %>% 
+  rowid_to_column() %>% 
+  mutate(pathString = paste("StarWars_characters", species, sex, rowid, sep = "/")) %>%
+  select(-species, -sex, -`_name`, -rowid) %>% 
   as.Node()
 
 starwars_train_tree$attributesAll
@@ -131,9 +140,9 @@ Now we can see that none of the predictor leaks the outcome hierarchy informatio
 
 This `starwars_tree` can now be used as an input for `tabnet_fit()` : 
 ```{r model training}
-config <- tabnet_config(decision_width = 3, attention_width = 3, num_steps = 3, penalty = .03, cat_emb_dim = 2, valid_split = 0.2, learn_rate = 1e-3, lr_scheduler = "reduce_on_plateau", early_stopping_monitor = "valid_loss", early_stopping_patience = 4, verbose = TRUE)
+config <- tabnet_config(decision_width = 8, attention_width = 8, num_steps = 3, penalty = .03, cat_emb_dim = 2, valid_split = 0.2, learn_rate = 1e-3, lr_scheduler = "reduce_on_plateau", early_stopping_monitor = "valid_loss", early_stopping_patience = 4, verbose = TRUE)
 
-starw_model <- tabnet_fit(starwars_train_tree, config = config, epoch = 65)
+starw_model <- tabnet_fit(starwars_train_tree, config = config, epoch = 170, checkpoint_epochs = 25)
 
 ```
 
@@ -157,13 +166,14 @@ starwars_hat <- bind_cols(
     predict(starw_model, starwars_test_tree),
     tabnet:::node_to_df(starwars_test_tree)$y
   )
-head(starwars_hat, n = 5)
+tail(starwars_hat, n = 5)
 
 ```
 
 We can see in the Warnings that the dataset is a challenge as many new levels are found in a lot of predictors in the test set.  
+The model here is very poor. This is due to the input dataset not collecting large samples of distinctive observation per leaf, but rather a limited number of personages compatible with watching a movie saga.
 
-We do have local feature importance on the complete dataset here :  
+Despite the performance, we do have local feature importance on the complete dataset here :  
 ```{r}
 starwars_explain <- tabnet_explain(starw_model, starwars_test_tree)
 autoplot(starwars_explain)

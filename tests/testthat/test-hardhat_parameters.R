@@ -56,7 +56,7 @@ test_that("early stopping works wo validation split", {
     tabnet_fit(attrix, attriy, epochs = 200, verbose=TRUE,
                       early_stopping_monitor="cross_validation_loss",
                       early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
-    regexp = "not a valid early stopping metric to monitor"
+    regexp = "not a valid early-stopping metric to monitor"
   )
 
 })

@@ -202,7 +202,7 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
       default_config,
       new_config)
   ]
-  config <- utils::modifyList(config, as.list(new_config, ancestor = Matrix::t(ancestor_m)))
+  config <- utils::modifyList(config, as.list(new_config, ancestor = ancestor_m))
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
