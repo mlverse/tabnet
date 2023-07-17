@@ -21,6 +21,7 @@ library(data.tree)
 library(ggplot2)
 library(rsample)
 library(tibble)
+set.seed(202307)
 ```
 
 ## Data preparation
@@ -60,6 +61,10 @@ You may have notice that `name` and `height` have unexpected values according to
 
 ## `Node` preparation rules for {tabnet} models
 
+### Avoid `factor` predictors
+
+As `as.Node()` will only consider the as.numeric() values of a factor(), you should turn them into characters before applying the `as.Node()` function in order for {tabnet} to properly embed them.  
+
 ### Avoid column name collision with reserved {data.tree} names
 
 `name` and `height` are both part of the `NODE_RESERVED_NAMES_CONST` reserved list of names for `Node` attributes. So they must **not be used** as predictor names, or the `as.Node()` function will silently discard them.
@@ -96,15 +101,14 @@ print(starwars_tree, "name", "_name","_height", "mass", "eye_color", limit = 8)
 
 ### Data set split
 
-The  `starwars` dataset contains list columns, hosting some variability in the predictor values. So we decide here to `unnest_longer` every list column to each of its values. This triple the size of the `starwars` dataset.  
+The  `starwars` dataset contains list columns, hosting some variability in the predictor values. Thus we decide here to `unnest_longer` every list column to each of its values. This will triple the size of the `starwars` dataset.  
 The dataset split here will be done upfront of the transformation into `as.Node()`.
-We will use `rsample::initial_split()` to split with a stratification on the parent category of the leaf `_name` which is `homeworld` in our hierarchy.
+We will use `rsample::initial_split()` to split with a stratification on the parent category of the first level of our hierarchy which is `species`.
 ```{r}
 starw_split <- starwars %>% 
   tidyr::unnest_longer(films) %>% 
   tidyr::unnest_longer(vehicles, keep_empty = TRUE) %>% 
   tidyr::unnest_longer(starships, keep_empty = TRUE) %>% 
-  mutate_if(is.character, as.factor) %>% 
   initial_split( prop = .8, strata = "species")
 ```
 
@@ -140,7 +144,7 @@ Now we can see that none of the predictor leaks the outcome hierarchy informatio
 
 This `starwars_tree` can now be used as an input for `tabnet_fit()` : 
 ```{r model training}
-config <- tabnet_config(decision_width = 8, attention_width = 8, num_steps = 3, penalty = .03, cat_emb_dim = 2, valid_split = 0.2, learn_rate = 1e-3, lr_scheduler = "reduce_on_plateau", early_stopping_monitor = "valid_loss", early_stopping_patience = 4, verbose = TRUE)
+config <- tabnet_config(decision_width = 8, attention_width = 8, num_steps = 3, penalty = .003, cat_emb_dim = 2, valid_split = 0.2, learn_rate = 1e-3, lr_scheduler = "reduce_on_plateau", early_stopping_monitor = "valid_loss", early_stopping_patience = 4, verbose = FALSE)
 
 starw_model <- tabnet_fit(starwars_train_tree, config = config, epoch = 170, checkpoint_epochs = 25)
 
@@ -148,7 +152,8 @@ starw_model <- tabnet_fit(starwars_train_tree, config = config, epoch = 170, che
 
 ## Model diagnostic
 
-Very first diagnostic is the check for model overfitting though the training loss plot
+We have avoid the verbose output of the model, thus very first diagnostic is the check for model over-fitting though the training loss plot.  
+
 ```{r}
 autoplot(starw_model)
 ```
@@ -171,7 +176,7 @@ tail(starwars_hat, n = 5)
 ```
 
 We can see in the Warnings that the dataset is a challenge as many new levels are found in a lot of predictors in the test set.  
-The model here is very poor. This is due to the input dataset not collecting large samples of distinctive observation per leaf, but rather a limited number of personages compatible with watching a movie saga.
+The model also here is very poor on the `level_2` ( `species` ) and on `level_3` ( ` sex` ) as this is definitively not a model-intended dataset. The reason is that the input dataset not collecting large samples of distinctive observation per leaf, but rather a very diverse but limited number of characters compatible with watching a movie saga.
 
 Despite the performance, we do have local feature importance on the complete dataset here :  
 ```{r}
@@ -179,4 +184,4 @@ starwars_explain <- tabnet_explain(starw_model, starwars_test_tree)
 autoplot(starwars_explain)
 autoplot(starwars_explain, type = "steps")
 ```
-
+Hopefully your own hierarchical outcome will have a better success than the one here with `starwars` dataset. But in this journey, you have learn a lot in the data format constraints and solutions, and you now have a new performing solution in your toolbox.
