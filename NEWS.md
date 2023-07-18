@@ -1,6 +1,7 @@
 # tabnet (development version)
 
 ## New features
+* {tabnet} now allows hierarchical multi-label classification through {data.tree} hierarchical `Node` dataset.  (#126) 
 * Add `reduce_on_plateau` as option for `lr_scheduler` at `tabnet_config()` (@SvenVw, #120)
 
 # tabnet 0.4.0
