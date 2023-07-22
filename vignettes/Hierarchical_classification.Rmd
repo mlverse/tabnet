@@ -57,7 +57,7 @@ print(starwars_tree, "name","height", "mass", "eye_color", limit = 8)
 
 ```
 
-You may have notice that `name` and `height` have unexpected values according to the original data: `Human` is not part of the `name` in orginal dataset, and `height` values have been changed into the local height of the tree. This is due to some rules we will have to follow to create the Node from data frame.
+You may have noticed that `name` and `height` have unexpected values according to the original data: `Human` is not part of the `name` in orginal dataset, and `height` values have been changed into the local height of the tree. This is due to some rules we will have to follow to create the Node from data frame.
 
 ## `Node` preparation rules for {tabnet} models
 
@@ -184,4 +184,4 @@ starwars_explain <- tabnet_explain(starw_model, starwars_test_tree)
 autoplot(starwars_explain)
 autoplot(starwars_explain, type = "steps")
 ```
-Hopefully your own hierarchical outcome will have a better success than the one here with `starwars` dataset. But in this journey, you have learn a lot in the data format constraints and solutions, and you now have a new performing solution in your toolbox.
+Hopefully your own hierarchical outcome will have a better success than the one here with `starwars` dataset. But in this journey, you have learned a lot in the data format constraints and solutions, and you now have a new performing solution in your toolbox.
