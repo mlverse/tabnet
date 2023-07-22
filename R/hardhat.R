@@ -652,16 +652,25 @@ check_compliant_node <- function(node) {
   invisible(node)
 }
 
-#' turn a Node object into predictor and outcome data-frame
+#' Turn a Node object into predictor and outcome.
 #'
 #' @param x Node object
 #' @param drop_last_level TRUE unused
 #'
 #' @return a named list of x and y, being respectively the predictor data-frame and the outcomes data-frame,
 #'   as expected inputs for `hardhat::mold()` function.
+#' @export
+#'
+#' @examplesIf (require("data.tree") || require("dplyr"))
+#' library(dplyr)
+#' library(data.tree)
+#' data(starwars)
+#' starwars_tree <- starwars %>%
+#'   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/")) %>%
+#'   as.Node()
+#' node_to_df(starwars_tree)
 #'
 #' @importFrom dplyr last_col mutate mutate_if select starts_with where
-#'
 node_to_df <- function(x, drop_last_level = TRUE) {
   # TODO get rid of all those import through base R equivalent
   xy_df <- data.tree::ToDataFrameTypeCol(x, x$attributesAll)

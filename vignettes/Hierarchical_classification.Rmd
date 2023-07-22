@@ -169,7 +169,7 @@ We can infer on the test-set
 ```{r}
 starwars_hat <- bind_cols(
     predict(starw_model, starwars_test_tree),
-    tabnet:::node_to_df(starwars_test_tree)$y
+    node_to_df(starwars_test_tree)$y
   )
 tail(starwars_hat, n = 5)
 

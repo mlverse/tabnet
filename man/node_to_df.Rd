@@ -2,7 +2,7 @@
 % Please edit documentation in R/hardhat.R
 \name{node_to_df}
 \alias{node_to_df}
-\title{turn a Node object into predictor and outcome data-frame}
+\title{Turn a Node object into predictor and outcome.}
 \usage{
 node_to_df(x, drop_last_level = TRUE)
 }
@@ -16,5 +16,16 @@ a named list of x and y, being respectively the predictor data-frame and the out
 as expected inputs for \code{hardhat::mold()} function.
 }
 \description{
-turn a Node object into predictor and outcome data-frame
+Turn a Node object into predictor and outcome.
+}
+\examples{
+\dontshow{if ((require("data.tree") || require("dplyr"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(dplyr)
+library(data.tree)
+data(starwars)
+starwars_tree <- starwars \%>\%
+  mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/")) \%>\%
+  as.Node()
+node_to_df(starwars_tree)
+\dontshow{\}) # examplesIf}
 }
