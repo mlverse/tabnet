@@ -32,16 +32,19 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/Hierarchical_classification.html">Hierarchical Classification</a>
+    </li>
+    <li>
       <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
     </li>
     <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
-      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+      <a href="../articles/selfsupervised_training.html">Self-supervised training and fine-tuning</a>
     </li>
     <li>
-      <a href="../articles/unsupervised_training.html">Unsupervised training and fine-tuning</a>
+      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
     </li>
   </ul></li>
 <li>
@@ -70,7 +73,8 @@
 <h2 class="page-header" data-toc-text="development version" id="tabnet-development-version">tabnet (development version)<a class="anchor" aria-label="anchor" href="#tabnet-development-version"></a></h2>
 <div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li>Add <code>reduce_on_plateau</code> as option for <code>lr_scheduler</code> at <code><a href="../reference/tabnet_config.html">tabnet_config()</a></code> (<a href="https://github.com/SvenVw" class="external-link">@SvenVw</a>, <a href="https://github.com/mlverse/tabnet/issues/120" class="external-link">#120</a>)</li>
+<ul><li>{tabnet} now allows hierarchical multi-label classification through {data.tree} hierarchical <code>Node</code> dataset. (<a href="https://github.com/mlverse/tabnet/issues/126" class="external-link">#126</a>)</li>
+<li>Add <code>reduce_on_plateau</code> as option for <code>lr_scheduler</code> at <code><a href="../reference/tabnet_config.html">tabnet_config()</a></code> (<a href="https://github.com/SvenVw" class="external-link">@SvenVw</a>, <a href="https://github.com/mlverse/tabnet/issues/120" class="external-link">#120</a>)</li>
 </ul></div>
 </div>
     <div class="section level2">

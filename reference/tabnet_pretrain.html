@@ -33,16 +33,19 @@ on the predictor data exclusively (unsupervised training)."><!-- mathjax --><scr
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/Hierarchical_classification.html">Hierarchical Classification</a>
+    </li>
+    <li>
       <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
     </li>
     <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
-      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+      <a href="../articles/selfsupervised_training.html">Self-supervised training and fine-tuning</a>
     </li>
     <li>
-      <a href="../articles/unsupervised_training.html">Unsupervised training and fine-tuning</a>
+      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
     </li>
   </ul></li>
 <li>
@@ -103,6 +106,15 @@ on the predictor data exclusively (unsupervised training).</p>
 <span><span class="fu">tabnet_pretrain</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">data</span>,</span>
+<span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  config <span class="op">=</span> <span class="fu"><a href="tabnet_config.html">tabnet_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for Node</span></span>
+<span><span class="fu">tabnet_pretrain</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
 <span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  config <span class="op">=</span> <span class="fu"><a href="tabnet_config.html">tabnet_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>

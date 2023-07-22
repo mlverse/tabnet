@@ -32,16 +32,19 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/Hierarchical_classification.html">Hierarchical Classification</a>
+    </li>
+    <li>
       <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
     </li>
     <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
-      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+      <a href="../articles/selfsupervised_training.html">Self-supervised training and fine-tuning</a>
     </li>
     <li>
-      <a href="../articles/unsupervised_training.html">Unsupervised training and fine-tuning</a>
+      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
     </li>
   </ul></li>
 <li>
@@ -101,6 +104,15 @@
 <span><span class="fu">tabnet_fit</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">data</span>,</span>
+<span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  config <span class="op">=</span> <span class="fu"><a href="tabnet_config.html">tabnet_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for Node</span></span>
+<span><span class="fu">tabnet_fit</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
 <span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  config <span class="op">=</span> <span class="fu"><a href="tabnet_config.html">tabnet_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>
@@ -181,8 +193,9 @@ The model fitting metrics append on top of the parent metrics in the returned Ta
     
 
 
-<p>TabNet allows multi-outcome prediction, the outcomes must all be numeric or all be categorical,
-and the <strong>data frame</strong> method shall be used for <code>x</code> and <code>y</code>.</p>
+<p>TabNet allows multi-outcome prediction, which is usually named <a href="https://en.wikipedia.org/wiki/Multi-label_classification" class="external-link">multi-label classification</a>
+or multi-output classification when outcomes are categorical.
+Multi-outcome currently expect outcomes to be either all numeric or all categorical.</p>
     </div>
     <div id="threading">
     <h2>Threading</h2>
@@ -199,22 +212,43 @@ available threads by default.</p>
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Single-outcome regression using formula specification</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"attrition"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">attrition</span><span class="op">)</span>, <span class="fl">256</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Single-outcome regression using formula specification</span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">tabnet_fit</span><span class="op">(</span><span class="va">Sale_Price</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">ames</span>, epochs <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Single-outcome classification using data-frame specification</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"attrition"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">attrition_x</span> <span class="op">&lt;-</span> <span class="va">attrition</span><span class="op">[</span>,<span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">attrition</span><span class="op">)</span> <span class="op">==</span> <span class="st">"Attrition"</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">tabnet_fit</span><span class="op">(</span><span class="va">attrition_x</span>, <span class="va">attrition</span><span class="op">$</span><span class="va">Attrition</span>, epochs <span class="op">=</span> <span class="fl">1</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> [Epoch 001] Loss: 0.875709</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> [Epoch 001] Loss: 0.995773</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ames</span><span class="op">)</span>, <span class="fl">256</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">ames</span><span class="op">[</span><span class="va">ids</span>,<span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ames</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sale_Price"</span>, <span class="st">"Pool_Area"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">ames</span><span class="op">[</span><span class="va">ids</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sale_Price"</span>, <span class="st">"Pool_Area"</span><span class="op">)</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">ames_fit</span> <span class="op">&lt;-</span> <span class="fu">tabnet_fit</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, epochs <span class="op">=</span> <span class="fl">2</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,</span></span></span>
+<span class="r-in"><span><span class="va">ames_fit</span> <span class="op">&lt;-</span> <span class="fu">tabnet_fit</span><span class="op">(</span><span class="va">Sale_Price</span> <span class="op">+</span> <span class="va">Pool_Area</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">ames</span><span class="op">[</span><span class="va">ids</span>,<span class="op">]</span>, epochs <span class="op">=</span> <span class="fl">2</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Multi-label classification on `Attrition` and `JobSatisfaction` in</span></span></span>
+<span class="r-in"><span><span class="co">## `attrition` dataset using recipe</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘recipes’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following object is masked from ‘package:stats’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     step</span>
+<span class="r-in"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">Attrition</span> <span class="op">+</span> <span class="va">JobSatisfaction</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">attrition</span><span class="op">[</span><span class="va">ids</span>,<span class="op">]</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_normalize.html" class="external-link">step_normalize</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_numeric</a></span><span class="op">(</span><span class="op">)</span>, <span class="op">-</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_outcomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">attrition_fit</span> <span class="op">&lt;-</span> <span class="fu">tabnet_fit</span><span class="op">(</span><span class="va">rec</span>, data <span class="op">=</span> <span class="va">attrition</span><span class="op">[</span><span class="va">ids</span>,<span class="op">]</span>, epochs <span class="op">=</span> <span class="fl">2</span>, valid_split <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Hierarchical classification on  `acme`</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">acme</span>, package <span class="op">=</span> <span class="st">"data.tree"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">acme_fit</span> <span class="op">&lt;-</span> <span class="fu">tabnet_fit</span><span class="op">(</span><span class="va">acme</span>, epochs <span class="op">=</span> <span class="fl">2</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> [Epoch 001] Loss: 2.754613</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> [Epoch 002] Loss: 1.907744</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note: Dataset number of rows and model number of epochs should be increased</span></span></span>
+<span class="r-in"><span><span class="co"># for publication-level results.</span></span></span>
 </code></pre></div>
     </div>
   </div>

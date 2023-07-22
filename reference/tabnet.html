@@ -32,16 +32,19 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/Hierarchical_classification.html">Hierarchical Classification</a>
+    </li>
+    <li>
       <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
     </li>
     <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
-      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+      <a href="../articles/selfsupervised_training.html">Self-supervised training and fine-tuning</a>
     </li>
     <li>
-      <a href="../articles/unsupervised_training.html">Unsupervised training and fine-tuning</a>
+      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
     </li>
   </ul></li>
 <li>
@@ -104,7 +107,7 @@ for this model are "unknown", "regression", or "classification".</p></dd>
 <dd><p>This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help.</p></dd>
+problem, reducing this value could help (default 1e-3).</p></dd>
 
 
 <dt>batch_size</dt>
@@ -124,7 +127,7 @@ range from 8 to 64.</p></dd>
 
 <dt>attention_width</dt>
 <dd><p>(int) Width of the attention embedding for each mask. According to
-the paper n_d=n_a is usually a good choice. (default=8)</p></dd>
+the paper n_d = n_a is usually a good choice. (default=8)</p></dd>
 
 
 <dt>num_steps</dt>

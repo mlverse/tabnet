@@ -52,16 +52,19 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="articles/Hierarchical_classification.html">Hierarchical Classification</a>
+    </li>
+    <li>
       <a href="articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
     </li>
     <li>
       <a href="articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
-      <a href="articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+      <a href="articles/selfsupervised_training.html">Self-supervised training and fine-tuning</a>
     </li>
     <li>
-      <a href="articles/unsupervised_training.html">Unsupervised training and fine-tuning</a>
+      <a href="articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
     </li>
   </ul>
 </li>
@@ -88,13 +91,14 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
+
 <div class="section level1">
 <div class="page-header"><h1 id="tabnet">tabnet<a class="anchor" aria-label="anchor" href="#tabnet"></a>
 </h1></div>
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p>An R implementation of: <a href="https://arxiv.org/abs/1908.07442" class="external-link">TabNet: Attentive Interpretable Tabular Learning</a>. The code in this repository is an R port of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> PyTorch’s implementation using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package.</p>
+<p>An R implementation of: <a href="https://arxiv.org/abs/1908.07442" class="external-link">TabNet: Attentive Interpretable Tabular Learning</a>. The code in this repository is an R port of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> PyTorch’s implementation using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package. The original repository is augmented with <a href="https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf" class="external-link">Coherent Hierarchical Multi-label Classification Networks</a></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -111,7 +115,7 @@
 </h2>
 <p>Here we show a <strong>binary classification</strong> example of the <code>attrition</code> dataset, using a <strong>recipe</strong> for dataset input specification.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mlverse.github.io/tabnet/" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/yardstick" class="external-link">yardstick</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -175,7 +179,7 @@
 <code class="sourceCode R"><span><span class="va">pretrain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pretrain</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-step-pretrain-1.png" width="100%"></p>
-<p>The exemple here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette on <a href="https://mlverse.github.io/tabnet/articles/unsupervised_training.html" class="external-link">Unsupervised training and fine-tuning</a> will gives you the complete correct workflow step-by-step.</p>
+<p>The exemple here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette on <a href="https://mlverse.github.io/tabnet/articles/selfsupervised_training.html" class="external-link">Self-supervised training and fine-tuning</a> will gives you the complete correct workflow step-by-step.</p>
 </div>
 <div class="section level2">
 <h2 id="missing-data-in-predictors">Missing data in predictors<a class="anchor" aria-label="anchor" href="#missing-data-in-predictors"></a>
@@ -183,6 +187,163 @@
 <p>{tabnet} leverage the masking mechanism to deal with missing data, so you don’t have to remove the entries in your dataset with some missing values in the predictors variables.</p>
 </div>
 </div>
+<div class="section level1">
+<h1 id="comparison-with-other-implementations">Comparison with other implementations<a class="anchor" aria-label="anchor" href="#comparison-with-other-implementations"></a>
+</h1>
+<table class="table">
+<colgroup>
+<col width="17%">
+<col width="36%">
+<col width="19%">
+<col width="14%">
+<col width="12%">
+</colgroup>
+<thead><tr class="header">
+<th>Group</th>
+<th>Feature</th>
+<th align="center">{tabnet}</th>
+<th align="center">dreamquark-ai</th>
+<th align="center">fast-tabnet</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Input format</td>
+<td>dataframe</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>formula</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>recipe</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Node</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>missings in predictor</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td>Output format</td>
+<td>dataframe</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>workflow</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td>ML Tasks</td>
+<td>self-supervised learning</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>classification (binary, multi-class)</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>regression</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>multi-outcome</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>hierarchical multi-label classif.</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td>Model management</td>
+<td>from / to file</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">v</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>resume from snapshot</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>training diagnostic</td>
+<td align="center">✅</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td>Interpretability</td>
+<td></td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+</tr>
+<tr class="odd">
+<td>Performance</td>
+<td></td>
+<td align="center">1 x</td>
+<td align="center">2 - 4 x</td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td>Code quality</td>
+<td>test coverage</td>
+<td align="center">85%</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>continuous integration</td>
+<td align="center">4 OS including GPU</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+</tbody>
+</table>
+<p>Alternative TabNet implementation features</p>
+</div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

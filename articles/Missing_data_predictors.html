@@ -50,16 +50,19 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/Hierarchical_classification.html">Hierarchical Classification</a>
+    </li>
+    <li>
       <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
     </li>
     <li>
       <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
-      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
+      <a href="../articles/selfsupervised_training.html">Self-supervised training and fine-tuning</a>
     </li>
     <li>
-      <a href="../articles/unsupervised_training.html">Unsupervised training and fine-tuning</a>
+      <a href="../articles/tidymodels-interface.html">Fitting tabnet with tidymodels</a>
     </li>
   </ul>
 </li>
@@ -92,7 +95,7 @@ dataset</h1>
                         <h4 data-toc-skip class="author">Christophe
 Regouby</h4>
             
-            <h4 data-toc-skip class="date">2023-06-18</h4>
+            <h4 data-toc-skip class="date">2023-07-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/HEAD/vignettes/Missing_data_predictors.Rmd" class="external-link"><code>vignettes/Missing_data_predictors.Rmd</code></a></small>
       <div class="hidden name"><code>Missing_data_predictors.Rmd</code></div>
@@ -133,7 +136,7 @@ distribution of the values like, for example, the
 <code>Masonry veneer area</code> predictor :</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mlverse/tabnet" class="external-link">tabnet</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mlverse.github.io/tabnet/" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ames"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="va">ames</span><span class="op">$</span><span class="va">Mas_Vnr_Area</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ames_mas_vnr_hist.png" alt="ames variable Mas_Vnr_Area histogram showing high occurrence of value zero">
@@ -235,16 +238,16 @@ Early stopping at epoch 017</code></pre>
 <img src="ames_pretrain.png" alt=""><p class="caption">ames_fit model training diagnostic plot</p>
 </div>
 <p>Now we capture the columns with missings, and create a convenience
-function to color the <code><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip::vip()</a></code> plot output according to
+function to color the <code><a href="https://koalaverse.github.io/vip/reference/vip.html" class="external-link">vip::vip()</a></code> plot output according to
 the missingness quality of the column</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">col_with_missings</span> <span class="op">&lt;-</span> <span class="va">ames_missing</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise_all.html" class="external-link">summarise_all</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="va">t</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">enframe</span><span class="op">(</span>name<span class="op">=</span><span class="st">"Variable"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="va">t</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/enframe.html" class="external-link">enframe</a></span><span class="op">(</span>name<span class="op">=</span><span class="st">"Variable"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>has_missing<span class="op">=</span><span class="st">"value"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">vip_color</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">col_has_missing</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">vip_data</span> <span class="op">&lt;-</span> <span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vip/man/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">$</span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Importance</span><span class="op">)</span></span>
+<span>  <span class="va">vip_data</span> <span class="op">&lt;-</span> <span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://koalaverse.github.io/vip/reference/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">$</span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Importance</span><span class="op">)</span></span>
 <span>  <span class="va">vis_miss_plus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">vip_data</span>, <span class="va">col_has_missing</span> , by<span class="op">=</span><span class="st">"Variable"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Variable<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">Variable</span>, levels <span class="op">=</span> <span class="va">vip_data</span><span class="op">$</span><span class="va">Variable</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="va">vis_miss_plus</span></span>
