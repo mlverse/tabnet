@@ -47,8 +47,9 @@
 #'
 #' @section Multi-outcome:
 #'
-#' TabNet allows multi-outcome prediction, the outcomes must all be numeric or all be categorical,
-#' and the __data frame__ method shall be used for `x` and `y`.
+#' TabNet allows multi-outcome prediction, which is usually named [multi-label classification](https://en.wikipedia.org/wiki/Multi-label_classification)
+#'   or multi-output classification when outcomes are categorical.
+#' Multi-outcome currently expect outcomes to be either all numeric or all categorical.
 #'
 #' @section Threading:
 #'
@@ -64,22 +65,35 @@
 #'
 #' @examplesIf torch::torch_is_installed()
 #'
-#' ## Single-outcome regression using formula specification
 #' data("ames", package = "modeldata")
+#' data("attrition", package = "modeldata")
+#' ids <- sample(nrow(attrition), 256)
+#'
+#' ## Single-outcome regression using formula specification
 #' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
 #'
 #' ## Single-outcome classification using data-frame specification
-#' data("attrition", package = "modeldata")
 #' attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
 #' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
 #'
-#' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
-#' data("ames", package = "modeldata")
-#' ids <- sample(nrow(ames), 256)
-#' x <- ames[ids,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
-#' y <- ames[ids, c("Sale_Price", "Pool_Area")]
-#' ames_fit <- tabnet_fit(x, y, epochs = 2, valid_split = 0.2)
-
+#' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
+#' ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames[ids,], epochs = 2, valid_split = 0.2)
+#'
+#' ## Multi-label classification on `Attrition` and `JobSatisfaction` in
+#' ## `attrition` dataset using recipe
+#' library(recipes)
+#' rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition[ids,]) %>%
+#'   step_normalize(all_numeric(), -all_outcomes())
+#'
+#' attrition_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
+#'
+#' ## Hierarchical classification on  `acme`
+#' data(acme, package = "data.tree")
+#'
+#' acme_fit <- tabnet_fit(acme, epochs = 2, verbose = TRUE)
+#'
+#' # Note: Dataset number of rows and model number of epochs should be increased
+#' # for publication-level results.
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'
 #' @export
@@ -112,7 +126,7 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
     ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
@@ -137,7 +151,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
@@ -156,7 +170,41 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="supervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
+}
+
+#' @export
+#' @rdname tabnet_fit
+#'
+#' @importFrom dplyr filter mutate select mutate_all mutate_if
+#' @importFrom tidyr replace_na
+#'
+tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+  # ensure there is no level_* col in the Node object
+  check_compliant_node(x)
+  # get tree leaves and extract attributes into data.frames
+  xy_df <- node_to_df(x)
+  processed <- hardhat::mold(xy_df$x, xy_df$y)
+  # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
+  ancestor <- data.tree::ToDataFrameNetwork(x) %>%
+   mutate_if(is.character, ~.x %>% as.factor %>% as.numeric)
+  # TODO check correctness
+  # embed the M matrix in the config$ancestor variable
+  dims <- c(max(ancestor), max(ancestor))
+  ancestor_m <- Matrix::sparseMatrix(ancestor$from, ancestor$to, dims = dims, x = 1)
+  check_type(processed$outcomes)
+
+  default_config <- tabnet_config()
+  new_config <- do.call(tabnet_config, list(...))
+  new_config <- new_config[
+    mapply(
+      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      default_config,
+      new_config)
+  ]
+  config <- utils::modifyList(config, as.list(new_config, ancestor = ancestor_m))
+
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 new_tabnet_fit <- function(fit, blueprint) {
@@ -268,7 +316,7 @@ tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabne
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 #' @export
@@ -292,7 +340,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 #' @export
@@ -310,7 +358,18 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet
   ]
   config <- utils::modifyList(config, as.list(new_config))
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task="unsupervised")
+  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
+}
+
+#' @export
+#' @rdname tabnet_pretrain
+tabnet_pretrain.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+  # ensure there is no level_* col in the Node object
+  check_compliant_node(x)
+  # get tree leaves and extract attributes into data.frames
+  xy_df <- node_to_df(x)
+  tabnet_pretrain(xy_df$x, xy_df$y, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
+
 }
 
 new_tabnet_pretrain <- function(pretrain, blueprint) {
@@ -329,14 +388,15 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   predictors <- processed$predictors
   outcomes <- processed$outcomes
   epoch_shift <- 0L
+
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
-    rlang::abort(paste0(tabnet_model," is not recognised as a proper TabNet model"))
+    rlang::abort(glue::glue("{tabnet_model} is not recognised as a proper TabNet model"))
 
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
     # model must be loaded from checkpoint
 
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-      rlang::abort(paste0("The model was trained for less than ", from_epoch, " epochs"))
+      rlang::abort(glue::glue("The model was trained for less than {from_epoch} epochs"))
 
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
@@ -348,7 +408,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
   if (task == "supervised") {
     if (sum(is.na(outcomes)) > 0) {
-      rlang::abort("Error: found missing values in the outcome data.")
+      rlang::abort(glue::glue("Error: found missing values in the `{names(outcomes)}` outcome column."))
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -383,7 +443,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
-    } else rlang::abort(paste0("No model serialized weight can be found in ", tabnet_model, ", check the model history"))
+    } else rlang::abort(glue::glue("No model serialized weight can be found in {tabnet_model} check the model history"))
 
     fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
@@ -400,57 +460,18 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 #' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
+  if (inherits(new_data, "Node")) {
+    new_data_df <- node_to_df(new_data)$x
+  } else {
+    new_data_df <- new_data
+  }
   # Enforces column order, type, column names, etc
-  processed <- hardhat::forge(new_data, object$blueprint)
+  processed <- hardhat::forge(new_data_df, object$blueprint)
   batch_size <- object$fit$config$batch_size
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
-  hardhat::validate_prediction_size(out, new_data)
+  hardhat::validate_prediction_size(out, new_data_df)
   out
 }
-
-#' Check consistency between modeling-task type and class of outcomes vars.
-#'
-#' infer default modeling-task type from the outcome vars class if needed.
-#'
-#' @param outcome_ptype shall be `model$blueprint$ptypes$outcomes` when called from
-#'  a model object, or `processed$outcomes` from the result of a `mold()`
-#' @param type expected type within  `c("numeric", "prob", "class")`
-#'
-#' @return valid type within `c("numeric", "prob", "class")` for repectively regression,
-#' class probabilities, or classification
-#' @noRd
-check_type <- function(outcome_ptype, type = NULL) {
-
-  # outcome_ptype <- model$blueprint$ptypes$outcomes when called from model
-  outcome_all_factor <- all(purrr::map_lgl(outcome_ptype, is.factor))
-  outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
-
-  if (!outcome_all_numeric && !outcome_all_factor)
-    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
-
-  if (is.null(type)) {
-    if (outcome_all_factor)
-      type <- "class"
-    else if (outcome_all_numeric)
-      type <- "numeric"
-    else if (ncol(outcome_ptype) == 1)
-      rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
-  }
-
-  type <- rlang::arg_match(type, c("numeric", "prob", "class"))
-
-  if (outcome_all_factor) {
-    if (!type %in% c("prob", "class"))
-      rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
-  } else if (outcome_all_numeric) {
-    if (type != "numeric")
-      rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
-  }
-
-  invisible(type)
-}
-
-
 
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
@@ -464,7 +485,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   if (!is.null(epoch)) {
 
     if (epoch > (length(object$fit$checkpoints) * object$fit$config$checkpoint_epoch))
-      rlang::abort(paste0("The model was trained for less than ", epoch, " epochs"))
+      rlang::abort(glue::glue("The model was trained for less than {epoch} epochs"))
 
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch
@@ -541,6 +562,131 @@ is_null_external_pointer <- function(pointer) {
   out <- identical(pointer, methods::new("externalptr"))
   attributes(pointer) <- a
   out
+}
+
+#' Check consistency between modeling-task type and class of outcomes vars.
+#'
+#' infer default modeling-task type from the outcome vars class if needed.
+#'
+#' @param outcome_ptype shall be `model$blueprint$ptypes$outcomes` when called from
+#'  a model object, or `processed$outcomes` from the result of a `mold()`
+#' @param type expected type within  `c("numeric", "prob", "class")`
+#'
+#' @return valid type within `c("numeric", "prob", "class")` for respectively regression,
+#' class probabilities, or classification
+#' @noRd
+check_type <- function(outcome_ptype, type = NULL) {
+
+  # outcome_ptype <- model$blueprint$ptypes$outcomes when called from model
+  outcome_all_factor <- all(purrr::map_lgl(outcome_ptype, is.factor))
+  outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
+
+  if (!outcome_all_numeric && !outcome_all_factor)
+    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
+
+  if (is.null(type)) {
+    if (outcome_all_factor)
+      type <- "class"
+    else if (outcome_all_numeric)
+      type <- "numeric"
+    else if (ncol(outcome_ptype) == 1)
+      rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
+  }
+
+  type <- rlang::arg_match(type, c("numeric", "prob", "class"))
+
+  if (outcome_all_factor) {
+    if (!type %in% c("prob", "class"))
+      rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
+  } else if (outcome_all_numeric) {
+    if (type != "numeric")
+      rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
+  }
+
+  invisible(type)
+}
+
+
+#' Check that Node object names are compliant
+#'
+#' @param node the Node object, or a dataframe ready to be parsed by `data.tree::as.Node()`
+#'
+#' @return node if it is compliant, else an Error with the column names to fix
+#' @export
+#'
+#' @examplesIf (require("data.tree") || require("dplyr"))
+#' library(dplyr)
+#' library(data.tree)
+#' data(starwars)
+#' starwars_tree <- starwars %>%
+#'   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/"))
+#'
+#' # pre as.Node() check
+#' try(check_compliant_node(starwars_tree))
+#'
+#' # post as.Node() check
+#' check_compliant_node(as.Node(starwars_tree))
+#'
+check_compliant_node <- function(node) {
+  #  prevent reserved data.tree Node colnames and the level_1 ... level_n names used for coercion
+  if (inherits(node, "Node")) {
+    # Node has already lost its reserved colnames
+    reserved_names <- paste0("level_", c(1:node$height))
+    actual_names <- node$attributesAll
+  } else if (inherits(node, "data.frame") && "pathString" %in% colnames(node)) {
+    node_height <- max(stringr::str_count(node$pathString, "/"))
+    reserved_names <- c(paste0("level_", c(1:node_height)), data.tree::NODE_RESERVED_NAMES_CONST)
+    actual_names <- colnames(node)[!colnames(node) %in% "pathString"]
+  } else {
+    rlang::abort("The provided hierarchical object is not recognized with a valid format that can be checked")
+  }
+
+  if (any(actual_names %in% reserved_names)) {
+    rlang::abort(paste0(
+      "The attributes or colnames in the provided hierarchical object use the following reserved names : '",
+      paste(actual_names[actual_names %in% reserved_names], collapse = "', '"),
+      "'. Please change those names as they will lead to unexpected tabnet behavior."
+      ))
+  }
+
+  invisible(node)
+}
+
+#' Turn a Node object into predictor and outcome.
+#'
+#' @param x Node object
+#' @param drop_last_level TRUE unused
+#'
+#' @return a named list of x and y, being respectively the predictor data-frame and the outcomes data-frame,
+#'   as expected inputs for `hardhat::mold()` function.
+#' @export
+#'
+#' @examplesIf (require("data.tree") || require("dplyr"))
+#' library(dplyr)
+#' library(data.tree)
+#' data(starwars)
+#' starwars_tree <- starwars %>%
+#'   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/")) %>%
+#'   as.Node()
+#' node_to_df(starwars_tree)
+#'
+#' @importFrom dplyr last_col mutate mutate_if select starts_with where
+node_to_df <- function(x, drop_last_level = TRUE) {
+  # TODO get rid of all those import through base R equivalent
+  xy_df <- data.tree::ToDataFrameTypeCol(x, x$attributesAll)
+  x_df <- xy_df %>%
+    select(-starts_with("level_")) %>%
+    mutate_if(is.character, as.factor)
+  y_df <- xy_df %>%
+    select(starts_with("level_")) %>%
+    # drop first (and all zero-variance) column
+    select(where(~ nlevels(as.factor(.x)) > 1 )) %>%
+    # TODO take the drop_last_level param into account
+    # drop last level column
+    select(-last_col()) %>%
+    # TODO impute "NA" with parent through coalesce() via an option
+    mutate_if(is.character, as.factor)
+  return(list(x = x_df, y = y_df))
 }
 
 reload_model <- function(object) {

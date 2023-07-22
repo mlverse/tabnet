@@ -6,6 +6,7 @@
 \alias{tabnet_fit.data.frame}
 \alias{tabnet_fit.formula}
 \alias{tabnet_fit.recipe}
+\alias{tabnet_fit.Node}
 \title{Tabnet model}
 \usage{
 tabnet_fit(x, ...)
@@ -33,6 +34,14 @@ tabnet_fit(x, ...)
 \method{tabnet_fit}{recipe}(
   x,
   data,
+  tabnet_model = NULL,
+  config = tabnet_config(),
+  ...,
+  from_epoch = NULL
+)
+
+\method{tabnet_fit}{Node}(
+  x,
   tabnet_model = NULL,
   config = tabnet_config(),
   ...,
@@ -103,8 +112,9 @@ The model fitting metrics append on top of the parent metrics in the returned Ta
 \section{Multi-outcome}{
 
 
-TabNet allows multi-outcome prediction, the outcomes must all be numeric or all be categorical,
-and the \strong{data frame} method shall be used for \code{x} and \code{y}.
+TabNet allows multi-outcome prediction, which is usually named \href{https://en.wikipedia.org/wiki/Multi-label_classification}{multi-label classification}
+or multi-output classification when outcomes are categorical.
+Multi-outcome currently expect outcomes to be either all numeric or all categorical.
 }
 
 \section{Threading}{
@@ -123,20 +133,34 @@ torch::torch_set_num_interop_threads(1)
 \examples{
 \dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
-## Single-outcome regression using formula specification
 data("ames", package = "modeldata")
+data("attrition", package = "modeldata")
+ids <- sample(nrow(attrition), 256)
+
+## Single-outcome regression using formula specification
 fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
 
 ## Single-outcome classification using data-frame specification
-data("attrition", package = "modeldata")
 attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
 fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
 
-## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
-data("ames", package = "modeldata")
-ids <- sample(nrow(ames), 256)
-x <- ames[ids,-which(names(ames) \%in\% c("Sale_Price", "Pool_Area"))]
-y <- ames[ids, c("Sale_Price", "Pool_Area")]
-ames_fit <- tabnet_fit(x, y, epochs = 2, valid_split = 0.2)
+## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
+ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames[ids,], epochs = 2, valid_split = 0.2)
+
+## Multi-label classification on `Attrition` and `JobSatisfaction` in
+## `attrition` dataset using recipe
+library(recipes)
+rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition[ids,]) \%>\%
+  step_normalize(all_numeric(), -all_outcomes())
+
+attrition_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
+
+## Hierarchical classification on  `acme`
+data(acme, package = "data.tree")
+
+acme_fit <- tabnet_fit(acme, epochs = 2, verbose = TRUE)
+
+# Note: Dataset number of rows and model number of epochs should be increased
+# for publication-level results.
 \dontshow{\}) # examplesIf}
 }

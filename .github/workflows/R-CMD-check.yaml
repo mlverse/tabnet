@@ -58,7 +58,7 @@ jobs:
     name: 'gpu'
 
     container:
-      image: 'nvidia/cuda:11.6.0-cudnn8-devel-ubuntu18.04'
+      image: 'nvidia/cuda:11.6.2-cudnn8-devel-ubuntu18.04'
       options: '--gpus all --runtime=nvidia'
 
     timeout-minutes: 120

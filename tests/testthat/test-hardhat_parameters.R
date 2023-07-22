@@ -40,7 +40,7 @@ test_that("early stopping works wo validation split", {
     tabnet_pretrain(attrix, attriy, epochs = 100, verbose=TRUE,
                                 early_stopping_monitor="cross_validation_loss",
                                 early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
-    regexp = "not a valid early stopping metric to monitor"
+    regexp = "not a valid early-stopping metric to monitor"
   )
 
   # tabnet_fit
@@ -56,7 +56,7 @@ test_that("early stopping works wo validation split", {
     tabnet_fit(attrix, attriy, epochs = 200, verbose=TRUE,
                       early_stopping_monitor="cross_validation_loss",
                       early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
-    regexp = "not a valid early stopping metric to monitor"
+    regexp = "not a valid early-stopping metric to monitor"
   )
 
 })
@@ -211,14 +211,14 @@ test_that("config$loss can be a function", {
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
-                      config = tabnet_config( loss=torch::nn_nll_loss()))
+                      config = tabnet_config( loss = torch::nn_nll_loss()))
   expect_equal(fit_auto$fit$config$loss_fn, torch::nn_nll_loss(), ignore_function_env = TRUE)
 
   # numerical outcome loss
   rec <- recipe(MonthlyIncome ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit_auto <- tabnet_fit(rec, attrition[ids, ], epochs = 1, verbose = TRUE,
-                      config = tabnet_config( loss=torch::nn_poisson_nll_loss()))
+                      config = tabnet_config( loss = torch::nn_poisson_nll_loss()))
   expect_equal(fit_auto$fit$config$loss_fn, torch::nn_poisson_nll_loss(), ignore_function_env = TRUE)
 
 })

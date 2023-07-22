@@ -46,7 +46,7 @@ recommended. (default: 1024^2)}
 \item{penalty}{This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help.}
+problem, reducing this value could help (default 1e-3).}
 
 \item{clip_value}{If a float is given this will clip the gradient at
 clip_value. Pass \code{NULL} to not clip.}
@@ -64,7 +64,7 @@ more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.}
 
 \item{attention_width}{(int) Width of the attention embedding for each mask. According to
-the paper n_d=n_a is usually a good choice. (default=8)}
+the paper n_d = n_a is usually a good choice. (default=8)}
 
 \item{num_steps}{(int) Number of steps in the architecture
 (usually between 3 and 10)}
@@ -79,7 +79,8 @@ block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)}
 
-\item{valid_split}{(float) The fraction of the dataset used for validation.}
+\item{valid_split}{(float) The fraction of the dataset used for validation.
+(default = 0 means no split)}
 
 \item{learn_rate}{initial learning rate for the optimizer.}
 
@@ -89,7 +90,7 @@ you can also pass any torch optimizer function.}
 \item{lr_scheduler}{if \code{NULL}, no learning rate decay is used. If "step"
 decays the learning rate by \code{lr_decay} every \code{step_size} epochs. If "reduce_on_plateau"
 decays the learning rate by \code{lr_decay} when no improvement after \code{step_size} epochs.
-It can #'   also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
+It can also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
 as parameter. The \code{step} method is called once per epoch.}
 
 \item{lr_decay}{multiplies the initial learning rate by \code{lr_decay} every

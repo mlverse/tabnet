@@ -21,7 +21,10 @@ Learning](https://arxiv.org/abs/1908.07442). The code in this repository
 is an R port of
 [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet)
 PyTorch’s implementation using the
-[torch](https://github.com/mlverse/torch) package.
+[torch](https://github.com/mlverse/torch) package. The original
+repository is augmented with [Coherent Hierarchical Multi-label
+Classification
+Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
 
 ## Installation
 
@@ -134,8 +137,8 @@ autoplot(pretrain)
 <img src="man/figures/README-step-pretrain-1.png" width="100%" />
 
 The exemple here is a toy example as the `train` dataset does actually
-contain outcomes. The vignette on [Unsupervised training and
-fine-tuning](https://mlverse.github.io/tabnet/articles/unsupervised_training.html)
+contain outcomes. The vignette on [Self-supervised training and
+fine-tuning](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html)
 will gives you the complete correct workflow step-by-step.
 
 ## Missing data in predictors
@@ -143,3 +146,29 @@ will gives you the complete correct workflow step-by-step.
 {tabnet} leverage the masking mechanism to deal with missing data, so
 you don’t have to remove the entries in your dataset with some missing
 values in the predictors variables.
+
+# Comparison with other implementations
+
+| Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
+|------------------|--------------------------------------|:------------------:|:-------------:|:-----------:|
+| Input format     | dataframe                            |         ✅         |      ✅       |     ✅      |
+|                  | formula                              |         ✅         |               |             |
+|                  | recipe                               |         ✅         |               |             |
+|                  | Node                                 |         ✅         |               |             |
+|                  | missings in predictor                |         ✅         |               |             |
+| Output format    | dataframe                            |         ✅         |      ✅       |     ✅      |
+|                  | workflow                             |         ✅         |               |             |
+| ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
+|                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
+|                  | regression                           |         ✅         |      ✅       |     ✅      |
+|                  | multi-outcome                        |         ✅         |      ✅       |             |
+|                  | hierarchical multi-label classif.    |         ✅         |               |             |
+| Model management | from / to file                       |         ✅         |      ✅       |      v      |
+|                  | resume from snapshot                 |         ✅         |               |             |
+|                  | training diagnostic                  |         ✅         |               |             |
+| Interpretability |                                      |         ✅         |      ✅       |     ✅      |
+| Performance      |                                      |        1 x         |    2 - 4 x    |             |
+| Code quality     | test coverage                        |        85%         |               |             |
+|                  | continuous integration               | 4 OS including GPU |               |             |
+
+Alternative TabNet implementation features
