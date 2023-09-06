@@ -105,7 +105,7 @@ test_that("lr scheduler step works", {
 
   expect_no_error(
     fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = "step",
-                      lr_decay = 0.1, step_size = 1)
+                           lr_decay = 0.1, step_size = 1)
   )
 
   sc_fn <- function(optimizer) {
@@ -114,7 +114,7 @@ test_that("lr scheduler step works", {
 
   expect_no_error(
     fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = sc_fn,
-                      lr_decay = 0.1, step_size = 1)
+                           lr_decay = 0.1, step_size = 1)
   )
 
 })
@@ -172,6 +172,20 @@ test_that("num_independent_decoder and num_shared_decoder change the network num
   )
   expect_gt( torch:::get_parameter_count(pretrain$fit$network),
              torch:::get_parameter_count(attr_pretrained$fit$network)
-             )
+  )
+})
+
+test_that("num_independent_decoder and num_shared_decoder do not change the network number of parameters for fit", {
+
+  expect_no_error(
+    config <- tabnet_config(epochs = 1,
+                            num_independent_decoder = 3, num_shared_decoder = 2)
+  )
+  expect_no_error(
+    attr_fit <- tabnet_fit(attrix, attriy, config = config)
+  )
+  expect_equal( torch:::get_parameter_count(attr_fit$fit$network),
+                torch:::get_parameter_count(attr_fitted$fit$network)
+  )
 })
 
