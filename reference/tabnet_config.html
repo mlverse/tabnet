@@ -98,6 +98,8 @@
 <span>  cat_emb_dim <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  num_independent <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  num_shared <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  num_independent_decoder <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  num_shared_decoder <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  momentum <span class="op">=</span> <span class="fl">0.02</span>,</span>
 <span>  pretraining_ratio <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -177,7 +179,7 @@ block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <cod
 
 
 <dt>valid_split</dt>
-<dd><p>(float) The fraction of the dataset used for validation.
+<dd><p>(<code>[0, 1)</code>) The fraction of the dataset used for validation.
 (default = 0 means no split)</p></dd>
 
 
@@ -216,17 +218,29 @@ Use <code>0</code> to disable checkpoints.</p></dd>
 
 
 <dt>cat_emb_dim</dt>
-<dd><p>Embedding size for categorical features (default=1)</p></dd>
+<dd><p>Size of the embedding of categorical features. If int, all categorical
+features will have same embedding size, if list of int, every corresponding feature will have
+specific embedding size.</p></dd>
 
 
 <dt>num_independent</dt>
-<dd><p>Number of independent Gated Linear Units layers at each step.
+<dd><p>Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.</p></dd>
 
 
 <dt>num_shared</dt>
-<dd><p>Number of shared Gated Linear Units at each step Usual values
-range from 1 to 5</p></dd>
+<dd><p>Number of shared Gated Linear Units at each step of the encoder. Usual values
+at each step of the decoder. range from 1 to 5</p></dd>
+
+
+<dt>num_independent_decoder</dt>
+<dd><p>For pretraining, number of independent Gated Linear Units layers
+Usual values range from 1 to 5.</p></dd>
+
+
+<dt>num_shared_decoder</dt>
+<dd><p>For pretraining, number of shared Gated Linear Units at each step of the
+decoder. Usual values range from 1 to 5.</p></dd>
 
 
 <dt>momentum</dt>
