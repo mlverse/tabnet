@@ -34,7 +34,7 @@ binary classification etc.. Vector of those dimensions in case of multi-output.}
 
 \item{n_steps}{Number of successive steps in the network (usually between 3 and 10).}
 
-\item{gamma}{Float above 1, scaling factor for attention updates (usually between 1.0 to 2.0).}
+\item{gamma}{Float above 1, scaling factor for attention updates (usually between 1 and 2).}
 
 \item{cat_idxs}{Index of each categorical column in the dataset.}
 
@@ -44,9 +44,9 @@ binary classification etc.. Vector of those dimensions in case of multi-output.}
 features will have same embedding size if list of int, every corresponding feature will have
 specific size.}
 
-\item{n_independent}{Number of independent GLU layer in each GLU block (default 2)..}
+\item{n_independent}{Number of independent GLU layer in each GLU block of the encoder.}
 
-\item{n_shared}{Number of independent GLU layer in each GLU block (default 2).}
+\item{n_shared}{Number of independent GLU layer in each GLU block of the encoder.}
 
 \item{epsilon}{Avoid log(0), this should be kept very low.}
 
