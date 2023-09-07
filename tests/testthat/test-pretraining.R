@@ -75,8 +75,7 @@ test_that("works with categorical embedding dimension as list", {
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
 
   expect_no_error(
-    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, valid_split = 0.2, config=config),
-    regexp = NA
+    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 1, valid_split = 0.2, config=config)
   )
 })
 
