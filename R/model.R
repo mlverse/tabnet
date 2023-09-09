@@ -55,7 +55,7 @@ resolve_data <- function(x, y) {
 #'
 #' @param batch_size (int) Number of examples per batch, large batch sizes are
 #'   recommended. (default: 1024^2)
-#' @param penalty This is the extra sparsity loss coefficient as proposed
+#' @param penalty This is the extra sparsity loss coefficient, or $\lambda_{sparse}$
 #'   in the original paper. The bigger this coefficient is, the sparser your model
 #'   will be in terms of feature selection. Depending on the difficulty of your
 #'   problem, reducing this value could help (default 1e-3).
@@ -73,9 +73,10 @@ resolve_data <- function(x, y) {
 #'   the paper n_d = n_a is usually a good choice. (default=8)
 #' @param num_steps (int) Number of steps in the architecture
 #'   (usually between 3 and 10)
-#' @param feature_reusage (float) This is the coefficient for feature reusage in the masks.
+#' @param feature_reusage (float) This is the coefficient for feature reusage in the masks,
+#'   or $\gamma$ in the original paper.
 #'   A value close to 1 will make mask selection least correlated between layers.
-#'   Values range from 1.0 to 2.0.
+#'   Values range in `[1, 2]`.
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
 #'   block, either `"sparsemax"` or `"entmax"`.Defaults to `"sparsemax"`.
 #' @param virtual_batch_size (int) Size of the mini batches used for
@@ -83,12 +84,16 @@ resolve_data <- function(x, y) {
 #' @param learn_rate initial learning rate for the optimizer.
 #' @param optimizer the optimization method. currently only 'adam' is supported,
 #'   you can also pass any torch optimizer function.
-#' @param valid_split (float) The fraction of the dataset used for validation.
+#' @param valid_split (`[0, 1)`) The fraction of the dataset used for validation.
 #'   (default = 0 means no split)
-#' @param num_independent Number of independent Gated Linear Units layers at each step.
+#' @param num_independent Number of independent Gated Linear Units layers at each step of the encoder.
 #'   Usual values range from 1 to 5.
-#' @param num_shared Number of shared Gated Linear Units at each step Usual values
-#'   range from 1 to 5
+#' @param num_shared Number of shared Gated Linear Units at each step of the encoder. Usual values
+#'    at each step of the decoder. range from 1 to 5
+#' @param num_independent_decoder For pretraining, number of independent Gated Linear Units layers
+#'   Usual values range from 1 to 5.
+#' @param num_shared_decoder For pretraining, number of shared Gated Linear Units at each step of the
+#'    decoder. Usual values range from 1 to 5.
 #' @param verbose (logical) Whether to print progress and loss values during
 #'   training.
 #' @param lr_scheduler if `NULL`, no learning rate decay is used. If "step"
@@ -101,7 +106,9 @@ resolve_data <- function(x, y) {
 #'   or `NULL`.
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
-#' @param cat_emb_dim Embedding size for categorical features (default=1)
+#' @param cat_emb_dim Size of the embedding of categorical features. If int, all categorical
+#'   features will have same embedding size, if list of int, every corresponding feature will have
+#'   specific embedding size.
 #' @param momentum Momentum for batch normalization, typically ranges from 0.01
 #'   to 0.4 (default=0.02)
 #' @param pretraining_ratio Ratio of features to mask for reconstruction during
@@ -147,6 +154,8 @@ tabnet_config <- function(batch_size = 1024^2,
                           cat_emb_dim = 1,
                           num_independent = 2,
                           num_shared = 2,
+                          num_independent_decoder = 1,
+                          num_shared_decoder = 1,
                           momentum = 0.02,
                           pretraining_ratio = 0.5,
                           verbose = FALSE,
@@ -190,6 +199,8 @@ tabnet_config <- function(batch_size = 1024^2,
     cat_emb_dim = cat_emb_dim,
     n_independent = num_independent,
     n_shared = num_shared,
+    n_independent_decoder = num_independent_decoder,
+    n_shared_decoder = num_shared_decoder,
     momentum = momentum,
     pretraining_ratio = pretraining_ratio,
     verbose = verbose,
@@ -198,7 +209,7 @@ tabnet_config <- function(batch_size = 1024^2,
     early_stopping_monitor = resolve_early_stop_monitor(early_stopping_monitor, valid_split),
     early_stopping_tolerance = early_stopping_tolerance,
     early_stopping_patience = early_stopping_patience,
-    early_stopping = !(early_stopping_tolerance==0 || early_stopping_patience==0),
+    early_stopping = !(early_stopping_tolerance == 0 || early_stopping_patience == 0),
     num_workers = num_workers,
     skip_importance = skip_importance
   )
