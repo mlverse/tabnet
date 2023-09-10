@@ -31,11 +31,12 @@ gbn <- torch::nn_module(
 tabnet_encoder <- torch::nn_module(
   "tabnet_encoder",
   initialize = function(input_dim, output_dim,
-                        n_d=8, n_a=8,
-                        n_steps=3, gamma=1.3,
-                        n_independent=2, n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum = 0.02,
-                        mask_type="sparsemax") {
+                        n_d = 8, n_a = 8,
+                        n_steps = 3, gamma = 1.3,
+                        n_independent = 2, n_shared = 2, epsilon = 1e-15,
+                        virtual_batch_size = 128, momentum = 0.02,
+                        mask_type = "sparsemax",
+                        group_attention_matrix = NULL) {
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
@@ -49,6 +50,15 @@ tabnet_encoder <- torch::nn_module(
     self$virtual_batch_size <- virtual_batch_size
     self$mask_type <- mask_type
     self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
+
+    if (is.null(group_attention_matrix)) {
+      # no variable group
+      self$group_attention_matrix <- create_group_matrix(list(), input_dim)
+      self$attention_dim <- self$input_dim
+    } else {
+      self$group_attention_matrix <- group_attention_matrix
+      self$attention_dim <-  group_attention_matrix$shape[1]
+    }
 
     if (self$n_shared > 0) {
       shared_feat_transform <- torch::nn_module_list()
@@ -87,7 +97,8 @@ tabnet_encoder <- torch::nn_module(
                                       n_glu_independent = self$n_independent,
                                       virtual_batch_size = self$virtual_batch_size,
                                       momentum = momentum)
-      attention <- attentive_transformer(n_a, self$input_dim,
+      attention <- attentive_transformer(n_a, self$attention_dim,
+                                         group_matrix = self$group_attention_matrix,
                                          virtual_batch_size = self$virtual_batch_size,
                                          momentum = momentum,
                                          mask_type = self$mask_type)
@@ -119,7 +130,8 @@ tabnet_encoder <- torch::nn_module(
       prior <- torch::torch_mul(self$gamma - M, prior)
 
       # output
-      masked_x <- torch::torch_mul(M, x)
+      M_feature_level <- torch::torch_matmul(M, self$group_attention_matrix)
+      masked_x <- torch::torch_mul(M_feature_level, x)
       out <- self$feat_transformers[[step]](masked_x)
       d <- torch::nnf_relu(out[.., 1:(self$n_d)])
       steps_output[[step]] <- d
@@ -137,7 +149,7 @@ tabnet_encoder <- torch::nn_module(
 
     x <- self$initial_bn(x)
 
-    prior <- x_na_mask$logical_not()
+    prior <- 1 - torch::torch_matmul(x_na_mask, self$group_attention_matrix) # shape [b, self$attention_dim]
     M_explain <- torch::torch_zeros(x$shape, device = x$device)
     att <- self$initial_splitter(x)[, (self$n_d+1):N]
     masks <- list()
@@ -145,19 +157,21 @@ tabnet_encoder <- torch::nn_module(
     for (step in seq_len(self$n_steps)) {
 
       M <- self$att_transformers[[step]](prior, att)
+      M_feature_level <- torch::torch_matmul(M, self$group_attention_matrix)
       masks[[step]] <- M
 
       # update prior
       prior <- torch::torch_mul(self$gamma - M, prior)
 
       # output
-      masked_x <- torch::torch_mul(M, x)
+      M_feature_level <- torch::torch_matmul(M, self$group_attention_matrix)
+      masked_x <- torch::torch_mul(M_feature_level, x)
       out <- self$feat_transformers[[step]](masked_x)
       d <- torch::nnf_relu(out[.., 1:(self$n_d)])
 
       # explain
-      step_importance <- torch::torch_sum(d, dim=2)
-      M_explain <- M_explain + torch::torch_mul(M, step_importance$unsqueeze(dim=2))
+      step_importance <- torch::torch_sum(d, dim = 2)
+      M_explain <- M_explain + torch::torch_mul(M_feature_level, step_importance$unsqueeze(dim = 2))
 
       # update attention
       att <- out[, (self$n_d+1):N]

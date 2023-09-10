@@ -82,7 +82,8 @@ check_vars_id_groups <- function(vars_id_groups, input_dim) {
 }
 
 
-#' Check consistency of parameters related to embeddings and rearrange them in a unique manner.
+#' Check consistency of parameters related to categorical embeddings
+#'   and reorder them on ascending ids.
 #' @noRd
 check_embedding_parameters <- function(cat_dims, cat_idx, cat_emb_dim){
   if (length(cat_dims) == 0 | length(cat_idx) == 0) {
@@ -104,7 +105,7 @@ check_embedding_parameters <- function(cat_dims, cat_idx, cat_emb_dim){
   }
 
   # Rearrange to get reproducible seeds with different ordering
-  cat_idx_df <- data.frame(cat_idx = cat_idx, row_id = seq_len(length(cat_idx)))
+  cat_idx_df <- data.frame(cat_idx = cat_idx, row_id = seq_along(cat_idx))
   cat_id_sorted <- cat_idx_df[order(cat_idx_df$cat_idx),]$row_id
   cat_idx_sorted <- cat_idx[cat_id_sorted]
   cat_dims <- cat_dims[cat_id_sorted]
