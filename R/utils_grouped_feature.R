@@ -13,7 +13,7 @@
 #' # mtcars example
 #' colnames(mtcars)
 #' create_group_matrix(vars_id_groups = list(c(1,3), c(4:7), c(9:10)), input_dim = 11)
-
+#' @noRd
 create_group_matrix <- function(vars_id_groups, input_dim) {
   # TODO shall be secured and simplified with sparse matrix functions
   check_vars_id_groups(vars_id_groups, input_dim)
@@ -56,54 +56,59 @@ create_group_matrix <- function(vars_id_groups, input_dim) {
 #'     - does not contain empty groups
 #' @vars_id_groups : list of vars_id_group, vars_id_group being the vector of features ids to group
 #' @input_dim : number of feature in the initial dataset
+#' @noRd
 check_vars_id_groups <- function(vars_id_groups, input_dim) {
-    if (!is.list(vars_id_groups)) {
-      rlang::abort(glue::glue("vars_id_groups must be a list."))
+  if (!is.list(vars_id_groups)) {
+    rlang::abort(glue::glue("`vars_id_groups` must be a list."))
+  }
+  if (length(vars_id_groups) == 0) {
+    return
+  } else {
+    # ensure groups are not empty
+    bad_group_ids <- purrr::map_lgl(vars_id_groups, ~(!is.vector(.x) | !length(.x) > 0))
+    if (any(bad_group_ids)) {
+      rlang::abort(glue::glue("Each vars_id_group must be a non empty vector. This fails with {vars_id_groups[bad_group_ids]}"))
     }
-    if (length(vars_id_groups) == 0) {
-      return
-    } else {
-      # ensure groups are not empty
-      for (group in vars_id_groups) {
-          if (!is.vector(group) || !length(group) > 0) {
-            rlang::abort(glue::glue("each vars_id_group must be a non empty vector. This fails with {group}"))
-          }
-      }
-    }
+  }
   # ensure there is no id overlap
   all_ids <- unlist(vars_id_groups)
   if (any(duplicated(all_ids))) {
-    rlang::abort(glue::glue("vars_id {all_ids[duplicated(all_ids)]} appears more than once in the `vars_id_groups`"))
+    rlang::abort(glue::glue("`vars_id` {all_ids[duplicated(all_ids)]} appears more than once in the `vars_id_groups`"))
   }
   # ensure all ids are within input_dim
   if (any((all_ids > input_dim) | (all_ids < 1) )) {
-    rlang::abort(glue::glue("vars_id {all_ids[(all_ids > input_dim) || (all_ids < 1) ]} are wrong ids for an `input_dim` of {input_dim}"))
+    rlang::abort(glue::glue("`vars_id` {all_ids[(all_ids > input_dim) | (all_ids < 1) ]} are wrong ids for an `input_dim` of {input_dim}"))
   }
 }
 
 
-# Check parameters related to embeddings and rearrange them in a unique manner.
-check_embedding_parameters <- function(cat_dims, cat_idxs, cat_emb_dim){
-    if (length(cat_dims) == 0 || length(cat_idxs) == 0) {
-      rlang::abort(glue::glue("`cat_dims` and `cat_idxs` cannot be null"))
-    }
-  if (length(cat_dims) != length(cat_idxs)) {
-    rlang::abort(glue::glue("`cat_dims` and `cat_idxs` must have the same length."))
-    }
+#' Check consistency of parameters related to embeddings and rearrange them in a unique manner.
+#' @noRd
+check_embedding_parameters <- function(cat_dims, cat_idx, cat_emb_dim){
+  if (length(cat_dims) == 0 | length(cat_idx) == 0) {
+    rlang::abort(glue::glue("`cat_dims` and `cat_idx` cannot be null"))
+  }
+  if (length(cat_dims) != length(cat_idx)) {
+    rlang::abort(glue::glue("`cat_dims` and `cat_idx` must have the same length."))
+  }
 
-    if (is.integer(cat_emb_dim)) {
-        cat_emb_dims <- cat_emb_dim * length(cat_idxs)
-    } else {
-        cat_emb_dims <- cat_emb_dim
-    }
+  if (length(cat_emb_dim) == 1) {
+    cat_emb_dims <- rep(cat_emb_dim, length(cat_idx))
+  } else {
+    cat_emb_dims <- cat_emb_dim
+  }
 
-    # check that all embeddings are provided
-    if (length(cat_emb_dims) != length(cat_dims)) {
-        rlang::abort(glue::glue("`cat_emb_dim` and `cat_dims` must have the same length, got {length(cat_emb_dims)} and {length(cat_dims)}"))
-    }
+  # check that all embeddings are provided
+  if (length(cat_emb_dims) != length(cat_dims)) {
+    rlang::abort(glue::glue("`cat_emb_dim` and `cat_dims` must have the same length, got {length(cat_emb_dims)} and {length(cat_dims)}"))
+  }
 
-    # Rearrange to get reproducible seeds with different ordering
-      cat_dims <- cat_dims[cat_idxs]
-      cat_emb_dims <- cat_emb_dims[cat_idxs]
+  # Rearrange to get reproducible seeds with different ordering
+  cat_idx_df <- data.frame(cat_idx = cat_idx, row_id = seq_len(length(cat_idx)))
+  cat_id_sorted <- cat_idx_df[order(cat_idx_df$cat_idx),]$row_id
+  cat_idx_sorted <- cat_idx[cat_id_sorted]
+  cat_dims <- cat_dims[cat_id_sorted]
+  cat_emb_dims <- cat_emb_dims[cat_id_sorted]
 
-    return(list(cat_dims, cat_idxs, cat_emb_dims))
+  return(list(cat_dims, cat_idx_sorted, cat_emb_dims))
+}
