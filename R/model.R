@@ -55,7 +55,7 @@ resolve_data <- function(x, y) {
 #'
 #' @param batch_size (int) Number of examples per batch, large batch sizes are
 #'   recommended. (default: 1024^2)
-#' @param penalty This is the extra sparsity loss coefficient, or $\lambda_{sparse}$
+#' @param penalty This is the extra sparsity loss coefficient, or \eqn{\lambda_{sparse}}
 #'   in the original paper. The bigger this coefficient is, the sparser your model
 #'   will be in terms of feature selection. Depending on the difficulty of your
 #'   problem, reducing this value could help (default 1e-3).
@@ -74,7 +74,7 @@ resolve_data <- function(x, y) {
 #' @param num_steps (int) Number of steps in the architecture
 #'   (usually between 3 and 10)
 #' @param feature_reusage (float) This is the coefficient for feature reusage in the masks,
-#'   or $\gamma$ in the original paper.
+#'   or \eqn{\gamma} in the original paper.
 #'   A value close to 1 will make mask selection least correlated between layers.
 #'   Values range in `[1, 2]`.
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
@@ -165,7 +165,8 @@ tabnet_config <- function(batch_size = 1024^2,
                           early_stopping_tolerance = 0,
                           early_stopping_patience = 0L,
                           num_workers=0L,
-                          skip_importance = FALSE) {
+                          skip_importance = FALSE,
+                          grouped_features = list()) {
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
   }
@@ -174,6 +175,9 @@ tabnet_config <- function(batch_size = 1024^2,
     attention_width <- decision_width
 
   if (is.null(decision_width))
+    decision_width <- attention_width
+
+  if (is.null(grouped_features))
     decision_width <- attention_width
 
   list(
@@ -211,13 +215,14 @@ tabnet_config <- function(batch_size = 1024^2,
     early_stopping_patience = early_stopping_patience,
     early_stopping = !(early_stopping_tolerance == 0 || early_stopping_patience == 0),
     num_workers = num_workers,
-    skip_importance = skip_importance
+    skip_importance = skip_importance,
+    grouped_features = grouped_features
   )
 }
 
 #' MCM
-#' @x the prediction
-#' @R the matrix of hierarchy constraint
+#' @param x the prediction
+#' @param R the matrix of hierarchy constraint
 #' @noRd
 get_constr_output <- function(x, R) {
     c_out <- x$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
@@ -404,6 +409,9 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   # resolve loss
   config$loss_fn <- resolve_loss(config, train$y$dtype)
 
+  # create the group matrix
+  group_attention_matrix <- create_group_matrix(config$grouped_features, train$input_dim)
+
   # create network
   network <- tabnet_nn(
     input_dim = train$input_dim,
@@ -419,7 +427,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     n_independent = config$n_independent,
     n_shared = config$n_shared,
     momentum = config$momentum,
-    mask_type = config$mask_type
+    mask_type = config$mask_type,
+    group_attention_matrix = group_attention_matrix
   )
 
   # main loop

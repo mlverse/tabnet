@@ -26,7 +26,7 @@ for this model are "unknown", "regression", or "classification".}
 
 \item{epochs}{(int) Number of training epochs.}
 
-\item{penalty}{This is the extra sparsity loss coefficient as proposed
+\item{penalty}{This is the extra sparsity loss coefficient, or \eqn{\lambda_{sparse}}
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help (default 1e-3).}
@@ -46,9 +46,10 @@ the paper n_d = n_a is usually a good choice. (default=8)}
 \item{num_steps}{(int) Number of steps in the architecture
 (usually between 3 and 10)}
 
-\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
+\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks,
+or \eqn{\gamma} in the original paper.
 A value close to 1 will make mask selection least correlated between layers.
-Values range from 1.0 to 2.0.}
+Values range in \verb{[1, 2]}.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)}

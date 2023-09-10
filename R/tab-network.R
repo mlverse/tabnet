@@ -256,7 +256,8 @@ tabnet_pretrainer <- torch::nn_module(
                         n_shared = 2, n_independent_decoder = 1,
                         n_shared_decoder = 1, epsilon = 1e-15,
                         virtual_batch_size = 128, momentum = 0.02,
-                        mask_type = "sparsemax") {
+                        mask_type = "sparsemax",
+                        group_attention_matrix = NULL) {
 
     self$input_dim <- input_dim
     self$pretraining_ratio <- pretraining_ratio
@@ -285,10 +286,13 @@ tabnet_pretrainer <- torch::nn_module(
       stop("n_shared and n_independant can't be both zero.")
 
     self$virtual_batch_size <- virtual_batch_size
-    self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
-    self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
+    self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim,
+                                         group_attention_matrix)
+    self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim,
+                                               group_attention_matrix)
     self$post_embed_dim <- self$embedder$post_embed_dim
-    self$masker = random_obfuscator(self$pretraining_ratio)
+    self$masker = random_obfuscator(self$pretraining_ratio,
+                                    group_matrix = self$embedder$embedding_group_matrix)
     self$encoder = tabnet_encoder(
       input_dim = self$post_embed_dim,
       output_dim = self$post_embed_dim,
@@ -301,7 +305,8 @@ tabnet_pretrainer <- torch::nn_module(
       epsilon = epsilon,
       virtual_batch_size = virtual_batch_size,
       momentum = momentum,
-      mask_type = mask_type
+      mask_type = mask_type,
+      group_attention_matrix = self$embedder$embedding_group_matrix
     )
     self$decoder = tabnet_decoder(
       self$post_embed_dim,
@@ -320,21 +325,23 @@ tabnet_pretrainer <- torch::nn_module(
 
     if (self$training) {
       masker_out_lst <- self$masker(embedded_x, embedded_x_na_mask)
-      obf_vars <- masker_out_lst[[2]]
-      # set prior of encoder as !obf_mask
-      prior <- obf_vars$logical_not()
+      obfuscated_groups <- masker_out_lst[[2]]
+      obfuscated_vars <- masker_out_lst[[3]]
+      # set prior of encoder with obfuscated_groups
+      prior <- 1 - obfuscated_groups
       steps_out <- self$encoder(masker_out_lst[[1]], prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
-           obf_vars)
+           obfuscated_vars)
     } else {
       prior <- embedded_x_na_mask$logical_not()
       steps_out <- self$encoder(embedded_x, prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
-           embedded_x_na_mask)
+           embedded_x_na_mask,
+           obfuscated_vars)
     }
   },
   forward_masks = function(x, x_na_mask) {
@@ -352,7 +359,8 @@ tabnet_no_embedding <- torch::nn_module(
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size=128, momentum = 0.02,
-                        mask_type="sparsemax") {
+                        mask_type = "sparsemax",
+                        group_attention_matrix = NULL) {
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
@@ -380,7 +388,8 @@ tabnet_no_embedding <- torch::nn_module(
       epsilon = epsilon,
       virtual_batch_size = virtual_batch_size,
       momentum = momentum,
-      mask_type = mask_type
+      mask_type = mask_type,
+      group_attention_matrix = group_attention_matrix
     )
     if (self$is_multi_outcome) {
       self$multi_outcome_mapping <- torch::nn_module_list()
@@ -427,17 +436,19 @@ tabnet_no_embedding <- torch::nn_module(
 #' @param n_a Dimension of the attention  layer (usually between 4 and 64).
 #' @param n_steps Number of successive steps in the network (usually between 3 and 10).
 #' @param gamma Float above 1, scaling factor for attention updates (usually between 1 and 2).
-#' @param cat_idxs Index of each categorical column in the dataset.
-#' @param cat_dims Number of categories in each categorical column.
-#' @param cat_emb_dim Size of the embedding of categorical features if int, all categorical
-#'   features will have same embedding size if list of int, every corresponding feature will have
-#'   specific size.
+#' @param cat_idxs vector of Index of each categorical column in the dataset.
+#' @param cat_dims vector of Number of levels in each categorical column.
+#' @param cat_emb_dim Dimension of the embedding of categorical features.  If integer, all categorical
+#'   features will have same embedding dimension If vector of size `cat_idxs`, every feature will be
+#'   embedded with a specific dimension.
 #' @param n_independent Number of independent GLU layer in each GLU block of the encoder.
 #' @param n_shared Number of independent GLU layer in each GLU block of the encoder.
 #' @param epsilon Avoid log(0), this should be kept very low.
 #' @param virtual_batch_size Batch size for Ghost Batch Normalization.
 #' @param momentum  Float value between 0 and 1 which will be used for momentum in all batch norm.
 #' @param mask_type Either "sparsemax" or "entmax" : this is the masking function to use.
+#' @param group_attention_matrix a torch_tensor of shape `\[n_groups, input_dim \]` where
+#' \eqn{m_{ij} = importance_{group i}(feature j)}. Usually the result of the [`create_group_matrix`] function.
 #' @export
 tabnet_nn <- torch::nn_module(
   "tabnet",
@@ -445,7 +456,8 @@ tabnet_nn <- torch::nn_module(
                         n_steps=3, gamma=1.3, cat_idxs=c(), cat_dims=c(), cat_emb_dim=1,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size = 128, momentum = 0.02,
-                        mask_type="sparsemax") {
+                        mask_type="sparsemax",
+                        group_attention_matrix = NULL) {
     self$cat_idxs <- cat_idxs
     self$cat_dims <- cat_dims
     self$cat_emb_dim <- cat_emb_dim
@@ -466,17 +478,20 @@ tabnet_nn <- torch::nn_module(
     self$mask_type <- mask_type
 
     if (self$n_steps <= 0)
-      stop("n_steps should be a positive integer.")
+      rlang::abort(glue::glue("n_steps should be a positive integer."))
     if (self$n_independent == 0 && self$n_shared == 0)
-      stop("n_shared and n_independant can't be both zero.")
+      rlang::abort(glue::glue("n_shared and n_independent can't be both zero."))
 
     self$virtual_batch_size <- virtual_batch_size
-    self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
-    self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
+    self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim,
+                                         group_attention_matrix)
+    self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim,
+                                               group_attention_matrix)
     self$post_embed_dim <- self$embedder$post_embed_dim
     self$tabnet <- tabnet_no_embedding(self$post_embed_dim, output_dim, n_d, n_a, n_steps,
                                      gamma, n_independent, n_shared, epsilon,
-                                     virtual_batch_size, momentum, mask_type)
+                                     virtual_batch_size, momentum, mask_type,
+                                     self$embedder$embedding_group_matrix)
 
   },
   forward = function(x, x_na_mask) {
@@ -494,12 +509,13 @@ tabnet_nn <- torch::nn_module(
 attentive_transformer <- torch::nn_module(
   "attentive_transformer",
   initialize = function(input_dim, output_dim,
+                        group_dim, group_matrix,
                         virtual_batch_size = 128,
                         momentum = 0.02,
                         mask_type="sparsemax") {
-    self$fc <- torch::nn_linear(input_dim, sum(output_dim), bias=FALSE)
-    initialize_non_glu(self$fc, input_dim, sum(output_dim))
-    self$bn <- gbn(sum(output_dim), virtual_batch_size=virtual_batch_size,
+    self$fc <- torch::nn_linear(input_dim, group_dim, bias=FALSE)
+    initialize_non_glu(self$fc, input_dim, group_dim)
+    self$bn <- gbn(group_dim, virtual_batch_size=virtual_batch_size,
                   momentum = momentum)
 
 
@@ -655,49 +671,59 @@ glu_layer <- torch::nn_module(
 
 embedding_generator <- torch::nn_module(
   "embedding_generator",
-  initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
+  initialize = function(input_dim, cat_dims, cat_idx, cat_emb_dim, group_matrix) {
 
-    if (length(cat_dims) == 0 || length(cat_idxs) == 0) {
+    if (length(cat_dims) == 0 || length(cat_idx) == 0) {
       self$skip_embedding <- TRUE
       self$post_embed_dim <- input_dim
       return(invisible(NULL))
     }
 
     self$skip_embedding <- FALSE
-    self$cat_dims <- cat_dims
-
-    if (length(cat_emb_dim) == 1)
-      self$cat_emb_dims <- rep(cat_emb_dim, length(cat_idxs))
-    else
-      self$cat_emb_dims <- cat_emb_dim
-
-    # check that all embeddings dimensions are provided
-    if (length(self$cat_emb_dims) != length(cat_dims)){
-      msg = paste0("`cat_emb_dim` length must be 1 or the number of categorical predictors, got length ",length(self$cat_emb_dims)," for ",length(cat_dims)," categorical predictors")
-      stop(msg)
-    }
-
-    self$post_embed_dim <- as.integer(input_dim + sum(self$cat_emb_dims) - length(self$cat_emb_dims))
+    self$post_embed_dim <- as.integer(input_dim + sum(cat_emb_dim) - length(cat_emb_dim))
     self$embeddings <- torch::nn_module_list()
 
-    # Sort dims by cat_idx
-    sorted_idx <- order(cat_idxs)
-    cat_dims <- cat_dims[sorted_idx]
-    self$cat_emb_dims <- self$cat_emb_dims[sorted_idx]
+    # Check cat consistency and reorder all in ascending ids
+    cat_lst <- check_embedding_parameters(cat_dims, cat_idx, cat_emb_dim)
+    cat_dims <- cat_lst[[1]]
+    cat_idx <- cat_lst[[2]]
+    cat_emb_dim <- cat_lst[[3]]
 
     for (i in seq_along(cat_dims)) {
       self$embeddings$append(
         torch::nn_embedding(
           cat_dims[i],
-          self$cat_emb_dims[i]
+          cat_emb_dim[i]
         )
       )
     }
 
     # record continuous indices
     self$continuous_idx <- rep(TRUE, input_dim)
-    self$continuous_idx[cat_idxs] <- FALSE
+    self$continuous_idx[cat_idx] <- FALSE
 
+    # update group matrix
+    n_groups <- group_matrix$shape[1]
+    self$embedding_group_matrix <- torch::torch_empty(c(n_groups, self$post_embed_dim),
+                                                      device = group_matrix$device)
+    for (group in seq_len(n_groups)) {
+      post_emb_id <- 1
+      cat_feat_counter <- 0
+      for (feature in seq_len(input_dim)) {
+        # TODO Opinonated : group-feature shall not be limited to categorical
+        if (self$continuous_idx[feature]) {
+          # this means that no embedding is applied to this column
+          self$embedding_group_matrix[group, post_emb_id] <- group_matrix[group, feature]
+          post_emb_id = post_emb_id + 1
+        } else {
+          # this is a categorical feature which creates multiple embeddings
+          n_embeddings <- cat_emb_dim[cat_feat_counter]
+          self$embedding_group_matrix[group, post_emb_id:(post_emb_id + n_embeddings)] <- group_matrix[group, feature] / n_embeddings
+          post_emb_id = post_emb_id + n_embeddings
+          cat_feat_counter = cat_feat_counter + 1
+        }
+      }
+    }
   },
   forward = function(x) {
 
@@ -735,27 +761,24 @@ embedding_generator <- torch::nn_module(
 
 na_embedding_generator <- torch::nn_module(
   "na_embedding_generator",
-  initialize = function(input_dim, cat_dims, cat_idxs, cat_emb_dim) {
+  initialize = function(input_dim, cat_dims, cat_idx, cat_emb_dim, group_matrix) {
 
-    if (length(cat_dims) == 0 || length(cat_idxs) == 0) {
+    if (length(cat_dims) == 0 || length(cat_idx) == 0) {
       self$skip_embedding <- TRUE
       return(invisible(NULL))
     }
 
     self$skip_embedding <- FALSE
 
-    if (length(cat_emb_dim) == 1)
-      self$cat_emb_dims <- rep(cat_emb_dim, length(cat_idxs))
-    else
-      self$cat_emb_dims <- cat_emb_dim
-
-    # Sort dims by cat_idx
-    sorted_idx <- order(cat_idxs)
-    self$cat_emb_dims <- self$cat_emb_dims[sorted_idx]
+    # Check cat consistency and reorder all in ascending ids
+    cat_lst <- check_embedding_parameters(cat_dims, cat_idx, cat_emb_dim)
+    cat_dims <- cat_lst[[1]]
+    cat_idx <- cat_lst[[2]]
+    cat_emb_dim <- cat_lst[[3]]
 
     # record continuous indices
     self$continuous_idx <- rep(TRUE, input_dim)
-    self$continuous_idx[cat_idxs] <- FALSE
+    self$continuous_idx[cat_idx] <- FALSE
 
   },
   forward = function(x) {
@@ -773,9 +796,9 @@ na_embedding_generator <- torch::nn_module(
       if (self$continuous_idx[i]) {
         cols[[i]] <- x[,i]$to(dtype = torch::torch_bool())$view(c(-1, 1))
       } else {
-        # extend the vector to match the dimention of the embedding_x via matmul
+        # extend the vector to match the dimension of the embedding_x via matmul
         # TODO basic tensor broadcasting function could be more efficient and have lower footprint
-        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dims[cat_feat_counter], device = x$device))
+        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dim[cat_feat_counter], device = x$device))
         cat_feat_counter <- cat_feat_counter + 1
       }
 
@@ -789,22 +812,25 @@ na_embedding_generator <- torch::nn_module(
 
 random_obfuscator <- torch::nn_module(
   "random_obfuscator",
-  initialize = function(pretraining_ratio) {
+  initialize = function(pretraining_ratio, group_matrix) {
 
     if (pretraining_ratio <= 0 || pretraining_ratio >= 1) {
       pretraining_ratio <- 0.5
     }
 
     self$pretraining_ratio <- pretraining_ratio
+    self$group_matrix <- (group_matrix > 0)
+    self$num_groups <- group_matrix$shape[1]
 
   },
   forward = function(x, x_na_mask) {
-    # workaround while torch_bernoulli is not available in CUDA
-    ones <- torch::torch_ones_like(x, device="cpu")
-    obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)$to(device=x$device)
+    obfuscated_groups <- torch::torch_bernoulli(
+      self$pretraining_ratio * torch::torch_ones(c(x$shape[1], self$num_groups), device = x$device)
+    )
+    obfuscated_vars <- torch::torch_matmul(obfuscated_groups, self$group_matrix)
     masked_input = torch::torch_mul(obfuscated_vars$logical_or(x_na_mask)$logical_not(), x)
 
-    list(masked_input, obfuscated_vars)
+    list(masked_input, obfuscated_groups, obfuscated_vars)
 
   }
 )

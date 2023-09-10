@@ -1,9 +1,9 @@
 #' Create the group matrix corresponding to the given vars_id_groups
 #'
-#' @vars_id_groups : list of vars_id_group, vars_id_group being the vector of features ids to group
+#' @param vars_id_groups : list of vars_id_group, vars_id_group being the vector of features ids to group
 #'     Each element represents features in the same group. Feature id cannot be present in
 #'     multiple group, ids that are not part of a group will be implicitly part of a single feature group.
-#' @input_dim : number of feature in the initial dataset
+#' @param input_dim : number of feature in the initial dataset
 #'
 #' @return a torch_tensor of size (n_groups, input_dim)
 #'     where m_ij represents the importance of feature j in group i
@@ -13,7 +13,6 @@
 #' # mtcars example
 #' colnames(mtcars)
 #' create_group_matrix(vars_id_groups = list(c(1,3), c(4:7), c(9:10)), input_dim = 11)
-#' @noRd
 create_group_matrix <- function(vars_id_groups, input_dim) {
   # TODO shall be secured and simplified with sparse matrix functions
   check_vars_id_groups(vars_id_groups, input_dim)
@@ -54,8 +53,8 @@ create_group_matrix <- function(vars_id_groups, input_dim) {
 #'     - does not contain twice the same feature in different groups
 #'     - does not contain unknown features (>= input_dim)
 #'     - does not contain empty groups
-#' @vars_id_groups : list of vars_id_group, vars_id_group being the vector of features ids to group
-#' @input_dim : number of feature in the initial dataset
+#' @param vars_id_groups : list of vars_id_group, vars_id_group being the vector of features ids to group
+#' @param input_dim : number of feature in the initial dataset
 #' @noRd
 check_vars_id_groups <- function(vars_id_groups, input_dim) {
   if (!is.list(vars_id_groups)) {
@@ -101,7 +100,7 @@ check_embedding_parameters <- function(cat_dims, cat_idx, cat_emb_dim){
 
   # check that all embeddings are provided
   if (length(cat_emb_dims) != length(cat_dims)) {
-    rlang::abort(glue::glue("`cat_emb_dim` and `cat_dims` must have the same length, got {length(cat_emb_dims)} and {length(cat_dims)}"))
+    rlang::abort(glue::glue("`cat_emb_dim` length must be 1 or the number of categorical predictors, got length {length(cat_emb_dims)} for {length(cat_dims)} categorical predictors"))
   }
 
   # Rearrange to get reproducible seeds with different ordering

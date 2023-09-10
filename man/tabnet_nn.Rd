@@ -19,7 +19,8 @@ tabnet_nn(
   epsilon = 1e-15,
   virtual_batch_size = 128,
   momentum = 0.02,
-  mask_type = "sparsemax"
+  mask_type = "sparsemax",
+  group_attention_matrix = NULL
 )
 }
 \arguments{
@@ -36,13 +37,13 @@ binary classification etc.. Vector of those dimensions in case of multi-output.}
 
 \item{gamma}{Float above 1, scaling factor for attention updates (usually between 1 and 2).}
 
-\item{cat_idxs}{Index of each categorical column in the dataset.}
+\item{cat_idxs}{vector of Index of each categorical column in the dataset.}
 
-\item{cat_dims}{Number of categories in each categorical column.}
+\item{cat_dims}{vector of Number of levels in each categorical column.}
 
-\item{cat_emb_dim}{Size of the embedding of categorical features if int, all categorical
-features will have same embedding size if list of int, every corresponding feature will have
-specific size.}
+\item{cat_emb_dim}{Dimension of the embedding of categorical features.  If integer, all categorical
+features will have same embedding dimension If vector of size \code{cat_idxs}, every feature will be
+embedded with a specific dimension.}
 
 \item{n_independent}{Number of independent GLU layer in each GLU block of the encoder.}
 
@@ -55,6 +56,9 @@ specific size.}
 \item{momentum}{Float value between 0 and 1 which will be used for momentum in all batch norm.}
 
 \item{mask_type}{Either "sparsemax" or "entmax" : this is the masking function to use.}
+
+\item{group_attention_matrix}{a torch_tensor of shape \verb{\[n_groups, input_dim \]} where
+\eqn{m_{ij} = importance_{group i}(feature j)}. Usually the result of the \code{\link{create_group_matrix}} function.}
 }
 \description{
 This is a \code{nn_module} representing the TabNet architecture from
