@@ -27,6 +27,8 @@ tabnet_config(
   cat_emb_dim = 1,
   num_independent = 2,
   num_shared = 2,
+  num_independent_decoder = 1,
+  num_shared_decoder = 1,
   momentum = 0.02,
   pretraining_ratio = 0.5,
   verbose = FALSE,
@@ -79,7 +81,7 @@ block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)}
 
-\item{valid_split}{(float) The fraction of the dataset used for validation.
+\item{valid_split}{(\verb{[0, 1)}) The fraction of the dataset used for validation.
 (default = 0 means no split)}
 
 \item{learn_rate}{initial learning rate for the optimizer.}
@@ -104,13 +106,21 @@ or \code{NULL}.}
 \code{checkpoint_epochs}. (default is 10). This may cause large memory usage.
 Use \code{0} to disable checkpoints.}
 
-\item{cat_emb_dim}{Embedding size for categorical features (default=1)}
+\item{cat_emb_dim}{Size of the embedding of categorical features. If int, all categorical
+features will have same embedding size, if list of int, every corresponding feature will have
+specific embedding size.}
 
-\item{num_independent}{Number of independent Gated Linear Units layers at each step.
+\item{num_independent}{Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.}
 
-\item{num_shared}{Number of shared Gated Linear Units at each step Usual values
-range from 1 to 5}
+\item{num_shared}{Number of shared Gated Linear Units at each step of the encoder. Usual values
+at each step of the decoder. range from 1 to 5}
+
+\item{num_independent_decoder}{For pretraining, number of independent Gated Linear Units layers
+Usual values range from 1 to 5.}
+
+\item{num_shared_decoder}{For pretraining, number of shared Gated Linear Units at each step of the
+decoder. Usual values range from 1 to 5.}
 
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)}

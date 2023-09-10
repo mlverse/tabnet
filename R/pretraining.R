@@ -119,6 +119,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     cat_emb_dim = config$cat_emb_dim,
     n_independent = config$n_independent,
     n_shared = config$n_shared,
+    n_independent_decoder = config$n_independent_decoder,
+    n_shared_decoder = config$n_shared_decoder,
     momentum = config$momentum
   )
 

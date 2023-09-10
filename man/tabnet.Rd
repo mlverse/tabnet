@@ -53,11 +53,11 @@ Values range from 1.0 to 2.0.}
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)}
 
-\item{num_independent}{Number of independent Gated Linear Units layers at each step.
+\item{num_independent}{Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.}
 
-\item{num_shared}{Number of shared Gated Linear Units at each step Usual values
-range from 1 to 5}
+\item{num_shared}{Number of shared Gated Linear Units at each step of the encoder. Usual values
+at each step of the decoder. range from 1 to 5}
 
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)}

@@ -248,14 +248,15 @@ tabnet_decoder <- torch::nn_module(
 
 tabnet_pretrainer <- torch::nn_module(
   "tabnet_pretrainer",
-  initialize = function(input_dim, pretraining_ratio=0.2,
-                        n_d=8, n_a=8,
-                        n_steps=3, gamma=1.3,
-                        cat_idxs=c(), cat_dims=c(),
-                        cat_emb_dim=1, n_independent=2,
-                        n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum = 0.02,
-                        mask_type="sparsemax") {
+  initialize = function(input_dim, pretraining_ratio = 0.2,
+                        n_d = 8, n_a = 8,
+                        n_steps = 3, gamma = 1.3,
+                        cat_idxs = c(), cat_dims = c(),
+                        cat_emb_dim = 1, n_independent = 2,
+                        n_shared = 2, n_independent_decoder = 1,
+                        n_shared_decoder = 1, epsilon = 1e-15,
+                        virtual_batch_size = 128, momentum = 0.02,
+                        mask_type = "sparsemax") {
 
     self$input_dim <- input_dim
     self$pretraining_ratio <- pretraining_ratio
@@ -273,6 +274,8 @@ tabnet_pretrainer <- torch::nn_module(
     self$epsilon <- epsilon
     self$n_independent <- n_independent
     self$n_shared <- n_shared
+    self$n_independent_decoder <- n_independent_decoder
+    self$n_shared_decoder <- n_shared_decoder
     self$mask_type <- mask_type
     self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
@@ -304,8 +307,8 @@ tabnet_pretrainer <- torch::nn_module(
       self$post_embed_dim,
       n_d = n_d,
       n_steps = n_steps,
-      n_independent = n_independent,
-      n_shared = n_shared,
+      n_independent = n_independent_decoder,
+      n_shared = n_shared_decoder,
       virtual_batch_size = virtual_batch_size,
       momentum = momentum
     )
@@ -423,14 +426,14 @@ tabnet_no_embedding <- torch::nn_module(
 #' @param n_d Dimension of the prediction  layer (usually between 4 and 64).
 #' @param n_a Dimension of the attention  layer (usually between 4 and 64).
 #' @param n_steps Number of successive steps in the network (usually between 3 and 10).
-#' @param gamma Float above 1, scaling factor for attention updates (usually between 1.0 to 2.0).
+#' @param gamma Float above 1, scaling factor for attention updates (usually between 1 and 2).
 #' @param cat_idxs Index of each categorical column in the dataset.
 #' @param cat_dims Number of categories in each categorical column.
 #' @param cat_emb_dim Size of the embedding of categorical features if int, all categorical
 #'   features will have same embedding size if list of int, every corresponding feature will have
 #'   specific size.
-#' @param n_independent Number of independent GLU layer in each GLU block (default 2)..
-#' @param n_shared Number of independent GLU layer in each GLU block (default 2).
+#' @param n_independent Number of independent GLU layer in each GLU block of the encoder.
+#' @param n_shared Number of independent GLU layer in each GLU block of the encoder.
 #' @param epsilon Avoid log(0), this should be kept very low.
 #' @param virtual_batch_size Batch size for Ghost Batch Normalization.
 #' @param momentum  Float value between 0 and 1 which will be used for momentum in all batch norm.
