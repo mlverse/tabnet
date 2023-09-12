@@ -97,7 +97,7 @@ tabnet_encoder <- torch::nn_module(
                                       n_glu_independent = self$n_independent,
                                       virtual_batch_size = self$virtual_batch_size,
                                       momentum = momentum)
-      attention <- attentive_transformer(n_a, self$attention_dim,
+      attention <- attentive_transformer(n_a, self$input_dim, self$attention_dim,
                                          group_matrix = self$group_attention_matrix,
                                          virtual_batch_size = self$virtual_batch_size,
                                          momentum = momentum,
@@ -676,6 +676,7 @@ embedding_generator <- torch::nn_module(
     if (length(cat_dims) == 0 || length(cat_idx) == 0) {
       self$skip_embedding <- TRUE
       self$post_embed_dim <- input_dim
+      self$embedding_group_matrix <- group_matrix$to(group_matrix$device)
       return(invisible(NULL))
     }
 
@@ -685,14 +686,14 @@ embedding_generator <- torch::nn_module(
 
     # Check cat consistency and reorder all in ascending ids
     cat_lst <- check_embedding_parameters(cat_dims, cat_idx, cat_emb_dim)
-    cat_dims <- cat_lst[[1]]
+    self$cat_dims <- cat_lst[[1]]
     cat_idx <- cat_lst[[2]]
     cat_emb_dim <- cat_lst[[3]]
 
-    for (i in seq_along(cat_dims)) {
+    for (i in seq_along(self$cat_dims)) {
       self$embeddings$append(
         torch::nn_embedding(
-          cat_dims[i],
+          self$cat_dims[i],
           cat_emb_dim[i]
         )
       )
@@ -704,23 +705,23 @@ embedding_generator <- torch::nn_module(
 
     # update group matrix
     n_groups <- group_matrix$shape[1]
-    self$embedding_group_matrix <- torch::torch_empty(c(n_groups, self$post_embed_dim),
+    self$embedding_group_matrix <- torch::torch_zeros(c(n_groups, self$post_embed_dim),
                                                       device = group_matrix$device)
     for (group in seq_len(n_groups)) {
-      post_emb_id <- 1
-      cat_feat_counter <- 0
+      post_emb_id <- 1L
+      cat_feat_counter <- 1L
       for (feature in seq_len(input_dim)) {
         # TODO Opinonated : group-feature shall not be limited to categorical
         if (self$continuous_idx[feature]) {
           # this means that no embedding is applied to this column
           self$embedding_group_matrix[group, post_emb_id] <- group_matrix[group, feature]
-          post_emb_id = post_emb_id + 1
+          post_emb_id = post_emb_id + 1L
         } else {
           # this is a categorical feature which creates multiple embeddings
           n_embeddings <- cat_emb_dim[cat_feat_counter]
           self$embedding_group_matrix[group, post_emb_id:(post_emb_id + n_embeddings)] <- group_matrix[group, feature] / n_embeddings
           post_emb_id = post_emb_id + n_embeddings
-          cat_feat_counter = cat_feat_counter + 1
+          cat_feat_counter = cat_feat_counter + 1L
         }
       }
     }
@@ -738,9 +739,11 @@ embedding_generator <- torch::nn_module(
     for (i in seq_along(self$continuous_idx)) {
 
       if (self$continuous_idx[i]) {
+        # numerical predictor
         # impute nan with 0s
         cols[[i]] <- x[,i]$nan_to_num(0)$to(dtype = torch::torch_float())$view(c(-1, 1))
       } else {
+        # categorical predictor
         # nan mask
         mask <- x[, i]$ge(1)$bitwise_and(x[, i]$le(self$cat_dims[cat_feat_counter]))$to(dtype = torch::torch_long())
         # impute nan with 1s (categorical vars are 1-indexed)
@@ -774,7 +777,7 @@ na_embedding_generator <- torch::nn_module(
     cat_lst <- check_embedding_parameters(cat_dims, cat_idx, cat_emb_dim)
     cat_dims <- cat_lst[[1]]
     cat_idx <- cat_lst[[2]]
-    cat_emb_dim <- cat_lst[[3]]
+    self$cat_emb_dim <- cat_lst[[3]]
 
     # record continuous indices
     self$continuous_idx <- rep(TRUE, input_dim)
@@ -798,14 +801,14 @@ na_embedding_generator <- torch::nn_module(
       } else {
         # extend the vector to match the dimension of the embedding_x via matmul
         # TODO basic tensor broadcasting function could be more efficient and have lower footprint
-        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1,self$cat_emb_dim[cat_feat_counter], device = x$device))
+        cols[[i]] <- x[,i:i]$logical_and(torch::torch_ones(1, self$cat_emb_dim[cat_feat_counter], device = x$device))
         cat_feat_counter <- cat_feat_counter + 1
       }
 
     }
 
     # concat
-    post_embeddings <- torch::torch_cat(cols, dim=2)
+    post_embeddings <- torch::torch_cat(cols, dim = 2)
     post_embeddings
   }
 )
