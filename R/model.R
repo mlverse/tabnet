@@ -266,7 +266,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 
 train_batch <- function(network, optimizer, batch, config) {
   # forward pass
-  output <- network(batch$x, batch$x_na_mask)
+  c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
   # if target is multi-outcome, loss has to be applied to each label-group
   if (max(batch$output_dim$shape) > 1) {
     # multi-outcome
@@ -275,7 +275,7 @@ train_batch <- function(network, optimizer, batch, config) {
       # hierarchical mandates use of `max_constraint_output`
       loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
         list(
-          torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
+          torch::torch_split(out, outcome_nlevels, dim = 2),
           torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
         ),
         ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor_tt))
@@ -285,7 +285,7 @@ train_batch <- function(network, optimizer, batch, config) {
       # use `resolved_loss`
       loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
         list(
-          torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
+          torch::torch_split(out, outcome_nlevels, dim = 2),
           torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
         ),
         ~config$loss_fn(.x, .y$squeeze(2))
@@ -295,13 +295,13 @@ train_batch <- function(network, optimizer, batch, config) {
   } else {
     if (batch$y$dtype == torch::torch_long()) {
       # classifier needs a squeeze for bce loss
-      loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
+      loss <- config$loss_fn(out, batch$y$squeeze(2))
     } else {
-      loss <- config$loss_fn(output[[1]], batch$y)
+      loss <- config$loss_fn(out, batch$y)
     }
   }
   # Add the overall sparsity loss
-  loss <- loss - config$lambda_sparse * output[[2]]
+  loss <- loss - config$lambda_sparse * M_loss
 
   # step of the optimization
   optimizer$zero_grad()
@@ -318,7 +318,7 @@ train_batch <- function(network, optimizer, batch, config) {
 
 valid_batch <- function(network, batch, config) {
   # forward pass
-  output <- network(batch$x, batch$x_na_mask)
+  c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
   # loss has to be applied to each label-group when output_dim is a vector
   if (max(batch$output_dim$shape) > 1) {
     # multi-outcome
@@ -327,7 +327,7 @@ valid_batch <- function(network, batch, config) {
       # hierarchical mandates use of `max_constraint_output`
       loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
         list(
-          torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
+          torch::torch_split(out, outcome_nlevels, dim = 2),
           torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
         ),
         ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor_tt))
@@ -337,7 +337,7 @@ valid_batch <- function(network, batch, config) {
       # use `resolved_loss`
       loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
         list(
-          torch::torch_split(output[[1]], outcome_nlevels, dim = 2),
+          torch::torch_split(out, outcome_nlevels, dim = 2),
           torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
         ),
         ~config$loss_fn(.x, .y$squeeze(2))
@@ -347,13 +347,13 @@ valid_batch <- function(network, batch, config) {
   } else {
     if (batch$y$dtype == torch::torch_long()) {
       # classifier needs a squeeze for bce loss
-      loss <- config$loss_fn(output[[1]], batch$y$squeeze(2))
+      loss <- config$loss_fn(out, batch$y$squeeze(2))
     } else {
-      loss <- config$loss_fn(output[[1]], batch$y)
+      loss <- config$loss_fn(out, batch$y)
     }
   }
   # Add the overall sparsity loss
-  loss <- loss - config$lambda_sparse * output[[2]]
+  loss <- loss - config$lambda_sparse * M_loss
 
   list(
     loss = loss$item()

@@ -105,23 +105,28 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # resolve loss (shortcutted from config)
   config$loss_fn <- unsupervised_loss
 
+  # create the group matrix
+  group_attention_matrix <- create_group_matrix(config$grouped_features, train$input_dim)
+
   # create network
   network <- tabnet_pretrainer(
     input_dim = train$input_dim,
-    cat_idxs = train$cat_idx,
-    cat_dims = train$cat_dims,
     pretraining_ratio = config$pretraining_ratio,
     n_d = config$n_d,
     n_a = config$n_a,
     n_steps = config$n_steps,
     gamma = config$gamma,
-    virtual_batch_size = config$virtual_batch_size,
+    cat_idxs = train$cat_idx,
+    cat_dims = train$cat_dims,
     cat_emb_dim = config$cat_emb_dim,
     n_independent = config$n_independent,
     n_shared = config$n_shared,
     n_independent_decoder = config$n_independent_decoder,
     n_shared_decoder = config$n_shared_decoder,
-    momentum = config$momentum
+    virtual_batch_size = config$virtual_batch_size,
+    momentum = config$momentum,
+    mask_type = config$mask_type,
+    group_attention_matrix = group_attention_matrix
   )
 
   network$to(device = device)

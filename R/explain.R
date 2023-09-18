@@ -95,19 +95,19 @@ explain_impl <- function(network, x, x_na_mask) {
     network$to(device = curr_device)
   })
   network$to(device=x$device)
-  outputs <- network$forward_masks(x, x_na_mask)
+  c(M_group_explain, masks) %<-% network$forward_masks(x, x_na_mask)
 
-  # summarize the categorical embeddedings into 1 column
+  # summarize the grouped categorical embeddedings into 1 column
   # per variable
   M_explain <- sum_embedding_masks(
-    mask = outputs[[1]],
+    mask = M_group_explain,
     input_dim = network$input_dim,
     cat_idx = network$cat_idxs,
     cat_emb_dim = network$cat_emb_dim
   )
 
   masks <- lapply(
-    outputs[[2]],
+    masks,
     FUN = sum_embedding_masks,
     input_dim = network$input_dim,
     cat_idx = network$cat_idxs,
@@ -118,8 +118,8 @@ explain_impl <- function(network, x, x_na_mask) {
 }
 
 compute_feature_importance <- function(network, x, x_na_mask) {
-  out <- explain_impl(network, x, x_na_mask)
-  m <- as.numeric(as.matrix(out$M_explain$sum(dim = 1)$detach()$to(device = "cpu")))
+  c(M_explain, masks_) %<-% explain_impl(network, x, x_na_mask)
+  m <- as.numeric(as.matrix(M_explain$sum(dim = 1)$detach()$to(device = "cpu")))
   m/sum(m)
 }
 

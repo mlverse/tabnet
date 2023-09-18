@@ -7,7 +7,7 @@
 #' @keywords internal
 #' @export
 #' @importFrom magrittr %>%
-#' @usage lhs \%>\% rhs
+#' @importFrom zeallot %<-%
 #'
-#' @return Returns `rhs(lhs)`.
+#' @usage lhs \%>\% rhs
 NULL
