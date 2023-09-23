@@ -695,30 +695,16 @@ embedding_generator <- torch::nn_module(
     # record continuous indices
     self$numerical_idx <- !seq(1,input_dim) %in% cat_idx
 
-    # update group matrix
-    # TODO refactor the too-pythonic for-if loop into something pure
+    # update embedding group matrix through a weighted embedding_expander
     n_groups <- group_matrix$shape[1]
-    self$embedding_group_matrix <- torch::torch_zeros(c(n_groups, self$post_embed_dim),
-                                                      device = group_matrix$device)
-    for (group in seq_len(n_groups)) {
-      post_emb_id <- 1L
-      cat_feat_counter <- 1L
-      for (feature in seq_len(input_dim)) {
-        # TODO Opinonated design: group-feature shall not be limited to categorical
-        if (self$numerical_idx[feature]) {
-          # this means that no embedding is applied to this column
-          self$embedding_group_matrix[group, post_emb_id] <- group_matrix[group, feature]
-          post_emb_id = post_emb_id + 1L
-        } else {
-          # this is a categorical feature which creates multiple embeddings
-          n_embeddings <- cat_emb_dim[cat_feat_counter]
-          self$embedding_group_matrix[group, post_emb_id:(post_emb_id + n_embeddings)] <- group_matrix[group, feature] / n_embeddings
-          post_emb_id = post_emb_id + n_embeddings
-          cat_feat_counter = cat_feat_counter + 1L
-        }
-      }
-    }
-  },
+    sizes <- rep(1, length(self$numerical_idx))
+    sizes[!self$numerical_idx] <- cat_emb_dim
+
+    splits <- group_matrix$split(1, dim = 2)
+    splits <- purrr::map2(splits, sizes, ~.x$broadcast_to(c(n_groups, .y))$divide(.y))
+
+    self$embedding_group_matrix <- torch::torch_cat(splits, dim = 2)
+    },
   forward = function(x) {
 
     if (self$skip_embedding) {
