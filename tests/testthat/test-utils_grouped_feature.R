@@ -27,6 +27,24 @@ test_that("create_group_matrix detects errors in vars id", {
                "non empty")
 })
 
+test_that("create_explain_matrix works", {
+  data(storms, package="dplyr")
+  cat_emb_dim <- c(3,2)
+  cat_idx <- which(!sapply(storms, is.numeric))
+  expect_no_error(create_explain_matrix(input_dim = 13, cat_emb_dim, cat_idx)  )
+  expect_tensor_shape(create_explain_matrix(input_dim = 13, cat_emb_dim, cat_idx)  , c(16,13))
+})
+
+test_that("embedding_expander works", {
+  iris_tt <- iris %>% mutate(Species = as.numeric(as.factor(Species))) %>%
+    as.matrix() %>% torch::torch_tensor()
+  cat_idx <- which(!sapply(iris, is.numeric))
+  numerical_idx <- !seq(1,ncol(iris)) %in% cat_idx
+  cat_emb_dim <- c(11)
+  expect_no_error(embedding_expander(x = iris_tt, numerical_idx, cat_emb_dim)  )
+  expect_tensor_shape(embedding_expander(x = iris_tt, numerical_idx, cat_emb_dim)  , c(nrow(iris),15))
+})
+
 test_that("check_embedding_parameters works", {
   # using the ames dataset
   cat_idx <- which(sapply(ames, is.factor))
@@ -38,8 +56,8 @@ test_that("check_embedding_parameters works", {
   expect_type(result_embedding_parameters, "list")
   expect_length(result_embedding_parameters, 3)
   expect_equal(result_embedding_parameters[[1]], cat_dims)
-  expect_equal(result_embedding_parameters[[2]], rep(3, length(cat_idx)))
-  expect_equal(result_embedding_parameters[[3]], cat_emb_dim)
+  expect_equal(result_embedding_parameters[[2]], cat_idx)
+  expect_equal(result_embedding_parameters[[3]], rep(3, length(cat_idx)))
   # tailored embedding dim
   cat_emb_dim <- sample.int(5, size = length(cat_idx), replace = TRUE)
   expect_no_error(check_embedding_parameters(cat_dims, cat_idx, cat_emb_dim))
@@ -61,13 +79,13 @@ test_that("check_embedding_parameters detects categorical inconsistencies", {
   expect_error(check_embedding_parameters(NULL, cat_idx, cat_emb_dim),
                "cannot be null")
   expect_error(check_embedding_parameters(cat_dims, cat_idx, NULL),
-               "cannot be null")
+               "length must be 1 or the number of")
   expect_error(check_embedding_parameters(cat_dims[1:10], cat_idx, cat_emb_dim),
                " must have the same length")
   expect_error(check_embedding_parameters(cat_dims, cat_idx[1:10], cat_emb_dim),
                " must have the same length")
   expect_error(check_embedding_parameters(cat_dims, cat_idx, cat_emb_dim[1:10]),
-               " must have the same length")
+               "length must be 1 or the number of")
 })
 
 test_that("check_embedding_parameters can reorder categorical ids", {
