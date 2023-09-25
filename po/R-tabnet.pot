@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: tabnet 0.4.0.9000\n"
+"POT-Creation-Date: 2023-09-25 20:38\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "`tabnet_explain()` is not defined for a '"
+msgstr ""
+
+msgid "'."
+msgstr ""
+
+msgid "`tabnet_fit()` is not defined for a '"
+msgstr ""
+
+msgid "`tabnet_pretrain()` is not defined for a '"
+msgstr ""
+
+msgid "'n_steps' should be a positive integer."
+msgstr ""
+
+msgid "'n_shared' and 'n_independant' can't be both zero."
+msgstr ""
+
+msgid "Please choose either 'sparsemax' or 'entmax' as 'mask_type'"
+msgstr ""
