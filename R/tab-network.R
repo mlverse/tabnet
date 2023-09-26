@@ -703,6 +703,7 @@ embedding_generator <- torch::nn_module(
     splits <- group_matrix$split(1, dim = 2)
     splits <- purrr::map2(splits, sizes, ~.x$broadcast_to(c(n_groups, .y))$divide(.y))
 
+    # TODO bug self$embedding_group_matrix is never used
     self$embedding_group_matrix <- torch::torch_cat(splits, dim = 2)
     },
   forward = function(x) {
@@ -737,6 +738,7 @@ embedding_generator <- torch::nn_module(
 
     # concat
     post_embeddings <- torch::torch_cat(cols, dim=2)
+    # TODO matmul with self$embedding_group_matrix ?
     post_embeddings
   }
 )

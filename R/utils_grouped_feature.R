@@ -59,7 +59,7 @@ create_group_matrix <- function(vars_id_groups, input_dim) {
 #' @param cat_idx : position of categorical features
 #' @param post_embed_dim : int Post-embedding number of features
 #'
-#' @eturn  reducing_matrix of dim (post_embed_dim, input_dim)  to perform explain matrix reduction
+#' @return  reducing_matrix of dim (post_embed_dim, input_dim)  to perform explain matrix reduction
 #' @noRd
 #' @examplesIf torch::torch_is_installed()
 #' # starwars example
@@ -92,7 +92,6 @@ create_explain_matrix <- function(input_dim, cat_emb_dim, cat_idx) {
 #'
 #' @return a boolean torch_tensor of size [length(numerical_idx), sum(cat_emb_dim)]
 #' @noRd
-#' @examples
 embedding_expander <- function(x, numerical_idx, cat_emb_dim) {
 
   nrows <- x$shape[1]
