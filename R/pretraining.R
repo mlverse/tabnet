@@ -136,7 +136,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     if (config$optimizer == "adam")
       optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
     else
-      rlang::abort("Currently only the 'adam' optimizer is supported.")
+      stop(domain=NA, "Currently only the 'adam' optimizer is supported.", call. = FALSE)
 
   }
 
@@ -150,7 +150,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   } else if (config$lr_scheduler == "step") {
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   } else {
-    rlang::abort("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.")
+    stop(domain=NA, "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.", call. = FALSE)
   }
 
   # initialize metrics & checkpoints
@@ -195,9 +195,10 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
     }
 
-    message <- sprintf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss))
-    if (has_valid)
-      message <- paste0(message, sprintf(" Valid loss: %3f", mean(metrics[[epoch]]$valid$loss)))
+    if (config$verbose & !has_valid)
+      message(gettextf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss)))
+    if (config$verbose & has_valid)
+      message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3fs", epoch, mean(metrics[[epoch]]$train$loss), mean(metrics[[epoch]]$valid$loss)))
 
     if (config$verbose)
       rlang::inform(message)
@@ -240,9 +241,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   importance_sample_size <- config$importance_sample_size
   if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
-    rlang::warn(c(glue::glue("Computing importances for a dataset with size {train_ds$.length()}."),
-                  "This can consume too much memory. We are going to use a sample of size 1e5",
-                  "You can disable this message by using the `importance_sample_size` argument."))
+    warning(domain=NA,
+            gettextf("Computing importances for a dataset with size %s. This can consume too much memory. We are going to use a sample of size 1e5. You can disable this message by using the `importance_sample_size` argument.", train_ds$.length()),
+            call. = FALSE)
     importance_sample_size <- 1e5
   }
   indexes <- as.numeric(torch::torch_randint(

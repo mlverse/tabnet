@@ -388,13 +388,14 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   epoch_shift <- 0L
 
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
-    rlang::abort(glue::glue("{tabnet_model} is not recognised as a proper TabNet model"))
+    stop(domain=NA, gettextf("'%s' is not recognised as a proper TabNet model", tabnet_model),
+         call. = FALSE)
 
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
     # model must be loaded from checkpoint
 
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-      rlang::abort(glue::glue("The model was trained for less than {from_epoch} epochs"))
+      stop(domain=NA, gettextf("The model was trained for less than '%s' epochs", from_epoch), call. = FALSE)
 
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
@@ -406,7 +407,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
   if (task == "supervised") {
     if (sum(is.na(outcomes)) > 0) {
-      rlang::abort(glue::glue("Error: found missing values in the `{names(outcomes)}` outcome column."))
+      stop(domain=NA, gettextf("Error: found missing values in the `%s` outcome column.", names(outcomes)), call. = FALSE)
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -416,7 +417,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     } else if (!check_net_is_empty_ptr(tabnet_model) && inherits(tabnet_model, "tabnet_fit")) {
       # resume training from supervised
       if (!identical(processed$blueprint, tabnet_model$blueprint))
-        rlang::abort("Model dimensions don't match.")
+        stop("Model dimensions don't match.", call. = FALSE)
 
       # model is available from tabnet_model$serialized_net
       m <- reload_model(tabnet_model$serialized_net)
@@ -441,7 +442,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
-    } else rlang::abort(glue::glue("No model serialized weight can be found in {tabnet_model} check the model history"))
+    } else stop(domain=NA, gettextf("No model serialized weight can be found in `%s`, check the model history", tabnet_model), call. = FALSE)
 
     fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
@@ -483,7 +484,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   if (!is.null(epoch)) {
 
     if (epoch > (length(object$fit$checkpoints) * object$fit$config$checkpoint_epoch))
-      rlang::abort(glue::glue("The model was trained for less than {epoch} epochs"))
+      stop(domain=NA, gettextf("The model was trained for less than `%s` epochs", epoch), call. = FALSE)
 
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch
@@ -528,7 +529,7 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
   m <- reload_model(obj$serialized_net)
 
   if (m$input_dim != tabnet_model_lst$network$input_dim)
-    rlang::abort("Model dimensions don't match.")
+    stop("Model dimensions don't match.", call. = FALSE)
 
   # perform update of selected weights into new tabnet_model
   m_stat_dict <- m$state_dict()
@@ -580,7 +581,7 @@ check_type <- function(outcome_ptype, type = NULL) {
   outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
 
   if (!outcome_all_numeric && !outcome_all_factor)
-    rlang::abort(glue::glue("Mixed multi-outcome type '{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}' is not supported"))
+    stop(domain=NA, gettextf("Mixed multi-outcome type '%s' is not supported", unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))), call. = FALSE)
 
   if (is.null(type)) {
     if (outcome_all_factor)
@@ -588,17 +589,17 @@ check_type <- function(outcome_ptype, type = NULL) {
     else if (outcome_all_numeric)
       type <- "numeric"
     else if (ncol(outcome_ptype) == 1)
-      rlang::abort(glue::glue("Unknown outcome type '{class(outcome_ptype)}'"))
+      stop(domain=NA, gettextf("Unknown outcome type '%s'", class(outcome_ptype)), call. = FALSE)
   }
 
   type <- rlang::arg_match(type, c("numeric", "prob", "class"))
 
   if (outcome_all_factor) {
     if (!type %in% c("prob", "class"))
-      rlang::abort(glue::glue("Outcome is factor and the prediction type is '{type}'."))
+      stop(domain=NA, gettextf("Outcome is factor and the prediction type is '%s'.", type), call. = FALSE)
   } else if (outcome_all_numeric) {
     if (type != "numeric")
-      rlang::abort(glue::glue("Outcome is numeric and the prediction type is '{type}'."))
+      stop(domain=NA, gettextf("Outcome is numeric and the prediction type is '%s'.", type), call. = FALSE)
   }
 
   invisible(type)
@@ -636,15 +637,15 @@ check_compliant_node <- function(node) {
     reserved_names <- c(paste0("level_", c(1:node_height)), data.tree::NODE_RESERVED_NAMES_CONST)
     actual_names <- colnames(node)[!colnames(node) %in% "pathString"]
   } else {
-    rlang::abort("The provided hierarchical object is not recognized with a valid format that can be checked")
+    stop("The provided hierarchical object is not recognized with a valid format that can be checked", call. = FALSE)
   }
 
   if (any(actual_names %in% reserved_names)) {
-    rlang::abort(paste0(
-      "The attributes or colnames in the provided hierarchical object use the following reserved names : '",
-      paste(actual_names[actual_names %in% reserved_names], collapse = "', '"),
-      "'. Please change those names as they will lead to unexpected tabnet behavior."
-      ))
+    stop(domain=NA,
+         gettextf("The attributes or colnames in the provided hierarchical object use the following reserved names : '%s'. Please change those names as they will lead to unexpected tabnet behavior.",
+          paste(actual_names[actual_names %in% reserved_names], collapse = "', '")
+         ),
+         call. = FALSE)
   }
 
   invisible(node)
