@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
-"POT-Creation-Date: 2023-09-25 20:38\n"
-"PO-Revision-Date: 2023-09-25 20:41+0200\n"
+"POT-Creation-Date: 2023-09-26 13:49\n"
+"PO-Revision-Date: 2023-09-26 14:28+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -11,17 +11,114 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.3.2\n"
 
-msgid "`tabnet_explain()` is not defined for a '"
-msgstr "`tabnet_explain()` n'est pas défini pour un '"
+msgid "`tabnet_explain()` is not defined for a '%s'."
+msgstr "`tabnet_explain()` n’est pas défini pour un ‘%s’."
 
-msgid "'."
-msgstr "'."
+msgid "`tabnet_fit()` is not defined for a '%s'."
+msgstr "`tabnet_fit()` n’est pas défini pour un ‘%s’."
 
-msgid "`tabnet_fit()` is not defined for a '"
-msgstr "`tabnet_fit()` n'est pas défini pour un '"
+msgid "`tabnet_pretrain()` is not defined for a '%s'."
+msgstr "`tabnet_pretrain()` n’est pas défini pour un ‘%s’."
 
-msgid "`tabnet_pretrain()` is not defined for a '"
-msgstr "`tabnet_pretrain()` n'est pas défini pour un '"
+msgid "'%s' is not recognised as a proper TabNet model"
+msgstr "‘%s’ n’est pas reconnu comme un modèle TabNet correct"
+
+msgid "The model was trained for less than '%s' epochs"
+msgstr "Le modèle a été entrainé sur moins de ‘%s’ époques"
+
+msgid "Error: found missing values in the `%s` outcome column."
+msgstr ""
+"Erreur : Il y a des valeurs manquantes dans la colonne de résultats `%s`."
+
+msgid "Model dimensions don't match."
+msgstr "Les dimensions ne correspondent pas entre les modèles."
+
+msgid ""
+"No model serialized weight can be found in `%s`, check the model history"
+msgstr ""
+"Il n’y a pas de points sérialisés de modèle dans `%s`, veuillez vérifier "
+"l’historique du modèle"
+
+msgid "The model was trained for less than `%s` epochs"
+msgstr "Le modèle a été entrainé sur moins de ‘%s’ époques"
+
+msgid "Mixed multi-outcome type '%s' is not supported"
+msgstr "Le type ’%s’ n’est pas supporté pour des modèles multi-résultat"
+
+msgid "Unknown outcome type '%s'"
+msgstr "Le type `%s` est inconnu pour une colonne de résultats"
+
+msgid "Outcome is factor and the prediction type is '%s'."
+msgstr ""
+"La colonne de résultats est catégorielle et la prédiction est de type ‘%s’."
+
+msgid "Outcome is numeric and the prediction type is '%s'."
+msgstr ""
+"La colonne de résultats est numérique et la prédiction est de type ‘%s’."
+
+msgid ""
+"The provided hierarchical object is not recognized with a valid format that "
+"can be checked"
+msgstr ""
+"L’objet hiérarchique fournit n’est pas reconnu dans un format valide qui "
+"peut être vérifié"
+
+msgid ""
+"The attributes or colnames in the provided hierarchical object use the "
+"following reserved names : '%s'. Please change those names as they will lead "
+"to unexpected tabnet behavior."
+msgstr ""
+"Les attributs ou noms de colonnes dans l’objet hiérarchique fournit utilise "
+"les noms réservés suivants : ‘%s’. Veuillez changer ces noms  pour éviter un "
+"comportement imprévisible de TabNet."
+
+msgid "`%s` is not a valid loss for outcome of type %s"
+msgstr ""
+"`%s` n’est pas une fonction objectif valide pour les colonnes de résultat de "
+"type  %s"
+
+msgid ""
+"%s is not a valid early-stopping metric to monitor with `valid_split` = %s"
+msgstr ""
+"%s n’est pas une métrique valide d’arrêt anticipé avec `valid_split` = %s"
+
+msgid "Currently only the 'adam' optimizer is supported."
+msgstr "Seule la fonction d’optimisation ‘adam’ est supportée pour l’instant."
+
+msgid ""
+"Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
+msgstr ""
+"Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
+"l’instant."
+
+msgid "[Epoch %03d] Loss: %3f"
+msgstr ""
+
+msgid "[Epoch %03d] Loss: %3f, Valid loss: %3fs"
+msgstr ""
+
+msgid "Early stopping at epoch %03d"
+msgstr "Arrêt anticipé à l’époque %03d"
+
+msgid ""
+"Computing importances for a dataset with size %s. This can consume too much "
+"memory. We are going to use a sample of size 1e5, You can disable this "
+"message by using the `importance_sample_size` argument."
+msgstr ""
+"Calcul de l’importance sur un jeu de données de taille %s. Il se peut que "
+"cela consomme trop de mémoire. Aussi le jeu de donnée sera réduit "
+"aléatoirement à une taille de 1e5. Vous pouvez rendre ce message silencieux "
+"en configurant l’argument `importance_sample_size`."
+
+msgid ""
+"Computing importances for a dataset with size %s. This can consume too much "
+"memory. We are going to use a sample of size 1e5. You can disable this "
+"message by using the `importance_sample_size` argument."
+msgstr ""
+"Calcul de l’importance sur un jeu de données de taille %s. Il se peut que "
+"cela consomme trop de mémoire. Aussi le jeu de donnée sera réduit "
+"aléatoirement à une taille de 1e5. Vous pouvez rendre ce message silencieux "
+"en configurant l’argument `importance_sample_size`."
 
 msgid "'n_steps' should be a positive integer."
 msgstr "’n_steps’ doit être un nombre entier positif."

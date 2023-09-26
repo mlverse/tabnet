@@ -1,8 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-26 11:58+0200\n"
+"POT-Creation-Date: 2023-09-26 13:49\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,29 +10,83 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: explain.R:48
-#, c-format
 msgid "`tabnet_explain()` is not defined for a '%s'."
 msgstr ""
 
-#: hardhat.R:108
-#, c-format
 msgid "`tabnet_fit()` is not defined for a '%s'."
 msgstr ""
 
-#: hardhat.R:296
-#, c-format
 msgid "`tabnet_pretrain()` is not defined for a '%s'."
 msgstr ""
 
-#: tab-network.R:269 tab-network.R:455
+msgid "'%s' is not recognised as a proper TabNet model"
+msgstr ""
+
+msgid "The model was trained for less than '%s' epochs"
+msgstr ""
+
+msgid "Error: found missing values in the `%s` outcome column."
+msgstr ""
+
+msgid "Model dimensions don't match."
+msgstr ""
+
+msgid "No model serialized weight can be found in `%s`, check the model history"
+msgstr ""
+
+msgid "The model was trained for less than `%s` epochs"
+msgstr ""
+
+msgid "Mixed multi-outcome type '%s' is not supported"
+msgstr ""
+
+msgid "Unknown outcome type '%s'"
+msgstr ""
+
+msgid "Outcome is factor and the prediction type is '%s'."
+msgstr ""
+
+msgid "Outcome is numeric and the prediction type is '%s'."
+msgstr ""
+
+msgid "The provided hierarchical object is not recognized with a valid format that can be checked"
+msgstr ""
+
+msgid "The attributes or colnames in the provided hierarchical object use the following reserved names : '%s'. Please change those names as they will lead to unexpected tabnet behavior."
+msgstr ""
+
+msgid "`%s` is not a valid loss for outcome of type %s"
+msgstr ""
+
+msgid "%s is not a valid early-stopping metric to monitor with `valid_split` = %s"
+msgstr ""
+
+msgid "Currently only the 'adam' optimizer is supported."
+msgstr ""
+
+msgid "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
+msgstr ""
+
+msgid "[Epoch %03d] Loss: %3f"
+msgstr ""
+
+msgid "[Epoch %03d] Loss: %3f, Valid loss: %3fs"
+msgstr ""
+
+msgid "Early stopping at epoch %03d"
+msgstr ""
+
+msgid "Computing importances for a dataset with size %s. This can consume too much memory. We are going to use a sample of size 1e5, You can disable this message by using the `importance_sample_size` argument."
+msgstr ""
+
+msgid "Computing importances for a dataset with size %s. This can consume too much memory. We are going to use a sample of size 1e5. You can disable this message by using the `importance_sample_size` argument."
+msgstr ""
+
 msgid "'n_steps' should be a positive integer."
 msgstr ""
 
-#: tab-network.R:271 tab-network.R:457
 msgid "'n_shared' and 'n_independant' can't be both zero."
 msgstr ""
 
-#: tab-network.R:497
 msgid "Please choose either 'sparsemax' or 'entmax' as 'mask_type'"
 msgstr ""
