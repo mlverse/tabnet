@@ -200,9 +200,6 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     if (config$verbose & has_valid)
       message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3fs", epoch, mean(metrics[[epoch]]$train$loss), mean(metrics[[epoch]]$valid$loss)))
 
-    if (config$verbose)
-      rlang::inform(message)
-
     # Early-stopping checks
     if (config$early_stopping && config$early_stopping_monitor=="valid_loss"){
       current_loss <- mean(metrics[[epoch]]$valid$loss)
