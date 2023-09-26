@@ -388,14 +388,14 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   epoch_shift <- 0L
 
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
-    stop(domain=NA, gettextf("'%s' is not recognised as a proper TabNet model", tabnet_model),
+    stop(gettextf("'%s' is not recognised as a proper TabNet model", tabnet_model),
          call. = FALSE)
 
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
     # model must be loaded from checkpoint
 
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-      stop(domain=NA, gettextf("The model was trained for less than '%s' epochs", from_epoch), call. = FALSE)
+      stop(gettextf("The model was trained for less than '%s' epochs", from_epoch), call. = FALSE)
 
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
@@ -407,7 +407,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
   if (task == "supervised") {
     if (sum(is.na(outcomes)) > 0) {
-      stop(domain=NA, gettextf("Error: found missing values in the `%s` outcome column.", names(outcomes)), call. = FALSE)
+      stop(gettextf("Found missing values in the `%s` outcome column.", names(outcomes)), call. = FALSE)
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -442,7 +442,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
-    } else stop(domain=NA, gettextf("No model serialized weight can be found in `%s`, check the model history", tabnet_model), call. = FALSE)
+    } else stop(gettextf("No model serialized weight can be found in `%s`, check the model history", tabnet_model), call. = FALSE)
 
     fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
@@ -484,7 +484,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   if (!is.null(epoch)) {
 
     if (epoch > (length(object$fit$checkpoints) * object$fit$config$checkpoint_epoch))
-      stop(domain=NA, gettextf("The model was trained for less than `%s` epochs", epoch), call. = FALSE)
+      stop(gettextf("The model was trained for less than `%s` epochs", epoch), call. = FALSE)
 
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch
@@ -581,7 +581,7 @@ check_type <- function(outcome_ptype, type = NULL) {
   outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
 
   if (!outcome_all_numeric && !outcome_all_factor)
-    stop(domain=NA, gettextf("Mixed multi-outcome type '%s' is not supported", unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))), call. = FALSE)
+    stop(gettextf("Mixed multi-outcome type '%s' is not supported", unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))), call. = FALSE)
 
   if (is.null(type)) {
     if (outcome_all_factor)
@@ -589,17 +589,17 @@ check_type <- function(outcome_ptype, type = NULL) {
     else if (outcome_all_numeric)
       type <- "numeric"
     else if (ncol(outcome_ptype) == 1)
-      stop(domain=NA, gettextf("Unknown outcome type '%s'", class(outcome_ptype)), call. = FALSE)
+      stop(gettextf("Unknown outcome type '%s'", class(outcome_ptype)), call. = FALSE)
   }
 
   type <- rlang::arg_match(type, c("numeric", "prob", "class"))
 
   if (outcome_all_factor) {
     if (!type %in% c("prob", "class"))
-      stop(domain=NA, gettextf("Outcome is factor and the prediction type is '%s'.", type), call. = FALSE)
+      stop(gettextf("Outcome is factor and the prediction type is '%s'.", type), call. = FALSE)
   } else if (outcome_all_numeric) {
     if (type != "numeric")
-      stop(domain=NA, gettextf("Outcome is numeric and the prediction type is '%s'.", type), call. = FALSE)
+      stop(gettextf("Outcome is numeric and the prediction type is '%s'.", type), call. = FALSE)
   }
 
   invisible(type)

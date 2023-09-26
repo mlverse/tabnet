@@ -239,7 +239,7 @@ resolve_loss <- function(config, dtype) {
     # cross entropy loss is required
     loss_fn <- torch::nn_cross_entropy_loss()
   else
-    stop(domain=NA, gettextf("`%s` is not a valid loss for outcome of type %s", loss, dtype), call. = FALSE)
+    stop(gettextf("`%s` is not a valid loss for outcome of type %s", loss, dtype), call. = FALSE)
 
   loss_fn
 }
@@ -250,7 +250,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   else if (early_stopping_monitor %in% c("train_loss", "auto"))
     early_stopping_monitor <- "train_loss"
   else
-    stop(domain=NA, gettextf("%s is not a valid early-stopping metric to monitor with `valid_split` = %s", early_stopping_monitor, valid_split), call. = FALSE)
+    stop(gettextf("%s is not a valid early-stopping metric to monitor with `valid_split` = %s", early_stopping_monitor, valid_split), call. = FALSE)
 
   early_stopping_monitor
 }
@@ -568,7 +568,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     if (config$verbose & !has_valid)
       message(gettextf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss)))
     if (config$verbose & has_valid)
-      message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3fs", epoch, mean(metrics[[epoch]]$train$loss), mean(metrics[[epoch]]$valid$loss)))
+      message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3f", epoch, mean(metrics[[epoch]]$train$loss), mean(metrics[[epoch]]$valid$loss)))
 
 
     # Early-stopping checks

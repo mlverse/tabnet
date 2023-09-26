@@ -136,7 +136,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     if (config$optimizer == "adam")
       optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
     else
-      stop(domain=NA, "Currently only the 'adam' optimizer is supported.", call. = FALSE)
+      stop("Currently only the 'adam' optimizer is supported.", call. = FALSE)
 
   }
 
@@ -150,7 +150,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   } else if (config$lr_scheduler == "step") {
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   } else {
-    stop(domain=NA, "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.", call. = FALSE)
+    stop("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.", call. = FALSE)
   }
 
   # initialize metrics & checkpoints
@@ -198,7 +198,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     if (config$verbose & !has_valid)
       message(gettextf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss)))
     if (config$verbose & has_valid)
-      message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3fs", epoch, mean(metrics[[epoch]]$train$loss), mean(metrics[[epoch]]$valid$loss)))
+      message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3f", epoch, mean(metrics[[epoch]]$train$loss), mean(metrics[[epoch]]$valid$loss)))
 
     # Early-stopping checks
     if (config$early_stopping && config$early_stopping_monitor=="valid_loss"){

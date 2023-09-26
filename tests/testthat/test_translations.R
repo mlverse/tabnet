@@ -1,0 +1,20 @@
+test_that("early stopping message get translated in french", {
+  withr::with_language(lang = "fr",
+                       expect_error(
+                         tabnet_fit(attrix, attriy, epochs = 200, verbose=TRUE,
+                                    early_stopping_monitor="cross_validation_loss",
+                                    early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
+                         regexp = "pas une métrique valide d’arrêt anticipé"
+                       )
+  )
+})
+
+test_that("scheduler message translated in french", {
+  withr::with_language(lang = "fr",
+                       expect_error(
+                         fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = "multiplicative",
+                                           lr_decay = 0.1, step_size = 1),
+                       regexp = "planifications ‘step’ et ‘reduce_on_plateau’ sont supportées"
+                       )
+  )
+})
