@@ -162,7 +162,7 @@ test_that("fit raise an error with non-supported mask-type", {
   expect_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
                       config = tabnet_config( mask_type="max_entropy")),
-    regexp = "either sparsemax or entmax"
+    regexp = "either 'sparsemax' or 'entmax' as"
   )
 
 })
