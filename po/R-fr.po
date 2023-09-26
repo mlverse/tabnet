@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-26 20:16+0200\n"
-"PO-Revision-Date: 2023-09-26 20:16+0200\n"
+"PO-Revision-Date: 2023-09-26 21:50+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: potools 0.2.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: dials.R:3
 msgid "Package \"dials\" needed for this function to work. Please install it."
@@ -163,7 +163,7 @@ msgid ""
 "Package \"parsnip\" needed for this function to work. Please install it."
 msgstr ""
 "Le package \"parsnip\" est nécessaire pour exécuter cette fonction, Veuillez "
-"l'installer"
+"l'installer."
 
 #: pretraining.R:242
 #, c-format

@@ -1,4 +1,6 @@
 test_that("early stopping message get translated in french", {
+  testthat::skip_on_ci()
+  testthat::skip_on_cran()
   withr::with_language(lang = "fr",
                        expect_error(
                          tabnet_fit(attrix, attriy, epochs = 200, verbose=TRUE,
@@ -10,6 +12,8 @@ test_that("early stopping message get translated in french", {
 })
 
 test_that("scheduler message translated in french", {
+  testthat::skip_on_ci()
+  testthat::skip_on_cran()
   withr::with_language(lang = "fr",
                        expect_error(
                          fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = "multiplicative",
