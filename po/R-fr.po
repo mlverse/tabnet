@@ -1,0 +1,41 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: tabnet 0.4.0.9000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-26 12:03+0200\n"
+"PO-Revision-Date: 2023-09-26 12:03+0200\n"
+"Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
+"Language-Team: fr\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: potools 0.2.3\n"
+
+#: explain.R:48
+#, c-format
+msgid "`tabnet_explain()` is not defined for a '%s'."
+msgstr "`tabnet_explain()` n'est pas défini pour un objet de type '%s'"
+
+#: hardhat.R:108
+#, c-format
+msgid "`tabnet_fit()` is not defined for a '%s'."
+msgstr "`tabnet_fit()` n'est pas défini pour un objet de type '%s'"
+
+#: hardhat.R:296
+#, c-format
+msgid "`tabnet_pretrain()` is not defined for a '%s'."
+msgstr "`tabnet_pretrain()` n'est pas défini pour un objet de type '%s'"
+
+#: tab-network.R:269 tab-network.R:455
+msgid "'n_steps' should be a positive integer."
+msgstr "`n_steps` doit être un nombre entier positif."
+
+#: tab-network.R:271 tab-network.R:457
+msgid "'n_shared' and 'n_independant' can't be both zero."
+msgstr "`n_shared` et `n_independant` ne peuvent pas être nuls simultanément."
+
+#: tab-network.R:497
+msgid "Please choose either 'sparsemax' or 'entmax' as 'mask_type'"
+msgstr ""
+"Vous devez choisir `sparsemax` ou `entmax` pour la valeur de `mask_type`."

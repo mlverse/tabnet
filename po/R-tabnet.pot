@@ -1,7 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
-"POT-Creation-Date: 2023-09-25 20:38\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-26 11:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -10,23 +11,29 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "`tabnet_explain()` is not defined for a '"
+#: explain.R:48
+#, c-format
+msgid "`tabnet_explain()` is not defined for a '%s'."
 msgstr ""
 
-msgid "'."
+#: hardhat.R:108
+#, c-format
+msgid "`tabnet_fit()` is not defined for a '%s'."
 msgstr ""
 
-msgid "`tabnet_fit()` is not defined for a '"
+#: hardhat.R:296
+#, c-format
+msgid "`tabnet_pretrain()` is not defined for a '%s'."
 msgstr ""
 
-msgid "`tabnet_pretrain()` is not defined for a '"
-msgstr ""
-
+#: tab-network.R:269 tab-network.R:455
 msgid "'n_steps' should be a positive integer."
 msgstr ""
 
+#: tab-network.R:271 tab-network.R:457
 msgid "'n_shared' and 'n_independant' can't be both zero."
 msgstr ""
 
+#: tab-network.R:497
 msgid "Please choose either 'sparsemax' or 'entmax' as 'mask_type'"
 msgstr ""

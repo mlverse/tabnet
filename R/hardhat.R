@@ -104,10 +104,9 @@ tabnet_fit <- function(x, ...) {
 #' @export
 #' @rdname tabnet_fit
 tabnet_fit.default <- function(x, ...) {
-  stop(
-    "`tabnet_fit()` is not defined for a '", class(x)[1], "'.",
-    call. = FALSE
-  )
+  stop(domain=NA,
+       gettextf("`tabnet_fit()` is not defined for a '%s'.", class(x)[1]),
+       call. = FALSE)
 }
 
 #' @export
@@ -293,10 +292,9 @@ tabnet_pretrain <- function(x, ...) {
 #' @export
 #' @rdname tabnet_pretrain
 tabnet_pretrain.default <- function(x, ...) {
-  stop(
-    "`tabnet_pretrain()` is not defined for a '", class(x)[1], "'.",
-    call. = FALSE
-  )
+  stop(domain=NA,
+       gettextf("`tabnet_pretrain()` is not defined for a '%s'.", class(x)[1]),
+       call. = FALSE)
 }
 
 
