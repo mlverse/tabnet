@@ -266,9 +266,9 @@ tabnet_pretrainer <- torch::nn_module(
     self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
     if (self$n_steps <= 0)
-      stop("n_steps should be a positive integer.")
+      stop("'n_steps' should be a positive integer.")
     if (self$n_independent == 0 && self$n_shared == 0)
-      stop("n_shared and n_independant can't be both zero.")
+      stop("'n_shared' and 'n_independant' can't be both zero.")
 
     self$virtual_batch_size <- virtual_batch_size
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
@@ -452,9 +452,9 @@ tabnet_nn <- torch::nn_module(
     self$mask_type <- mask_type
 
     if (self$n_steps <= 0)
-      stop("n_steps should be a positive integer.")
+      stop("'n_steps' should be a positive integer.")
     if (self$n_independent == 0 && self$n_shared == 0)
-      stop("n_shared and n_independant can't be both zero.")
+      stop("'n_shared' and 'n_independant' can't be both zero.")
 
     self$virtual_batch_size <- virtual_batch_size
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
@@ -494,7 +494,7 @@ attentive_transformer <- torch::nn_module(
     else if (mask_type == "entmax")
       self$selector <- entmax(dim = -1)
     else
-      stop("Please choose either sparsemax or entmax as masktype")
+      stop("Please choose either 'sparsemax' or 'entmax' as 'mask_type'")
 
   },
   forward = function(priors, processed_feat) {

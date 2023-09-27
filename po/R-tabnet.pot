@@ -1,0 +1,163 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: tabnet 0.4.0.9000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-26 19:59+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: dials.R:3
+msgid "Package \"dials\" needed for this function to work. Please install it."
+msgstr ""
+
+#: explain.R:48
+#, c-format
+msgid "`tabnet_explain()` is not defined for a '%s'."
+msgstr ""
+
+#: hardhat.R:108
+#, c-format
+msgid "`tabnet_fit()` is not defined for a '%s'."
+msgstr ""
+
+#: hardhat.R:296
+#, c-format
+msgid "`tabnet_pretrain()` is not defined for a '%s'."
+msgstr ""
+
+#: hardhat.R:391
+#, c-format
+msgid "'%s' is not recognised as a proper TabNet model"
+msgstr ""
+
+#: hardhat.R:398
+#, c-format
+msgid "The model was trained for less than '%s' epochs"
+msgstr ""
+
+#: hardhat.R:410
+#, c-format
+msgid "Error: found missing values in the `%s` outcome column."
+msgstr ""
+
+#: hardhat.R:420 hardhat.R:532
+msgid "Model dimensions don't match."
+msgstr ""
+
+#: hardhat.R:445
+#, c-format
+msgid ""
+"No model serialized weight can be found in `%s`, check the model history"
+msgstr ""
+
+#: hardhat.R:487
+#, c-format
+msgid "The model was trained for less than `%s` epochs"
+msgstr ""
+
+#: hardhat.R:584
+#, c-format
+msgid "Mixed multi-outcome type '%s' is not supported"
+msgstr ""
+
+#: hardhat.R:592
+#, c-format
+msgid "Unknown outcome type '%s'"
+msgstr ""
+
+#: hardhat.R:599
+#, c-format
+msgid "Outcome is factor and the prediction type is '%s'."
+msgstr ""
+
+#: hardhat.R:602
+#, c-format
+msgid "Outcome is numeric and the prediction type is '%s'."
+msgstr ""
+
+#: hardhat.R:640
+msgid ""
+"The provided hierarchical object is not recognized with a valid format that "
+"can be checked"
+msgstr ""
+
+#: hardhat.R:645
+#, c-format
+msgid ""
+"The attributes or colnames in the provided hierarchical object use the "
+"following reserved names : '%s'. Please change those names as they will lead "
+"to unexpected tabnet behavior."
+msgstr ""
+
+#: model.R:242
+#, c-format
+msgid "`%s` is not a valid loss for outcome of type %s"
+msgstr ""
+
+#: model.R:253
+#, c-format
+msgid ""
+"%s is not a valid early-stopping metric to monitor with `valid_split` = %s"
+msgstr ""
+
+#: model.R:509 pretraining.R:139
+msgid "Currently only the 'adam' optimizer is supported."
+msgstr ""
+
+#: model.R:523 pretraining.R:153
+msgid ""
+"Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
+msgstr ""
+
+#: model.R:569 pretraining.R:199
+#, c-format
+msgid "[Epoch %03d] Loss: %3f"
+msgstr ""
+
+#: model.R:571 pretraining.R:201
+#, c-format
+msgid "[Epoch %03d] Loss: %3f, Valid loss: %3fs"
+msgstr ""
+
+#: model.R:587
+#, c-format
+msgid "Early stopping at epoch %03d"
+msgstr ""
+
+#: model.R:614
+#, c-format
+msgid ""
+"Computing importances for a dataset with size %s. This can consume too much "
+"memory. We are going to use a sample of size 1e5, You can disable this "
+"message by using the `importance_sample_size` argument."
+msgstr ""
+
+#: parsnip.R:245
+msgid ""
+"Package \"parsnip\" needed for this function to work. Please install it."
+msgstr ""
+
+#: pretraining.R:242
+#, c-format
+msgid ""
+"Computing importances for a dataset with size %s. This can consume too much "
+"memory. We are going to use a sample of size 1e5. You can disable this "
+"message by using the `importance_sample_size` argument."
+msgstr ""
+
+#: tab-network.R:269 tab-network.R:455
+msgid "'n_steps' should be a positive integer."
+msgstr ""
+
+#: tab-network.R:271 tab-network.R:457
+msgid "'n_shared' and 'n_independant' can't be both zero."
+msgstr ""
+
+#: tab-network.R:497
+msgid "Please choose either 'sparsemax' or 'entmax' as 'mask_type'"
+msgstr ""

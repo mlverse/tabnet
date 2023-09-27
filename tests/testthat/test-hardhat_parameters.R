@@ -61,7 +61,6 @@ test_that("early stopping works wo validation split", {
 
 })
 
-
 test_that("configuration with categorical_embedding_dimension vector works", {
 
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
@@ -104,6 +103,12 @@ test_that("reduce_on_plateau scheduler works", {
   expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "reduce_on_plateau",
                       lr_decay = 0.1, step_size = 1)
+  )
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "multiplicative",
+                      lr_decay = 0.1, step_size = 1),
+    "only the 'step' and 'reduce_on_plateau' scheduler"
   )
 
   sc_fn <- function(optimizer) {
@@ -157,7 +162,7 @@ test_that("fit raise an error with non-supported mask-type", {
   expect_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
                       config = tabnet_config( mask_type="max_entropy")),
-    regexp = "either sparsemax or entmax"
+    regexp = "either 'sparsemax' or 'entmax' as"
   )
 
 })

@@ -1,6 +1,6 @@
 check_dials <- function() {
   if (!requireNamespace("dials", quietly = TRUE))
-    rlang::abort("Package \"dials\" needed for this function to work. Please install it.")
+    stop("Package \"dials\" needed for this function to work. Please install it.", call. = FALSE)
 }
 
 
