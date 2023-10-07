@@ -305,15 +305,14 @@ tabnet_pretrainer <- torch::nn_module(
     embedded_x_na_mask <- self$embedder_na(x_na_mask)
 
     if (self$training) {
-      masker_out_lst <- self$masker(embedded_x, embedded_x_na_mask)
-      obf_vars <- masker_out_lst[[2]]
+      c(masked_x, obfuscated_vars) %<-% self$masker(embedded_x, embedded_x_na_mask)
       # set prior of encoder as !obf_mask
-      prior <- obf_vars$logical_not()
-      steps_out <- self$encoder(masker_out_lst[[1]], prior)[[3]]
+      prior <- obfuscated_vars$logical_not()
+      steps_out <- self$encoder(masked_x, prior)[[3]]
       res <- self$decoder(steps_out)
       list(res,
            embedded_x,
-           obf_vars)
+           obfuscated_vars)
     } else {
       prior <- embedded_x_na_mask$logical_not()
       steps_out <- self$encoder(embedded_x, prior)[[3]]
@@ -383,12 +382,10 @@ tabnet_no_embedding <- torch::nn_module(
   },
   forward = function(x, x_na_mask) {
     prior <- x_na_mask$logical_not()
-    self_encoder_lst <- self$encoder(x, prior)
-    steps_output <- self_encoder_lst[[1]]
-    M_loss <- self_encoder_lst[[2]]
-    res <- torch::torch_sum(torch::torch_stack(steps_output, dim=1), dim=1)
+    c(steps_output, M_loss) %<-% self$encoder(x, prior)
+    res <- torch::torch_sum(torch::torch_stack(steps_output, dim = 1), dim = 1)
     if (self$is_multi_outcome) {
-      out <- torch::torch_stack(purrr::map(self$multi_outcome_mapping, exec, !!!res), dim=2)$squeeze(3)
+      out <- torch::torch_stack(purrr::map(self$multi_outcome_mapping, exec, !!!res), dim = 2)$squeeze(3)
     } else {
       out <- self$final_mapping(res)
     }
