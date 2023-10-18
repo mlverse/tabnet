@@ -382,8 +382,7 @@ tabnet_no_embedding <- torch::nn_module(
   },
   forward = function(x, x_na_mask) {
     prior <- x_na_mask$logical_not()
-    c(steps_output, M_loss) %<-% self$encoder(x, prior)
-    res <- torch::torch_sum(torch::torch_stack(steps_output, dim = 1), dim = 1)
+    c(res, M_loss, steps_output) %<-% self$encoder(x, prior)
     if (self$is_multi_outcome) {
       out <- torch::torch_stack(purrr::map(self$multi_outcome_mapping, exec, !!!res), dim = 2)$squeeze(3)
     } else {
