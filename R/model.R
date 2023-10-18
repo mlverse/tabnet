@@ -340,7 +340,7 @@ valid_batch <- function(network, batch, config) {
       # classifier needs a squeeze for bce loss
       loss <- config$loss_fn(out, batch$y$squeeze(2))
     } else {
-      loss <- config$loss_fn(ou, batch$y)
+      loss <- config$loss_fn(out, batch$y)
     }
   }
   # Add the overall sparsity loss
