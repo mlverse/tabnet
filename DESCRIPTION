@@ -29,7 +29,8 @@ Imports:
     tibble,
     tidyr,
     coro,
-    vctrs
+    vctrs,
+    zeallot
 Suggests: 
     testthat (>= 3.0.0),
     data.tree,
