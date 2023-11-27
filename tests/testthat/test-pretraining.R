@@ -1,3 +1,4 @@
+testthat::snapshot_accept('pretraining')
 test_that("transpose_metrics is not adding an unnamed entry on top of the list", {
 
   metrics <- list(loss = 1, loss = 2, loss = 3, loss = 4)
