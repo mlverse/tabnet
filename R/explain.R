@@ -94,6 +94,8 @@ explain_impl <- function(network, x, x_na_mask) {
     network$to(device = curr_device)
   })
   network$to(device=x$device)
+  # NULLing values to avoid a R-CMD Check Note "No visible binding for global variable"
+  M_explain_emb_dim <- masks_emb_dim <- NULL
   c(M_explain_emb_dim, masks_emb_dim) %<-% network$forward_masks(x, x_na_mask)
 
   # summarize the categorical embeddedings into 1 column

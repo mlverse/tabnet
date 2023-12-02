@@ -53,3 +53,5 @@ Suggests:
     yardstick
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+Config/testthat/parallel: false
+Config/testthat/start-first: interface, explain, params
