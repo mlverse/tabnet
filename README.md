@@ -17,14 +17,17 @@ status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org
 <!-- badges: end -->
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular
-Learning](https://arxiv.org/abs/1908.07442). The code in this repository
-is an R port of
+Learning](https://arxiv.org/abs/1908.07442) [(Sercan O. Arik, Tomas
+Pfister)](https://doi.org/10.48550/arXiv.1908.07442).  
+The code in this repository is an R port using the
+[torch](https://github.com/mlverse/torch) package of
 [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet)
-PyTorch’s implementation using the
-[torch](https://github.com/mlverse/torch) package. The original
-repository is augmented with [Coherent Hierarchical Multi-label
+PyTorch’s implementation.  
+TabNet is augmented with [Coherent Hierarchical Multi-label
 Classification
 Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
+[(Eleonora Giunchiglia et Al.)](giunchiglia2020neurips) for hierarchical
+outcomes.
 
 ## Installation
 
@@ -99,7 +102,7 @@ cbind(test, predict(fit, test, type = "prob")) %>%
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.554
+#> 1 roc_auc binary         0.548
 ```
 
 ## Explain model on test-set with attention map

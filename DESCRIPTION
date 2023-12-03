@@ -9,9 +9,10 @@ Authors@R: c(
     person(given = "Philipp", family = "Haarmeyer", role = c("ctb")),
     person(given = "Sven", family = "Verweij", role = c("ctb"),  comment = c(ORCID = "0000-0002-5573-3952"))
     )
-Description: Implements the 'TabNet' model by Sercan O. Arik et al. (2019) <arXiv:1908.07442>
-    and provides a consistent interface for fitting and creating predictions. It's
-    also fully compatible with the 'tidymodels' ecosystem.
+Description: Implements the 'TabNet' model by Sercan O. Arik et al. (2019) <arXiv:1908.07442> 
+    with 'Coherent Hierarchical Multi-label Classification Networks' by Giunchiglia et al.
+    <giunchiglia2020neurips> and provides a consistent interface for fitting and creating 
+    predictions. It's also fully compatible with the 'tidymodels' ecosystem.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
