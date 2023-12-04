@@ -667,8 +667,8 @@ check_compliant_node <- function(node) {
 #' starwars_tree <- starwars %>%
 #'   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/")) %>%
 #'   as.Node()
-#' node_to_df(starwars_tree)
-#'
+#' node_to_df(starwars_tree)$x %>% head()
+#' node_to_df(starwars_tree)$y %>% head()
 #' @importFrom dplyr last_col mutate mutate_if select starts_with where
 node_to_df <- function(x, drop_last_level = TRUE) {
   # TODO get rid of all those import through base R equivalent
