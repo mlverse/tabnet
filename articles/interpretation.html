@@ -104,8 +104,8 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mlverse.github.io/tabnet/" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.3     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.4</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.0</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.4</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.1</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.4.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.2.1</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.3     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.0</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr    </span> 1.0.2     </span></span>
@@ -191,11 +191,11 @@ the interpretation metrics.</p>
 <span><span class="co">#&gt; [Epoch 003] Loss: 0.676509</span></span>
 <span><span class="co">#&gt; [Epoch 004] Loss: 0.639690</span></span>
 <span><span class="co">#&gt; [Epoch 005] Loss: 0.611584</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.585045</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.549735</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.513075</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.484156</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.461366</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.585036</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.552491</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.518478</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.488461</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.464825</span></span></code></pre></div>
 <p>In the feature importance plot we can see that, as expected, features
 <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -236,14 +236,14 @@ create the response variable and we expect to see this in the masks.</p>
 <code class="sourceCode R"><span><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.289555</span></span>
 <span><span class="co">#&gt; [Epoch 002] Loss: 0.929622</span></span>
-<span><span class="co">#&gt; [Epoch 003] Loss: 0.745960</span></span>
-<span><span class="co">#&gt; [Epoch 004] Loss: 0.685982</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.661789</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.645513</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.633089</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.616770</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.602258</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.589325</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 003] Loss: 0.745959</span></span>
+<span><span class="co">#&gt; [Epoch 004] Loss: 0.685983</span></span>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.661784</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.645590</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.632412</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.616508</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.599206</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.585125</span></span></code></pre></div>
 <p>In the feature importance plot we have, as expected, strong
 importance for <code>V10</code>, and the other features that are used
 conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
