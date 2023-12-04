@@ -94,19 +94,21 @@ explain_impl <- function(network, x, x_na_mask) {
     network$to(device = curr_device)
   })
   network$to(device=x$device)
-  outputs <- network$forward_masks(x, x_na_mask)
+  # NULLing values to avoid a R-CMD Check Note "No visible binding for global variable"
+  M_explain_emb_dim <- masks_emb_dim <- NULL
+  c(M_explain_emb_dim, masks_emb_dim) %<-% network$forward_masks(x, x_na_mask)
 
   # summarize the categorical embeddedings into 1 column
   # per variable
   M_explain <- sum_embedding_masks(
-    mask = outputs[[1]],
+    mask = M_explain_emb_dim,
     input_dim = network$input_dim,
     cat_idx = network$cat_idxs,
     cat_emb_dim = network$cat_emb_dim
   )
 
   masks <- lapply(
-    outputs[[2]],
+    masks_emb_dim,
     FUN = sum_embedding_masks,
     input_dim = network$input_dim,
     cat_idx = network$cat_idxs,
