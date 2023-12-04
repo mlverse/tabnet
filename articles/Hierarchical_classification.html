@@ -103,14 +103,6 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mlverse.github.io/tabnet/" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/gluc/data.tree" class="external-link">data.tree</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org" class="external-link">rsample</a></span><span class="op">)</span></span>
@@ -134,17 +126,7 @@ associates attributes of each node in the hierarchy :</li>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">acme</span>, package <span class="op">=</span> <span class="st">"data.tree"</span><span class="op">)</span></span>
 <span><span class="va">acme</span><span class="op">$</span><span class="va">attributesAll</span></span>
-<span><span class="co">#&gt; [1] "cost" "p"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">acme</span>, <span class="st">"cost"</span>, <span class="st">"p"</span> , limit <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                          levelName    cost    p</span></span>
-<span><span class="co">#&gt; 1 Acme Inc.                             NA   NA</span></span>
-<span><span class="co">#&gt; 2  ¦--Accounting                        NA   NA</span></span>
-<span><span class="co">#&gt; 3  ¦   ¦--New Software             1000000 0.50</span></span>
-<span><span class="co">#&gt; 4  ¦   °--New Accounting Standards  500000 0.75</span></span>
-<span><span class="co">#&gt; 5  ¦--Research                          NA   NA</span></span>
-<span><span class="co">#&gt; 6  ¦   ¦--New Product Line         2000000 0.25</span></span>
-<span><span class="co">#&gt; 7  ¦   °--New Labs                  750000 0.90</span></span>
-<span><span class="co">#&gt; 8  °--... 1 nodes w/ 3 sub              NA   NA</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">acme</span>, <span class="st">"cost"</span>, <span class="st">"p"</span> , limit <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 <ul>
 <li><p>Multiple manual or programmatic methods are available to create
 or update predictors. They are detailled in the
@@ -166,43 +148,12 @@ command.</p></li>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">starwars</span>, package <span class="op">=</span> <span class="st">"dplyr"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">starwars</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 14</span></span></span>
-<span><span class="co">#&gt;   name      height  mass hair_color skin_color eye_color birth_year sex   gender</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Luke Sky…    172    77 blond      fair       blue            19   male  mascu…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> C-3PO        167    75 <span style="color: #BB0000;">NA</span>         gold       yellow         112   none  mascu…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> R2-D2         96    32 <span style="color: #BB0000;">NA</span>         white, bl… red             33   none  mascu…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Darth Va…    202   136 none       white      yellow          41.9 male  mascu…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   vehicles &lt;list&gt;, starships &lt;list&gt;</span></span></span>
 <span></span>
 <span><span class="co"># erroneous Node construction</span></span>
 <span><span class="va">starwars_tree</span> <span class="op">&lt;-</span> <span class="va">starwars</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pathString <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"StarWars_characters"</span>, <span class="va">species</span>, <span class="va">sex</span>, <span class="va">`name`</span>, sep <span class="op">=</span> <span class="st">"/"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/data.tree/man/as.Node.html" class="external-link">as.Node</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">starwars_tree</span>, <span class="st">"name"</span>,<span class="st">"height"</span>, <span class="st">"mass"</span>, <span class="st">"eye_color"</span>, limit <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                            levelName                    name height mass</span></span>
-<span><span class="co">#&gt; 1  StarWars_characters                   StarWars_characters      4   NA</span></span>
-<span><span class="co">#&gt; 2   ¦--Human                                           Human      3   NA</span></span>
-<span><span class="co">#&gt; 3   ¦   ¦--male                                         male      2   NA</span></span>
-<span><span class="co">#&gt; 4   ¦   ¦   ¦--Luke Skywalker                 Luke Skywalker      1   77</span></span>
-<span><span class="co">#&gt; 5   ¦   ¦   ¦--Darth Vader                       Darth Vader      1  136</span></span>
-<span><span class="co">#&gt; 6   ¦   ¦   ¦--Owen Lars                           Owen Lars      1  120</span></span>
-<span><span class="co">#&gt; 7   ¦   ¦   ¦--Biggs Darklighter           Biggs Darklighter      1   84</span></span>
-<span><span class="co">#&gt; 8   ¦   ¦   °--... 22 nodes w/ 0 sub   ... 22 nodes w/ 0 sub      1   NA</span></span>
-<span><span class="co">#&gt; 9   ¦   °--... 1 nodes w/ 31 sub       ... 1 nodes w/ 31 sub      1   NA</span></span>
-<span><span class="co">#&gt; 10  °--... 37 nodes w/ 123 sub       ... 37 nodes w/ 123 sub      1   NA</span></span>
-<span><span class="co">#&gt;    eye_color</span></span>
-<span><span class="co">#&gt; 1           </span></span>
-<span><span class="co">#&gt; 2           </span></span>
-<span><span class="co">#&gt; 3           </span></span>
-<span><span class="co">#&gt; 4       blue</span></span>
-<span><span class="co">#&gt; 5     yellow</span></span>
-<span><span class="co">#&gt; 6       blue</span></span>
-<span><span class="co">#&gt; 7      brown</span></span>
-<span><span class="co">#&gt; 8           </span></span>
-<span><span class="co">#&gt; 9           </span></span>
-<span><span class="co">#&gt; 10</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">starwars_tree</span>, <span class="st">"name"</span>,<span class="st">"height"</span>, <span class="st">"mass"</span>, <span class="st">"eye_color"</span>, limit <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 <p>You may have noticed that <code>name</code> and <code>height</code>
 have unexpected values according to the original data:
 <code>Human</code> is not part of the <code>name</code> in orginal
@@ -267,29 +218,7 @@ hierarchy</strong> in any case.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>`_name` <span class="op">=</span> <span class="st">"name"</span>, `_height` <span class="op">=</span> <span class="st">"height"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pathString <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"StarWars_characters"</span>, <span class="va">species</span>, <span class="va">sex</span>, <span class="va">`_name`</span>, sep <span class="op">=</span> <span class="st">"/"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/data.tree/man/as.Node.html" class="external-link">as.Node</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">starwars_tree</span>, <span class="st">"name"</span>, <span class="st">"_name"</span>,<span class="st">"_height"</span>, <span class="st">"mass"</span>, <span class="st">"eye_color"</span>, limit <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                            levelName                    name             _name</span></span>
-<span><span class="co">#&gt; 1  StarWars_characters                   StarWars_characters                  </span></span>
-<span><span class="co">#&gt; 2   ¦--Human                                           Human                  </span></span>
-<span><span class="co">#&gt; 3   ¦   ¦--male                                         male                  </span></span>
-<span><span class="co">#&gt; 4   ¦   ¦   ¦--Luke Skywalker                 Luke Skywalker    Luke Skywalker</span></span>
-<span><span class="co">#&gt; 5   ¦   ¦   ¦--Darth Vader                       Darth Vader       Darth Vader</span></span>
-<span><span class="co">#&gt; 6   ¦   ¦   ¦--Owen Lars                           Owen Lars         Owen Lars</span></span>
-<span><span class="co">#&gt; 7   ¦   ¦   ¦--Biggs Darklighter           Biggs Darklighter Biggs Darklighter</span></span>
-<span><span class="co">#&gt; 8   ¦   ¦   °--... 22 nodes w/ 0 sub   ... 22 nodes w/ 0 sub                  </span></span>
-<span><span class="co">#&gt; 9   ¦   °--... 1 nodes w/ 31 sub       ... 1 nodes w/ 31 sub                  </span></span>
-<span><span class="co">#&gt; 10  °--... 37 nodes w/ 123 sub       ... 37 nodes w/ 123 sub                  </span></span>
-<span><span class="co">#&gt;    _height mass eye_color</span></span>
-<span><span class="co">#&gt; 1       NA   NA          </span></span>
-<span><span class="co">#&gt; 2       NA   NA          </span></span>
-<span><span class="co">#&gt; 3       NA   NA          </span></span>
-<span><span class="co">#&gt; 4      172   77      blue</span></span>
-<span><span class="co">#&gt; 5      202  136    yellow</span></span>
-<span><span class="co">#&gt; 6      178  120      blue</span></span>
-<span><span class="co">#&gt; 7      183   84     brown</span></span>
-<span><span class="co">#&gt; 8       NA   NA          </span></span>
-<span><span class="co">#&gt; 9       NA   NA          </span></span>
-<span><span class="co">#&gt; 10      NA   NA</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">starwars_tree</span>, <span class="st">"name"</span>, <span class="st">"_name"</span>,<span class="st">"_height"</span>, <span class="st">"mass"</span>, <span class="st">"eye_color"</span>, limit <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 <p>We can see that the reserved <code>name</code> column contains
 slightly different content that the original <code>_name</code>
 column.</p>
@@ -341,10 +270,7 @@ must now be dropped.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">species</span>, <span class="op">-</span><span class="va">sex</span>, <span class="op">-</span><span class="va">`_name`</span>, <span class="op">-</span><span class="va">rowid</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/data.tree/man/as.Node.html" class="external-link">as.Node</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">starwars_train_tree</span><span class="op">$</span><span class="va">attributesAll</span></span>
-<span><span class="co">#&gt;  [1] "_height"    "birth_year" "eye_color"  "films"      "gender"    </span></span>
-<span><span class="co">#&gt;  [6] "hair_color" "homeworld"  "mass"       "skin_color" "starships" </span></span>
-<span><span class="co">#&gt; [11] "vehicles"</span></span></code></pre></div>
+<span><span class="va">starwars_train_tree</span><span class="op">$</span><span class="va">attributesAll</span></span></code></pre></div>
 <p>Now we can see that none of the predictor leaks the outcome hierarchy
 information.</p>
 </div>
@@ -367,11 +293,9 @@ diagnostic is the check for model over-fitting though the training loss
 plot.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">starw_model</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Hierarchical_classification_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 <p>Then global feature importance gives us a clue of model quality</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://koalaverse.github.io/vip/reference/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">starw_model</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Hierarchical_classification_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="model-inference">Model inference<a class="anchor" aria-label="anchor" href="#model-inference"></a>
@@ -382,27 +306,7 @@ plot.</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">starw_model</span>, <span class="va">starwars_test_tree</span><span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="../reference/node_to_df.html">node_to_df</a></span><span class="op">(</span><span class="va">starwars_test_tree</span><span class="op">)</span><span class="op">$</span><span class="va">y</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'hair_color': 'blonde'. The levels have</span></span>
-<span><span class="co">#&gt; been removed, and values have been coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'homeworld': 'Bestine IV', 'Ojom',</span></span>
-<span><span class="co">#&gt; 'Tund', 'Utapau', 'Zolan'. The levels have been removed, and values have been</span></span>
-<span><span class="co">#&gt; coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'skin_color': 'fair, green, yellow',</span></span>
-<span><span class="co">#&gt; 'grey, green, yellow'. The levels have been removed, and values have been</span></span>
-<span><span class="co">#&gt; coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'starships': 'A-wing'. The levels have</span></span>
-<span><span class="co">#&gt; been removed, and values have been coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'vehicles': 'Koro-2 Exodrive airspeeder'.</span></span>
-<span><span class="co">#&gt; The levels have been removed, and values have been coerced to 'NA'.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">starwars_hat</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
-<span><span class="co">#&gt;   .pred_class_level_2 .pred_class_level_3 level_2  level_3</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Human               NA                  Clawdite female </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Human               hermaphroditic      Besalisk male   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Human               hermaphroditic      Kaminoan male   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Human               hermaphroditic      Togruta  female </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Human               NA                  Pau'an   male</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">starwars_hat</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p>We can see in the Warnings that the dataset is a challenge as many
 new levels are found in a lot of predictors in the test set.<br>
 The model also here is very poor on the <code>level_2</code> (
@@ -415,27 +319,13 @@ characters compatible with watching a movie saga.</p>
 complete dataset here :</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">starwars_explain</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">starw_model</span>, <span class="va">starwars_test_tree</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'hair_color': 'blonde'. The levels have</span></span>
-<span><span class="co">#&gt; been removed, and values have been coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'homeworld': 'Bestine IV', 'Ojom',</span></span>
-<span><span class="co">#&gt; 'Tund', 'Utapau', 'Zolan'. The levels have been removed, and values have been</span></span>
-<span><span class="co">#&gt; coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'skin_color': 'fair, green, yellow',</span></span>
-<span><span class="co">#&gt; 'grey, green, yellow'. The levels have been removed, and values have been</span></span>
-<span><span class="co">#&gt; coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'starships': 'A-wing'. The levels have</span></span>
-<span><span class="co">#&gt; been removed, and values have been coerced to 'NA'.</span></span>
-<span><span class="co">#&gt; Warning: Novel levels found in column 'vehicles': 'Koro-2 Exodrive airspeeder'.</span></span>
-<span><span class="co">#&gt; The levels have been removed, and values have been coerced to 'NA'.</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">starwars_explain</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Hierarchical_classification_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">starwars_explain</span>, type <span class="op">=</span> <span class="st">"steps"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Hierarchical_classification_files/figure-html/unnamed-chunk-10-2.png" width="700">
-Hopefully your own hierarchical outcome will have a better success than
-the one here with <code>starwars</code> dataset. But in this journey,
-you have learned a lot in the data format constraints and solutions, and
-you now have a new performing solution in your toolbox.</p>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">starwars_explain</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">starwars_explain</span>, type <span class="op">=</span> <span class="st">"steps"</span><span class="op">)</span></span></code></pre></div>
+<p>Hopefully your own hierarchical outcome will have a better success
+than the one here with <code>starwars</code> dataset. But in this
+journey, you have learned a lot in the data format constraints and
+solutions, and you now have a new performing solution in your
+toolbox.</p>
 </div>
   </div>
 
