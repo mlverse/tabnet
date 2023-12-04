@@ -65,7 +65,7 @@ fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1, learn_rate = 5e-3)
 autoplot(fit)
 ```
 
-The plots gives you an immediate insight about model overfitting, and if any, the available model checkpoints available before the overfitting
+The plots gives you an immediate insight about model over-fitting, and if any, the available model checkpoints available before the over-fitting
 
 Keep in mind that **regression** as well as **multi-class classification** are also available, and that you can specify dataset through **data.frame** and **formula** as well. You will find them in the package vignettes.
 
@@ -106,7 +106,7 @@ pretrain <- tabnet_pretrain(rec, train, epochs = 50, valid_split=0.1, learn_rate
 autoplot(pretrain)
 ```
 
-The exemple here is a toy example as the `train` dataset does actually contain outcomes. The vignette on [Self-supervised training and fine-tuning](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html) will gives you the complete correct workflow step-by-step.
+The example here is a toy example as the `train` dataset does actually contain outcomes. The vignette on [Self-supervised training and fine-tuning](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html) will gives you the complete correct workflow step-by-step.
 
 ## Missing data in predictors
 
@@ -116,12 +116,12 @@ The exemple here is a toy example as the `train` dataset does actually contain o
 
 | Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
 |-------------|---------------------|:--------:|:-------------:|:----------:|
-| Input format     | dataframe                            |         ✅         |      ✅       |     ✅      |
+| Input format     | data-frame                            |         ✅         |      ✅       |     ✅      |
 |                  | formula                              |         ✅         |               |             |
 |                  | recipe                               |         ✅         |               |             |
 |                  | Node                                 |         ✅         |               |             |
 |                  | missings in predictor                |         ✅         |               |             |
-| Output format    | dataframe                            |         ✅         |      ✅       |     ✅      |
+| Output format    | data-frame                            |         ✅         |      ✅       |     ✅      |
 |                  | workflow                             |         ✅         |               |             |
 | ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
 |                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
