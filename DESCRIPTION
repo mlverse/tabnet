@@ -1,6 +1,6 @@
 Package: tabnet
 Title: Fit 'TabNet' Models for Classification and Regression
-Version: 0.4.0.9000
+Version: 0.5.0
 Authors@R: c(
     person(given = "Daniel", family = "Falbel", role = c("aut"), email = "daniel@rstudio.com"),
     person(family = "RStudio", role = c("cph")),
