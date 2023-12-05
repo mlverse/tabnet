@@ -26,7 +26,8 @@ PyTorch’s implementation.
 TabNet is augmented with [Coherent Hierarchical Multi-label
 Classification
 Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
-[(Eleonora Giunchiglia et Al.)](giunchiglia2020neurips) for hierarchical
+[(Eleonora Giunchiglia et
+Al.)](https://doi.org/10.48550/arXiv.2010.10151) for hierarchical
 outcomes.
 
 ## Installation
@@ -72,8 +73,9 @@ autoplot(fit)
 
 <img src="man/figures/README-model-fit-1.png" width="100%" />
 
-The plots gives you an immediate insight about model overfitting, and if
-any, the available model checkpoints available before the overfitting
+The plots gives you an immediate insight about model over-fitting, and
+if any, the available model checkpoints available before the
+over-fitting
 
 Keep in mind that **regression** as well as **multi-class
 classification** are also available, and that you can specify dataset
@@ -139,7 +141,7 @@ autoplot(pretrain)
 
 <img src="man/figures/README-step-pretrain-1.png" width="100%" />
 
-The exemple here is a toy example as the `train` dataset does actually
+The example here is a toy example as the `train` dataset does actually
 contain outcomes. The vignette on [Self-supervised training and
 fine-tuning](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html)
 will gives you the complete correct workflow step-by-step.
@@ -154,12 +156,12 @@ values in the predictors variables.
 
 | Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
 |------------------|--------------------------------------|:------------------:|:-------------:|:-----------:|
-| Input format     | dataframe                            |         ✅         |      ✅       |     ✅      |
+| Input format     | data-frame                           |         ✅         |      ✅       |     ✅      |
 |                  | formula                              |         ✅         |               |             |
 |                  | recipe                               |         ✅         |               |             |
 |                  | Node                                 |         ✅         |               |             |
 |                  | missings in predictor                |         ✅         |               |             |
-| Output format    | dataframe                            |         ✅         |      ✅       |     ✅      |
+| Output format    | data-frame                           |         ✅         |      ✅       |     ✅      |
 |                  | workflow                             |         ✅         |               |             |
 | ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
 |                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
