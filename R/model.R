@@ -1,6 +1,7 @@
 
 #' Transforms input data into a list of_tensors and parameters for model input
 #'
+#' @description
 #' The 3 torch tensors being
 #' $x , $x_na_mask, $y
 #'  and parameters being
@@ -254,6 +255,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 
   early_stopping_monitor
 }
+
 
 train_batch <- function(network, optimizer, batch, config) {
   # NULLing values to avoid a R-CMD Check Note "No visible binding for global variable"
@@ -548,7 +550,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       )
 
     coro::loop(for (batch in train_dl) {
-      m <- train_batch(network, optimizer, to_device(batch, device), config)
+      m <- train_batch(network, optimizer, to_device(batch, device), config, )
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     })
