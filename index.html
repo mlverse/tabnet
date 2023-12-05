@@ -14,7 +14,7 @@
 <script src="pkgdown.js"></script><meta property="og:title" content="Fit TabNet Models for Classification and Regression">
 <meta property="og:description" content="Implements the TabNet model by Sercan O. Arik et al. (2019) &lt;arXiv:1908.07442&gt; 
     with Coherent Hierarchical Multi-label Classification Networks by Giunchiglia et al.
-    &lt;giunchiglia2020neurips&gt; and provides a consistent interface for fitting and creating 
+    &lt;arXiv:2010.10151&gt; and provides a consistent interface for fitting and creating 
     predictions. Its also fully compatible with the tidymodels' ecosystem.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -101,7 +101,7 @@
 <!-- badges: end -->
 <p>An R implementation of: <a href="https://arxiv.org/abs/1908.07442" class="external-link">TabNet: Attentive Interpretable Tabular Learning</a> <a href="https://doi.org/10.48550/arXiv.1908.07442" class="external-link">(Sercan O. Arik, Tomas Pfister)</a>.<br>
 The code in this repository is an R port using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> PyTorch’s implementation.<br>
-TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf" class="external-link">Coherent Hierarchical Multi-label Classification Networks</a> <a href="giunchiglia2020neurips">(Eleonora Giunchiglia et Al.)</a> for hierarchical outcomes.</p>
+TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf" class="external-link">Coherent Hierarchical Multi-label Classification Networks</a> <a href="https://doi.org/10.48550/arXiv.2010.10151" class="external-link">(Eleonora Giunchiglia et Al.)</a> for hierarchical outcomes.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -136,7 +136,7 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">30</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">5e-3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-model-fit-1.png" width="100%"></p>
-<p>The plots gives you an immediate insight about model overfitting, and if any, the available model checkpoints available before the overfitting</p>
+<p>The plots gives you an immediate insight about model over-fitting, and if any, the available model checkpoints available before the over-fitting</p>
 <p>Keep in mind that <strong>regression</strong> as well as <strong>multi-class classification</strong> are also available, and that you can specify dataset through <strong>data.frame</strong> and <strong>formula</strong> as well. You will find them in the package vignettes.</p>
 </div>
 <div class="section level2">
@@ -182,7 +182,7 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <code class="sourceCode R"><span><span class="va">pretrain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pretrain</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-step-pretrain-1.png" width="100%"></p>
-<p>The exemple here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette on <a href="https://mlverse.github.io/tabnet/articles/selfsupervised_training.html" class="external-link">Self-supervised training and fine-tuning</a> will gives you the complete correct workflow step-by-step.</p>
+<p>The example here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette on <a href="https://mlverse.github.io/tabnet/articles/selfsupervised_training.html" class="external-link">Self-supervised training and fine-tuning</a> will gives you the complete correct workflow step-by-step.</p>
 </div>
 <div class="section level2">
 <h2 id="missing-data-in-predictors">Missing data in predictors<a class="anchor" aria-label="anchor" href="#missing-data-in-predictors"></a>
@@ -211,7 +211,7 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <tbody>
 <tr class="odd">
 <td>Input format</td>
-<td>dataframe</td>
+<td>data-frame</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
@@ -246,7 +246,7 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 </tr>
 <tr class="even">
 <td>Output format</td>
-<td>dataframe</td>
+<td>data-frame</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
