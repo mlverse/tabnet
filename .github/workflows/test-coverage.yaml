@@ -13,13 +13,13 @@ jobs:
     runs-on: ['self-hosted', 'gce', 'gpu']
 
     container:
-      image: 'nvidia/cuda:11.6.2-cudnn8-devel-ubuntu18.04'
+      image: 'nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04'
       options: '--gpus all --runtime=nvidia'
 
     timeout-minutes: 120
 
     env:
-      RSPM: https://packagemanager.rstudio.com/cran/__linux__/bionic/latest
+      RSPM: https://packagemanager.rstudio.com/cran/__linux__/focal/latest
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       TORCH_INSTALL: 1
       TORCH_TEST: 1
