@@ -18,16 +18,19 @@ status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular
 Learning](https://arxiv.org/abs/1908.07442) [(Sercan O. Arik, Tomas
-Pfister)](https://doi.org/10.48550/arXiv.1908.07442).  
-The code in this repository is an R port using the
-[torch](https://github.com/mlverse/torch) package of
+Pfister)](https://doi.org/10.48550/arXiv.1908.07442). It is initially an
+R port using the [torch](https://github.com/mlverse/torch) package of
 [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet)
-PyTorch’s implementation.  
-TabNet is augmented with [Coherent Hierarchical Multi-label
-Classification
+PyTorch’s Tabnet implementation.  
+TabNet is augmented with  
+- Missing values in predictors.  
+- [Coherent Hierarchical Multi-label Classification
 Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
 [(Eleonora Giunchiglia et Al.)](giunchiglia2020neurips) for hierarchical
-outcomes.
+outcomes.  
+- [InterpreTabNet: Enhancing Interpretability of Tabular Data
+Using](https://arxiv.org/abs/2310.02870) [(Shiyun Wa et
+Al.)](https://doi.org/10.48550/arXiv.2310.02870)
 
 ## Installation
 
@@ -72,8 +75,9 @@ autoplot(fit)
 
 <img src="man/figures/README-model-fit-1.png" width="100%" />
 
-The plots gives you an immediate insight about model overfitting, and if
-any, the available model checkpoints available before the overfitting
+The plots gives you an immediate insight about model over-fitting, and
+if any, the available model checkpoints available before the
+over-fitting
 
 Keep in mind that **regression** as well as **multi-class
 classification** are also available, and that you can specify dataset
@@ -139,7 +143,7 @@ autoplot(pretrain)
 
 <img src="man/figures/README-step-pretrain-1.png" width="100%" />
 
-The exemple here is a toy example as the `train` dataset does actually
+The example here is a toy example as the `train` dataset does actually
 contain outcomes. The vignette on [Self-supervised training and
 fine-tuning](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html)
 will gives you the complete correct workflow step-by-step.
@@ -154,12 +158,12 @@ values in the predictors variables.
 
 | Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
 |------------------|--------------------------------------|:------------------:|:-------------:|:-----------:|
-| Input format     | dataframe                            |         ✅         |      ✅       |     ✅      |
+| Input format     | data-frame                           |         ✅         |      ✅       |     ✅      |
 |                  | formula                              |         ✅         |               |             |
 |                  | recipe                               |         ✅         |               |             |
 |                  | Node                                 |         ✅         |               |             |
 |                  | missings in predictor                |         ✅         |               |             |
-| Output format    | dataframe                            |         ✅         |      ✅       |     ✅      |
+| Output format    | data-frame                           |         ✅         |      ✅       |     ✅      |
 |                  | workflow                             |         ✅         |               |             |
 | ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
 |                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
@@ -169,7 +173,8 @@ values in the predictors variables.
 | Model management | from / to file                       |         ✅         |      ✅       |      v      |
 |                  | resume from snapshot                 |         ✅         |               |             |
 |                  | training diagnostic                  |         ✅         |               |             |
-| Interpretability |                                      |         ✅         |      ✅       |     ✅      |
+| Interpretability | default                              |         ✅         |      ✅       |     ✅      |
+|                  | stabilized                           |         ✅         |               |             |
 | Performance      |                                      |        1 x         |    2 - 4 x    |             |
 | Code quality     | test coverage                        |        85%         |               |             |
 |                  | continuous integration               | 4 OS including GPU |               |             |
