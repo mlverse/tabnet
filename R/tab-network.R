@@ -132,8 +132,8 @@ tabnet_encoder <- torch::nn_module(
       } else {
         alphas <- self$att_transformers[[step + 1]](prior, att)
       }
-      betas <- self$reparametrize(M)$to(device)
-      alphas <- self$reparametrize(alphas)$to(device)
+      # betas <- self$reparametrize(M)$to(device)
+      # alphas <- self$reparametrize(alphas)$to(device)
 
       M_loss <- M_loss + torch::torch_mean(torch::torch_sum(
         torch::torch_mul(M, torch::torch_log(M + self$epsilon)),
@@ -141,18 +141,18 @@ tabnet_encoder <- torch::nn_module(
       ))
 
       # compare two masks to promote sparsity
-      h1 <- betas * torch::torch_log(betas + eps)
-      h2 <- betas * torch::torch_log(alphas + eps)
-      kld <- torch::torch_mean(torch::torch_sum(h1 - h2, dim = -1), dim = 1)
+      # h1 <- betas * torch::torch_log(betas + eps)
+      # h2 <- betas * torch::torch_log(alphas + eps)
+      # kld <- torch::torch_mean(torch::torch_sum(h1 - h2, dim = -1), dim = 1)
 
       # Second KL Term 2.0 (Gumble Softmax)
-      q_p <- betas
-      h1 <- q_p * torch::torch_log(q_p + eps)
-      h2 = q_p * torch::torch_log(1. / self$input_dim + eps)
-      kld_PQ = torch::torch_mean(torch::torch_sum(h1 - h2, dim = -1), dim = 0)
+      # q_p <- betas
+      # h1 <- q_p * torch::torch_log(q_p + eps)
+      # h2 = q_p * torch::torch_log(1. / self$input_dim + eps)
+      # kld_PQ = torch::torch_mean(torch::torch_sum(h1 - h2, dim = -1), dim = 0)
 
       # KLD Loss
-      M_loss = M_loss + torch::torch_mean(kld_PQ - self$reg_m * kld)
+      # M_loss = M_loss + torch::torch_mean(kld_PQ - self$reg_m * kld)
 
       # update prior
       prior <- torch::torch_mul(self$gamma - M, prior)
