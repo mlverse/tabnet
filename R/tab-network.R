@@ -49,7 +49,6 @@ tabnet_encoder <- torch::nn_module(
     self$virtual_batch_size <- virtual_batch_size
     self$mask_type <- mask_type
     self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
-    # self$reparametrize <- torch::nnf_gumbel_softmax()
 
     if (self$n_shared > 0) {
       shared_feat_transform <- torch::nn_module_list()
@@ -99,60 +98,22 @@ tabnet_encoder <- torch::nn_module(
     }
 
   },
-
-  reparametrize = function(z, eps = 1e-7) {
-    # Gumbel-softmax trick to sample from Categorical Distribution
-    # z(Tensor) Latent Codes [B x D x Q]
-    # return (Tensor) [B x D]
-    # Sample from Gumbel
-    u <- torch::torch_rand_like(z)
-    g = -torch::torch_log(-torch::torch_log(u + eps) + eps)
-
-    # Gumbel-Softmax sample
-  s = torch::nnf_softmax((z + g) / 0.5, dim = -1)
-  s$view(c(-1, input_dim))
-  },
-
-  forward = function(x, prior, kl_step) {
+  forward = function(x, prior) {
     res <- torch::torch_tensor(0, device = x$device)
     x <- self$initial_bn(x)
 
     #prior <- torch::torch_ones(size = x$shape, device = x$device)
     M_loss <- 0
-    eps <- 1e-7
     att <- self$initial_splitter(x)[, (self$n_d + 1):N]
 
     steps_output <- list()
     for (step in seq_len(self$n_steps)) {
 
       M <- self$att_transformers[[step]](prior, att)
-
-      if (step == self$n_steps) {
-        alphas <- self$att_transformers[[1]](prior, att)
-      } else {
-        alphas <- self$att_transformers[[step + 1]](prior, att)
-      }
-      # betas <- self$reparametrize(M)$to(device)
-      # alphas <- self$reparametrize(alphas)$to(device)
-
       M_loss <- M_loss + torch::torch_mean(torch::torch_sum(
         torch::torch_mul(M, torch::torch_log(M + self$epsilon)),
         dim = 2
       ))
-
-      # compare two masks to promote sparsity
-      # h1 <- betas * torch::torch_log(betas + eps)
-      # h2 <- betas * torch::torch_log(alphas + eps)
-      # kld <- torch::torch_mean(torch::torch_sum(h1 - h2, dim = -1), dim = 1)
-
-      # Second KL Term 2.0 (Gumble Softmax)
-      # q_p <- betas
-      # h1 <- q_p * torch::torch_log(q_p + eps)
-      # h2 = q_p * torch::torch_log(1. / self$input_dim + eps)
-      # kld_PQ = torch::torch_mean(torch::torch_sum(h1 - h2, dim = -1), dim = 0)
-
-      # KLD Loss
-      # M_loss = M_loss + torch::torch_mean(kld_PQ - self$reg_m * kld)
 
       # update prior
       prior <- torch::torch_mul(self$gamma - M, prior)
