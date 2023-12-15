@@ -77,7 +77,7 @@ resolve_data <- function(x, y) {
 #'   A value close to 1 will make mask selection least correlated between layers.
 #'   Values range from 1.0 to 2.0.
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
-#'   block, either `"sparsemax"` or `"entmax"`.Defaults to `"sparsemax"`.
+#'   block, either `"sparsemax"` or `"entmax"`.Defaults to `"entmax"`.
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=256^2)
 #' @param learn_rate initial learning rate for the optimizer.
@@ -141,7 +141,7 @@ tabnet_config <- function(batch_size = 1024^2,
                           attention_width = NULL,
                           num_steps = 3,
                           feature_reusage = 1.3,
-                          mask_type = "sparsemax",
+                          mask_type = "entmax",
                           virtual_batch_size = 256^2,
                           valid_split = 0,
                           learn_rate = 2e-2,

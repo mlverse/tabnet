@@ -32,6 +32,8 @@ tabnet_encoder <- torch::nn_module(
   "tabnet_encoder",
   initialize = function(input_dim, output_dim,
                         n_d=8, n_a=8,
+                        mlp_hidden_mults = NULL,
+                        mlp_act = NULL,
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size=128, momentum = 0.02,
@@ -88,6 +90,7 @@ tabnet_encoder <- torch::nn_module(
                                       virtual_batch_size = self$virtual_batch_size,
                                       momentum = momentum)
       attention <- attentive_transformer(n_a, self$input_dim,
+                                         mlp_hidden_mults = mlp_hidden_mults,
                                          virtual_batch_size = self$virtual_batch_size,
                                          momentum = momentum,
                                          mask_type = self$mask_type)
@@ -473,15 +476,45 @@ tabnet_nn <- torch::nn_module(
   }
 )
 
+#' @importFrom purrr %||%
+mlp <- torch::nn_module(
+  "MLP",
+  initialize = function(dims, mlp_act) {
+    if (length(dims) == 2) {
+      # Original Tabnet is one single FC layer
+      self$mlp <- torch::nn_linear(dims[[1]], dims[[2]], bias = FALSE)
+      initialize_non_glu(self$mlp, dims[[1]], dims[[2]])
+    } else {
+      # InterpreTabnet turns it into 3 layers MLP
+      stopifnot("only length 4 dims (2 hidden) is supported for 3 FC layers" = (is.numeric(dims) & length(dims) == 4))
+      self$mlp <- torch::nn_sequential(
+        torch::nn_linear(dims[[1]], dims[[2]], bias = FALSE),
+        mlp_act %||% torch::nn_relu(),
+        torch::nn_linear(dims[[2]], dims[[3]]),
+        mlp_act %||% torch::nn_relu(),
+        torch::nn_linear(dims[[3]], dims[[4]]),
+        mlp_act %||% torch::nn_relu()
+      )
+      initialize_non_glu(self$mlp[[1]], dims[[1]], dims[[4]])
+    }
+  },
+  forward = function(x) {
+    self$mlp(x)
+  }
+)
+
 attentive_transformer <- torch::nn_module(
   "attentive_transformer",
   initialize = function(input_dim, output_dim,
+                        mlp_hidden_mults = c(4, 2),
+                        mlp_act = NULL,
                         virtual_batch_size = 128,
                         momentum = 0.02,
                         mask_type="sparsemax") {
-    self$fc <- torch::nn_linear(input_dim, sum(output_dim), bias=FALSE)
-    initialize_non_glu(self$fc, input_dim, sum(output_dim))
-    self$bn <- gbn(sum(output_dim), virtual_batch_size=virtual_batch_size,
+    hidden_dim <- sum(output_dim)
+    mlp_dims <- c(input_dim, (hidden_dim %/% 8) * mlp_hidden_mults ,hidden_dim)
+    self$mlp <- mlp(dims = mlp_dims, mlp_act)
+    self$bn <- gbn(hidden_dim, virtual_batch_size=virtual_batch_size,
                   momentum = momentum)
 
 
@@ -494,7 +527,7 @@ attentive_transformer <- torch::nn_module(
 
   },
   forward = function(priors, processed_feat) {
-    x <- self$fc(processed_feat)
+    x <- self$mlp(processed_feat)
     x <- self$bn(x)
     x <- torch::torch_mul(x, priors)
     x <- self$selector(x)

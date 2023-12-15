@@ -31,7 +31,6 @@ nn_mbwlu <- torch::nn_module(
 #' Applies the Multibranch Weighted Linear Unit (MB-WLU) function, element_wise.
 #' See [nn_mbwlu()] for more information.
 #' @seealso [nn_mbwlu()].
-#' @inheritParams nn_mbwlu
 #' @export
 #' @rdname nn_mbwlu
 nnf_mbwlu <- function(input, alpha, beta, gamma,  init) {
