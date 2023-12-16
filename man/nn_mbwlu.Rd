@@ -7,7 +7,7 @@
 \usage{
 nn_mbwlu(alpha = 0.6, beta = 0.2, gamma = 0.2, init = 0.25)
 
-nnf_mbwlu(input, alpha, beta, gamma, init)
+nnf_mbwlu(input, alpha = 0.6, beta = 0.2, gamma = 0.2, init = 0.25)
 }
 \arguments{
 \item{alpha}{(float) the weight of ELU activation component.}
@@ -20,6 +20,9 @@ nnf_mbwlu(input, alpha, beta, gamma, init)
 
 \item{input}{(N,*) tensor, where * means, any number of additional
 dimensions}
+}
+\value{
+an activation function computing  \eqn{\mathbf{\alpha \times ELU(input) + \beta \times PReLU(input) + \gamma \times SiLU(input)}}
 }
 \description{
 Multibranch Weighted Linear Unit (MB-WLU) nn module.

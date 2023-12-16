@@ -67,7 +67,9 @@ resolve_data <- function(x, y) {
 #'   block, either `"sparsemax"` or `"entmax"`.
 #' @param mlp_hidden_multiplier NULL (tabnet) or a vector of 2 values being the size of the 2 hidden layers
 #'  of the MLP block (InterpreTabnet).
-#' @param mlp_activation the torch nn_ function for non-linear unit layer of the MLP part.
+#' @param mlp_activation the torch nn_ activation function for the MLP-attentive-transformer part.
+#'  If `NULL` then `nn_relu()` will be used. (InterpreTabnet).
+#' @param encoder_activation the torch nn_ activation function for the encoder part.
 #'  If `NULL` then `nn_relu()` will be used. (InterpreTabnet).
 #' @param num_independent Number of independent Gated Linear Units layers at each step of the encoder.
 #'   Usual values range from 1 to 5.
@@ -161,6 +163,7 @@ tabnet_config <- function(
     mask_type = "sparsemax",
     mlp_hidden_multiplier = NULL,
     mlp_activation = NULL,
+    encoder_activation = NULL,
     num_independent = 2L,
     num_shared = 2L,
     num_independent_decoder = 1L,
@@ -214,6 +217,7 @@ tabnet_config <- function(
     mask_type = mask_type,
     mlp_hidden_multiplier = mlp_hidden_multiplier,
     mlp_activation = mlp_activation,
+    encoder_activation = encoder_activation,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
     learn_rate = learn_rate,
@@ -250,6 +254,7 @@ interpretabnet_config <- function(...) {
   tabnet_config(mask_type = "entmax",
                 mlp_hidden_multiplier = c(4,2),
                 mlp_activation = NULL,
+                encoder_activation = nn_mbwlu(),
                 ...)
 
 }
@@ -454,6 +459,7 @@ tabnet_initialize <- function(x, y, config = interpretabnet_config()) {
     n_a = config$n_a,
     mlp_hidden_mults = config$mlp_hidden_multiplier,
     mlp_act = config$mlp_activation,
+    encoder_act = config$encoder_activation,
     n_steps = config$n_steps,
     gamma = config$gamma,
     virtual_batch_size = config$virtual_batch_size,

@@ -25,15 +25,16 @@ gbn <- torch::nn_module(
   }
 )
 
-# Defines main part of the TabNet network without the embedding layers.
-#
-#
+#' Defines main part of the TabNet network without the embedding layers.
+#' @noRd
+#' @importFrom purrr %||%
 tabnet_encoder <- torch::nn_module(
   "tabnet_encoder",
   initialize = function(input_dim, output_dim,
                         n_d=8, n_a=8,
                         mlp_hidden_mults = NULL,
                         mlp_act = NULL,
+                        encoder_act = NULL,
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size=128, momentum = 0.02,
@@ -51,7 +52,7 @@ tabnet_encoder <- torch::nn_module(
     self$virtual_batch_size <- virtual_batch_size
     self$mask_type <- mask_type
     self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
-
+    self$encoder_act <- encoder_act %||% torch::nn_relu()
     if (self$n_shared > 0) {
       shared_feat_transform <- torch::nn_module_list()
 
@@ -125,7 +126,7 @@ tabnet_encoder <- torch::nn_module(
       # output
       masked_x <- torch::torch_mul(M, x)
       out <- self$feat_transformers[[step]](masked_x)
-      d <- torch::nnf_relu(out[.., 1:(self$n_d)])
+      d <- self$encoder_act(out[.., 1:(self$n_d)])
       steps_output[[step]] <- d
       res <- torch::torch_add(res, d)
       # update attention
@@ -339,6 +340,7 @@ tabnet_no_embedding <- torch::nn_module(
   initialize = function(input_dim, output_dim,
                         n_d=8, n_a=8,
                         mlp_hidden_mults, mlp_act,
+                        encoder_act,
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size=128, momentum = 0.02,
@@ -364,6 +366,7 @@ tabnet_no_embedding <- torch::nn_module(
       n_d = n_d,
       n_a = n_a,
       mlp_hidden_mults, mlp_act,
+      encoder_act,
       n_steps = n_steps,
       gamma = gamma,
       n_independent = n_independent,
@@ -413,6 +416,12 @@ tabnet_no_embedding <- torch::nn_module(
 #'   binary classification etc.. Vector of those dimensions in case of multi-output.
 #' @param n_d Dimension of the prediction  layer (usually between 4 and 64).
 #' @param n_a Dimension of the attention  layer (usually between 4 and 64).
+#' @param mlp_hidden_mults NULL (tabnet) or a vector of 2 values being the size of the 2 hidden layers
+#'  of the MLP block (InterpreTabnet).
+#' @param mlp_act the torch nn_ function used as activation layer of the MLP part.
+#'  If `NULL` then `nn_relu()` will be used. (InterpreTabnet).
+#' @param encoder_act the torch nn_ function used as activation layer of the Tabnet encoder.
+#'  If `NULL` then `nn_relu()` will be used. (InterpreTabnet).
 #' @param n_steps Number of successive steps in the network (usually between 3 and 10).
 #' @param gamma Float above 1, scaling factor for attention updates (usually between 1 and 2).
 #' @param cat_idxs Index of each categorical column in the dataset.
@@ -430,7 +439,7 @@ tabnet_no_embedding <- torch::nn_module(
 tabnet_nn <- torch::nn_module(
   "tabnet",
   initialize = function(input_dim, output_dim, n_d=8, n_a=8,
-                        mlp_hidden_mults, mlp_act,
+                        mlp_hidden_mults, mlp_act, encoder_act,
                         n_steps=3, gamma=1.3, cat_idxs=c(), cat_dims=c(), cat_emb_dim=1,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size = 128, momentum = 0.02,
@@ -463,8 +472,10 @@ tabnet_nn <- torch::nn_module(
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$post_embed_dim <- self$embedder$post_embed_dim
-    self$tabnet <- tabnet_no_embedding(self$post_embed_dim, output_dim, n_d, n_a, mlp_hidden_mults, mlp_act,
-                                       n_steps, gamma, n_independent, n_shared, epsilon, virtual_batch_size, momentum, mask_type)
+    self$tabnet <- tabnet_no_embedding(self$post_embed_dim, output_dim, n_d, n_a,
+                                       mlp_hidden_mults, mlp_act, encoder_act,
+                                       n_steps, gamma, n_independent, n_shared, epsilon,
+                                       virtual_batch_size, momentum, mask_type)
 
   },
   forward = function(x, x_na_mask) {

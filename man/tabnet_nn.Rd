@@ -9,6 +9,9 @@ tabnet_nn(
   output_dim,
   n_d = 8,
   n_a = 8,
+  mlp_hidden_mults,
+  mlp_act,
+  encoder_act,
   n_steps = 3,
   gamma = 1.3,
   cat_idxs = c(),
@@ -31,6 +34,15 @@ binary classification etc.. Vector of those dimensions in case of multi-output.}
 \item{n_d}{Dimension of the prediction  layer (usually between 4 and 64).}
 
 \item{n_a}{Dimension of the attention  layer (usually between 4 and 64).}
+
+\item{mlp_hidden_mults}{NULL (tabnet) or a vector of 2 values being the size of the 2 hidden layers
+of the MLP block (InterpreTabnet).}
+
+\item{mlp_act}{the torch nn_ function used as activation layer of the MLP part.
+If \code{NULL} then \code{nn_relu()} will be used. (InterpreTabnet).}
+
+\item{encoder_act}{the torch nn_ function used as activation layer of the Tabnet encoder.
+If \code{NULL} then \code{nn_relu()} will be used. (InterpreTabnet).}
 
 \item{n_steps}{Number of successive steps in the network (usually between 3 and 10).}
 

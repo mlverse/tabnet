@@ -66,7 +66,8 @@ test_that("configuration with categorical_embedding_dimension vector works", {
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
 
   expect_no_error(
-    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config)
+    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config,
+                      verbose = FALSE)
   )
 })
 
@@ -75,7 +76,8 @@ test_that("explicit error message when categorical embedding dimension vector ha
   config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
 
   expect_error(
-    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config),
+    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config,
+                      verbose = FALSE),
     regexp = "number of categorical predictors"
   )
 })
@@ -84,7 +86,8 @@ test_that("step scheduler works", {
 
   expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "step",
-                      lr_decay = 0.1, step_size = 1)
+                      lr_decay = 0.1, step_size = 1,
+                      verbose = FALSE)
   )
 
   sc_fn <- function(optimizer) {
@@ -93,7 +96,8 @@ test_that("step scheduler works", {
 
   expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = sc_fn,
-                      lr_decay = 0.1, step_size = 1)
+                      lr_decay = 0.1, step_size = 1,
+                      verbose = FALSE)
   )
 
 })
@@ -102,12 +106,14 @@ test_that("reduce_on_plateau scheduler works", {
 
   expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "reduce_on_plateau",
-                      lr_decay = 0.1, step_size = 1)
+                      lr_decay = 0.1, step_size = 1,
+                      verbose = FALSE)
   )
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "multiplicative",
-                      lr_decay = 0.1, step_size = 1),
+                      lr_decay = 0.1, step_size = 1,
+                      verbose = FALSE),
     "only the 'step' and 'reduce_on_plateau' scheduler"
   )
 
@@ -117,7 +123,8 @@ test_that("reduce_on_plateau scheduler works", {
 
   expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = sc_fn,
-                      lr_decay = 0.1, step_size = 1)
+                      lr_decay = 0.1, step_size = 1,
+                      verbose = FALSE)
   )
 
 })
@@ -139,18 +146,18 @@ test_that("fit uses config parameters mix from config= and ...", {
 
 })
 
-test_that("fit works with sparsemax mask-type", {
+test_that("fit works with entmax mask-type", {
 
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
 
   expect_no_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-                      config = tabnet_config( mask_type="sparsemax"))
+                      config = tabnet_config( mask_type="entmax"))
   )
   expect_no_error(
     predict(tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-                       config = tabnet_config( mask_type="sparsemax")), attrition)
+                       config = tabnet_config( mask_type="entmax")), attrition)
   )
 
 })

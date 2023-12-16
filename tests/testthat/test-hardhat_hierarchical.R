@@ -67,7 +67,8 @@ test_that("node_to_df works ", {
 test_that("Training hierarchical classification for {data.tree} Node", {
 
   expect_no_error(
-    fit <- tabnet_fit(acme, epochs = 1)
+    fit <- tabnet_fit(acme, epochs = 1,
+                      verbose = FALSE)
   )
   expect_no_error(
     result <- predict(fit, acme_df, type = "prob")
@@ -83,7 +84,8 @@ test_that("Training hierarchical classification for {data.tree} Node", {
   expect_equal(ncol(result), 1)
 
   expect_no_error(
-    fit <- tabnet_fit(attrition_tree, epochs = 1)
+    fit <- tabnet_fit(attrition_tree, epochs = 1,
+                      verbose = FALSE)
   )
   expect_no_error(
     result <- predict(fit, attrition_tree, type = "prob")
@@ -104,7 +106,8 @@ test_that("Training hierarchical classification for {data.tree} Node", {
 test_that("Training hierarchical classification for {data.tree} Node with validation split", {
 
   expect_no_error(
-    fit <- tabnet_fit(attrition_tree, valid_split = 0.2, epochs = 1)
+    fit <- tabnet_fit(attrition_tree, valid_split = 0.2, epochs = 1,
+                      verbose = FALSE)
   )
 
   expect_no_error(
@@ -132,7 +135,8 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
 
 test_that("hierarchical classification for {data.tree} Node is explainable", {
 
-    fit <- tabnet_fit(attrition_tree, epochs = 1)
+    fit <- tabnet_fit(attrition_tree, epochs = 1,
+                      verbose = FALSE)
 
   expect_no_error(
     explain <- tabnet_explain(fit, attrition_tree)

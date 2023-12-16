@@ -13,6 +13,7 @@ tabnet_config(
   mask_type = "sparsemax",
   mlp_hidden_multiplier = NULL,
   mlp_activation = NULL,
+  encoder_activation = NULL,
   num_independent = 2L,
   num_shared = 2L,
   num_independent_decoder = 1L,
@@ -67,7 +68,10 @@ block, either \code{"sparsemax"} or \code{"entmax"}.}
 \item{mlp_hidden_multiplier}{NULL (tabnet) or a vector of 2 values being the size of the 2 hidden layers
 of the MLP block (InterpreTabnet).}
 
-\item{mlp_activation}{the torch nn_ function for non-linear unit layer of the MLP part.
+\item{mlp_activation}{the torch nn_ activation function for the MLP-attentive-transformer part.
+If \code{NULL} then \code{nn_relu()} will be used. (InterpreTabnet).}
+
+\item{encoder_activation}{the torch nn_ activation function for the encoder part.
 If \code{NULL} then \code{nn_relu()} will be used. (InterpreTabnet).}
 
 \item{num_independent}{Number of independent Gated Linear Units layers at each step of the encoder.

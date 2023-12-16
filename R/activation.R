@@ -7,6 +7,8 @@
 #' @param gamma (float) the weight of SILU activation component.
 #' @param init (float): the initial value of \eqn{a} of PRELU. Default: 0.25.
 #'
+#' @return an activation function computing  \eqn{\mathbf{\alpha \times ELU(input) + \beta \times PReLU(input) + \gamma \times SiLU(input)}}
+#'
 #' @examplesIf torch::torch_is_installed()
 #' x <- torch::torch_randn(2, 2)
 #' my_mbwlu <- nn_mbwlu(alpha = 0.6, beta = 0.2, gamma = 0.2)
@@ -33,7 +35,7 @@ nn_mbwlu <- torch::nn_module(
 #' @seealso [nn_mbwlu()].
 #' @export
 #' @rdname nn_mbwlu
-nnf_mbwlu <- function(input, alpha, beta, gamma,  init) {
+nnf_mbwlu <- function(input, alpha = 0.6, beta = 0.2, gamma = 0.2,  init = 0.25) {
     alpha * torch::nnf_elu(input) +
       beta * torch::nnf_prelu(input, init) +
       gamma * torch::nnf_silu(input)
