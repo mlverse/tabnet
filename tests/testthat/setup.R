@@ -15,9 +15,11 @@ y <- ames[ids,]$Sale_Price
 ames_pretrain <- tabnet_pretrain(x, y, epoch = 2, checkpoint_epochs = 1)
 ames_pretrain_vsplit <- tabnet_pretrain(x, y, epochs = 3, valid_split=.2,
                                         num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-ames_fit <- tabnet_fit(x, y, epochs = 5 , checkpoint_epochs = 2)
+ames_fit <- tabnet_fit(x, y, epochs = 5 , checkpoint_epochs = 2,
+                       verbose = FALSE)
 ames_fit_vsplit <- tabnet_fit(x, y, tabnet_model=ames_pretrain_vsplit, epochs = 3,
-                              num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+                              num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1,
+                              verbose = FALSE)
 
 # attrition small data
 data("attrition", package = "modeldata")
@@ -29,10 +31,14 @@ attri_mult_x <- attrix[-which(names(attrix) == "JobSatisfaction")]
 
 attriy <- attrition[ids,]$Attrition
 
-attr_pretrained <- tabnet_pretrain(attrix, attriy, epochs = 12)
-attr_pretrained_vsplit <- tabnet_pretrain(attrix, attriy, epochs = 12, valid_split=0.3)
-attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12)
-attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
+attr_pretrained <- tabnet_pretrain(attrix, attriy, epochs = 12,
+                                   verbose = FALSE)
+attr_pretrained_vsplit <- tabnet_pretrain(attrix, attriy, epochs = 12, valid_split=0.3,
+                                          verbose = FALSE)
+attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12,
+                          verbose = FALSE)
+attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3,
+                                 verbose = FALSE)
 
 # data.tree Node dataset
 data("acme", package = "data.tree")

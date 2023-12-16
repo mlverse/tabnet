@@ -53,38 +53,22 @@ resolve_data <- function(x, y) {
 
 #' Configuration for TabNet models
 #'
-#' @param batch_size (int) Number of examples per batch, large batch sizes are
-#'   recommended. (default: 1024^2)
-#' @param penalty This is the extra sparsity loss coefficient as proposed
-#'   in the original paper. The bigger this coefficient is, the sparser your model
-#'   will be in terms of feature selection. Depending on the difficulty of your
-#'   problem, reducing this value could help (default 1e-3).
-#' @param clip_value If a float is given this will clip the gradient at
-#'   clip_value. Pass `NULL` to not clip.
-#' @param loss (character or function) Loss function for training (default to mse
-#'   for regression and cross entropy for classification)
-#' @param epochs (int) Number of training epochs.
-#' @param drop_last (logical) Whether to drop last batch if not complete during
-#'   training
-#' @param decision_width (int) Width of the decision prediction layer. Bigger values gives
+#' @param cat_emb_dim Size of the embedding of categorical features. If a single interger, all categorical
+#'   features will have same embedding size, if a list of integer, every corresponding feature will have
+#'   specific embedding size.
+#' @param decision_width (int) Width of the decision prediction layer or \eqn{\mathbf{n_d}}. Bigger values gives
 #'   more capacity to the model with the risk of overfitting. Values typically
 #'   range from 8 to 64.
-#' @param attention_width (int) Width of the attention embedding for each mask. According to
-#'   the paper n_d = n_a is usually a good choice. (default=8)
+#' @param attention_width (int) Width of the attention embedding for each mask or \eqn{\mathbf{n_a}}. According to
+#'   the paper \eqn{\mathbf{n_a = n_d}} is usually a good choice. (default=8)
 #' @param num_steps (int) Number of steps in the architecture
 #'   (usually between 3 and 10)
-#' @param feature_reusage (float) This is the coefficient for feature reusage in the masks.
-#'   A value close to 1 will make mask selection least correlated between layers.
-#'   Values range from 1.0 to 2.0.
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
-#'   block, either `"sparsemax"` or `"entmax"`.Defaults to `"entmax"`.
-#' @param virtual_batch_size (int) Size of the mini batches used for
-#'   "Ghost Batch Normalization" (default=256^2)
-#' @param learn_rate initial learning rate for the optimizer.
-#' @param optimizer the optimization method. currently only 'adam' is supported,
-#'   you can also pass any torch optimizer function.
-#' @param valid_split (`[0, 1)`) The fraction of the dataset used for validation.
-#'   (default = 0 means no split)
+#'   block, either `"sparsemax"` or `"entmax"`.
+#' @param mlp_hidden_multiplier NULL (tabnet) or a vector of 2 values being the size of the 2 hidden layers
+#'  of the MLP block (InterpreTabnet).
+#' @param mlp_activation the torch nn_ function for non-linear unit layer of the MLP part.
+#'  If `NULL` then `nn_relu()` will be used. (InterpreTabnet).
 #' @param num_independent Number of independent Gated Linear Units layers at each step of the encoder.
 #'   Usual values range from 1 to 5.
 #' @param num_shared Number of shared Gated Linear Units at each step of the encoder. Usual values
@@ -93,6 +77,31 @@ resolve_data <- function(x, y) {
 #'   Usual values range from 1 to 5.
 #' @param num_shared_decoder For pretraining, number of shared Gated Linear Units at each step of the
 #'    decoder. Usual values range from 1 to 5.
+#'
+#' @param penalty This is the extra sparsity loss coefficient as proposed
+#'   in the original paper as \eqn{\mathbf{\lambda}}. The bigger this coefficient is, the sparser
+#'   your model will be in terms of feature selection. Depending on the difficulty of
+#'   your problem, reducing this value could help (default 1e-3).
+#' @param feature_reusage This is the \eqn{\mathbf{\gamma}} coefficient for feature re-usage
+#'    in the masks. A value close to 1 will make mask selection least correlated between layers.
+#'   Values range from 1.0 to 2.0.
+#' @param momentum Momentum for batch normalization, typically ranges from 0.01
+#'   to 0.4 (default: 0.02)
+#'
+#' @param epochs  Number of training epochs.
+#' @param batch_size Number of examples per batch, large batch sizes are
+#'   recommended. (default \eqn{\mathbf{1024^2}})
+#' @param virtual_batch_size Size of the mini batches used for
+#'   "Ghost Batch Normalization" (default \eqn{\mathbf{256^2}})
+#' @param learn_rate initial learning rate for the optimizer.
+#' @param optimizer the optimization method. currently only 'adam' is supported,
+#'   you can also pass any torch optimizer function.
+#' @param clip_value If a float is given this will clip the gradient at
+#'   clip_value. Default `NULL` do not clip.
+#' @param loss (character or function) Loss function for training (default to mse
+#'   for regression and cross entropy for classification)
+#' @param valid_split (`[0, 1)`) The fraction of the dataset used for validation.
+#'   (default = 0 means no split)
 #' @param verbose (logical) Whether to print progress and loss values during
 #'   training.
 #' @param lr_scheduler if `NULL`, no learning rate decay is used. If "step"
@@ -105,21 +114,19 @@ resolve_data <- function(x, y) {
 #'   or `NULL`.
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
-#' @param cat_emb_dim Size of the embedding of categorical features. If int, all categorical
-#'   features will have same embedding size, if list of int, every corresponding feature will have
-#'   specific embedding size.
-#' @param momentum Momentum for batch normalization, typically ranges from 0.01
-#'   to 0.4 (default=0.02)
 #' @param pretraining_ratio Ratio of features to mask for reconstruction during
-#'   pretraining.  Ranges from 0 to 1 (default=0.5)
+#'   pretraining.  Ranges from 0 to 1 (default: 0.5)
 #' @param checkpoint_epochs checkpoint model weights and architecture every
-#'   `checkpoint_epochs`. (default is 10). This may cause large memory usage.
+#'   `checkpoint_epochs`. (default: 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
+#' @param drop_last  Whether to drop last batch if not complete during
+#'   training
 #' @param device the device to use for training. "cpu" or "cuda". The default ("auto")
 #'   uses  to "cuda" if it's available, otherwise uses "cpu".
 #' @param importance_sample_size sample of the dataset to compute importance metrics.
-#'   If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
-#'   display a warning.
+#'   If the dataset is larger than 1e5 observations, importance will be computed on a
+#'   sample of size 1e5 and display a warning.
+#' @param skip_importance should feature importance calculation be skipped (default: `FALSE`)
 #' @param early_stopping_monitor Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").
 #' @param  early_stopping_tolerance Minimum relative improvement to reset the patience counter.
 #'  0.01 for 1% tolerance (default 0)
@@ -127,44 +134,62 @@ resolve_data <- function(x, y) {
 #' @param num_workers (int, optional): how many subprocesses to use for data
 #'   loading. 0 means that the data will be loaded in the main process.
 #'   (default: `0`)
-#' @param skip_importance if feature importance calculation should be skipped (default: `FALSE`)
-#' @return A named list with all hyperparameters of the TabNet implementation.
+#'
+#' @section Network design:
+#'
+#' The first 11 parameters `cat_emb_dim`, `decision_width`, `attention_width`, `num_steps`, `mask_type`, `mlp_hidden_multiplier`,
+#' `mlp_activation`, `num_independent`, `num_shared`, `num_independent_decoder`, `num_shared_decoder` will form the Tabnet network
+#'  design through shapping each TabNet sub-component.
+#'
+#' @section Network hyper-parameters:
+#'
+#' The next 3 parameters `penalty`, `feature_reusage`, `momentum` are numerical hyper-parameter that you may tune to adapt the
+#'  model to your dataset characteristics
+#'
+#' @section Model training:
+#'
+#' The last 22 parameters control the training loop of the model.
+#'
+#' @return A named list with all parameters of the TabNet implementation.
 #'
 #' @export
-tabnet_config <- function(batch_size = 1024^2,
-                          penalty = 1e-3,
-                          clip_value = NULL,
-                          loss = "auto",
-                          epochs = 5,
-                          drop_last = FALSE,
-                          decision_width = NULL,
-                          attention_width = NULL,
-                          num_steps = 3,
-                          feature_reusage = 1.3,
-                          mask_type = "entmax",
-                          virtual_batch_size = 256^2,
-                          valid_split = 0,
-                          learn_rate = 2e-2,
-                          optimizer = "adam",
-                          lr_scheduler = NULL,
-                          lr_decay = 0.1,
-                          step_size = 30,
-                          checkpoint_epochs = 10,
-                          cat_emb_dim = 1,
-                          num_independent = 2,
-                          num_shared = 2,
-                          num_independent_decoder = 1,
-                          num_shared_decoder = 1,
-                          momentum = 0.02,
-                          pretraining_ratio = 0.5,
-                          verbose = FALSE,
-                          device = "auto",
-                          importance_sample_size = NULL,
-                          early_stopping_monitor = "auto",
-                          early_stopping_tolerance = 0,
-                          early_stopping_patience = 0L,
-                          num_workers=0L,
-                          skip_importance = FALSE) {
+tabnet_config <- function(
+    cat_emb_dim = 1L,
+    decision_width = 8L,
+    attention_width = 8L,
+    num_steps = 3L,
+    mask_type = "sparsemax",
+    mlp_hidden_multiplier = NULL,
+    mlp_activation = NULL,
+    num_independent = 2L,
+    num_shared = 2L,
+    num_independent_decoder = 1L,
+    num_shared_decoder = 1L,
+    penalty = 1e-3,
+    feature_reusage = 1.3,
+    momentum = 0.02,
+    epochs = 5L,
+    batch_size = 1024^2,
+    virtual_batch_size = 256^2,
+    learn_rate = 2e-2,
+    optimizer = "adam",
+    valid_split = 0,
+    loss = "auto",
+    clip_value = NULL,
+    drop_last = FALSE,
+    lr_scheduler = NULL,
+    lr_decay = 0.1,
+    step_size = 30,
+    checkpoint_epochs = 10,
+    pretraining_ratio = 0.5,
+    verbose = TRUE,
+    device = "auto",
+    importance_sample_size = NULL,
+    early_stopping_monitor = "auto",
+    early_stopping_tolerance = 0,
+    early_stopping_patience = 0L,
+    num_workers=0L,
+    skip_importance = FALSE) {
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
   }
@@ -187,6 +212,8 @@ tabnet_config <- function(batch_size = 1024^2,
     n_steps = num_steps,
     gamma = feature_reusage,
     mask_type = mask_type,
+    mlp_hidden_multiplier = mlp_hidden_multiplier,
+    mlp_activation = mlp_activation,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
     learn_rate = learn_rate,
@@ -212,6 +239,19 @@ tabnet_config <- function(batch_size = 1024^2,
     num_workers = num_workers,
     skip_importance = skip_importance
   )
+}
+#' Configuration for InterpreTabNet models
+#'
+#' This change few default values of `tabnet_config()` to turn model into InterpreTabnet
+#'
+#' @rdname tabnet_config
+#' @export
+interpretabnet_config <- function(...) {
+  tabnet_config(mask_type = "entmax",
+                mlp_hidden_multiplier = c(4,2),
+                mlp_activation = NULL,
+                ...)
+
 }
 
 get_constr_output <- function(x, R) {
@@ -370,7 +410,7 @@ get_device_from_config <- function(config) {
   device
 }
 
-tabnet_initialize <- function(x, y, config = tabnet_config()) {
+tabnet_initialize <- function(x, y, config = interpretabnet_config()) {
 
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
@@ -412,6 +452,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     cat_dims = train$cat_dims,
     n_d = config$n_d,
     n_a = config$n_a,
+    mlp_hidden_mults = config$mlp_hidden_multiplier,
+    mlp_act = config$mlp_activation,
     n_steps = config$n_steps,
     gamma = config$gamma,
     virtual_batch_size = config$virtual_batch_size,
@@ -441,7 +483,7 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
   )
 }
 
-tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift = 0L) {
+tabnet_train_supervised <- function(obj, x, y, config = interpretabnet_config(), epoch_shift = 0L) {
   stopifnot("tabnet_model shall be initialised or pretrained" = (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
 
@@ -576,17 +618,17 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
 
     # Early-stopping checks
-    if (config$early_stopping && config$early_stopping_monitor=="valid_loss"){
+    if (config$early_stopping && config$early_stopping_monitor == "valid_loss"){
       current_loss <- mean(metrics[[epoch]]$valid$loss)
     } else {
       current_loss <- mean(metrics[[epoch]]$train$loss)
     }
-    if (config$early_stopping && epoch > 1+epoch_shift) {
+    if (config$early_stopping && epoch > 1 + epoch_shift) {
       # compute relative change, and compare to best_metric
       change <- (current_loss - best_metric) / current_loss
-      if (change > config$early_stopping_tolerance){
+      if (change > config$early_stopping_tolerance) {
         patience_counter <- patience_counter + 1
-        if (patience_counter >= config$early_stopping_patience){
+        if (patience_counter >= config$early_stopping_patience) {
           if (config$verbose)
             message(gettextf("Early stopping at epoch %03d", epoch))
           break
@@ -597,7 +639,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
         patience_counter <- 0L
       }
     }
-    if (config$early_stopping && epoch == 1+epoch_shift) {
+    if (config$early_stopping && epoch == 1 + epoch_shift) {
       # initialise best_metric
       best_metric <- current_loss
     }

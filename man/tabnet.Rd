@@ -24,34 +24,34 @@ tabnet(
 \item{mode}{A single character string for the type of model. Possible values
 for this model are "unknown", "regression", or "classification".}
 
-\item{epochs}{(int) Number of training epochs.}
+\item{epochs}{Number of training epochs.}
 
 \item{penalty}{This is the extra sparsity loss coefficient as proposed
-in the original paper. The bigger this coefficient is, the sparser your model
-will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help (default 1e-3).}
+in the original paper as \eqn{\mathbf{\lambda}}. The bigger this coefficient is, the sparser
+your model will be in terms of feature selection. Depending on the difficulty of
+your problem, reducing this value could help (default 1e-3).}
 
-\item{batch_size}{(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024^2)}
+\item{batch_size}{Number of examples per batch, large batch sizes are
+recommended. (default \eqn{\mathbf{1024^2}})}
 
 \item{learn_rate}{initial learning rate for the optimizer.}
 
-\item{decision_width}{(int) Width of the decision prediction layer. Bigger values gives
+\item{decision_width}{(int) Width of the decision prediction layer or \eqn{\mathbf{n_d}}. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.}
 
-\item{attention_width}{(int) Width of the attention embedding for each mask. According to
-the paper n_d = n_a is usually a good choice. (default=8)}
+\item{attention_width}{(int) Width of the attention embedding for each mask or \eqn{\mathbf{n_a}}. According to
+the paper \eqn{\mathbf{n_a = n_d}} is usually a good choice. (default=8)}
 
 \item{num_steps}{(int) Number of steps in the architecture
 (usually between 3 and 10)}
 
-\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
-A value close to 1 will make mask selection least correlated between layers.
+\item{feature_reusage}{This is the \eqn{\mathbf{\gamma}} coefficient for feature re-usage
+in the masks. A value close to 1 will make mask selection least correlated between layers.
 Values range from 1.0 to 2.0.}
 
-\item{virtual_batch_size}{(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=256^2)}
+\item{virtual_batch_size}{Size of the mini batches used for
+"Ghost Batch Normalization" (default \eqn{\mathbf{256^2}})}
 
 \item{num_independent}{Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.}
@@ -60,7 +60,7 @@ Usual values range from 1 to 5.}
 at each step of the decoder. range from 1 to 5}
 
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
-to 0.4 (default=0.02)}
+to 0.4 (default: 0.02)}
 }
 \value{
 A TabNet \code{parsnip} instance. It can be used to fit tabnet models using

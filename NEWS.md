@@ -1,3 +1,11 @@
+# tabnet development version
+
+## New features
+
+* Implement InterpretabNet by switching configuration from `tabnet_config()` to `interppretabnet_config()`.
+* Change default values for `verbose` to TRUE and default configuration for pretraining and 
+supervised learning to `interpretabnet_config()`.
+
 # tabnet 0.5.0
 
 ## New features

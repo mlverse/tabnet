@@ -25,22 +25,26 @@ test_that("Autoplot with supervised training, w and wo valid_split", {
 
 test_that("Autoplot a model without checkpoint", {
 
-  tabnet_pretrain <- tabnet_pretrain(attrix, attriy, epochs = 3)
+  tabnet_pretrain <- tabnet_pretrain(attrix, attriy, epochs = 3,
+                                     verbose = FALSE)
   expect_no_error(
     print(autoplot(tabnet_pretrain))
   )
 
-  tabnet_pretrain <- tabnet_pretrain(attrix, attriy, epochs = 3, valid_split=0.3)
+  tabnet_pretrain <- tabnet_pretrain(attrix, attriy, epochs = 3, valid_split=0.3,
+                                     verbose = FALSE)
   expect_no_error(
     print(autoplot(tabnet_pretrain))
   )
 
-  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3)
+  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3,
+                           verbose = FALSE)
   expect_no_error(
     print(autoplot(tabnet_fit))
   )
 
-  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3, valid_split=0.3)
+  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3, valid_split=0.3,
+                           verbose = FALSE)
   expect_no_error(
     print(autoplot(tabnet_fit))
   )
@@ -49,7 +53,8 @@ test_that("Autoplot a model without checkpoint", {
 
 test_that("Autoplot of pretrain then fit scenario", {
 
-  tabnet_fit <- tabnet_fit(attrix, attriy, tabnet_model=attr_pretrained_vsplit, epochs = 12)
+  tabnet_fit <- tabnet_fit(attrix, attriy, tabnet_model=attr_pretrained_vsplit, epochs = 12,
+                           verbose = FALSE)
 
   expect_no_error(
     print(autoplot(tabnet_fit))
@@ -93,7 +98,7 @@ test_that("Autoplot of multi-outcome regression explainer", {
 
   x <- small_ames[,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
   y <- small_ames[, c("Sale_Price", "Pool_Area")]
-  ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
+  ames_fit <- tabnet_fit(x, y, epochs = 5, verbose = TRUE)
   ames_explain <- tabnet_explain(ames_fit, ames)
 
   expect_no_error(
