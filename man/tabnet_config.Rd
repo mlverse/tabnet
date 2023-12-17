@@ -12,8 +12,8 @@ tabnet_config(
   num_steps = 3L,
   mask_type = "sparsemax",
   mlp_hidden_multiplier = NULL,
-  mlp_activation = NULL,
-  encoder_activation = NULL,
+  mlp_activation = nn_relu(),
+  encoder_activation = nn_relu(),
   num_independent = 2L,
   num_shared = 2L,
   num_independent_decoder = 1L,
@@ -37,7 +37,7 @@ tabnet_config(
   pretraining_ratio = 0.5,
   verbose = TRUE,
   device = "auto",
-  importance_sample_size = NULL,
+  importance_sample_size = 1e+05,
   early_stopping_monitor = "auto",
   early_stopping_tolerance = 0,
   early_stopping_patience = 0L,
@@ -52,17 +52,17 @@ interpretabnet_config(...)
 features will have same embedding size, if a list of integer, every corresponding feature will have
 specific embedding size.}
 
-\item{decision_width}{(int) Width of the decision prediction layer or \eqn{\mathbf{n_d}}. Bigger values gives
+\item{decision_width}{Width of the decision prediction layer or \eqn{\mathbf{n_d}}. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.}
 
-\item{attention_width}{(int) Width of the attention embedding for each mask or \eqn{\mathbf{n_a}}. According to
+\item{attention_width}{Width of the attention embedding for each mask or \eqn{\mathbf{n_a}}. According to
 the paper \eqn{\mathbf{n_a = n_d}} is usually a good choice. (default=8)}
 
-\item{num_steps}{(int) Number of steps in the architecture
+\item{num_steps}{Number of steps in the architecture
 (usually between 3 and 10)}
 
-\item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
+\item{mask_type}{Final layer of feature selector in the attentive_transformer
 block, either \code{"sparsemax"} or \code{"entmax"}.}
 
 \item{mlp_hidden_multiplier}{NULL (tabnet) or a vector of 2 values being the size of the 2 hidden layers
@@ -96,7 +96,7 @@ in the masks. A value close to 1 will make mask selection least correlated betwe
 Values range from 1.0 to 2.0.}
 
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
-to 0.4 (default: 0.02)}
+to 0.4 (default 0.02)}
 
 \item{epochs}{Number of training epochs.}
 
@@ -108,7 +108,7 @@ recommended. (default \eqn{\mathbf{1024^2}})}
 
 \item{learn_rate}{initial learning rate for the optimizer.}
 
-\item{optimizer}{the optimization method. currently only 'adam' is supported,
+\item{optimizer}{the optimization method. currently only \code{"adam"} is supported,
 you can also pass any torch optimizer function.}
 
 \item{valid_split}{(\verb{[0, 1)}) The fraction of the dataset used for validation.
@@ -118,7 +118,7 @@ you can also pass any torch optimizer function.}
 for regression and cross entropy for classification)}
 
 \item{clip_value}{If a float is given this will clip the gradient at
-clip_value. Default \code{NULL} do not clip.}
+clip_value. (default \code{NULL} do not clip)}
 
 \item{drop_last}{Whether to drop last batch if not complete during
 training}
@@ -137,11 +137,11 @@ or \code{NULL}.}
 \code{lr_scheduler} is a \code{torch::lr_scheduler} or \code{NULL}.}
 
 \item{checkpoint_epochs}{checkpoint model weights and architecture every
-\code{checkpoint_epochs}. (default: 10). This may cause large memory usage.
+\code{checkpoint_epochs}. (default 10). This may cause large memory usage.
 Use \code{0} to disable checkpoints.}
 
 \item{pretraining_ratio}{Ratio of features to mask for reconstruction during
-pretraining.  Ranges from 0 to 1 (default: 0.5)}
+pretraining.  Ranges from 0 to 1 (default 0.5)}
 
 \item{verbose}{(logical) Whether to print progress and loss values during
 training.}
@@ -150,21 +150,22 @@ training.}
 uses  to "cuda" if it's available, otherwise uses "cpu".}
 
 \item{importance_sample_size}{sample of the dataset to compute importance metrics.
-If the dataset is larger than 1e5 observations, importance will be computed on a
-sample of size 1e5 and display a warning.}
+If the dataset is larger than \eqn{\mathbf{10^5}} observations, importance will be computed on a
+sample of size \eqn{\mathbf{10^5}} and display a warning.}
 
-\item{early_stopping_monitor}{Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").}
+\item{early_stopping_monitor}{Metric to monitor for early_stopping. One of \code{"valid_loss"}, \code{"train_loss"} or \code{"auto"}
+\code{auto} uses validation loss is there is a validation split, training loss else. (defaults to \code{"auto"}).}
 
 \item{early_stopping_tolerance}{Minimum relative improvement to reset the patience counter.
 0.01 for 1\% tolerance (default 0)}
 
-\item{early_stopping_patience}{Number of epochs without improving until stopping training. (default=5)}
+\item{early_stopping_patience}{Number of epochs without improving until stopping training. (default 5)}
 
 \item{num_workers}{(int, optional): how many subprocesses to use for data
 loading. 0 means that the data will be loaded in the main process.
 (default: \code{0})}
 
-\item{skip_importance}{should feature importance calculation be skipped (default: \code{FALSE})}
+\item{skip_importance}{should feature importance calculation be skipped (default \code{FALSE})}
 }
 \value{
 A named list with all parameters of the TabNet implementation.
@@ -175,16 +176,17 @@ This change few default values of \code{tabnet_config()} to turn model into Inte
 \section{Network design}{
 
 
-The first 11 parameters \code{cat_emb_dim}, \code{decision_width}, \code{attention_width}, \code{num_steps}, \code{mask_type}, \code{mlp_hidden_multiplier},
-\code{mlp_activation}, \code{num_independent}, \code{num_shared}, \code{num_independent_decoder}, \code{num_shared_decoder} will form the Tabnet network
+The first 12 parameters \code{cat_emb_dim}, \code{decision_width}, \code{attention_width}, \code{num_steps},
+\code{mask_type}, \code{mlp_hidden_multiplier}, \code{mlp_activation}, \code{encoder_activation}, \code{num_independent},
+\code{num_shared}, \code{num_independent_decoder}, \code{num_shared_decoder} will form the Tabnet network
 design through shapping each TabNet sub-component.
 }
 
 \section{Network hyper-parameters}{
 
 
-The next 3 parameters \code{penalty}, \code{feature_reusage}, \code{momentum} are numerical hyper-parameter that you may tune to adapt the
-model to your dataset characteristics
+The next 3 parameters \code{penalty}, \code{feature_reusage}, \code{momentum} are numerical hyper-parameter
+that you may tune to adapt the model to your dataset characteristics
 }
 
 \section{Model training}{

@@ -56,14 +56,14 @@ resolve_data <- function(x, y) {
 #' @param cat_emb_dim Size of the embedding of categorical features. If a single interger, all categorical
 #'   features will have same embedding size, if a list of integer, every corresponding feature will have
 #'   specific embedding size.
-#' @param decision_width (int) Width of the decision prediction layer or \eqn{\mathbf{n_d}}. Bigger values gives
+#' @param decision_width Width of the decision prediction layer or \eqn{\mathbf{n_d}}. Bigger values gives
 #'   more capacity to the model with the risk of overfitting. Values typically
 #'   range from 8 to 64.
-#' @param attention_width (int) Width of the attention embedding for each mask or \eqn{\mathbf{n_a}}. According to
+#' @param attention_width Width of the attention embedding for each mask or \eqn{\mathbf{n_a}}. According to
 #'   the paper \eqn{\mathbf{n_a = n_d}} is usually a good choice. (default=8)
-#' @param num_steps (int) Number of steps in the architecture
+#' @param num_steps  Number of steps in the architecture
 #'   (usually between 3 and 10)
-#' @param mask_type (character) Final layer of feature selector in the attentive_transformer
+#' @param mask_type Final layer of feature selector in the attentive_transformer
 #'   block, either `"sparsemax"` or `"entmax"`.
 #' @param mlp_hidden_multiplier NULL (tabnet) or a vector of 2 values being the size of the 2 hidden layers
 #'  of the MLP block (InterpreTabnet).
@@ -88,7 +88,7 @@ resolve_data <- function(x, y) {
 #'    in the masks. A value close to 1 will make mask selection least correlated between layers.
 #'   Values range from 1.0 to 2.0.
 #' @param momentum Momentum for batch normalization, typically ranges from 0.01
-#'   to 0.4 (default: 0.02)
+#'   to 0.4 (default 0.02)
 #'
 #' @param epochs  Number of training epochs.
 #' @param batch_size Number of examples per batch, large batch sizes are
@@ -96,10 +96,10 @@ resolve_data <- function(x, y) {
 #' @param virtual_batch_size Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default \eqn{\mathbf{256^2}})
 #' @param learn_rate initial learning rate for the optimizer.
-#' @param optimizer the optimization method. currently only 'adam' is supported,
+#' @param optimizer the optimization method. currently only `"adam"` is supported,
 #'   you can also pass any torch optimizer function.
 #' @param clip_value If a float is given this will clip the gradient at
-#'   clip_value. Default `NULL` do not clip.
+#'   clip_value. (default `NULL` do not clip)
 #' @param loss (character or function) Loss function for training (default to mse
 #'   for regression and cross entropy for classification)
 #' @param valid_split (`[0, 1)`) The fraction of the dataset used for validation.
@@ -117,43 +117,45 @@ resolve_data <- function(x, y) {
 #' @param step_size the learning rate scheduler step size. Unused if
 #'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
 #' @param pretraining_ratio Ratio of features to mask for reconstruction during
-#'   pretraining.  Ranges from 0 to 1 (default: 0.5)
+#'   pretraining.  Ranges from 0 to 1 (default 0.5)
 #' @param checkpoint_epochs checkpoint model weights and architecture every
-#'   `checkpoint_epochs`. (default: 10). This may cause large memory usage.
+#'   `checkpoint_epochs`. (default 10). This may cause large memory usage.
 #'   Use `0` to disable checkpoints.
 #' @param drop_last  Whether to drop last batch if not complete during
 #'   training
 #' @param device the device to use for training. "cpu" or "cuda". The default ("auto")
 #'   uses  to "cuda" if it's available, otherwise uses "cpu".
 #' @param importance_sample_size sample of the dataset to compute importance metrics.
-#'   If the dataset is larger than 1e5 observations, importance will be computed on a
-#'   sample of size 1e5 and display a warning.
-#' @param skip_importance should feature importance calculation be skipped (default: `FALSE`)
-#' @param early_stopping_monitor Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").
+#'   If the dataset is larger than \eqn{\mathbf{10^5}} observations, importance will be computed on a
+#'   sample of size \eqn{\mathbf{10^5}} and display a warning.
+#' @param skip_importance should feature importance calculation be skipped (default `FALSE`)
+#' @param early_stopping_monitor Metric to monitor for early_stopping. One of `"valid_loss"`, `"train_loss"` or `"auto"`
+#'  `auto` uses validation loss is there is a validation split, training loss else. (defaults to `"auto"`).
 #' @param  early_stopping_tolerance Minimum relative improvement to reset the patience counter.
 #'  0.01 for 1% tolerance (default 0)
-#' @param early_stopping_patience Number of epochs without improving until stopping training. (default=5)
+#' @param early_stopping_patience Number of epochs without improving until stopping training. (default 5)
 #' @param num_workers (int, optional): how many subprocesses to use for data
 #'   loading. 0 means that the data will be loaded in the main process.
 #'   (default: `0`)
 #'
 #' @section Network design:
 #'
-#' The first 11 parameters `cat_emb_dim`, `decision_width`, `attention_width`, `num_steps`, `mask_type`, `mlp_hidden_multiplier`,
-#' `mlp_activation`, `num_independent`, `num_shared`, `num_independent_decoder`, `num_shared_decoder` will form the Tabnet network
+#' The first 12 parameters `cat_emb_dim`, `decision_width`, `attention_width`, `num_steps`,
+#'  `mask_type`, `mlp_hidden_multiplier`, `mlp_activation`, `encoder_activation`, `num_independent`,
+#'   `num_shared`, `num_independent_decoder`, `num_shared_decoder` will form the Tabnet network
 #'  design through shapping each TabNet sub-component.
 #'
 #' @section Network hyper-parameters:
 #'
-#' The next 3 parameters `penalty`, `feature_reusage`, `momentum` are numerical hyper-parameter that you may tune to adapt the
-#'  model to your dataset characteristics
+#' The next 3 parameters `penalty`, `feature_reusage`, `momentum` are numerical hyper-parameter
+#'  that you may tune to adapt the model to your dataset characteristics
 #'
 #' @section Model training:
 #'
 #' The last 22 parameters control the training loop of the model.
 #'
 #' @return A named list with all parameters of the TabNet implementation.
-#'
+#' @importFrom torch nn_relu
 #' @export
 tabnet_config <- function(
     cat_emb_dim = 1L,
@@ -162,8 +164,8 @@ tabnet_config <- function(
     num_steps = 3L,
     mask_type = "sparsemax",
     mlp_hidden_multiplier = NULL,
-    mlp_activation = NULL,
-    encoder_activation = NULL,
+    mlp_activation = nn_relu(),
+    encoder_activation = nn_relu(),
     num_independent = 2L,
     num_shared = 2L,
     num_independent_decoder = 1L,
@@ -187,7 +189,7 @@ tabnet_config <- function(
     pretraining_ratio = 0.5,
     verbose = TRUE,
     device = "auto",
-    importance_sample_size = NULL,
+    importance_sample_size = 1e5,
     early_stopping_monitor = "auto",
     early_stopping_tolerance = 0,
     early_stopping_patience = 0L,
