@@ -66,12 +66,12 @@ test_that("encoder module works with non mBwLU activation function", {
   expect_no_error(
     encoder <- tabnet:::tabnet_encoder(32, 16, mlp_hidden_mults = c(4,2),
                                        mlp_act = torch::nn_leaky_relu(),
-                                       encoder_act = nn_mbwlu() )
+                                       encoder_act = nn_mb_wlu() )
   )
   expect_no_error(
     encoder <- tabnet:::tabnet_encoder(32, 16, mlp_hidden_mults = c(4,2),
                                        mlp_act = torch::nn_leaky_relu(),
-                                       encoder_act = nn_mbwlu(alpha = 0.5, beta = 0.3, gamma = 0.2) )
+                                       encoder_act = nn_mb_wlu(alpha = 0.5, beta = 0.3, gamma = 0.2) )
   )
   expect_tensor_shape(encoder$parameters$att_transformers.0.mlp.mlp.0.weight, c(16,8))
   expect_tensor_shape(encoder$parameters$att_transformers.0.mlp.mlp.2.weight, c(8,16))

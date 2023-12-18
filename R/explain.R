@@ -88,7 +88,7 @@ convert_to_df <- function(x, nms) {
   tibble::as_tibble(x)
 }
 
-explain_impl <- function(network, x, x_na_mask) {
+explain_impl <- function(network, x, x_na_mask, with_stability = FALSE) {
   curr_device <- network$.check$device
   withr::defer({
     network$to(device = curr_device)
@@ -98,7 +98,16 @@ explain_impl <- function(network, x, x_na_mask) {
   M_explain_emb_dim <- masks_emb_dim <- NULL
   c(M_explain_emb_dim, masks_emb_dim) %<-% network$forward_masks(x, x_na_mask)
 
-  # summarize the categorical embeddedings into 1 column
+  if (with_stability) {
+    # Compute InterpreStability value through 5-group, the lazy way
+    # define 5 sampled id groups
+    obs_group <- lapply(1:5, FUN = sample.int, n = nrow(x), size = ceiling(nrow(x)/5))
+    x_group <- map(obs_group, ~x[.x,] )
+    x_na_mask_group <- map(obs_group, ~x_na_mask[.x,] )
+
+    M_explain_mask_lst <- map2(x_group, x_na_mask_group, network$forward_masks)
+  }
+  # summarize the categorical embedding into 1 column
   # per variable
   M_explain <- sum_embedding_masks(
     mask = M_explain_emb_dim,
@@ -124,7 +133,7 @@ compute_feature_importance <- function(network, x, x_na_mask) {
   m/sum(m)
 }
 
-# sum embeddings taking their sizes into account.
+# sum embeddings, taking their sizes into account.
 sum_embedding_masks <- function(mask, input_dim, cat_idx, cat_emb_dim) {
   sizes <- rep(1, input_dim)
   sizes[cat_idx] <- cat_emb_dim

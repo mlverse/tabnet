@@ -105,11 +105,11 @@ autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quant
       dplyr::ungroup()
   } else {
 
-  .data <- object$M_explain %>%
-    dplyr::mutate(rowname = dplyr::row_number()) %>%
-    tidyr::pivot_longer(-rowname, names_to = "variable", values_to = "mask_agg") %>%
-    dplyr::mutate(mask_agg = quantile_clip(mask_agg, probs=quantile),
-                  step = "mask_aggregate")
+    .data <- object$M_explain %>%
+      dplyr::mutate(rowname = dplyr::row_number()) %>%
+      tidyr::pivot_longer(-rowname, names_to = "variable", values_to = "mask_agg") %>%
+      dplyr::mutate(mask_agg = quantile_clip(mask_agg, probs=quantile),
+                    step = "mask_aggregate")
   }
 
   p <- ggplot2::ggplot(.data, ggplot2::aes(x = rowname, y = variable, fill = mask_agg)) +

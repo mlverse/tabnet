@@ -308,7 +308,7 @@ tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabne
   new_config <- do.call(tabnet_config, list(...))
   new_config <- new_config[
     mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      function(x, y) ifelse((is.null(x) || !is.null(y) || x != y), TRUE, FALSE),
       default_config,
       new_config)
   ]
@@ -319,6 +319,7 @@ tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabne
 
 #' @export
 #' @rdname tabnet_pretrain
+#' @importFrom purrr %||%
 tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(
     formula, data,
@@ -332,7 +333,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
   new_config <- do.call(tabnet_config, list(...))
   new_config <- new_config[
     mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      function(x, y) ifelse((is.null(x) || !is.null(y) || x != y), TRUE, FALSE),
       default_config,
       new_config)
   ]
@@ -350,7 +351,7 @@ tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet
   new_config <- do.call(tabnet_config, list(...))
   new_config <- new_config[
     mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
+      function(x, y) ifelse((is.null(x) || !is.null(y) || x != y), TRUE, FALSE),
       default_config,
       new_config)
   ]
