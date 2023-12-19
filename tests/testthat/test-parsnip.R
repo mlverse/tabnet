@@ -2,33 +2,30 @@ test_that("multiplication works", {
 
   data("ames", package = "modeldata")
 
-  expect_error(
+  expect_no_error(
     model <- tabnet() %>%
       parsnip::set_mode("regression") %>%
-      parsnip::set_engine("torch"),
-    regexp = NA
+      parsnip::set_engine("torch")
   )
 
-  expect_error(
+  expect_no_error(
     fit <- model %>%
-      parsnip::fit(Sale_Price ~ ., data = ames),
-    regexp = NA
+      parsnip::fit(Sale_Price ~ ., data = ames)
   )
 
 })
 
 test_that("multi_predict works as expected", {
 
-  model <- tabnet() %>%
+  model <- tabnet(checkpoint_epoch = 1) %>%
     parsnip::set_mode("regression") %>%
-    parsnip::set_engine("torch", checkpoint_epochs = 1)
+    parsnip::set_engine("torch")
 
   data("ames", package = "modeldata")
 
-  expect_error(
+  expect_no_error(
     fit <- model %>%
-      parsnip::fit(Sale_Price ~ ., data = ames),
-    regexp = NA
+      parsnip::fit(Sale_Price ~ ., data = ames)
   )
 
   preds <- parsnip::multi_predict(fit, ames, epochs = c(1,2,3,4,5))
@@ -51,9 +48,8 @@ test_that("Check we can finalize a workflow", {
 
   wf <- tune::finalize_workflow(wf, tibble::tibble(penalty = 0.01, epochs = 1))
 
-  expect_error(
-    fit <- wf %>% parsnip::fit(data = ames),
-    regexp = NA
+  expect_no_error(
+    fit <- wf %>% parsnip::fit(data = ames)
   )
 
   expect_equal(rlang::eval_tidy(wf$fit$actions$model$spec$args$penalty), 0.01)
@@ -64,9 +60,9 @@ test_that("Check we can finalize a workflow from a tune_grid", {
 
   data("ames", package = "modeldata")
 
-  model <- tabnet(epochs = tune()) %>%
+  model <- tabnet(epochs = tune(), checkpoint_epochs = 1) %>%
     parsnip::set_mode("regression") %>%
-    parsnip::set_engine("torch", checkpoint_epochs = 1)
+    parsnip::set_engine("torch")
 
   wf <- workflows::workflow() %>%
     workflows::add_model(model) %>%
@@ -86,9 +82,8 @@ test_that("Check we can finalize a workflow from a tune_grid", {
 
   best_rmse <- tune::select_best(at, "rmse")
 
-  expect_error(
-    final_wf <- tune::finalize_workflow(wf, best_rmse),
-    regexp = NA
+  expect_no_error(
+    final_wf <- tune::finalize_workflow(wf, best_rmse)
   )
 })
 

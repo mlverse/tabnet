@@ -252,11 +252,14 @@ tabnet_config <- function(
 #'
 #' @rdname tabnet_config
 #' @export
-interpretabnet_config <- function(...) {
-  tabnet_config(mask_type = "entmax",
-                mlp_hidden_multiplier = c(4,2),
-                mlp_activation = NULL,
-                encoder_activation = nn_mb_wlu(),
+interpretabnet_config <- function(mask_type = "entmax",
+                                   mlp_hidden_multiplier = c(4,2),
+                                   mlp_activation = NULL,
+                                   encoder_activation = nn_mb_wlu(), ...) {
+  tabnet_config(mask_type = mask_type,
+                mlp_hidden_multiplier = mlp_hidden_multiplier,
+                mlp_activation = mlp_activation,
+                encoder_activation = encoder_activation,
                 ...)
 
 }

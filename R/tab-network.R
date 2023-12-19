@@ -27,7 +27,7 @@ gbn <- torch::nn_module(
 
 #' Defines main part of the TabNet network without the embedding layers.
 #' @noRd
-#' @importFrom purrr %||%
+#' @importFrom rlang %||%
 tabnet_encoder <- torch::nn_module(
   "tabnet_encoder",
   initialize = function(input_dim, output_dim,
@@ -490,7 +490,7 @@ tabnet_nn <- torch::nn_module(
   }
 )
 
-#' @importFrom purrr %||%
+#' @importFrom rlang %||%
 mlp <- torch::nn_module(
   "MLP",
   initialize = function(dims, mlp_act) {
@@ -533,7 +533,7 @@ attentive_transformer <- torch::nn_module(
 
 
     if (mask_type == "sparsemax")
-      self$selector <- torch::nn_contrib_sparsemax(dim =-1)
+      self$selector <- torch::nn_contrib_sparsemax(dim = -1)
     else if (mask_type == "entmax")
       self$selector <- entmax(dim = -1)
     else

@@ -140,6 +140,7 @@ test_that("Importance is skipped if skip_importance flag is used", {
                     num_steps = 1,
                     batch_size = 512,
                     attention_width = 1,
+                    mlp_hidden_multiplier = NULL,
                     num_shared = 1,
                     num_independent = 1,
                     skip_importance = TRUE,
@@ -147,16 +148,17 @@ test_that("Importance is skipped if skip_importance flag is used", {
 
   expect_equal(fit$fit$importances, NULL)
 
-  fit <- tabnet_fit(x, y, epochs = 15,
+  fit <- tabnet_fit(x, y, epochs = 30,
                     num_steps = 1,
                     batch_size = 512,
                     attention_width = 1,
+                    mlp_hidden_multiplier = NULL,
                     num_shared = 1,
                     num_independent = 1,
                     skip_importance = FALSE,
                     verbose = FALSE)
 
-
+  # first predictor has most importance
   expect_equal(which.max(fit$fit$importances$importance), 1)
   expect_equal(fit$fit$importances$variables, colnames(x))
 

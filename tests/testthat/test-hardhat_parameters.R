@@ -73,10 +73,10 @@ test_that("configuration with categorical_embedding_dimension vector works", {
 
 test_that("explicit error message when categorical embedding dimension vector has wrong size", {
 
-  config <- tabnet_config(cat_emb_dim=c(1,1,2,2))
+  config <- tabnet_config(cat_emb_dim = c(1,1,2,2))
 
   expect_error(
-    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config,
+    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config = config,
                       verbose = FALSE),
     regexp = "number of categorical predictors"
   )

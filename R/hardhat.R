@@ -115,17 +115,9 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
   processed <- hardhat::mold(x, y)
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-    function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-    default_config,
-    new_config)
-    ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- update_config(config, ...)
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
@@ -140,17 +132,9 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
   )
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- update_config(config, ...)
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
@@ -159,17 +143,9 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
   processed <- hardhat::mold(x, data)
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- update_config(config, ...)
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 #' @export
@@ -186,24 +162,16 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   processed <- hardhat::mold(xy_df$x, xy_df$y)
   # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
   ancestor <- data.tree::ToDataFrameNetwork(x) %>%
-   mutate_if(is.character, ~.x %>% as.factor %>% as.numeric)
+    mutate_if(is.character, ~.x %>% as.factor %>% as.numeric)
   # TODO check correctness
   # embed the M matrix in the config$ancestor variable
   dims <- c(max(ancestor), max(ancestor))
   ancestor_m <- Matrix::sparseMatrix(ancestor$from, ancestor$to, dims = dims, x = 1)
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config, ancestor = ancestor_m))
+  config <- update_config(config, ...)
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
 new_tabnet_fit <- function(fit, blueprint) {
@@ -304,22 +272,14 @@ tabnet_pretrain.default <- function(x, ...) {
 tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse((is.null(x) || !is.null(y) || x != y), TRUE, FALSE),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- update_config(config, ...)
 
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 #' @export
 #' @rdname tabnet_pretrain
-#' @importFrom purrr %||%
+#' @importFrom rlang %||%
 tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(
     formula, data,
@@ -329,17 +289,9 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
     )
   )
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse((is.null(x) || !is.null(y) || x != y), TRUE, FALSE),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- update_config(config, ...)
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 #' @export
@@ -347,17 +299,9 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
 tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse((is.null(x) || !is.null(y) || x != y), TRUE, FALSE),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
+  config <- update_config(config, ...)
 
-  tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
+    tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
 #' @export
@@ -644,7 +588,7 @@ check_compliant_node <- function(node) {
   if (any(actual_names %in% reserved_names)) {
     stop(domain=NA,
          gettextf("The attributes or colnames in the provided hierarchical object use the following reserved names : '%s'. Please change those names as they will lead to unexpected tabnet behavior.",
-          paste(actual_names[actual_names %in% reserved_names], collapse = "', '")
+                  paste(actual_names[actual_names %in% reserved_names], collapse = "', '")
          ),
          call. = FALSE)
   }
@@ -740,3 +684,34 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
 
 }
 
+`%update%` <- function(y, x) {
+  (is.null(x) && !is.null(y)) ||
+    if (is.atomic(x) && is.atomic(y)) {
+      any(x != y)
+    } else if (torch::is_nn_module(x) && torch::is_nn_module(y)) {
+      any(class(x) != class(y)) || rlang::fn_fmls(y$initialize) %update% rlang::fn_fmls(x$initialize)
+    } else {
+      TRUE
+    }
+
+}
+#' Merge the 3 lists of parameters interpretabnet_config(), config and `...`
+#'
+#' @param config the parsed config
+#' @param ... any additionnal tabnet parameter
+#'
+#' @return a tabnet config parameter list
+#' @noRd
+update_config <- function(config, ...) {
+  default_config <- interpretabnet_config()
+  new_config <- do.call(interpretabnet_config, list(...))
+  delta_config <- new_config[
+    mapply(
+      function(x, y) y %update% x,
+      default_config,
+      new_config)
+  ]
+  utils::modifyList(config, delta_config)
+
+
+}
