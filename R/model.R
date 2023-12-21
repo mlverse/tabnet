@@ -676,22 +676,26 @@ tabnet_train_supervised <- function(obj, x, y, config = interpretabnet_config(),
       1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
       dtype = torch::torch_long()
     ))
-    importances <- tibble::tibble(
-      variables = colnames(x),
-      importance = compute_feature_importance(
+    cfi <- compute_feature_importance(
         network,
         train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
-        train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu"))
+        train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu")
+    )
+    importances <- tibble::tibble(
+      variables = colnames(x),
+      importance = cfi$importance
     )
   } else {
     importances <- NULL
+    cfi <- list(interprestability = NULL)
   }
   list(
     network = network,
     metrics = metrics,
     config = config,
     checkpoints = checkpoints,
-    importances = importances
+    importances = importances,
+    interprestability = cfi$interprestability
   )
 }
 

@@ -247,13 +247,14 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
     dtype = torch::torch_long()
   ))
+  cfi <- compute_feature_importance(
+    network,
+    train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
+    train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu")
+  )
   importances <- tibble::tibble(
     variables = colnames(x),
-    importance = compute_feature_importance(
-      network,
-      train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
-      train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu")
-    )
+    importance = cfi$importance
   )
 
   list(
@@ -261,6 +262,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     metrics = metrics,
     config = config,
     checkpoints = checkpoints,
-    importances = importances
+    importances = importances,
+    interprestability = cfi$interprestability
   )
 }
