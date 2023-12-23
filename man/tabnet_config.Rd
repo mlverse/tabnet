@@ -45,7 +45,13 @@ tabnet_config(
   skip_importance = FALSE
 )
 
-interpretabnet_config(...)
+interpretabnet_config(
+  mask_type = "entmax",
+  mlp_hidden_multiplier = c(4, 2),
+  mlp_activation = NULL,
+  encoder_activation = nn_mb_wlu(),
+  ...
+)
 }
 \arguments{
 \item{cat_emb_dim}{Size of the embedding of categorical features. If a single interger, all categorical

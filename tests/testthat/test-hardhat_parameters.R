@@ -134,7 +134,7 @@ test_that("fit uses config parameters mix from config= and ...", {
   rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
     step_normalize(all_numeric(), -all_outcomes())
   fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-                    config = tabnet_config(decision_width=3, attention_width=5, cat_emb_dim = 2))
+                    config = tabnet_config(decision_width = 3, attention_width = 5, cat_emb_dim = 2))
   expect_no_error(
     predict(fit, attrition)
   )
@@ -144,6 +144,20 @@ test_that("fit uses config parameters mix from config= and ...", {
   expect_equal(fit$fit$config$n_d, 3)
   expect_equal(fit$fit$config$n_a, 5)
 
+})
+
+test_that("... has precedence over config = for atomic, vectors and nn functions", {
+
+  expect_no_error(
+    fit <- tabnet_fit(x, y, attrition, epochs = 1,
+                      decision_width = 5, mlp_hidden_multiplier = c(5,5), encoder_activation = nn_elu(),
+                      config = tabnet_config(decision_width = 3, mlp_hidden_multiplier = c(3,3),
+                                             encoder_activation = nn_gelu())
+    )
+  )
+  expect_equal(fit$fit$config$decision_width, 5)
+  expect_equal(fit$fit$config$mlp_hidden_multiplier, c(5,5))
+  expect_equal(fit$fit$config$encoder_activation, nn_elu())
 })
 
 test_that("fit works with entmax mask-type", {

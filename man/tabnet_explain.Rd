@@ -8,20 +8,23 @@
 \alias{tabnet_explain.model_fit}
 \title{Interpretation metrics from a TabNet model}
 \usage{
-tabnet_explain(object, new_data)
+tabnet_explain(object, new_data, stability)
 
-\method{tabnet_explain}{default}(object, new_data)
+\method{tabnet_explain}{default}(object, new_data, stability)
 
-\method{tabnet_explain}{tabnet_fit}(object, new_data)
+\method{tabnet_explain}{tabnet_fit}(object, new_data, stability = TRUE)
 
-\method{tabnet_explain}{tabnet_pretrain}(object, new_data)
+\method{tabnet_explain}{tabnet_pretrain}(object, new_data, stability = TRUE)
 
-\method{tabnet_explain}{model_fit}(object, new_data)
+\method{tabnet_explain}{model_fit}(object, new_data, stability)
 }
 \arguments{
 \item{object}{a TabNet fit object}
 
 \item{new_data}{a data.frame to obtain interpretation metrics.}
+
+\item{stability}{shall we compute the InterpreStability score of the model with
+it's last 5 checkpoints?.}
 }
 \value{
 Returns a list with
@@ -29,6 +32,13 @@ Returns a list with
 \item \code{M_explain}: the aggregated feature importance masks as detailed in
 TabNet's paper.
 \item \code{masks} a list containing the masks for each step.
+\item \code{interprestability} The InterpreStability score of model with its last 5 checkpoints.
+according to Interpretabnet paper, the score represent the stability of feature importance mask:
+• InterpreStability ∈ \link{0.9, 1}: Very high stability
+• InterpreStability ∈ \link{0.7, 0.9}: High stability
+• InterpreStability ∈ \link{0.5, 0.7}: Moderate stability
+• InterpreStability ∈ \link{0.3, 0.5}: Low stability
+• InterpreStability ∈ \link{0, 0.3}: Little if any stability
 }
 }
 \description{
@@ -57,6 +67,6 @@ fit <- tabnet_fit(x, y, epochs = 20,
 
 
  ex <- tabnet_explain(fit, x)
-
+ ex$interprestability
 \dontshow{\}) # examplesIf}
 }

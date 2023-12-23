@@ -3,6 +3,8 @@
 #'
 #' @param object a TabNet fit object
 #' @param new_data a data.frame to obtain interpretation metrics.
+#' @param stability shall we compute the InterpreStability score of the model with
+#'  it's last 5 checkpoints?.
 #'
 #' @return
 #'
@@ -11,6 +13,13 @@
 #' * `M_explain`: the aggregated feature importance masks as detailed in
 #'   TabNet's paper.
 #' * `masks` a list containing the masks for each step.
+#' * `interprestability` The InterpreStability score of model with its last 5 checkpoints.
+#'  according to Interpretabnet paper, the score represent the stability of feature importance mask:
+#'  • InterpreStability ∈ [0.9, 1]: Very high stability
+#'  • InterpreStability ∈ [0.7, 0.9]: High stability
+#'  • InterpreStability ∈ [0.5, 0.7]: Moderate stability
+#'  • InterpreStability ∈ [0.3, 0.5]: Low stability
+#'  • InterpreStability ∈ [0, 0.3]: Little if any stability
 #'
 #' @examplesIf torch::torch_is_installed()
 #'
@@ -34,16 +43,16 @@
 #'
 #'
 #'  ex <- tabnet_explain(fit, x)
-#'
+#'  ex$interprestability
 #'
 #' @export
-tabnet_explain <- function(object, new_data) {
+tabnet_explain <- function(object, new_data, stability) {
   UseMethod("tabnet_explain")
 }
 
 #' @export
 #' @rdname tabnet_explain
-tabnet_explain.default <- function(object, new_data) {
+tabnet_explain.default <- function(object, new_data, stability) {
   stop(domain=NA,
        gettextf("`tabnet_explain()` is not defined for a '%s'.", class(object)[1]),
        call. = FALSE)
@@ -51,7 +60,7 @@ tabnet_explain.default <- function(object, new_data) {
 
 #' @export
 #' @rdname tabnet_explain
-tabnet_explain.tabnet_fit <- function(object, new_data) {
+tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
   if (inherits(new_data, "Node")) {
     new_data_df <- node_to_df(new_data)$x
   } else {
@@ -64,10 +73,33 @@ tabnet_explain.tabnet_fit <- function(object, new_data) {
   data <- to_device(data, device)
   output <- explain_impl(object$fit$network, data$x, data$x_na_mask)
 
+  # Compute InterpreStability value through last 5 checkpoints
+  n_checkpoints <- length(object$fit$checkpoints)
+  if (stability && n_checkpoints > 5 ) {
+    # TODO
+    # Compute feature importance value through last 5 checkpoints
+    computed_feature_importance <- purrr::map(
+      object$fit$checkpoints[(n_checkpoints-5):n_checkpoints],
+      ~compute_feature_importance(reload_model(.x), data$x, data$x_na_mask),
+      .progress = "InterpreStability score within last 6 models")
+    #
+    corr_mat <- data.frame(computed_feature_importance) |> set_names(as.character(seq(-5,0))) |> cor(method = "pearson")
+    diag(corr_mat) <- 0
+    interprestability <- (sum(corr_mat[corr_mat >= 0.9]) +
+                            .8 * sum( corr_mat[corr_mat < 0.9 & corr_mat >= 0.7]) +
+                            .6 * sum( corr_mat[corr_mat < 0.7 & corr_mat >= 0.5]) +
+                            .4 * sum( corr_mat[corr_mat < 0.5 & corr_mat >= 0.3]) +
+                            .2 * sum( corr_mat[corr_mat < 0.3])) / (prod(dim(corr_mat)) - dim(corr_mat)[1])
+  } else {
+    interprestability <- NULL
+  }
+
+
   # convert stuff to matrix with colnames
   nms <- colnames(processed$predictors)
   output$M_explain <- convert_to_df(output$M_explain, nms)
   output$masks <- lapply(output$masks, convert_to_df, nms = nms)
+  output$interprestability <- interprestability
   class(output) <- "tabnet_explain"
   output
 }
@@ -78,8 +110,8 @@ tabnet_explain.tabnet_pretrain <- tabnet_explain.tabnet_fit
 
 #' @export
 #' @rdname tabnet_explain
-tabnet_explain.model_fit <- function(object, new_data) {
-  tabnet_explain(parsnip::extract_fit_engine(object), new_data)
+tabnet_explain.model_fit <- function(object, new_data, stability) {
+  tabnet_explain(parsnip::extract_fit_engine(object), new_data, stability)
 }
 
 convert_to_df <- function(x, nms) {
@@ -98,36 +130,6 @@ explain_impl <- function(network, x, x_na_mask, with_stability = FALSE) {
   M_explain_emb_dim <- masks_emb_dim <- NULL
   c(M_explain_emb_dim, masks_emb_dim) %<-% network$forward_masks(x, x_na_mask)
 
-  if (with_stability) {
-    # TODO
-    # Compute InterpreStability value through 5-group, the lazy way
-    # define 5 sampled id groups
-    obs_group <- lapply(1:5, FUN = sample.int, n = nrow(x), size = ceiling(nrow(x)/5))
-    x_group <- map(obs_group, ~x[.x,] )
-    x_na_mask_group <- map(obs_group, ~x_na_mask[.x,] )
-
-    M_explain_mask_lst <- map2(x_group, x_na_mask_group, network$forward_masks)
-    M_explain <- map(M_explain_mask_lst, ~tabnet:::sum_embedding_masks(
-      mask = .x[[1]],
-      input_dim = network$input_dim,
-      cat_idx = network$cat_idxs,
-      cat_emb_dim = network$cat_emb_dim
-    )
-    )
-    m <- map(M_explain, ~as.numeric(as.matrix(.x$sum(dim = 1)$detach()$to(device = "cpu"))))
-    compute_feature_importance <-  map(m, ~.x/sum(.x))
-
-    corr_mat <- torch::torch_stack(compute_feature_importance, dim = 1) |> as.matrix() |> t() |> cor(method = "pearson")
-    corr_mat <- corr_mat * (torch::torch_ones_like(corr_mat) - torch::torch_eye(n = dim(corr_mat)[1] ))
-    interprestability <- (corr_mat[corr_mat >=0.9]$sum() +
-      .8 * corr_mat[corr_mat < 0.9 & corr_mat >= 0.7]$sum() +
-      .6 * corr_mat[corr_mat < 0.7 & corr_mat >= 0.5]$sum() +
-      .4 * corr_mat[corr_mat < 0.5 & corr_mat >= 0.3]$sum() +
-      .2 * corr_mat[corr_mat < 0.3]$sum()) / (corr_mat$shape[1] * (corr_mat$shape[2] - 1))
-
-  } else {
-    interprestability <- NULL
-  }
   # summarize the categorical embedding into 1 column
   # per variable
   M_explain <- sum_embedding_masks(
@@ -146,14 +148,14 @@ explain_impl <- function(network, x, x_na_mask, with_stability = FALSE) {
   )
 
   list(M_explain = M_explain$to(device="cpu"),
-       masks = to_device(masks, "cpu"),
-       interprestability = interprestability)
+       masks = to_device(masks, "cpu")
+       )
 }
 
 compute_feature_importance <- function(network, x, x_na_mask) {
   out <- explain_impl(network, x, x_na_mask)
   m <- as.numeric(as.matrix(out$M_explain$sum(dim = 1)$detach()$to(device = "cpu")))
-  list(importance = m/sum(m), interprestability = out$interprestability)
+  m/sum(m)
 }
 
 # sum embeddings, taking their sizes into account.
