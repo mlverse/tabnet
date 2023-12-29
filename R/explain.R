@@ -88,6 +88,8 @@ convert_to_df <- function(x, nms) {
   tibble::as_tibble(x)
 }
 
+#' @importFrom purrr map map2
+#' @importFrom stats cor
 explain_impl <- function(network, x, x_na_mask, with_stability = FALSE) {
   curr_device <- network$.check$device
   withr::defer({
@@ -107,7 +109,7 @@ explain_impl <- function(network, x, x_na_mask, with_stability = FALSE) {
     x_na_mask_group <- map(obs_group, ~x_na_mask[.x,] )
 
     M_explain_mask_lst <- map2(x_group, x_na_mask_group, network$forward_masks)
-    M_explain <- map(M_explain_mask_lst, ~tabnet:::sum_embedding_masks(
+    M_explain <- map(M_explain_mask_lst, ~sum_embedding_masks(
       mask = .x[[1]],
       input_dim = network$input_dim,
       cat_idx = network$cat_idxs,
