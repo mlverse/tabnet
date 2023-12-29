@@ -256,12 +256,18 @@ interpretabnet_config <- function(mask_type = "entmax",
                                    mlp_hidden_multiplier = c(4,2),
                                    mlp_activation = NULL,
                                    encoder_activation = nn_mb_wlu(), ...) {
-  tabnet_config(mask_type = mask_type,
+  interpretabnet_conf <- tabnet_config(mask_type = mask_type,
                 mlp_hidden_multiplier = mlp_hidden_multiplier,
                 mlp_activation = mlp_activation,
                 encoder_activation = encoder_activation,
                 ...)
-
+  # align  nn_mb_wlu weight device with the config device
+  device <- get_device_from_config(interpretabnet_conf)
+  if (!grepl(device,interpretabnet_conf$encoder_activation$weight$device )) {
+    # move the weight to the config device
+    interpretabnet_conf$encoder_activation$weight <- interpretabnet_conf$encoder_activation$weight$to(device = device)
+  }
+  interpretabnet_conf
 }
 
 get_constr_output <- function(x, R) {

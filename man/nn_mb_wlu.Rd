@@ -5,9 +5,20 @@
 \alias{nnf_mb_wlu}
 \title{Multi-branch Weighted Linear Unit (MB-wLU) nn module.}
 \usage{
-nn_mb_wlu(alpha = 0.6, beta = 0.2, gamma = 0.2, init = 0.25)
+nn_mb_wlu(
+  alpha = 0.6,
+  beta = 0.2,
+  gamma = 0.2,
+  weight = torch::torch_tensor(0.25)
+)
 
-nnf_mb_wlu(input, alpha = 0.6, beta = 0.2, gamma = 0.2, init = 0.25)
+nnf_mb_wlu(
+  input,
+  alpha = 0.6,
+  beta = 0.2,
+  gamma = 0.2,
+  weight = torch::torch_tensor(0.25)
+)
 }
 \arguments{
 \item{alpha}{(float) the weight of ELU activation component.}
@@ -16,7 +27,7 @@ nnf_mb_wlu(input, alpha = 0.6, beta = 0.2, gamma = 0.2, init = 0.25)
 
 \item{gamma}{(float) the weight of SiLU activation component.}
 
-\item{init}{(float): the initial value of \eqn{a} of PReLU. Default: 0.25.}
+\item{weight}{(torch_tensor): the initial value of \eqn{weight} of PReLU. Default: 0.25.}
 
 \item{input}{(N,*) tensor, where * means, any number of additional
 dimensions}
