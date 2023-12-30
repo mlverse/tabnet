@@ -32,10 +32,10 @@ test_that("we can change the tabnet_options between training epoch", {
 
 test_that("epoch counter is valid for retraining from a checkpoint", {
 
-  tmp <- tempfile("model", fileext = "safetensor")
-  withr::local_file(torch::torch_save(ames_fit, tmp))
+  tmp <- tempfile("model", fileext = "rds")
+  withr::local_file(saveRDS(ames_fit, tmp))
 
-  fit1 <- torch::torch_load(tmp)
+  fit1 <- readRDS(tmp)
   fit_2 <- tabnet_fit(x, y, ames_fit, epochs = 12, verbose=T)
 
   expect_equal(fit_2$fit$config$epoch, 12)
@@ -90,15 +90,15 @@ test_that("Supervised training can continue unsupervised training, with or wo fr
 
 })
 
-test_that("serialization of tabnet_pretrain with torch_save just works", {
+test_that("serialization of tabnet_pretrain with saveRDS just works", {
 
   fit <- tabnet_fit(x, y, ames_pretrain, epoch = 1, learn_rate = 1e-12,
                     verbose = FALSE)
 
-  tmp <- tempfile("model", fileext = "safetensor")
-  withr::local_file(torch::torch_save(ames_pretrain, tmp))
+  tmp <- tempfile("model", fileext = "rds")
+  withr::local_file(saveRDS(ames_pretrain, tmp))
 
-  pretrain2 <- torch::torch_load(tmp)
+  pretrain2 <- readRDS(tmp)
   fit2 <- tabnet_fit(x, y, pretrain2, epoch = 1, learn_rate = 1e-12,
                      verbose = FALSE)
 
