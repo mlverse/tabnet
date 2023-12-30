@@ -62,17 +62,17 @@ test_that("can train from a recipe", {
 
 })
 
-test_that("serialization with saveRDS just works", {
+test_that("save model works", {
 
   predictions <-  predict(ames_fit, ames)
 
-  tmp <- tempfile("model", fileext = "rds")
-  withr::local_file(saveRDS(ames_fit, tmp))
+  tmp <- tempfile("model", fileext = "safetensor")
+  withr::local_file(torch::torch_save(ames_fit, tmp))
 
   # rm(fit)
   gc()
 
-  fit2 <- readRDS(tmp)
+  fit2 <- torch::torch_load(tmp)
 
   expect_equal(
     predictions,
@@ -113,9 +113,10 @@ test_that("print module works even after a reload from disk", {
   withr::with_options(new = c(cli.width = 50),
                       expect_snapshot_output(ames_fit))
 
-  tmp <- tempfile("model", fileext = "rds")
-  withr::local_file(saveRDS(ames_fit, tmp))
-  fit2 <- readRDS(tmp)
+  tmp <- tempfile("model", fileext = "safetensor")
+  withr::local_file(torch::torch_save(ames_fit, tmp))
+
+  fit2 <- torch::torch_load(tmp)
 
   withr::with_options(new = c(cli.width = 50),
                       expect_snapshot_output(fit2))
@@ -174,18 +175,18 @@ test_that("we can prune head of restored models from disk", {
   testthat::skip_on_os("linux")
   testthat::skip_on_os("windows")
 
-  tmp <- tempfile("model", fileext = "rds")
-  withr::local_file(saveRDS(ames_pretrain, tmp))
-  ames_pretrain2 <- readRDS(tmp)
+  tmp <- tempfile("model", fileext = "safetensor")
+  withr::local_file(torch::torch_save(ames_pretrain, tmp))
+  ames_pretrain2 <- torch::torch_load(tmp)
   expect_no_error(pruned_pretrain <- torch::nn_prune_head(ames_pretrain2, 1))
   test_that("decoder has been removed from the list of modules", {
     expect_equal(all(stringr::str_detect("decoder", names(pruned_pretrain$children))),FALSE)
   })
 
 
-  tmp <- tempfile("model", fileext = "rds")
-  withr::local_file(saveRDS(ames_fit, tmp))
-  ames_fit2 <- readRDS(tmp)
+  tmp <- tempfile("model", fileext = "safetensor")
+  withr::local_file(torch::torch_save(ames_fit, tmp))
+  ames_fit2 <- torch::torch_load(tmp)
   expect_no_error(pruned_fit <- torch::nn_prune_head(ames_fit2, 1))
   test_that("decoder has been removed from the list of modules", {
     expect_equal(all(stringr::str_detect("final_mapping", names(pruned_pretrain$children))),FALSE)
