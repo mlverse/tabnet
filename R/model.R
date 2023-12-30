@@ -707,16 +707,19 @@ tabnet_train_supervised <- function(obj, x, y, config = interpretabnet_config(),
 
 predict_impl <- function(obj, x, batch_size = 1e5) {
   # prediction dataset
-  device = obj$fit$config$device
+  device <- get_device_from_config(obj$fit$config)
+
   predict_ds <-   torch::dataset(
     initialize = function() {},
     .getbatch = function(batch) {resolve_data(x[batch,], rep(1, nrow(x)))},
     .length = function() {nrow(x)}
   )()
 
-  network <- obj$fit$network
   num_workers <- obj$fit$config$num_workers
   yhat <- c()
+  # restore network from model and send it to device
+  network <- obj$fit$network
+  network$to(device = device)
   network$eval()
 
   predict_dl <- torch::dataloader(
