@@ -1,10 +1,18 @@
-# tabnet development version
+# tabnet (development version)
+
+## Breaking changes
+
+* tabnet pretrain and fit configuration now defaults to `interpretabnet_config()`. You should explicitly use `config = tabnet_confg()` to restore previous configuration parameters.
+* Change default values for `verbose` to TRUE and default configuration for pretraining and 
+supervised learning to `interpretabnet_config()`.
 
 ## New features
 
-* Implement InterpretabNet by switching configuration from `tabnet_config()` to `interppretabnet_config()`.
-* Change default values for `verbose` to TRUE and default configuration for pretraining and 
-supervised learning to `interpretabnet_config()`.
+* Implement InterpretabNet through configuration parameters through `interppretabnet_config()`.
+
+## Bugfixes
+
+* `tabnet_predict` is now running on GPU.
 
 # tabnet 0.5.0
 
