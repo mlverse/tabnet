@@ -150,14 +150,14 @@ test_that("... has precedence over config = for atomic, vectors and nn functions
 
   expect_no_error(
     fit <- tabnet_fit(x, y, attrition, epochs = 1,
-                      decision_width = 5, mlp_hidden_multiplier = c(5,5), encoder_activation = nn_elu(),
+                      decision_width = 5, mlp_hidden_multiplier = c(5,5), encoder_activation = torch::nn_elu(),
                       config = tabnet_config(decision_width = 3, mlp_hidden_multiplier = c(3,3),
-                                             encoder_activation = nn_gelu())
+                                             encoder_activation = torch::nn_gelu())
     )
   )
   expect_equal(fit$fit$config$decision_width, 5)
   expect_equal(fit$fit$config$mlp_hidden_multiplier, c(5,5))
-  expect_equal(fit$fit$config$encoder_activation, nn_elu())
+  expect_equal(fit$fit$config$encoder_activation, torch::nn_elu())
 })
 
 test_that("fit works with entmax mask-type", {

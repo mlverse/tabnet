@@ -16,7 +16,7 @@ tabnet_explain(object, new_data, stability)
 
 \method{tabnet_explain}{tabnet_pretrain}(object, new_data, stability = TRUE)
 
-\method{tabnet_explain}{model_fit}(object, new_data, stability)
+\method{tabnet_explain}{model_fit}(object, new_data, stability = FALSE)
 }
 \arguments{
 \item{object}{a TabNet fit object}

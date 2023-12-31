@@ -81,9 +81,11 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
     computed_feature_importance <- purrr::map(
       object$fit$checkpoints[(n_checkpoints-5):n_checkpoints],
       ~compute_feature_importance(reload_model(.x), data$x, data$x_na_mask),
-      .progress = "InterpreStability score within last 6 models")
+      .progress = "InterpreStability score within last 6 models") |>
+      data.frame() |>
+      set_names(as.character(seq(-5,0)))
     #
-    corr_mat <- data.frame(computed_feature_importance) |> set_names(as.character(seq(-5,0))) |> cor(method = "pearson")
+    corr_mat <- computed_feature_importance |> cor(method = "pearson")
     diag(corr_mat) <- 0
     interprestability <- (sum(corr_mat[corr_mat >= 0.9]) +
                             .8 * sum( corr_mat[corr_mat < 0.9 & corr_mat >= 0.7]) +
@@ -91,7 +93,8 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
                             .4 * sum( corr_mat[corr_mat < 0.5 & corr_mat >= 0.3]) +
                             .2 * sum( corr_mat[corr_mat < 0.3])) / (prod(dim(corr_mat)) - dim(corr_mat)[1])
   } else {
-    interprestability <- NULL
+    interprestability <- NA_real_
+    computed_feature_importance <- data.frame()
   }
 
 
@@ -100,6 +103,7 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
   output$M_explain <- convert_to_df(output$M_explain, nms)
   output$masks <- lapply(output$masks, convert_to_df, nms = nms)
   output$interprestability <- interprestability
+  output$computed_feature_importance <- computed_feature_importance
   class(output) <- "tabnet_explain"
   output
 }
@@ -110,7 +114,7 @@ tabnet_explain.tabnet_pretrain <- tabnet_explain.tabnet_fit
 
 #' @export
 #' @rdname tabnet_explain
-tabnet_explain.model_fit <- function(object, new_data, stability) {
+tabnet_explain.model_fit <- function(object, new_data, stability = FALSE) {
   tabnet_explain(parsnip::extract_fit_engine(object), new_data, stability)
 }
 
@@ -120,7 +124,7 @@ convert_to_df <- function(x, nms) {
   tibble::as_tibble(x)
 }
 
-explain_impl <- function(network, x, x_na_mask, with_stability = FALSE) {
+explain_impl <- function(network, x, x_na_mask) {
   curr_device <- network$.check$device
   withr::defer({
     network$to(device = curr_device)

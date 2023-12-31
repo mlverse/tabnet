@@ -25,7 +25,7 @@ test_that("explain provides correct result with data.frame", {
 
   ex <- tabnet_explain(fit, x)
 
-  expect_length(ex, 3)
+  expect_length(ex, 4)
   expect_length(ex[[2]], 1)
   expect_equal(nrow(ex[[1]]), nrow(x))
   expect_equal(nrow(ex[[2]][[1]]), nrow(x))
