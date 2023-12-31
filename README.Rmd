@@ -64,7 +64,7 @@ test <- attrition[test_idx,]
 rec <- recipe(Attrition ~ ., data = train) %>% 
   step_normalize(all_numeric(), -all_outcomes())
 
-fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1, learn_rate = 5e-3)
+fit <- tabnet_fit(rec, train, epochs = 35, valid_split = 0.1, learn_rate = 5e-3, verbose = FALSE)
 autoplot(fit)
 ```
 
@@ -105,7 +105,7 @@ autoplot(explain, type = "steps")
 For cases when a consistent part of your dataset has no outcome, TabNet offers a self-supervised training step allowing to model to capture predictors intrinsic features and predictors interactions, upfront the supervised task.
 
 ```{r step-pretrain}
-pretrain <- tabnet_pretrain(rec, train, epochs = 50, valid_split=0.1, learn_rate = 1e-2)
+pretrain <- tabnet_pretrain(rec, train, epochs = 70, valid_split=0.1, learn_rate = 1e-2, verbose  = FALSE, )
 autoplot(pretrain)
 ```
 
