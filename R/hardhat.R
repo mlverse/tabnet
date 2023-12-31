@@ -684,17 +684,35 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
 
 }
 
-`%update%` <- function(y, x) {
+`%!=%` <- function(x, y) {
   (is.null(x) && !is.null(y)) ||
     if (is.atomic(x) && is.atomic(y)) {
       any(x != y)
     } else if (torch::is_nn_module(x) && torch::is_nn_module(y)) {
-      any(class(x) != class(y)) || rlang::fn_fmls(y$initialize) %update% rlang::fn_fmls(x$initialize)
+      any(class(x) != class(y)) || rlang::fn_fmls(x$initialize) %!=% rlang::fn_fmls(y$initialize)
     } else {
       TRUE
     }
 
 }
+
+torch_setdiff <- function(x, y) {
+  x_nn <- purrr::map_lgl(x, ~torch::is_nn_module(.x))
+  y_nn <- purrr::map_lgl(y, ~torch::is_nn_module(.x))
+  if (sum(x_nn) == sum(y_nn)) {
+    x_init_param <- purrr::map(x[x_nn], ~rlang::fn_fmls(.x$initialize))
+    y_init_param <- purrr::map(y[y_nn], ~rlang::fn_fmls(.x$initialize))
+    x_equal_init_param <- purrr::map2_lgl(x_init_param, y_init_param, all.equal)
+    x_equal_class <- purrr::map2_lgl(x[x_nn], y[y_nn], ~all.equal(class(.x),class(.y)))
+    c(
+      setdiff(x[!x_nn], y[!y_nn]),
+      x[x_nn & !x_equal_init_param & !x_equal_class]
+    )
+  } else {
+    setdiff(x[!x_nn], y[!y_nn])
+  }
+}
+
 #' Merge the 3 lists of parameters interpretabnet_config(), config and `...`
 #'
 #' @param config the parsed config
@@ -707,7 +725,7 @@ update_config <- function(config, ...) {
   new_config <- do.call(interpretabnet_config, list(...))
   delta_config <- new_config[
     mapply(
-      function(x, y) y %update% x,
+      function(x, y) x %!=% y,
       default_config,
       new_config)
   ]

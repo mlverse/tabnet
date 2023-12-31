@@ -5,7 +5,7 @@
 #' @param alpha (float) the weight of ELU activation component.
 #' @param beta (float) the weight of PReLU activation component.
 #' @param gamma (float) the weight of SiLU activation component.
-#' @param init (float): the initial value of \eqn{a} of PReLU. Default: 0.25.
+#' @param weight (torch_tensor): the initial value of \eqn{weight} of PReLU. Default: 0.25.
 #'
 #' @return an activation function computing
 #' \eqn{\mathbf{MBwLU(input) = \alpha \times ELU(input) + \beta \times PReLU(input) + \gamma \times SiLU(input)}}
@@ -20,14 +20,15 @@
 #' @export
 nn_mb_wlu <- torch::nn_module(
   "multibranch Weighted Linear Unit",
-  initialize = function(alpha = 0.6, beta = 0.2, gamma = 0.2, init = 0.25) {
+  initialize = function(alpha = 0.6, beta = 0.2, gamma = 0.2, weight = torch::torch_tensor(0.25)) {
+    stopifnot("weight must be a torch_tensor()" = inherits(weight, "torch_tensor"))
     self$alpha <- alpha
     self$beta <- beta
     self$gamma <- gamma
-    self$init <- init
+    self$weight <- weight
   },
   forward = function(input) {
-    nnf_mb_wlu(input, self$alpha, self$beta, self$gamma, self$init)
+    nnf_mb_wlu(input, self$alpha, self$beta, self$gamma, self$weight)
   }
 )
 
@@ -36,9 +37,10 @@ nn_mb_wlu <- torch::nn_module(
 #' @seealso [nn_mb_wlu()].
 #' @export
 #' @rdname nn_mb_wlu
-nnf_mb_wlu <- function(input, alpha = 0.6, beta = 0.2, gamma = 0.2,  init = 0.25) {
-    alpha * torch::nnf_elu(input) +
-      beta * torch::nnf_prelu(input, init) +
-      gamma * torch::nnf_silu(input)
+nnf_mb_wlu <- function(input, alpha = 0.6, beta = 0.2, gamma = 0.2,  weight = torch::torch_tensor(0.25)) {
+  stopifnot("weight and input must reside on the same device" = weight$device == input$device)
+  alpha * torch::nnf_elu(input) +
+    beta * torch::nnf_prelu(input, weight) +
+    gamma * torch::nnf_silu(input)
 
 }

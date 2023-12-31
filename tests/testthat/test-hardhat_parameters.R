@@ -1,27 +1,91 @@
-test_that("errors when using an argument that do not exist", {
+test_that("configuration argument merge is correct", {
+  # merge atomic arguments
+  expect_no_error(
+    config <- tabnet_config(epochs = 37, checkpoint_epochs = 237, verbose = FALSE)
+  )
+  expect_equal(config$epochs, 37L)
+  expect_equal(config$checkpoint_epochs, 237L)
+  expect_equal(config$verbose, FALSE)
+  # merge torch_nn arguments
+  expect_no_error(
+    config <- tabnet_config(encoder_activation = nn_mb_wlu(weight = torch::torch_tensor(0.9)))
+  )
+  expect_equal_to_r(config$encoder_activation$weight, 0.9, tolerance = 1e-5)
+
+  expect_no_error(
+    config <- tabnet_config(mlp_activation = torch::nn_prelu())
+  )
+  expect_true("nn_prelu" %in% class(config$mlp_activation))
+
+})
+
+test_that("errors when using an configuration argument that do not exist", {
 
   expect_error(
     fit <- tabnet_fit(x, y, epochsas = 1),
     "unused argument"
   )
+  expect_error(
+    fit <- tabnet_fit(x, y, config = tabnet_config(epochsas = 1)),
+    "unused argument"
+  )
+
+  expect_error(
+    fit <- tabnet_pretrain(x, y, epochsas = 1),
+    "unused argument"
+  )
+  expect_error(
+    fit <- tabnet_pretrain(x, y, config = tabnet_config(epochsas = 1)),
+    "unused argument"
+  )
+
+})
+
+test_that("fit uses config parameters mix from config= and ...", {
+  skip_if(torch::backends_mps_is_available())
+  # bypass on MPS due to
+  # `error: 'mps.scatter_nd' op invalid input tensor shape: updates tensor shape and data tensor shape must match along inner dimensions
+  # `MPSGraphExecutable.mm:1710: failed assertion `Error: MLIR pass manager failed'
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  fit <- tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25,
+                    config = tabnet_config(decision_width=3, attention_width=5, cat_emb_dim = 2, verbose = FALSE))
+  expect_no_error(
+    predict(fit, attrition)
+  )
+
+  expect_equal(fit$fit$config$verbose, FALSE)
+  expect_equal(fit$fit$config$valid_split, 0.25)
+  expect_equal(fit$fit$config$n_d, 3)
+  expect_equal(fit$fit$config$n_a, 5)
 
 })
 
 test_that("pretrain and fit both work with early stopping", {
 
   expect_message(
-    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 100, valid_split = 0.5, verbose=TRUE,
-                                early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
+    pretrain <- tabnet_pretrain(attrix, attriy, epochs = 101, valid_split = 0.5, verbose=TRUE,
+                                early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.3,
+                                checkpoint_epochs = 200),
     "Early stopping at epoch"
   )
   expect_lt(length(pretrain$fit$metrics),100)
 
+  expect_equal(pretrain$fit$config$valid_split, 0.5)
+  expect_equal(pretrain$fit$config$verbose, TRUE)
+  expect_equal(pretrain$fit$config$epochs, 101L)
+
   expect_message(
-    fit <- tabnet_fit(attrix, attriy, epochs = 100, valid_split = 0.5, verbose=TRUE,
-                      early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
+    fit <- tabnet_fit(attrix, attriy, epochs = 99, valid_split = 0.5, verbose=TRUE,
+                      early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2,
+                      checkpoint_epochs = 200),
     "Early stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),100)
+
+  expect_equal(fit$fit$config$verbose, TRUE)
+  expect_equal(fit$fit$config$valid_split, 0.5)
+  expect_equal(fit$fit$config$epochs, 99L)
 
 })
 
@@ -31,7 +95,8 @@ test_that("early stopping works wo validation split", {
   expect_message(
     pretrain <- tabnet_pretrain(attrix, attriy, epochs = 100, verbose=TRUE,
                                 early_stopping_monitor="train_loss",
-                                early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
+                                early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2,
+                                checkpoint_epochs = 200),
     "Early stopping at epoch"
   )
   expect_lt(length(pretrain$fit$metrics),100)
@@ -47,7 +112,8 @@ test_that("early stopping works wo validation split", {
   expect_message(
     fit <- tabnet_fit(attrix, attriy, epochs = 200, verbose=TRUE,
                       early_stopping_monitor="train_loss",
-                      early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.3),
+                      early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.3,
+                      checkpoint_epochs = 200),
     "Early stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),200)
@@ -62,12 +128,15 @@ test_that("early stopping works wo validation split", {
 })
 
 test_that("configuration with categorical_embedding_dimension vector works", {
-
-  config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2))
+  skip_if(torch::backends_mps_is_available())
+  # bypass on MPS due to
+  # `error: 'mps.scatter_nd' op invalid input tensor shape: updates tensor shape and data tensor shape must match along inner dimensions
+  # `MPSGraphExecutable.mm:1710: failed assertion `Error: MLIR pass manager failed'
+  config <- tabnet_config(cat_emb_dim=c(1,1,2,2,1,1,1,2,1,1,1,2,2,2), epochs = 1, valid_split = 0.2,
+                          verbose = FALSE)
 
   expect_no_error(
-    fit <- tabnet_fit(attrix, attriy, epochs = 1, valid_split = 0.2, config=config,
-                      verbose = FALSE)
+    fit <- tabnet_fit(attrix, attriy, config = config)
   )
 })
 

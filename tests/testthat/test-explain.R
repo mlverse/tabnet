@@ -148,7 +148,7 @@ test_that("Importance is skipped if skip_importance flag is used", {
 
   expect_equal(fit$fit$importances, NULL)
 
-  fit <- tabnet_fit(x, y, epochs = 30,
+  fit <- tabnet_fit(x, y, epochs = 60,
                     num_steps = 1,
                     batch_size = 512,
                     attention_width = 1,
