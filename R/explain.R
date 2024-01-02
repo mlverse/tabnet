@@ -68,6 +68,7 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
   }
   # Enforces column order, type, column names, etc
   processed <- hardhat::forge(new_data_df, object$blueprint, outcomes = FALSE)
+  nms <- colnames(processed$predictors)
   data <- resolve_data(processed$predictors, y = rep(1, nrow(processed$predictors)))
   device <- get_device_from_config(object$fit$config)
   data <- to_device(data, device)
@@ -85,6 +86,7 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
       data.frame() %>%
       rlang::set_names(as.character(seq(-5,0)))
     #
+    rownames(computed_feature_importance) <- nms
     corr_mat <- computed_feature_importance %>% stats::cor(method = "pearson")
     diag(corr_mat) <- 0
     interprestability <- (sum(corr_mat[corr_mat >= 0.9]) +
@@ -99,7 +101,6 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
 
 
   # convert stuff to matrix with colnames
-  nms <- colnames(processed$predictors)
   output$M_explain <- convert_to_df(output$M_explain, nms)
   output$masks <- lapply(output$masks, convert_to_df, nms = nms)
   output$interprestability <- interprestability

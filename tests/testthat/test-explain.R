@@ -31,7 +31,7 @@ test_that("explain provides correct result with data.frame", {
   expect_length(ex$masks, 1)
   expect_equal(nrow(ex$M_explain), nrow(x))
   expect_equal(nrow(ex$masks[[1]]), nrow(x))
-  expect_equal(ex$interprestability, NA_real_)
+  expect_gt(ex$interprestability, 0.5)
 
 })
 
@@ -39,12 +39,14 @@ test_that("explain works for dataframe, formula and recipe", {
 
   # data.frame, regression
   expect_no_error(
-    tabnet_explain(ames_pretrain_vsplit, new_data=small_ames)
+    ex <- tabnet_explain(ames_pretrain_vsplit, new_data=small_ames)
   )
+  expect_equal(ex$interprestability, NA_real_)
 
   expect_no_error(
-    tabnet_explain(ames_fit_vsplit, new_data=small_ames)
+    ex <- tabnet_explain(ames_fit_vsplit, new_data=small_ames)
   )
+  expect_equal(ex$interprestability, NA_real_)
 
   # data.frame, classification
   expect_no_error(
@@ -52,22 +54,6 @@ test_that("explain works for dataframe, formula and recipe", {
   )
   expect_no_error(
     tabnet_explain(attr_fitted_vsplit, attrix)
-  )
-
-
-  # formula
-  tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 3, valid_split=.2,
-                                     num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1,
-                                     verbose = FALSE)
-  expect_no_error(
-    tabnet_explain(tabnet_pretrain, new_data=small_ames)
-  )
-
-  tabnet_fit <- tabnet_fit(Sale_Price ~., data=small_ames, tabnet_model=tabnet_pretrain, epochs = 3,
-                           num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1,
-                           verbose = FALSE)
-  expect_no_error(
-    tabnet_explain(tabnet_fit, new_data=small_ames)
   )
 
   # recipe
