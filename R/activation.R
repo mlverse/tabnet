@@ -20,15 +20,14 @@
 #' @export
 nn_mb_wlu <- torch::nn_module(
   "multibranch Weighted Linear Unit",
-  initialize = function(alpha = 0.6, beta = 0.2, gamma = 0.2, weight = torch::torch_tensor(0.25)) {
-    stopifnot("weight must be a torch_tensor()" = inherits(weight, "torch_tensor"))
+  initialize = function(alpha = 0.6, beta = 0.2, gamma = 0.2, weight = 0.25) {
     self$alpha <- alpha
     self$beta <- beta
     self$gamma <- gamma
-    self$weight <- weight
+    self$prelu <- torch::nn_prelu(init = weight)
   },
   forward = function(input) {
-    nnf_mb_wlu(input, self$alpha, self$beta, self$gamma, self$weight)
+    nnf_mb_wlu(input, self$alpha, self$beta, self$gamma, self$prelu)
   }
 )
 
@@ -37,10 +36,9 @@ nn_mb_wlu <- torch::nn_module(
 #' @seealso [nn_mb_wlu()].
 #' @export
 #' @rdname nn_mb_wlu
-nnf_mb_wlu <- function(input, alpha = 0.6, beta = 0.2, gamma = 0.2,  weight = torch::torch_tensor(0.25)) {
-  stopifnot("weight and input must reside on the same device" = weight$device == input$device)
+nnf_mb_wlu <- function(input, alpha = 0.6, beta = 0.2, gamma = 0.2,  prelu) {
   alpha * torch::nnf_elu(input) +
-    beta * torch::nnf_prelu(input, weight) +
+    beta * prelu(input) +
     gamma * torch::nnf_silu(input)
 
 }

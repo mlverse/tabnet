@@ -94,7 +94,7 @@ explain <- tabnet_explain(fit, test)
 autoplot(explain)
 ```
 
-or at **each layer** through the `type = "steps"` option:
+or at **each attention step** through the `type = "steps"` option:
 
 ```{r step-explain}
 autoplot(explain, type = "steps")

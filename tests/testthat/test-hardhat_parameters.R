@@ -8,9 +8,9 @@ test_that("configuration argument merge is correct", {
   expect_equal(config$verbose, FALSE)
   # merge torch_nn arguments
   expect_no_error(
-    config <- tabnet_config(encoder_activation = nn_mb_wlu(weight = torch::torch_tensor(0.9)))
+    config <- tabnet_config(encoder_activation = nn_mb_wlu(weight = 0.9))
   )
-  expect_equal_to_r(config$encoder_activation$weight, 0.9, tolerance = 1e-5)
+  expect_equal_to_r(config$encoder_activation$prelu$weight, 0.9, tolerance = 1e-5)
 
   expect_no_error(
     config <- tabnet_config(mlp_activation = torch::nn_prelu())
@@ -215,18 +215,18 @@ test_that("fit uses config parameters mix from config= and ...", {
 
 })
 
-test_that("... has precedence over config = for atomic, vectors and nn functions", {
+test_that("... has precedence over `config =` for atomic, vectors and nn_functions", {
 
   expect_no_error(
-    fit <- tabnet_fit(x, y, attrition, epochs = 1,
-                      decision_width = 5, mlp_hidden_multiplier = c(5,5), encoder_activation = torch::nn_elu(),
+    fit <- tabnet_fit(x, y, epochs = 1, decision_width = 5, mlp_hidden_multiplier = c(5,5),
+                      encoder_activation = torch::nn_elu(alpha = 0.72),
                       config = tabnet_config(decision_width = 3, mlp_hidden_multiplier = c(3,3),
                                              encoder_activation = torch::nn_gelu())
     )
   )
-  expect_equal(fit$fit$config$decision_width, 5)
+  expect_equal(fit$fit$config$n_d, 5)
   expect_equal(fit$fit$config$mlp_hidden_multiplier, c(5,5))
-  expect_equal(fit$fit$config$encoder_activation, torch::nn_elu())
+  expect_equal(fit$fit$config$encoder_activation$alpha, 0.72)
 })
 
 test_that("fit works with entmax mask-type", {

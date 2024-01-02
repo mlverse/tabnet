@@ -66,7 +66,7 @@ test_that("serialization with saveRDS just works", {
 
   predictions <-  predict(ames_fit, ames)
 
-  tmp <- tempfile("model", fileext = "rds")
+  tmp <- tempfile("model", fileext = ".rds")
   withr::local_file(saveRDS(ames_fit, tmp))
 
   # rm(fit)
@@ -113,7 +113,7 @@ test_that("print module works even after a reload from disk", {
   withr::with_options(new = c(cli.width = 50),
                       expect_snapshot_output(ames_fit))
 
-  tmp <- tempfile("model", fileext = "rds")
+  tmp <- tempfile("model", fileext = ".rds")
   withr::local_file(saveRDS(ames_fit, tmp))
   fit2 <- readRDS(tmp)
 
@@ -174,7 +174,7 @@ test_that("we can prune head of restored models from disk", {
   testthat::skip_on_os("linux")
   testthat::skip_on_os("windows")
 
-  tmp <- tempfile("model", fileext = "rds")
+  tmp <- tempfile("model", fileext = ".rds")
   withr::local_file(saveRDS(ames_pretrain, tmp))
   ames_pretrain2 <- readRDS(tmp)
   expect_no_error(pruned_pretrain <- torch::nn_prune_head(ames_pretrain2, 1))
@@ -183,7 +183,7 @@ test_that("we can prune head of restored models from disk", {
   })
 
 
-  tmp <- tempfile("model", fileext = "rds")
+  tmp <- tempfile("model", fileext = ".rds")
   withr::local_file(saveRDS(ames_fit, tmp))
   ames_fit2 <- readRDS(tmp)
   expect_no_error(pruned_fit <- torch::nn_prune_head(ames_fit2, 1))

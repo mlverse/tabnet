@@ -261,12 +261,6 @@ interpretabnet_config <- function(mask_type = "entmax",
                 mlp_activation = mlp_activation,
                 encoder_activation = encoder_activation,
                 ...)
-  # align  nn_mb_wlu weight device with the config device
-  device <- get_device_from_config(interpretabnet_conf)
-  if (!grepl(device,interpretabnet_conf$encoder_activation$weight$device )) {
-    # move the weight to the config device
-    interpretabnet_conf$encoder_activation$weight <- interpretabnet_conf$encoder_activation$weight$to(device = device)
-  }
   interpretabnet_conf
 }
 
@@ -730,7 +724,9 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   )
   coro::loop(for (batch in predict_dl) {
     batch <- to_device(batch, device)
-    yhat <- c(yhat, network(batch$x, batch$x_na_mask)[[1]])
+    torch::with_no_grad({
+      yhat <- c(yhat, network(batch$x, batch$x_na_mask)[[1]])
+    })
   })
   # bind rows of the batches
   torch::torch_cat(yhat)

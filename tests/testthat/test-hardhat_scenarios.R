@@ -32,7 +32,7 @@ test_that("we can change the tabnet_options between training epoch", {
 
 test_that("epoch counter is valid for retraining from a checkpoint", {
 
-  tmp <- tempfile("model", fileext = "rds")
+  tmp <- tempfile("model", fileext = ".rds")
   withr::local_file(saveRDS(ames_fit, tmp))
 
   fit1 <- readRDS(tmp)
@@ -95,7 +95,7 @@ test_that("serialization of tabnet_pretrain with saveRDS just works", {
   fit <- tabnet_fit(x, y, ames_pretrain, epoch = 1, learn_rate = 1e-12,
                     verbose = FALSE)
 
-  tmp <- tempfile("model", fileext = "rds")
+  tmp <- tempfile("model", fileext = ".rds")
   withr::local_file(saveRDS(ames_pretrain, tmp))
 
   pretrain2 <- readRDS(tmp)
