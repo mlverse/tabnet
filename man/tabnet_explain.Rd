@@ -34,11 +34,11 @@ TabNet's paper.
 \item \code{masks} a list containing the masks for each step.
 \item \code{interprestability} The InterpreStability score of model with its last 5 checkpoints.
 according to Interpretabnet paper, the score represent the stability of feature importance mask:
-• InterpreStability ∈ \link{0.9, 1}: Very high stability
-• InterpreStability ∈ \link{0.7, 0.9}: High stability
-• InterpreStability ∈ \link{0.5, 0.7}: Moderate stability
-• InterpreStability ∈ \link{0.3, 0.5}: Low stability
-• InterpreStability ∈ \link{0, 0.3}: Little if any stability
+• InterpreStability ∈ \verb{[0.9, 1]}: Very high stability
+• InterpreStability ∈ \verb{[0.7, 0.9[}: High stability
+• InterpreStability ∈ \verb{[0.5, 0.7[}: Moderate stability
+• InterpreStability ∈ \verb{[0.3, 0.5[}: Low stability
+• InterpreStability ∈ \verb{[0, 0.3[}: Little if any stability
 }
 }
 \description{

@@ -5,20 +5,9 @@
 \alias{nnf_mb_wlu}
 \title{Multi-branch Weighted Linear Unit (MB-wLU) nn module.}
 \usage{
-nn_mb_wlu(
-  alpha = 0.6,
-  beta = 0.2,
-  gamma = 0.2,
-  weight = torch::torch_tensor(0.25)
-)
+nn_mb_wlu(alpha = 0.6, beta = 0.2, gamma = 0.2, weight = 0.25)
 
-nnf_mb_wlu(
-  input,
-  alpha = 0.6,
-  beta = 0.2,
-  gamma = 0.2,
-  weight = torch::torch_tensor(0.25)
-)
+nnf_mb_wlu(input, alpha = 0.6, beta = 0.2, gamma = 0.2, prelu)
 }
 \arguments{
 \item{alpha}{(float) the weight of ELU activation component.}
@@ -27,10 +16,13 @@ nnf_mb_wlu(
 
 \item{gamma}{(float) the weight of SiLU activation component.}
 
-\item{weight}{(torch_tensor): the initial value of \eqn{weight} of PReLU. Default: 0.25.}
+\item{weight}{(float): the initial value of \eqn{weight} of PReLU. Default: 0.25.}
 
 \item{input}{(N,*) tensor, where * means, any number of additional
 dimensions}
+
+\item{prelu}{an initialized torch::nn_prelu().
+See \code{\link[=nn_mb_wlu]{nn_mb_wlu()}} for more information.}
 }
 \value{
 an activation function computing
@@ -40,7 +32,6 @@ an activation function computing
 Multi-branch Weighted Linear Unit (MB-wLU) nn module.
 
 Applies the Multi-branch Weighted Linear Unit (MB-wLU) function, element_wise.
-See \code{\link[=nn_mb_wlu]{nn_mb_wlu()}} for more information.
 }
 \examples{
 \dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

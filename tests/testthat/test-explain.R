@@ -12,7 +12,8 @@ test_that("explain provides correct result with data.frame", {
 
   y <- x$x
 
-  fit <- tabnet_fit(x, y, epochs = 15,
+  fit <- tabnet_fit(x, y, epochs = 36,
+                    checkpoint_epochs = 6,
                     num_steps = 1,
                     batch_size = 512,
                     attention_width = 1,
@@ -25,10 +26,12 @@ test_that("explain provides correct result with data.frame", {
 
   ex <- tabnet_explain(fit, x)
 
+  expect_s3_class(ex, "tabnet_explain")
   expect_length(ex, 4)
-  expect_length(ex[[2]], 1)
-  expect_equal(nrow(ex[[1]]), nrow(x))
-  expect_equal(nrow(ex[[2]][[1]]), nrow(x))
+  expect_length(ex$masks, 1)
+  expect_equal(nrow(ex$M_explain), nrow(x))
+  expect_equal(nrow(ex$masks[[1]]), nrow(x))
+  expect_equal(ex$interprestability, NA_real_)
 
 })
 

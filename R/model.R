@@ -250,6 +250,8 @@ tabnet_config <- function(
 #'
 #' This change few default values of `tabnet_config()` to turn model into InterpreTabnet
 #'
+#' @param ... any `tabnet_config()` parameter.
+#'
 #' @rdname tabnet_config
 #' @export
 interpretabnet_config <- function(mask_type = "entmax",
@@ -306,8 +308,6 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 }
 
 train_batch <- function(network, optimizer, batch, config) {
-  # NULLing values to avoid a R-CMD Check Note "No visible binding for global variable"
-  out <- M_loss <- NULL
   # forward pass
   c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
   # if target is multi-outcome, loss has to be applied to each label-group
@@ -360,8 +360,6 @@ train_batch <- function(network, optimizer, batch, config) {
 }
 
 valid_batch <- function(network, batch, config) {
-  # NULLing values to avoid a R-CMD Check Note "No visible binding for global variable"
-  out <- M_loss <- NULL
   # forward pass
   c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
   # loss has to be applied to each label-group when output_dim is a vector

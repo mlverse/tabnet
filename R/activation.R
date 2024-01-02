@@ -5,7 +5,7 @@
 #' @param alpha (float) the weight of ELU activation component.
 #' @param beta (float) the weight of PReLU activation component.
 #' @param gamma (float) the weight of SiLU activation component.
-#' @param weight (torch_tensor): the initial value of \eqn{weight} of PReLU. Default: 0.25.
+#' @param weight (float): the initial value of \eqn{weight} of PReLU. Default: 0.25.
 #'
 #' @return an activation function computing
 #' \eqn{\mathbf{MBwLU(input) = \alpha \times ELU(input) + \beta \times PReLU(input) + \gamma \times SiLU(input)}}
@@ -32,6 +32,8 @@ nn_mb_wlu <- torch::nn_module(
 )
 
 #' Applies the Multi-branch Weighted Linear Unit (MB-wLU) function, element_wise.
+#'
+#' @param prelu an initialized torch::nn_prelu().
 #' See [nn_mb_wlu()] for more information.
 #' @seealso [nn_mb_wlu()].
 #' @export

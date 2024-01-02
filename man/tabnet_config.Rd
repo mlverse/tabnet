@@ -172,6 +172,8 @@ loading. 0 means that the data will be loaded in the main process.
 (default: \code{0})}
 
 \item{skip_importance}{should feature importance calculation be skipped (default \code{FALSE})}
+
+\item{...}{any \code{tabnet_config()} parameter.}
 }
 \value{
 A named list with all parameters of the TabNet implementation.
