@@ -3,12 +3,14 @@
 ## Breaking changes
 
 * tabnet pretrain and fit configuration now defaults to `interpretabnet_config()`. You should explicitly use `config = tabnet_confg()` to restore previous configuration parameters.
-* Change default values for `verbose` to TRUE and default configuration for pretraining and 
-supervised learning to `interpretabnet_config()`.
+* Change default values for `verbose` to TRUE.
 
 ## New features
 
-* Implement InterpretabNet through configuration parameters through `interppretabnet_config()`.
+* Implement InterpretabNet through 
+- 3 new configuration parameters `mlp_hidden_multiplier`,`mlp_activation`,`encoder_activation`  all packed in the new  `interpretabnet_config()` command.
+- the Multi-branch Weighted Linear Unit activation `nn_mb_wlu()`
+- interprestability score output added to `tabnet_explain()`
 
 ## Bugfixes
 
