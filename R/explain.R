@@ -132,38 +132,6 @@ explain_impl <- function(network, x, x_na_mask) { #, with_stability = FALSE
   network$to(device=x$device)
   c(M_explain_emb_dim, masks_emb_dim) %<-% network$forward_masks(x, x_na_mask)
 
-  # if (with_stability) {
-  #   # TODO
-  #   # Compute InterpreStability value through 5-group, the lazy way
-  #   # define 5 sampled id groups
-  #   obs_group <- lapply(1:5, FUN = sample.int, n = nrow(x), size = ceiling(nrow(x)/5))
-  #   x_group <- purrr::map(obs_group, ~x[.x,] )
-  #   x_na_mask_group <- purrr::map(obs_group, ~x_na_mask[.x,] )
-  #
-  #   M_explain_mask_lst <- purrr::map2(x_group, x_na_mask_group, network$forward_masks)
-  #   M_explain <- purrr::map(M_explain_mask_lst, ~sum_embedding_masks(
-  #     mask = .x[[1]],
-  #     input_dim = network$input_dim,
-  #     cat_idx = network$cat_idxs,
-  #     cat_emb_dim = network$cat_emb_dim
-  #   )
-  #   )
-  #   m <- purrr::map(M_explain, ~as.numeric(as.matrix(.x$sum(dim = 1)$detach()$to(device = "cpu"))))
-  #   compute_feature_importance <-  purrr::map(m, ~.x/sum(.x))
-  #
-  #   corr_mat <- torch::torch_stack(compute_feature_importance, dim = 1) %>%
-  #     as.matrix() %>% t() %>% stats::cor(method = "pearson")
-  #   corr_mat <- corr_mat * (torch::torch_ones_like(corr_mat) - torch::torch_eye(n = dim(corr_mat)[1] ))
-  #   interprestability <- (corr_mat[corr_mat >=0.9]$sum() +
-  #     .8 * corr_mat[corr_mat < 0.9 & corr_mat >= 0.7]$sum() +
-  #     .6 * corr_mat[corr_mat < 0.7 & corr_mat >= 0.5]$sum() +
-  #     .4 * corr_mat[corr_mat < 0.5 & corr_mat >= 0.3]$sum() +
-  #     .2 * corr_mat[corr_mat < 0.3]$sum()) / (corr_mat$shape[1] * (corr_mat$shape[2] - 1))
-  #
-  # } else {
-  #   interprestability <- NULL
-  # }
-
   # summarize the categorical embedding into 1 column
   # per variable
   M_explain <- sum_embedding_masks(
