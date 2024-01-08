@@ -1,0 +1,123 @@
+---
+title: "Interpretabnet"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interpretabnet}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+  out.width = "100%", 
+  out.height = "100%", 
+  fig.width = 14
+)
+```
+
+```{r setup}
+library(tabnet)
+library(purrr)
+library(ggplot2)
+library(patchwork)
+```
+
+# Interprestability 
+
+Interprestability score associated with `tabnet_explain()` results, is providing a metric for the stability of mask between models.
+
+Papers states that Interpretability score over 0.9 relates very-high stability, between 0.7 and 0.9 is high stability, between 0.5 and 0.7 is moderate and between 0.3 and 0.5 low stability of the interpretation on the model.
+
+
+The implementation here compares the explainability parameters between the last 5 model checkpoints. 
+Let's experiment those on a pretraining scenario on the `ames` dataset : 
+
+## Interprestability on ames, the pretraining 
+
+Let's train 6 models on ames dataset
+
+```{r, 6 models pretrain}
+data(ames, package = "modeldata")
+pretrain_lst <- map(1:6, ~tabnet_pretrain(Sale_Price ~., data=ames,
+                                   epochs = 60, valid_split = 0.2, checkpoint_epoch = 10,
+                                   num_steps = 3, attention_width = 2, num_shared = 2,
+                                   num_independent = 2, verbose = FALSE)
+                   , .progress = TRUE)
+
+```
+
+with first a close look at their training loss
+
+```{r}
+autoplot(pretrain_lst[[1]]) + 
+  autoplot(pretrain_lst[[2]]) + 
+  autoplot(pretrain_lst[[3]]) + 
+  autoplot(pretrain_lst[[4]]) + 
+  autoplot(pretrain_lst[[5]])  +
+  autoplot(pretrain_lst[[6]])  +
+  plot_layout(axes = "collect", guides = "collect")
+  
+```
+
+### evolution of the Interpretabnet score along the checkpoints
+
+
+```{r, explain pretraining}
+explain_lst <- map(pretrain_lst, tabnet_explain, new_data=ames)
+interprestability <- map_dbl(explain_lst, "interprestability")
+interprestability
+```
+
+### plot the 6 different models
+```{r, plot explain pretrain}
+autoplot(explain_lst[[1]], quantile = 0.99) + 
+  autoplot(explain_lst[[2]], quantile = 0.99) + 
+  autoplot(explain_lst[[3]], quantile = 0.99) + 
+  autoplot(explain_lst[[4]], quantile = 0.99) + 
+  autoplot(explain_lst[[5]], quantile = 0.99)  +
+  autoplot(explain_lst[[6]], quantile = 0.99)  +
+  plot_layout(axes = "collect", guides = "collect")
+  
+```
+## Interprestability on ames, the training 
+
+```{r, 6 models fit & explain}
+best_pretrain <- pretrain_lst[[which(interprestability == max(interprestability))]]
+fit_lst <- map(1:6, ~tabnet_fit(Sale_Price ~., data=ames, tabnet_model = best_pretrain,
+                                   epochs = 60, valid_split = 0.2, checkpoint_epoch = 10,
+                                   num_steps = 3, attention_width = 2, num_shared = 2,
+                                   num_independent = 2, verbose = FALSE)
+                   , .progress = TRUE)
+```
+and their training plot
+
+```{r}
+autoplot(fit_lst[[1]]) + 
+  autoplot(fit_lst[[2]]) + 
+  autoplot(fit_lst[[3]]) + 
+  autoplot(fit_lst[[4]]) + 
+  autoplot(fit_lst[[5]])  +
+  autoplot(fit_lst[[6]])  +
+  plot_layout(axes = "collect", guides = "collect")
+  
+```
+
+### evolution of the Interpretabnet score along the checkpoints
+```{r}
+explain_lst <- map(fit_lst, tabnet_explain, new_data=ames)
+map_dbl(explain_lst, "interprestability")
+```
+
+### plot the evolution
+```{r, plot explain fit}
+autoplot(explain_lst[[1]], quantile = 0.99) + 
+  autoplot(explain_lst[[2]], quantile = 0.99) + 
+  autoplot(explain_lst[[3]], quantile = 0.99) + 
+  autoplot(explain_lst[[4]], quantile = 0.99) + 
+  autoplot(explain_lst[[5]], quantile = 0.99)  +
+  autoplot(explain_lst[[6]], quantile = 0.99)  +
+  plot_layout(axes = "collect", guides = "collect")
+  
+```

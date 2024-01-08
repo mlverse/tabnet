@@ -62,6 +62,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #'   or `"steps"` for one heatmap at each mask step.
 #' @param quantile numerical value between 0 and 1. Provides quantile clipping of the
 #'  mask values
+#' @param title  a title to add to the figure.
 #' @param ...  not used.
 #' @return A `ggplot` object.
 #' @details
@@ -89,7 +90,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
 #' ames_explain <- tabnet_explain(ames_fit, x)
 #' autoplot(ames_explain, quantile = 0.99)
-autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
+autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, title = "", ...) {
   type <- match.arg(type)
 
   if (type == "steps") {
@@ -116,7 +117,10 @@ autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quant
     ggplot2::geom_tile() +
     ggplot2::scale_fill_viridis_c() +
     ggplot2::facet_wrap(~step) +
-    ggplot2::theme_minimal()
+    ggplot2::theme_minimal() +
+    ggtitle(label = title, subtitle = glue::glue(
+      "Interprestability score: {prettyunits::pretty_round(object$interprestability,digits = 3)}"
+      ))
   p
 }
 
