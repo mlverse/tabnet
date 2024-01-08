@@ -11,6 +11,7 @@
 - 3 new configuration parameters `mlp_hidden_multiplier`,`mlp_activation`,`encoder_activation`  all packed in the new  `interpretabnet_config()` command.
 - the Multi-branch Weighted Linear Unit activation `nn_mb_wlu()`
 - interprestability score output added to `tabnet_explain()`
+* Extend parsnip model argument to the full list of tabnet config parameters.
 
 ## Bugfixes
 
