@@ -1,9 +1,9 @@
-if (torch::cuda_is_available()) {
-  device <- "cuda"
-} else {
-  device <- "cpu"
-}
-
+dev <- dplyr::case_when(
+  torch::cuda_is_available() ~ "cuda",
+  torch::backends_mps_is_available() ~ "mps",
+  TRUE ~ "cpu"
+)
+dev_tt <- torch::torch_tensor(1)$to(device = dev)$device
 
 test_that("resolve_data works through a dataloader", {
   data("ames", package = "modeldata")
@@ -27,14 +27,22 @@ test_that("resolve_data works through a dataloader", {
     shuffle = FALSE #,
     # num_workers = 0L
   )
+  # device
+  device <- tabnet:::get_device_from_config(list(device="auto"))
+  expect_equal(device, dev)
+
   expect_no_error(
     coro::loop(for (batch in train_dl) {
+      batch <- tabnet:::to_device(batch, device)
       expect_tensor_shape(batch$x, c(2000, 73))
       expect_true(batch$x$dtype == torch::torch_float())
+      expect_true(batch$x$device == dev_tt)
       expect_tensor_shape(batch$x_na_mask, c(2000, 73))
       expect_true(batch$x_na_mask$dtype == torch::torch_bool())
+      expect_true(batch$x_na_mask$device == dev_tt)
       expect_tensor_shape(batch$y, c(2000, 1))
       expect_true(batch$y$dtype == torch::torch_float())
+      expect_true(batch$y$device == dev_tt)
       expect_tensor_shape(batch$cat_idx, 40)
       expect_true(batch$cat_idx$dtype == torch::torch_long())
       expect_equal_to_r(batch$output_dim, 1L)
@@ -76,8 +84,15 @@ test_that("resolve_data works through a dataloader without nominal variables", {
     shuffle = FALSE #,
     # num_workers = 0L
   )
+  # device
+  device <- tabnet:::get_device_from_config(list(device="auto"))
+
   expect_no_error(
     coro::loop(for (batch in train_dl) {
+      batch <- tabnet:::to_device(batch, device)
+      expect_true(batch$x$device == dev_tt)
+      expect_true(batch$x_na_mask$device == dev_tt)
+      expect_true(batch$y$device == dev_tt)
       expect_tensor_shape(batch$x, c(2000, 3))
       expect_true(batch$x$dtype == torch::torch_float())
       expect_tensor_shape(batch$x_na_mask, c(2000, 3))
@@ -92,7 +107,6 @@ test_that("resolve_data works through a dataloader without nominal variables", {
       expect_true(batch$input_dim$dtype == torch::torch_long())
       expect_tensor_shape(batch$cat_dims, 0)
       expect_true(batch$cat_dims$dtype == torch::torch_long())
-
     })
   )
 
@@ -121,8 +135,15 @@ test_that("resolve_data works for multioutput regression", {
     shuffle = FALSE #,
     # num_workers = 0L
   )
+  # device
+  device <- tabnet:::get_device_from_config(list(device="auto"))
+
   expect_no_error(
     coro::loop(for (batch in train_dl) {
+      batch <- tabnet:::to_device(batch, device)
+      expect_true(batch$x$device == dev_tt)
+      expect_true(batch$x_na_mask$device == dev_tt)
+      expect_true(batch$y$device == dev_tt)
       expect_tensor_shape(batch$x, c(2000, 72))
       expect_true(batch$x$dtype == torch::torch_float())
       expect_tensor_shape(batch$x_na_mask, c(2000, 72))
@@ -164,8 +185,15 @@ test_that("resolve_data works for multioutput classification", {
     shuffle = FALSE #,
     # num_workers = 0L
   )
+  # device
+  device <- tabnet:::get_device_from_config(list(device="auto"))
+
   expect_no_error(
     coro::loop(for (batch in train_dl) {
+      batch <- tabnet:::to_device(batch, device)
+      expect_true(batch$x$device == dev_tt)
+      expect_true(batch$x_na_mask$device == dev_tt)
+      expect_true(batch$y$device == dev_tt)
       expect_tensor_shape(batch$x, c(2000, 72))
       expect_true(batch$x$dtype == torch::torch_float())
       expect_tensor_shape(batch$x_na_mask, c(2000, 72))
