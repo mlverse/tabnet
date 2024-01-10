@@ -25,6 +25,8 @@ library(tibble)
 set.seed(202307)
 ```
 
+{tabnet} provides hierarchical outcomes classification capability thanks to a C-HMCN classification head that is used as soon as the dataset is a {data.tree} Node. Lets demonstrate this capability on the `starwars` toy dataset.
+
 ## Data preparation
 
 The supported data format for hierarchical classification is the `Node` object format from package `{data.tree}`.

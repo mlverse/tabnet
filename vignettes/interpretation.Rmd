@@ -28,9 +28,9 @@ set.seed(1)
 torch::torch_manual_seed(1)
 ```
 
-TabNet claims to be an interpretable model because the underlying neural
-network architecture uses feature selection masks that can help identify
-which features were used at each step.
+TabNet provides interpretable model as the underlying neural
+network architecture uses a feature selection masks that help identify
+which features are used at each step.
 
 The paper also defines an aggregate measure that combines the masks of
 each step into a single measure.

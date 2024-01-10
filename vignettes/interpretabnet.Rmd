@@ -40,7 +40,8 @@ Let's train 6 models on ames dataset
 
 ```{r, 6 models pretrain}
 data(ames, package = "modeldata")
-pretrain_lst <- map(1:6, ~tabnet_pretrain(Sale_Price ~., data=ames,
+pretrain_lst <- map(1:6, ~tabnet_pretrain(Sale_Price ~., 
+                                   data=ames |> select(-Sale_Price),
                                    epochs = 60, valid_split = 0.2, checkpoint_epoch = 10,
                                    num_steps = 3, attention_width = 2, num_shared = 2,
                                    num_independent = 2, verbose = FALSE)
