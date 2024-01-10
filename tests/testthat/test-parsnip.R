@@ -1,9 +1,34 @@
-test_that("multiplication works", {
+test_that("parsnip fit model works", {
 
   data("ames", package = "modeldata")
 
+  # default params
   expect_no_error(
     model <- tabnet() %>%
+      parsnip::set_mode("regression") %>%
+      parsnip::set_engine("torch")
+  )
+
+  expect_no_error(
+    fit <- model %>%
+      parsnip::fit(Sale_Price ~ ., data = ames)
+  )
+
+  # some setup params
+  expect_no_error(
+    model <- tabnet(epochs = 2, learn_rate = 1e-5) %>%
+      parsnip::set_mode("regression") %>%
+      parsnip::set_engine("torch")
+  )
+
+  expect_no_error(
+    fit <- model %>%
+      parsnip::fit(Sale_Price ~ ., data = ames)
+  )
+
+  # new batch of setup params
+  expect_no_error(
+    model <- tabnet(penalty = 0.2, verbose = FALSE, early_stopping_tolerance = 1e-3) %>%
       parsnip::set_mode("regression") %>%
       parsnip::set_engine("torch")
   )
