@@ -26,6 +26,7 @@ data(starwars)
 starwars_tree <- starwars \%>\%
   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/")) \%>\%
   as.Node()
-node_to_df(starwars_tree)
+node_to_df(starwars_tree)$x \%>\% head()
+node_to_df(starwars_tree)$y \%>\% head()
 \dontshow{\}) # examplesIf}
 }

@@ -6,35 +6,50 @@
 \usage{
 tabnet(
   mode = "unknown",
-  epochs = NULL,
-  penalty = NULL,
-  batch_size = NULL,
-  learn_rate = NULL,
+  cat_emb_dim = NULL,
   decision_width = NULL,
   attention_width = NULL,
   num_steps = NULL,
-  feature_reusage = NULL,
-  virtual_batch_size = NULL,
+  mask_type = NULL,
+  mlp_hidden_multiplier = NULL,
+  mlp_activation = NULL,
+  encoder_activation = NULL,
   num_independent = NULL,
   num_shared = NULL,
-  momentum = NULL
+  num_independent_decoder = NULL,
+  num_shared_decoder = NULL,
+  penalty = NULL,
+  feature_reusage = NULL,
+  momentum = NULL,
+  epochs = NULL,
+  batch_size = NULL,
+  virtual_batch_size = NULL,
+  learn_rate = NULL,
+  optimizer = NULL,
+  loss = NULL,
+  clip_value = NULL,
+  drop_last = NULL,
+  lr_scheduler = NULL,
+  lr_decay = NULL,
+  step_size = NULL,
+  checkpoint_epochs = NULL,
+  verbose = NULL,
+  importance_sample_size = NULL,
+  early_stopping_monitor = NULL,
+  early_stopping_tolerance = NULL,
+  early_stopping_patience = NULL,
+  skip_importance = NULL,
+  tabnet_model = NULL,
+  from_epoch = NULL
 )
 }
 \arguments{
 \item{mode}{A single character string for the type of model. Possible values
 for this model are "unknown", "regression", or "classification".}
 
-\item{epochs}{(int) Number of training epochs.}
-
-\item{penalty}{This is the extra sparsity loss coefficient as proposed
-in the original paper. The bigger this coefficient is, the sparser your model
-will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help (default 1e-3).}
-
-\item{batch_size}{(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024^2)}
-
-\item{learn_rate}{initial learning rate for the optimizer.}
+\item{cat_emb_dim}{Size of the embedding of categorical features. If int, all categorical
+features will have same embedding size, if list of int, every corresponding feature will have
+specific embedding size.}
 
 \item{decision_width}{(int) Width of the decision prediction layer. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
@@ -46,12 +61,8 @@ the paper n_d = n_a is usually a good choice. (default=8)}
 \item{num_steps}{(int) Number of steps in the architecture
 (usually between 3 and 10)}
 
-\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
-A value close to 1 will make mask selection least correlated between layers.
-Values range from 1.0 to 2.0.}
-
-\item{virtual_batch_size}{(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=256^2)}
+\item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
+block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax"}.}
 
 \item{num_independent}{Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.}
@@ -59,8 +70,78 @@ Usual values range from 1 to 5.}
 \item{num_shared}{Number of shared Gated Linear Units at each step of the encoder. Usual values
 at each step of the decoder. range from 1 to 5}
 
+\item{num_independent_decoder}{For pretraining, number of independent Gated Linear Units layers
+Usual values range from 1 to 5.}
+
+\item{num_shared_decoder}{For pretraining, number of shared Gated Linear Units at each step of the
+decoder. Usual values range from 1 to 5.}
+
+\item{penalty}{This is the extra sparsity loss coefficient as proposed
+in the original paper. The bigger this coefficient is, the sparser your model
+will be in terms of feature selection. Depending on the difficulty of your
+problem, reducing this value could help (default 1e-3).}
+
+\item{feature_reusage}{(float) This is the coefficient for feature reusage in the masks.
+A value close to 1 will make mask selection least correlated between layers.
+Values range from 1.0 to 2.0.}
+
 \item{momentum}{Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)}
+
+\item{epochs}{(int) Number of training epochs.}
+
+\item{batch_size}{(int) Number of examples per batch, large batch sizes are
+recommended. (default: 1024^2)}
+
+\item{virtual_batch_size}{(int) Size of the mini batches used for
+"Ghost Batch Normalization" (default=256^2)}
+
+\item{learn_rate}{initial learning rate for the optimizer.}
+
+\item{optimizer}{the optimization method. currently only 'adam' is supported,
+you can also pass any torch optimizer function.}
+
+\item{loss}{(character or function) Loss function for training (default to mse
+for regression and cross entropy for classification)}
+
+\item{clip_value}{If a float is given this will clip the gradient at
+clip_value. Pass \code{NULL} to not clip.}
+
+\item{drop_last}{(logical) Whether to drop last batch if not complete during
+training}
+
+\item{lr_scheduler}{if \code{NULL}, no learning rate decay is used. If "step"
+decays the learning rate by \code{lr_decay} every \code{step_size} epochs. If "reduce_on_plateau"
+decays the learning rate by \code{lr_decay} when no improvement after \code{step_size} epochs.
+It can also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
+as parameter. The \code{step} method is called once per epoch.}
+
+\item{lr_decay}{multiplies the initial learning rate by \code{lr_decay} every
+\code{step_size} epochs. Unused if \code{lr_scheduler} is a \code{torch::lr_scheduler}
+or \code{NULL}.}
+
+\item{step_size}{the learning rate scheduler step size. Unused if
+\code{lr_scheduler} is a \code{torch::lr_scheduler} or \code{NULL}.}
+
+\item{checkpoint_epochs}{checkpoint model weights and architecture every
+\code{checkpoint_epochs}. (default is 10). This may cause large memory usage.
+Use \code{0} to disable checkpoints.}
+
+\item{verbose}{(logical) Whether to print progress and loss values during
+training.}
+
+\item{importance_sample_size}{sample of the dataset to compute importance metrics.
+If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
+display a warning.}
+
+\item{early_stopping_monitor}{Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").}
+
+\item{early_stopping_tolerance}{Minimum relative improvement to reset the patience counter.
+0.01 for 1\% tolerance (default 0)}
+
+\item{early_stopping_patience}{Number of epochs without improving until stopping training. (default=5)}
+
+\item{skip_importance}{if feature importance calculation should be skipped (default: \code{FALSE})}
 }
 \value{
 A TabNet \code{parsnip} instance. It can be used to fit tabnet models using
