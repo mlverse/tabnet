@@ -738,7 +738,7 @@ predict_impl_numeric <- function(obj, x, batch_size) {
 predict_impl_numeric_multiple <- function(obj, x, batch_size) {
   p <- as.matrix(predict_impl(obj, x, batch_size))
   # TODO use a cleaner function to turn matrix into vectors
-  hardhat::spruce_numeric_multiple(!!!purrr::map(1:ncol(p), ~p[,.x]))
+  hardhat::spruce_numeric_multiple(!!!purrr::map(seq_len(ncol(p)), ~p[,.x]))
 }
 
 #' single-outcome level blueprint

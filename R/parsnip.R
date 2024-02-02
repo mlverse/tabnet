@@ -504,7 +504,7 @@ multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NU
     pred <- predict(object$fit, new_data, type = type, epoch = epoch)
     nms <- names(pred)
     pred[["epochs"]] <- epoch
-    pred[[".row"]] <- 1:nrow(new_data)
+    pred[[".row"]] <- seq_along(new_data)
     pred[, c(".row", "epochs", nms)]
   })
 

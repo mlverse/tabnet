@@ -10,7 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
   out.width = "100%", 
   out.height = "100%", 
   fig.width = 14
@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(tabnet)
+library(dplyr)
 library(purrr)
 library(ggplot2)
 library(patchwork)
@@ -28,20 +29,20 @@ library(patchwork)
 
 Interprestability score associated with `tabnet_explain()` results, is providing a metric for the stability of mask between models.
 
-Papers states that Interpretability score over 0.9 relates very-high stability, between 0.7 and 0.9 is high stability, between 0.5 and 0.7 is moderate and between 0.3 and 0.5 low stability of the interpretation on the model.
+Paper states that Interpretability score over 0.9 relates very-high stability, between 0.7 and 0.9 is high stability, between 0.5 and 0.7 is moderate and between 0.3 and 0.5 low stability of the interpretation on the model.
 
 
-The implementation here compares the explainability parameters between the last 5 model checkpoints. 
+The {tabnet} implementation compares the explainability parameters between the last 5 model checkpoints. 
 Let's experiment those on a pretraining scenario on the `ames` dataset : 
 
 ## Interprestability on ames, the pretraining 
 
-Let's train 6 models on ames dataset
+Let's train 6 different models on ames dataset
 
 ```{r, 6 models pretrain}
 data(ames, package = "modeldata")
 pretrain_lst <- map(1:6, ~tabnet_pretrain(Sale_Price ~., 
-                                   data=ames |> select(-Sale_Price),
+                                   data = ames,
                                    epochs = 60, valid_split = 0.2, checkpoint_epoch = 10,
                                    num_steps = 3, attention_width = 2, num_shared = 2,
                                    num_independent = 2, verbose = FALSE)
@@ -66,7 +67,7 @@ autoplot(pretrain_lst[[1]]) +
 
 
 ```{r, explain pretraining}
-explain_lst <- map(pretrain_lst, tabnet_explain, new_data=ames)
+explain_lst <- map(pretrain_lst, tabnet_explain, new_data = ames)
 interprestability <- map_dbl(explain_lst, "interprestability")
 interprestability
 ```

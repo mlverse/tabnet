@@ -16,7 +16,7 @@ gbn <- torch::nn_module(
   initialize = function(input_dim, virtual_batch_size=128, momentum = 0.02) {
     self$input_dim <- input_dim
     self$virtual_batch_size <- virtual_batch_size
-    self$bn = torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
+    self$bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
   },
   forward = function(x) {
     chunks <- x$chunk(as.integer(ceiling(x$shape[1] / self$virtual_batch_size)), 1)
@@ -279,8 +279,8 @@ tabnet_pretrainer <- torch::nn_module(
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$post_embed_dim <- self$embedder$post_embed_dim
-    self$masker = random_obfuscator(self$pretraining_ratio)
-    self$encoder = tabnet_encoder(
+    self$masker <- random_obfuscator(self$pretraining_ratio)
+    self$encoder <- tabnet_encoder(
       input_dim = self$post_embed_dim,
       output_dim = self$post_embed_dim,
       n_d = n_d,
@@ -294,7 +294,7 @@ tabnet_pretrainer <- torch::nn_module(
       momentum = momentum,
       mask_type = mask_type
     )
-    self$decoder = tabnet_decoder(
+    self$decoder <- tabnet_decoder(
       self$post_embed_dim,
       n_d = n_d,
       n_steps = n_steps,
@@ -604,7 +604,7 @@ glu_block <- torch::nn_module(
     self$n_glu <- n_glu
     self$glu_layers <- torch::nn_module_list()
 
-    params = list(
+    params <- list(
       'virtual_batch_size' = virtual_batch_size,
       'momentum' = momentum
     )
@@ -702,7 +702,7 @@ embedding_generator <- torch::nn_module(
 
     # check that all embeddings dimensions are provided
     if (length(self$cat_emb_dims) != length(cat_dims)){
-      msg = paste0("`cat_emb_dim` length must be 1 or the number of categorical predictors, got length ",length(self$cat_emb_dims)," for ",length(cat_dims)," categorical predictors")
+      msg <- paste0("`cat_emb_dim` length must be 1 or the number of categorical predictors, got length ",length(self$cat_emb_dims)," for ",length(cat_dims)," categorical predictors")
       stop(msg)
     }
 
@@ -831,7 +831,7 @@ random_obfuscator <- torch::nn_module(
     # workaround while torch_bernoulli is not available in CUDA
     ones <- torch::torch_ones_like(x, device="cpu")
     obfuscated_vars <- torch::torch_bernoulli(self$pretraining_ratio * ones)$to(device=x$device)
-    masked_input = torch::torch_mul(obfuscated_vars$logical_or(x_na_mask)$logical_not(), x)
+    masked_input <- torch::torch_mul(obfuscated_vars$logical_or(x_na_mask)$logical_not(), x)
 
     list(masked_input, obfuscated_vars)
 

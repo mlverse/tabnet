@@ -123,7 +123,7 @@ test_that("tabnet grid reduction - torch", {
 
   expect_equal(reg_grid_smol$epochs, rep(3, 2))
   expect_equal(reg_grid_smol$penalty, 1:2)
-  for (i in 1:nrow(reg_grid_smol)) {
+  for (i in seq_along(reg_grid_smol)) {
     expect_equal(reg_grid_smol$.submodels[[i]], list(epochs = 1:2))
   }
 
@@ -144,7 +144,7 @@ test_that("tabnet grid reduction - torch", {
   expect_equal(reg_grid_extra_smol$epochs, rep(3, 6))
   expect_equal(reg_grid_extra_smol$penalty, rep(1:2, each = 3))
   expect_equal(reg_grid_extra_smol$batch_size, rep(10:12, 2))
-  for (i in 1:nrow(reg_grid_extra_smol)) {
+  for (i in seq_along(reg_grid_extra_smol)) {
     expect_equal(reg_grid_extra_smol$.submodels[[i]], list(epochs = 1:2))
   }
 
@@ -161,7 +161,7 @@ test_that("tabnet grid reduction - torch", {
 
   expect_equal(no_sub_smol$epochs, rep(1, 2))
   expect_equal(no_sub_smol$penalty, 1:2)
-  for (i in 1:nrow(no_sub_smol)) {
+  for (i in seq_along(no_sub_smol)) {
     expect_length(no_sub_smol$.submodels[[i]], 0)
   }
 
@@ -173,7 +173,7 @@ test_that("tabnet grid reduction - torch", {
 
   expect_equal(reg_grid_smol$Amos, rep(3, 2))
   expect_equal(reg_grid_smol$penalty, 1:2)
-  for (i in 1:nrow(reg_grid_smol)) {
+  for (i in seq_along(reg_grid_smol)) {
     expect_equal(reg_grid_smol$.submodels[[i]], list(Amos = 1:2))
   }
 
@@ -191,7 +191,7 @@ test_that("tabnet grid reduction - torch", {
   expect_equal(reg_grid_smol$`Ade Tukunbo`, rep(3, 4))
   expect_equal(reg_grid_smol$penalty, rep(1:2, each = 2))
   expect_equal(reg_grid_smol$` \t123`, rep(10:11, 2))
-  for (i in 1:nrow(reg_grid_smol)) {
+  for (i in seq_along(reg_grid_smol)) {
     expect_equal(reg_grid_smol$.submodels[[i]], list(`Ade Tukunbo` = 1:2))
   }
 })

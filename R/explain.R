@@ -3,8 +3,8 @@
 #'
 #' @param object a TabNet fit object
 #' @param new_data a data.frame to obtain interpretation metrics.
-#' @param stability shall we compute the InterpreStability score of the model with
-#'  it's last 5 checkpoints?.
+#' @param stability shall we compute the InterpreStability score of the model
+#'   with it's last 5 checkpoints?
 #'
 #' @return
 #'

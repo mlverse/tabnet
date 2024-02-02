@@ -28,7 +28,7 @@ sparsemax_function <- torch::autograd_function(
   forward = function(ctx, input, dim = -1) {
     max_val <- input$max(dim=dim, keepdim=TRUE)[[1]]
     input$sub_(max_val) # same numerical stability trick as for softmax
-    tau_supp_size = .threshold_and_support(input, dim=dim)
+    tau_supp_size <- .threshold_and_support(input, dim=dim)
     output <- torch::torch_clamp(input - tau_supp_size[[1]], min=0)
     ctx$save_for_backward(supp_size = tau_supp_size[[2]], output = output, dim = dim)
     output
