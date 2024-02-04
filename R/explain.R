@@ -79,6 +79,7 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
   if (stability && n_checkpoints > 5 ) {
     # TODO
     # Compute feature importance value through last 5 checkpoints
+    # TODO raise a warning for interprestability being NA if not enough checkpoints
     computed_feature_importance <- purrr::map(
       object$fit$checkpoints[(n_checkpoints-5):n_checkpoints],
       ~compute_feature_importance(reload_model(.x), data$x, data$x_na_mask),

@@ -21,44 +21,59 @@ knitr::opts_chunk$set(
 library(tabnet)
 library(dplyr)
 library(purrr)
+library(rsample)
+library(yardstick)
 library(ggplot2)
 library(patchwork)
 ```
 
 # Interprestability 
 
-Interprestability score associated with `tabnet_explain()` results, is providing a metric for the stability of mask between models.
+In this vignette, we will try to improve the workflow on Ames dataset debuted in the [Missing_data_predictors] vignette.
 
-Paper states that Interpretability score over 0.9 relates very-high stability, between 0.7 and 0.9 is high stability, between 0.5 and 0.7 is moderate and between 0.3 and 0.5 low stability of the interpretation on the model.
+Interprestability score associated with `tabnet_explain()` results, will help us to select more stable models.  
+
+Interprestability score is a metric for the stability of mask between models: score over 0.9 relates very-high stability, between 0.7 and 0.9 is high stability, between 0.5 and 0.7 is moderate and between 0.3 and 0.5 low stability of the interpretation on the model.
 
 
-The {tabnet} implementation compares the explainability parameters between the last 5 model checkpoints. 
+The {tabnet} implementation compares the explainability parameters between the last 5 model checkpoints. So it is up to you to make the those last 5 checkpoints a good proxy of the model.
+
 Let's experiment those on a pretraining scenario on the `ames` dataset : 
 
 ## Interprestability on ames, the pretraining 
 
-Let's train 6 different models on ames dataset
+Let's train 6 different models on ames dataset for 60 epochs, and continue the training fro 5 epochs where we will record the checkpoints. 
+
 
 ```{r, 6 models pretrain}
-data(ames, package = "modeldata")
-pretrain_lst <- map(1:6, ~tabnet_pretrain(Sale_Price ~., 
-                                   data = ames,
-                                   epochs = 60, valid_split = 0.2, checkpoint_epoch = 10,
+data("ames_missing", package = "tabnet")
+cat_emb_dim <- map_dbl(ames_missing %>% select_if(is.factor), ~log2(nlevels(.x)) %>% round)
+
+pretrain_no_checkpoints <- map(1:6, ~tabnet_pretrain(Sale_Price ~., 
+                                   data = ames_missing,
+                                   epochs = 54, valid_split = 0.2, checkpoint_epoch = 55,
                                    num_steps = 3, attention_width = 2, num_shared = 2,
-                                   num_independent = 2, verbose = FALSE)
+                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE,
+                                   early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
+                   , .progress = TRUE)
+pretrain_with_checkpoints <- map(1:6, ~tabnet_pretrain(Sale_Price ~., 
+                                   data = ames_missing, tabnet_model = pretrain_no_checkpoints[[.x]],
+                                   epochs = 6, valid_split = 0.2, checkpoint_epoch = 1,
+                                   num_steps = 3, attention_width = 2, num_shared = 2,
+                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE)
                    , .progress = TRUE)
 
 ```
 
 with first a close look at their training loss
 
-```{r}
-autoplot(pretrain_lst[[1]]) + 
-  autoplot(pretrain_lst[[2]]) + 
-  autoplot(pretrain_lst[[3]]) + 
-  autoplot(pretrain_lst[[4]]) + 
-  autoplot(pretrain_lst[[5]])  +
-  autoplot(pretrain_lst[[6]])  +
+```{r, fig.width= 10}
+autoplot(pretrain_with_checkpoints[[1]]) + 
+  autoplot(pretrain_with_checkpoints[[2]]) + 
+  autoplot(pretrain_with_checkpoints[[3]]) + 
+  autoplot(pretrain_with_checkpoints[[4]]) + 
+  autoplot(pretrain_with_checkpoints[[5]])  +
+  autoplot(pretrain_with_checkpoints[[6]])  +
   plot_layout(axes = "collect", guides = "collect")
   
 ```
@@ -67,13 +82,14 @@ autoplot(pretrain_lst[[1]]) +
 
 
 ```{r, explain pretraining}
-explain_lst <- map(pretrain_lst, tabnet_explain, new_data = ames)
+explain_lst <- map(pretrain_with_checkpoints, tabnet_explain, new_data = ames_missing)
 interprestability <- map_dbl(explain_lst, "interprestability")
 interprestability
 ```
 
 ### plot the 6 different models
-```{r, plot explain pretrain}
+```{r, plot explain pretrain, fig.width= 13}
+
 autoplot(explain_lst[[1]], quantile = 0.99) + 
   autoplot(explain_lst[[2]], quantile = 0.99) + 
   autoplot(explain_lst[[3]], quantile = 0.99) + 
@@ -83,25 +99,42 @@ autoplot(explain_lst[[1]], quantile = 0.99) +
   plot_layout(axes = "collect", guides = "collect")
   
 ```
-## Interprestability on ames, the training 
+## Interprestability on ames, supervised learning
+
+### Dataset preparation
 
 ```{r, 6 models fit & explain}
-best_pretrain <- pretrain_lst[[which(interprestability == max(interprestability))]]
-fit_lst <- map(1:6, ~tabnet_fit(Sale_Price ~., data=ames, tabnet_model = best_pretrain,
-                                   epochs = 60, valid_split = 0.2, checkpoint_epoch = 10,
+best_pretrain <- pretrain_with_checkpoints[[which(interprestability == max(interprestability))]]
+ames_split <- initial_split(ames_missing, strata = Sale_Price, prop = 0.8)
+ames_train <- training(ames_split)
+ames_test <- testing(ames_split)
+```
+
+### The Training of 6 models
+
+```{r, 6 models fit & explain}
+fit_no_checkpoint <- map(1:6, ~tabnet_fit(Sale_Price ~., data = ames_train, tabnet_model = best_pretrain,
+                                   epochs = 54, valid_split = 0.2, checkpoint_epoch = 55,
                                    num_steps = 3, attention_width = 2, num_shared = 2,
-                                   num_independent = 2, verbose = FALSE)
+                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE,
+                                   early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
+                   , .progress = TRUE)
+fit_with_checkpoint <- map(1:6, ~tabnet_fit(Sale_Price ~., data = ames_train, tabnet_model = fit_no_checkpoint[[.x]],
+                                   epochs = 6, valid_split = 0.2, checkpoint_epoch = 1,
+                                   num_steps = 3, attention_width = 2, num_shared = 2,
+                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE)
                    , .progress = TRUE)
 ```
+
 and their training plot
 
-```{r}
-autoplot(fit_lst[[1]]) + 
-  autoplot(fit_lst[[2]]) + 
-  autoplot(fit_lst[[3]]) + 
-  autoplot(fit_lst[[4]]) + 
-  autoplot(fit_lst[[5]])  +
-  autoplot(fit_lst[[6]])  +
+```{r, fig.width= 10}
+autoplot(fit_with_checkpoint[[1]]) + 
+  autoplot(fit_with_checkpoint[[2]]) + 
+  autoplot(fit_with_checkpoint[[3]]) + 
+  autoplot(fit_with_checkpoint[[4]]) + 
+  autoplot(fit_with_checkpoint[[5]])  +
+  autoplot(fit_with_checkpoint[[6]])  +
   plot_layout(axes = "collect", guides = "collect")
   
 ```
@@ -113,7 +146,7 @@ map_dbl(explain_lst, "interprestability")
 ```
 
 ### plot the evolution
-```{r, plot explain fit}
+```{r, plot explain fit, fig.width= 13}
 autoplot(explain_lst[[1]], quantile = 0.99) + 
   autoplot(explain_lst[[2]], quantile = 0.99) + 
   autoplot(explain_lst[[3]], quantile = 0.99) + 

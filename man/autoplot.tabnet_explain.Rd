@@ -8,6 +8,7 @@ autoplot.tabnet_explain(
   object,
   type = c("mask_agg", "steps"),
   quantile = 1,
+  title = "",
   ...
 )
 }
@@ -20,6 +21,8 @@ or \code{"steps"} for one heatmap at each mask step.}
 
 \item{quantile}{numerical value between 0 and 1. Provides quantile clipping of the
 mask values}
+
+\item{title}{a title to add to the figure.}
 
 \item{...}{not used.}
 }

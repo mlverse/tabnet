@@ -104,7 +104,7 @@ Let's fit a TabNet model to the `syn2` dataset and analyze the
 interpretation metrics.
 
 ```{r}
-fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 10, verbose = TRUE)
+fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 40, verbose = TRUE)
 ```
 
 In the feature importance plot we can see that, as expected, features
@@ -119,11 +119,14 @@ each observation on the x axis and each variable on the y axis. The
 colors represent the importance of the feature in predicting the value
 for each observation.
 
+We trimmed the color scale to the 99th percentile so the colors shows the
+importance even if there are strong outliers.
+
 ```{r}
 library(tidyverse)
 ex_syn2 <- tabnet_explain(fit_syn2, syn2)
 
-autoplot(ex_syn2)
+autoplot(ex_syn2, quantile = 0.99)
 ```
 
 We can see that the region between V03 and V06 concentrates most of the
@@ -151,7 +154,7 @@ create the response variable and we expect to see this in the masks.
 First we fit the model for 10 epochs.
 
 ```{r}
-fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 10, verbose = TRUE)
+fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 50, verbose = TRUE)
 ```
 
 In the feature importance plot we have, as expected, strong importance
@@ -171,7 +174,7 @@ importance even if there are strong outliers.
 ```{r}
 ex_syn4 <- tabnet_explain(fit_syn4, arrange(syn4, V10))
 
-autoplot(ex_syn4, quantile=.995)
+autoplot(ex_syn4, quantile=.99)
 ```
 
 From the figure we see that V10 is important for all observations. We
@@ -186,5 +189,5 @@ autoplot(ex_syn4, type="steps", quantile=.995)
 ```
 
 We see that step 1 and 3 both focus on `V10`, but on different
-additional features, depending on `V10`. Step 2 seems to have found some
-noise in `V08`, but also focuses strongly on `V01-V02` and `V05-V06`.
+additional features, depending on `V10`. Step 3 seems to have found some
+noise in `V09`, but also focuses strongly on `V01-V02` and `V05-V06`.

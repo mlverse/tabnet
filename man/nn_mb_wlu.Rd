@@ -16,7 +16,8 @@ nnf_mb_wlu(input, alpha = 0.6, beta = 0.2, gamma = 0.2, prelu)
 
 \item{gamma}{(float) the weight of SiLU activation component.}
 
-\item{weight}{(float): the initial value of \eqn{weight} of PReLU. Default: 0.25.}
+\item{weight}{(float): the initial value of \eqn{weight} of PReLU.
+Default: 0.25.}
 
 \item{input}{(N,*) tensor, where * means, any number of additional
 dimensions}

@@ -23,8 +23,8 @@ tabnet_explain(object, new_data, stability)
 
 \item{new_data}{a data.frame to obtain interpretation metrics.}
 
-\item{stability}{shall we compute the InterpreStability score of the model with
-it's last 5 checkpoints?.}
+\item{stability}{shall we compute the InterpreStability score of the model
+with it's last 5 checkpoints?}
 }
 \value{
 Returns a list with
