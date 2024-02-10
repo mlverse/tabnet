@@ -188,3 +188,14 @@ test_that("num_independent_decoder and num_shared_decoder do not change the netw
   )
 })
 
+test_that("pretraining with `tabnet_model= ` parameter raise a warning", {
+
+  expect_warning(
+    fit <- tabnet_pretrain(x, y, epochs = 1, tabnet_model = ames_pretrain)
+  )
+  expect_s3_class( fit, "tabnet_pretrain")
+  expect_equal( length(fit), length(ames_pretrain))
+  expect_equal( length(fit$fit$metrics), 1)
+  )
+})
+
