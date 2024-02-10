@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-26 20:16+0200\n"
-"PO-Revision-Date: 2023-09-26 21:50+0200\n"
+"POT-Creation-Date: 2024-02-10 17:01+0100\n"
+"PO-Revision-Date: 2024-02-10 17:09+0100\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
@@ -33,26 +33,26 @@ msgstr "`tabnet_fit()` n’est pas défini pour un '%s'."
 msgid "`tabnet_pretrain()` is not defined for a '%s'."
 msgstr "`tabnet_pretrain()` n’est pas défini pour un '%s'."
 
-#: hardhat.R:391
+#: hardhat.R:404
 #, c-format
 msgid "'%s' is not recognised as a proper TabNet model"
 msgstr "'%s' n’est pas reconnu comme un modèle TabNet correct"
 
-#: hardhat.R:398
+#: hardhat.R:411
 #, c-format
 msgid "The model was trained for less than '%s' epochs"
 msgstr "Le modèle a été entrainé sur moins de '%s' époques"
 
-#: hardhat.R:410
+#: hardhat.R:423
 #, c-format
 msgid "Found missing values in the `%s` outcome column."
 msgstr "Il y a des valeurs manquantes dans la colonne de résultats `%s`."
 
-#: hardhat.R:420 hardhat.R:532
+#: hardhat.R:433 hardhat.R:548
 msgid "Model dimensions don't match."
 msgstr "Les dimensions ne correspondent pas entre les modèles."
 
-#: hardhat.R:445
+#: hardhat.R:458
 #, c-format
 msgid ""
 "No model serialized weight can be found in `%s`, check the model history"
@@ -60,34 +60,43 @@ msgstr ""
 "Il n’y a pas de points sérialisés de modèle dans `%s`, veuillez vérifier "
 "l’historique du modèle"
 
-#: hardhat.R:487
+#: hardhat.R:466
+msgid ""
+"`tabnet_pretrain()` from a model is not currently supported.\n"
+"The pretraining here will start with a network initialization"
+msgstr ""
+"La reprise de l’entraînement avec `tabnet_pretrain()` n'est pas supportée "
+"pour l'instant.\n"
+"Le pré-entraînement va commencer par une initialisation du réseau."
+
+#: hardhat.R:503
 #, c-format
 msgid "The model was trained for less than `%s` epochs"
 msgstr "Le modèle a été entrainé sur moins de '%s' époques"
 
-#: hardhat.R:584
+#: hardhat.R:600
 #, c-format
 msgid "Mixed multi-outcome type '%s' is not supported"
 msgstr "Le type '%s' n’est pas supporté pour des modèles multi-résultat"
 
-#: hardhat.R:592
+#: hardhat.R:608
 #, c-format
 msgid "Unknown outcome type '%s'"
 msgstr "Le type `%s` est inconnu pour une colonne de résultat"
 
-#: hardhat.R:599
+#: hardhat.R:615
 #, c-format
 msgid "Outcome is factor and the prediction type is '%s'."
 msgstr ""
 "La colonne de résultats est catégorielle et la prédiction est de type '%s'."
 
-#: hardhat.R:602
+#: hardhat.R:618
 #, c-format
 msgid "Outcome is numeric and the prediction type is '%s'."
 msgstr ""
 "La colonne de résultats est numérique et la prédiction est de type '%s'."
 
-#: hardhat.R:640
+#: hardhat.R:656
 msgid ""
 "The provided hierarchical object is not recognized with a valid format that "
 "can be checked"
@@ -95,7 +104,7 @@ msgstr ""
 "L’objet hiérarchique fournit n’est pas reconnu dans un format valide qui "
 "peut être vérifié"
 
-#: hardhat.R:645
+#: hardhat.R:661
 #, c-format
 msgid ""
 "The attributes or colnames in the provided hierarchical object use the "
@@ -120,33 +129,33 @@ msgid ""
 msgstr ""
 "%s n’est pas une métrique valide d’arrêt anticipé avec `valid_split = %s`"
 
-#: model.R:509 pretraining.R:139
+#: model.R:513 pretraining.R:139
 msgid "Currently only the 'adam' optimizer is supported."
 msgstr "Seule la fonction d’optimisation ‘adam’ est supportée pour l’instant."
 
-#: model.R:523 pretraining.R:153
+#: model.R:527 pretraining.R:153
 msgid ""
 "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
 msgstr ""
 "Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
 "l’instant."
 
-#: model.R:569 pretraining.R:199
+#: model.R:574 pretraining.R:200
 #, c-format
 msgid "[Epoch %03d] Loss: %3f"
 msgstr ""
 
-#: model.R:571 pretraining.R:201
+#: model.R:576 pretraining.R:202
 #, c-format
-msgid "[Epoch %03d] Loss: %3f, Valid loss: %3fs"
+msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:587
+#: model.R:592
 #, c-format
 msgid "Early stopping at epoch %03d"
 msgstr "Arrêt anticipé à l’époque %03d"
 
-#: model.R:614
+#: model.R:619
 #, c-format
 msgid ""
 "Computing importances for a dataset with size %s. This can consume too much "
@@ -165,7 +174,7 @@ msgstr ""
 "Le package \"parsnip\" est nécessaire pour exécuter cette fonction, Veuillez "
 "l'installer."
 
-#: pretraining.R:242
+#: pretraining.R:243
 #, c-format
 msgid ""
 "Computing importances for a dataset with size %s. This can consume too much "
@@ -177,14 +186,14 @@ msgstr ""
 "aléatoirement à une taille de 1e5. Vous pouvez rendre ce message silencieux "
 "en configurant l’argument `importance_sample_size`."
 
-#: tab-network.R:269 tab-network.R:455
+#: tab-network.R:269 tab-network.R:451
 msgid "'n_steps' should be a positive integer."
 msgstr "’n_steps’ doit être un nombre entier positif."
 
-#: tab-network.R:271 tab-network.R:457
+#: tab-network.R:271 tab-network.R:453
 msgid "'n_shared' and 'n_independant' can't be both zero."
 msgstr "’n_shared’ et ’n_independant’ ne peuvent pas être nuls simultanément."
 
-#: tab-network.R:497
+#: tab-network.R:493
 msgid "Please choose either 'sparsemax' or 'entmax' as 'mask_type'"
 msgstr "Vous devez choisir ‘sparsemax’ ou ‘entmax’ pour  ‘mask_type’"
