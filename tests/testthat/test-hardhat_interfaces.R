@@ -120,7 +120,6 @@ test_that("print module works even after a reload from disk", {
   withr::with_options(new = c(cli.width = 50),
                       expect_snapshot_output(fit2))
 
-
 })
 
 
@@ -128,28 +127,27 @@ test_that("num_workers works for pretrain, fit an predict", {
 
   expect_no_error(
     tabnet_pretrain(x, y, epochs = 1, num_workers=1L,
-                                batch_size=65e3, virtual_batch_size=8192)
+                    batch_size=128, virtual_batch_size=64)
   )
   expect_no_error(
     tabnet_pretrain(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
-                                batch_size=65e3, virtual_batch_size=8192)
+                    batch_size=128, virtual_batch_size=64)
   )
 
   expect_no_error(
     tabnet_fit(x, y, epochs = 1, num_workers=1L,
-                      batch_size=65e3, virtual_batch_size=8192)
+               batch_size=128, virtual_batch_size=64)
   )
 
   expect_no_error(
     tabnet_fit(x, y, epochs = 1, num_workers=1L, valid_split=0.2,
-                      batch_size=65e3, virtual_batch_size=8192)
+               batch_size=128, virtual_batch_size=64)
   )
 
   expect_no_error(
     predict(ames_fit, x, num_workers=1L,
-                      batch_size=65e3, virtual_batch_size=8192)
+            batch_size=128, virtual_batch_size=64)
   )
-
 
 })
 

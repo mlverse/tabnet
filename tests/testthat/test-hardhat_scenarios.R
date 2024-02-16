@@ -4,16 +4,16 @@ test_that("Supervised training can continue with a additional fit, with or wo fr
 
   expect_equal(fit_2$fit$config$epoch, 1)
   expect_length(fit_2$fit$metrics, 6)
-  expect_identical(ames_fit$fit$metrics[[1]]$train$loss, fit_2$fit$metrics[[1]]$train$loss)
-  expect_identical(ames_fit$fit$metrics[[5]]$train$loss, fit_2$fit$metrics[[5]]$train$loss)
+  expect_identical(ames_fit$fit$metrics[[1]]$train, fit_2$fit$metrics[[1]]$train)
+  expect_identical(ames_fit$fit$metrics[[5]]$train, fit_2$fit$metrics[[5]]$train)
 
   expect_no_error(
     fit_3 <- tabnet_fit(x, y, tabnet_model = ames_fit, from_epoch = 2, epoch = 1 )
   )
   expect_equal(fit_3$fit$config$epoch, 1)
   expect_length(fit_3$fit$metrics, 3)
-  expect_identical(ames_fit$fit$metrics[[1]]$train$loss, fit_2$fit$metrics[[1]]$train$loss)
-  expect_identical(ames_fit$fit$metrics[[2]]$train$loss, fit_2$fit$metrics[[2]]$train$loss)
+  expect_identical(ames_fit$fit$metrics[[1]]$train, fit_2$fit$metrics[[1]]$train)
+  expect_identical(ames_fit$fit$metrics[[2]]$train, fit_2$fit$metrics[[2]]$train)
 
 })
 
@@ -37,7 +37,7 @@ test_that("epoch counter is valid for retraining from a checkpoint", {
 
   expect_equal(fit_2$fit$config$epoch, 12)
   expect_length(fit_2$fit$metrics, 17)
-  expect_lte(mean(fit_2$fit$metrics[[17]]$train$loss), mean(fit_2$fit$metrics[[1]]$train$loss))
+  expect_lte(mean(fit_2$fit$metrics[[17]]$train), mean(fit_2$fit$metrics[[1]]$train))
 
 })
 

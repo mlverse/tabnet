@@ -18,10 +18,22 @@ test_that("Unsupervised training with default config, data.frame and formula", {
   expect_no_error(
     fit <- tabnet_pretrain(x, y, epochs = 1)
   )
+  expect_s3_class( fit, "tabnet_pretrain")
+  expect_equal(length(fit), 3)
+  expect_equal(names(fit), c("fit", "serialized_net", "blueprint"))
+  expect_equal(length(fit$fit), 5)
+  expect_equal(names(fit$fit), c("network", "metrics", "config", "checkpoints", "importances"))
+  expect_equal(length(fit$fit$metrics), 1)
 
   expect_no_error(
     fit <- tabnet_pretrain(Sale_Price ~ ., data = ames, epochs = 1)
   )
+  expect_s3_class( fit, "tabnet_pretrain")
+  expect_equal(length(fit), 3)
+  expect_equal(names(fit), c("fit", "serialized_net", "blueprint"))
+  expect_equal(length(fit$fit), 5)
+  expect_equal(names(fit$fit), c("network", "metrics", "config", "checkpoints", "importances"))
+  expect_equal(length(fit$fit$metrics), 1)
 
 })
 
@@ -47,6 +59,16 @@ test_that("Unsupervised training prevent predict with an explicit message", {
     regexp = "tabnet_pretrain"
   )
 
+})
+
+test_that("pretraining with `tabnet_model= ` parameter raise a warning", {
+
+  expect_warning(
+    fit <- tabnet_pretrain(x, y, epochs = 1, tabnet_model = ames_pretrain)
+  )
+  expect_s3_class( fit, "tabnet_pretrain")
+  expect_equal( length(fit), length(ames_pretrain))
+  expect_equal( length(fit$fit$metrics), 1)
 })
 
 test_that("errors when using an argument that do not exist", {
