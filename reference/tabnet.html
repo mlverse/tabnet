@@ -77,18 +77,41 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tabnet</span><span class="op">(</span></span>
 <span>  mode <span class="op">=</span> <span class="st">"unknown"</span>,</span>
-<span>  epochs <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  penalty <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  learn_rate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cat_emb_dim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  decision_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  attention_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  feature_reusage <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  virtual_batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mask_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mlp_hidden_multiplier <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mlp_activation <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  encoder_activation <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_independent <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_shared <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  momentum <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  num_independent_decoder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  num_shared_decoder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  penalty <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  feature_reusage <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  momentum <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  epochs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  virtual_batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  learn_rate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  optimizer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  loss <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  clip_value <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop_last <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lr_scheduler <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lr_decay <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  step_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  checkpoint_epochs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  importance_sample_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  early_stopping_monitor <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  early_stopping_tolerance <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  early_stopping_patience <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  skip_importance <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,24 +122,10 @@
 for this model are "unknown", "regression", or "classification".</p></dd>
 
 
-<dt>epochs</dt>
-<dd><p>(int) Number of training epochs.</p></dd>
-
-
-<dt>penalty</dt>
-<dd><p>This is the extra sparsity loss coefficient as proposed
-in the original paper. The bigger this coefficient is, the sparser your model
-will be in terms of feature selection. Depending on the difficulty of your
-problem, reducing this value could help (default 1e-3).</p></dd>
-
-
-<dt>batch_size</dt>
-<dd><p>(int) Number of examples per batch, large batch sizes are
-recommended. (default: 1024^2)</p></dd>
-
-
-<dt>learn_rate</dt>
-<dd><p>initial learning rate for the optimizer.</p></dd>
+<dt>cat_emb_dim</dt>
+<dd><p>Size of the embedding of categorical features. If int, all categorical
+features will have same embedding size, if list of int, every corresponding feature will have
+specific embedding size.</p></dd>
 
 
 <dt>decision_width</dt>
@@ -135,15 +144,9 @@ the paper n_d = n_a is usually a good choice. (default=8)</p></dd>
 (usually between 3 and 10)</p></dd>
 
 
-<dt>feature_reusage</dt>
-<dd><p>(float) This is the coefficient for feature reusage in the masks.
-A value close to 1 will make mask selection least correlated between layers.
-Values range from 1.0 to 2.0.</p></dd>
-
-
-<dt>virtual_batch_size</dt>
-<dd><p>(int) Size of the mini batches used for
-"Ghost Batch Normalization" (default=256^2)</p></dd>
+<dt>mask_type</dt>
+<dd><p>(character) Final layer of feature selector in the attentive_transformer
+block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
 
 
 <dt>num_independent</dt>
@@ -156,9 +159,123 @@ Usual values range from 1 to 5.</p></dd>
 at each step of the decoder. range from 1 to 5</p></dd>
 
 
+<dt>num_independent_decoder</dt>
+<dd><p>For pretraining, number of independent Gated Linear Units layers
+Usual values range from 1 to 5.</p></dd>
+
+
+<dt>num_shared_decoder</dt>
+<dd><p>For pretraining, number of shared Gated Linear Units at each step of the
+decoder. Usual values range from 1 to 5.</p></dd>
+
+
+<dt>penalty</dt>
+<dd><p>This is the extra sparsity loss coefficient as proposed
+in the original paper. The bigger this coefficient is, the sparser your model
+will be in terms of feature selection. Depending on the difficulty of your
+problem, reducing this value could help (default 1e-3).</p></dd>
+
+
+<dt>feature_reusage</dt>
+<dd><p>(float) This is the coefficient for feature reusage in the masks.
+A value close to 1 will make mask selection least correlated between layers.
+Values range from 1.0 to 2.0.</p></dd>
+
+
 <dt>momentum</dt>
 <dd><p>Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)</p></dd>
+
+
+<dt>epochs</dt>
+<dd><p>(int) Number of training epochs.</p></dd>
+
+
+<dt>batch_size</dt>
+<dd><p>(int) Number of examples per batch, large batch sizes are
+recommended. (default: 1024^2)</p></dd>
+
+
+<dt>virtual_batch_size</dt>
+<dd><p>(int) Size of the mini batches used for
+"Ghost Batch Normalization" (default=256^2)</p></dd>
+
+
+<dt>learn_rate</dt>
+<dd><p>initial learning rate for the optimizer.</p></dd>
+
+
+<dt>optimizer</dt>
+<dd><p>the optimization method. currently only 'adam' is supported,
+you can also pass any torch optimizer function.</p></dd>
+
+
+<dt>loss</dt>
+<dd><p>(character or function) Loss function for training (default to mse
+for regression and cross entropy for classification)</p></dd>
+
+
+<dt>clip_value</dt>
+<dd><p>If a float is given this will clip the gradient at
+clip_value. Pass <code>NULL</code> to not clip.</p></dd>
+
+
+<dt>drop_last</dt>
+<dd><p>(logical) Whether to drop last batch if not complete during
+training</p></dd>
+
+
+<dt>lr_scheduler</dt>
+<dd><p>if <code>NULL</code>, no learning rate decay is used. If "step"
+decays the learning rate by <code>lr_decay</code> every <code>step_size</code> epochs. If "reduce_on_plateau"
+decays the learning rate by <code>lr_decay</code> when no improvement after <code>step_size</code> epochs.
+It can also be a <a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a> function that only takes the optimizer
+as parameter. The <code>step</code> method is called once per epoch.</p></dd>
+
+
+<dt>lr_decay</dt>
+<dd><p>multiplies the initial learning rate by <code>lr_decay</code> every
+<code>step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
+or <code>NULL</code>.</p></dd>
+
+
+<dt>step_size</dt>
+<dd><p>the learning rate scheduler step size. Unused if
+<code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code> or <code>NULL</code>.</p></dd>
+
+
+<dt>checkpoint_epochs</dt>
+<dd><p>checkpoint model weights and architecture every
+<code>checkpoint_epochs</code>. (default is 10). This may cause large memory usage.
+Use <code>0</code> to disable checkpoints.</p></dd>
+
+
+<dt>verbose</dt>
+<dd><p>(logical) Whether to print progress and loss values during
+training.</p></dd>
+
+
+<dt>importance_sample_size</dt>
+<dd><p>sample of the dataset to compute importance metrics.
+If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
+display a warning.</p></dd>
+
+
+<dt>early_stopping_monitor</dt>
+<dd><p>Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").</p></dd>
+
+
+<dt>early_stopping_tolerance</dt>
+<dd><p>Minimum relative improvement to reset the patience counter.
+0.01 for 1% tolerance (default 0)</p></dd>
+
+
+<dt>early_stopping_patience</dt>
+<dd><p>Number of epochs without improving until stopping training. (default=5)</p></dd>
+
+
+<dt>skip_importance</dt>
+<dd><p>if feature importance calculation should be skipped (default: <code>FALSE</code>)</p></dd>
 
 </dl></div>
     <div id="value">

@@ -104,10 +104,10 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mlverse.github.io/tabnet/" class="external-link">tabnet</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.4</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.5</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.1</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.4.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.2.1</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.3     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.0</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.3     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.1</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr    </span> 1.0.2     </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span> masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
@@ -185,17 +185,17 @@ columns 5-6.</p></li>
 <p>Let’s fit a TabNet model to the <code>syn2</code> dataset and analyze
 the interpretation metrics.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn2</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">fit_syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn2</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, device <span class="op">=</span> <span class="st">"cpu"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.044368</span></span>
 <span><span class="co">#&gt; [Epoch 002] Loss: 0.784014</span></span>
 <span><span class="co">#&gt; [Epoch 003] Loss: 0.676509</span></span>
 <span><span class="co">#&gt; [Epoch 004] Loss: 0.639690</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.611584</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.585036</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.552491</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.518478</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.488461</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.464825</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.611583</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.585100</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.549167</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.513818</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.484044</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.460407</span></span></code></pre></div>
 <p>In the feature importance plot we can see that, as expected, features
 <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -233,17 +233,17 @@ between the variables. Depending on V10, different variables are used to
 create the response variable and we expect to see this in the masks.</p>
 <p>First we fit the model for 10 epochs.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">fit_syn4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">syn4</span>, epochs <span class="op">=</span> <span class="fl">10</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, device <span class="op">=</span> <span class="st">"cpu"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [Epoch 001] Loss: 1.289555</span></span>
 <span><span class="co">#&gt; [Epoch 002] Loss: 0.929622</span></span>
-<span><span class="co">#&gt; [Epoch 003] Loss: 0.745959</span></span>
-<span><span class="co">#&gt; [Epoch 004] Loss: 0.685983</span></span>
-<span><span class="co">#&gt; [Epoch 005] Loss: 0.661784</span></span>
-<span><span class="co">#&gt; [Epoch 006] Loss: 0.645590</span></span>
-<span><span class="co">#&gt; [Epoch 007] Loss: 0.632412</span></span>
-<span><span class="co">#&gt; [Epoch 008] Loss: 0.616508</span></span>
-<span><span class="co">#&gt; [Epoch 009] Loss: 0.599206</span></span>
-<span><span class="co">#&gt; [Epoch 010] Loss: 0.585125</span></span></code></pre></div>
+<span><span class="co">#&gt; [Epoch 003] Loss: 0.745608</span></span>
+<span><span class="co">#&gt; [Epoch 004] Loss: 0.686255</span></span>
+<span><span class="co">#&gt; [Epoch 005] Loss: 0.659525</span></span>
+<span><span class="co">#&gt; [Epoch 006] Loss: 0.642972</span></span>
+<span><span class="co">#&gt; [Epoch 007] Loss: 0.628153</span></span>
+<span><span class="co">#&gt; [Epoch 008] Loss: 0.609161</span></span>
+<span><span class="co">#&gt; [Epoch 009] Loss: 0.593733</span></span>
+<span><span class="co">#&gt; [Epoch 010] Loss: 0.579750</span></span></code></pre></div>
 <p>In the feature importance plot we have, as expected, strong
 importance for <code>V10</code>, and the other features that are used
 conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
