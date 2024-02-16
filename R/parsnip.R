@@ -83,6 +83,141 @@ add_parsnip_tabnet <- function() {
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
+    parsnip = "cat_emb_dim",
+    original = "cat_emb_dim",
+    func = list(pkg = "dials", fun = "cat_emb_dim"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "decision_width",
+    original = "decision_width",
+    func = list(pkg = "dials", fun = "decision_width"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "attention_width",
+    original = "attention_width",
+    func = list(pkg = "dials", fun = "attention_width"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_steps",
+    original = "num_steps",
+    func = list(pkg = "dials", fun = "num_steps"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "mask_type",
+    original = "mask_type",
+    func = list(pkg = "dials", fun = "mask_type"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "mlp_hidden_multiplier",
+    original = "mlp_hidden_multiplier",
+    func = list(pkg = "dials", fun = "mlp_hidden_multiplier"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "mlp_activation",
+    original = "mlp_activation",
+    func = list(pkg = "dials", fun = "mlp_activation"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "encoder_activation",
+    original = "encoder_activation",
+    func = list(pkg = "dials", fun = "encoder_activation"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_independent",
+    original = "num_independent",
+    func = list(pkg = "dials", fun = "num_independent"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_shared",
+    original = "num_shared",
+    func = list(pkg = "dials", fun = "num_shared"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_independent_decoder",
+    original = "num_independent_decoder",
+    func = list(pkg = "dials", fun = "num_independent_decoder"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "num_shared_decoder",
+    original = "num_shared_decoder",
+    func = list(pkg = "dials", fun = "num_shared_decoder"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "penalty",
+    original = "penalty",
+    func = list(pkg = "dials", fun = "penalty"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "feature_reusage",
+    original = "feature_reusage",
+    func = list(pkg = "dials", fun = "feature_reusage"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "momentum",
+    original = "momentum",
+    func = list(pkg = "dials", fun = "momentum"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
     parsnip = "epochs",
     original = "epochs",
     func = list(pkg = "dials", fun = "epochs"),
@@ -101,9 +236,9 @@ add_parsnip_tabnet <- function() {
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "penalty",
-    original = "penalty",
-    func = list(pkg = "dials", fun = "penalty"),
+    parsnip = "virtual_batch_size",
+    original = "virtual_batch_size",
+    func = list(pkg = "dials", fun = "virtual_batch_size"),
     has_submodel = FALSE
   )
 
@@ -119,72 +254,144 @@ add_parsnip_tabnet <- function() {
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "decision_width",
-    original = "decision_width",
-    func = list(pkg = "tabnet", fun = "decision_width"),
+    parsnip = "optimizer",
+    original = "optimizer",
+    func = list(pkg = "dials", fun = "optimizer"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "attention_width",
-    original = "attention_width",
-    func = list(pkg = "tabnet", fun = "attention_width"),
+    parsnip = "loss",
+    original = "loss",
+    func = list(pkg = "dials", fun = "loss"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "num_steps",
-    original = "num_steps",
-    func = list(pkg = "tabnet", fun = "num_steps"),
+    parsnip = "clip_value",
+    original = "clip_value",
+    func = list(pkg = "dials", fun = "clip_value"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "feature_reusage",
-    original = "feature_reusage",
-    func = list(pkg = "tabnet", fun = "feature_reusage"),
+    parsnip = "drop_last",
+    original = "drop_last",
+    func = list(pkg = "dials", fun = "drop_last"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "virtual_batch_size",
-    original = "virtual_batch_size",
-    func = list(pkg = "dials", fun = "batch_size"),
+    parsnip = "lr_scheduler",
+    original = "lr_scheduler",
+    func = list(pkg = "dials", fun = "lr_scheduler"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "num_independent",
-    original = "num_independent",
-    func = list(pkg = "tabnet", fun = "num_independent"),
+    parsnip = "lr_decay",
+    original = "lr_decay",
+    func = list(pkg = "dials", fun = "lr_decay"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "num_shared",
-    original = "num_shared",
-    func = list(pkg = "tabnet", fun = "num_shared"),
+    parsnip = "step_size",
+    original = "step_size",
+    func = list(pkg = "dials", fun = "step_size"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "momentum",
-    original = "momentum",
-    func = list(pkg = "tabnet", fun = "momentum"),
+    parsnip = "checkpoint_epochs",
+    original = "checkpoint_epochs",
+    func = list(pkg = "dials", fun = "checkpoint_epochs"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "verbose",
+    original = "verbose",
+    func = list(pkg = "dials", fun = "verbose"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "importance_sample_size",
+    original = "importance_sample_size",
+    func = list(pkg = "dials", fun = "importance_sample_size"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "early_stopping_monitor",
+    original = "early_stopping_monitor",
+    func = list(pkg = "dials", fun = "early_stopping_monitor"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "early_stopping_tolerance",
+    original = "early_stopping_tolerance",
+    func = list(pkg = "dials", fun = "early_stopping_tolerance"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "early_stopping_patience",
+    original = "early_stopping_patience",
+    func = list(pkg = "dials", fun = "early_stopping_patience"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "skip_importance",
+    original = "skip_importance",
+    func = list(pkg = "dials", fun = "skip_importance"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "tabnet_model",
+    original = "tabnet_model",
+    func = list(pkg = "dials", fun = "tabnet_model"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "from_epoch",
+    original = "from_epoch",
+    func = list(pkg = "dials", fun = "from_epoch"),
     has_submodel = FALSE
   )
 
@@ -236,10 +443,18 @@ add_parsnip_tabnet <- function() {
 #' `parsnip` machinery.
 #'
 #' @export
-tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size = NULL,
-                   learn_rate = NULL, decision_width = NULL, attention_width = NULL,
-                   num_steps = NULL, feature_reusage = NULL, virtual_batch_size = NULL,
-                   num_independent = NULL, num_shared = NULL, momentum = NULL) {
+tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL, attention_width = NULL,
+                   num_steps = NULL, mask_type = NULL, mlp_hidden_multiplier = NULL, mlp_activation = NULL,
+                   encoder_activation = NULL, num_independent = NULL, num_shared = NULL,
+                   num_independent_decoder = NULL, num_shared_decoder = NULL, penalty = NULL,
+                   feature_reusage = NULL, momentum = NULL, epochs = NULL, batch_size = NULL,
+                   virtual_batch_size = NULL, learn_rate = NULL, optimizer = NULL, loss = NULL,
+                   clip_value = NULL, drop_last = NULL, lr_scheduler = NULL, lr_decay = NULL, step_size = NULL,
+                   checkpoint_epochs = NULL, verbose = NULL, importance_sample_size = NULL,
+                   early_stopping_monitor = NULL, early_stopping_tolerance = NULL,
+                   early_stopping_patience = NULL, skip_importance = NULL,
+                   tabnet_model = NULL, from_epoch = NULL
+                   ) {
 
   if (!requireNamespace("parsnip", quietly = TRUE))
     stop("Package \"parsnip\" needed for this function to work. Please install it.", call. = FALSE)
@@ -251,18 +466,41 @@ tabnet <- function(mode = "unknown", epochs = NULL, penalty = NULL, batch_size =
 
   # Capture the arguments in quosures
   args <- list(
-    epochs = rlang::enquo(epochs),
-    penalty = rlang::enquo(penalty),
-    batch_size = rlang::enquo(batch_size),
-    learn_rate = rlang::enquo(learn_rate),
+    cat_emb_dim = rlang::enquo(cat_emb_dim),
     decision_width = rlang::enquo(decision_width),
     attention_width = rlang::enquo(attention_width),
     num_steps = rlang::enquo(num_steps),
-    feature_reusage = rlang::enquo(feature_reusage),
-    virtual_batch_size = rlang::enquo(virtual_batch_size),
+    mask_type = rlang::enquo(mask_type),
+    mlp_hidden_multiplier = rlang::enquo(mlp_hidden_multiplier),
+    mlp_activation = rlang::enquo(mlp_activation),
+    encoder_activation = rlang::enquo(encoder_activation),
     num_independent = rlang::enquo(num_independent),
     num_shared = rlang::enquo(num_shared),
-    momentum = rlang::enquo(momentum)
+    num_independent_decoder = rlang::enquo(num_independent_decoder),
+    num_shared_decoder = rlang::enquo(num_shared_decoder),
+    penalty = rlang::enquo(penalty),
+    feature_reusage = rlang::enquo(feature_reusage),
+    momentum = rlang::enquo(momentum),
+    epochs = rlang::enquo(epochs),
+    batch_size = rlang::enquo(batch_size),
+    virtual_batch_size = rlang::enquo(virtual_batch_size),
+    learn_rate = rlang::enquo(learn_rate),
+    optimizer = rlang::enquo(optimizer),
+    loss = rlang::enquo(loss),
+    clip_value = rlang::enquo(clip_value),
+    drop_last = rlang::enquo(drop_last),
+    lr_scheduler = rlang::enquo(lr_scheduler),
+    lr_decay = rlang::enquo(lr_decay),
+    step_size = rlang::enquo(step_size),
+    checkpoint_epochs = rlang::enquo(checkpoint_epochs),
+    verbose = rlang::enquo(verbose),
+    importance_sample_size = rlang::enquo(importance_sample_size),
+    early_stopping_monitor = rlang::enquo(early_stopping_monitor),
+    early_stopping_tolerance = rlang::enquo(early_stopping_tolerance),
+    early_stopping_patience = rlang::enquo(early_stopping_patience),
+    skip_importance = rlang::enquo(skip_importance),
+    tabnet_model = rlang::enquo(tabnet_model),
+    from_epoch = rlang::enquo(from_epoch)
   )
 
   # Save some empty slots for future parts of the specification

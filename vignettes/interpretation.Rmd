@@ -104,7 +104,7 @@ Let's fit a TabNet model to the `syn2` dataset and analyze the
 interpretation metrics.
 
 ```{r}
-fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 10, verbose = TRUE)
+fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 10, verbose = TRUE, device = "cpu")
 ```
 
 In the feature importance plot we can see that, as expected, features
@@ -151,7 +151,7 @@ create the response variable and we expect to see this in the masks.
 First we fit the model for 10 epochs.
 
 ```{r}
-fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 10, verbose = TRUE)
+fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 10, verbose = TRUE, device = "cpu")
 ```
 
 In the feature importance plot we have, as expected, strong importance
