@@ -19,26 +19,28 @@ knitr::opts_chunk$set(
 
 # Motivation
 
-Real-life training dataset usually contains missing data. The vast majority of deep-learning networks do not handle missing data and thus either stop or crash when values are missing in the predictors.
+Real-life training dataset usually contains Missing Data. The vast majority of deep-learning networks do not handle Missing Data and thus either stop or crash when values are missing in the predictors.
 
-But Tabnet use a masking mechanism that we can reuse to cover the missing data in the training set.
+In {tabnet}, we reuse the self-supervised masking mechanism to cover the Missing Data in the training set.
 
-As we enter the world of missing-data, we have to question the type of missing-data we deal with. We could have missing data at random (MAR), like for example some transmission errors on a sensor data dataset, or missing not at random (MNAR) when some interactions exists between the missing data and other predictors values for the same sample. The later is a more complex topic to cover, and we will try to investigate it here through the `ames` dataset.
+As we enter the world of Missing Data, we have to question the type of Missing Data we deal with. We could have Missing at Random (MAR), like for example some transmission errors on a sensor data dataset, or Missing Not at Random (MNAR) when some interactions exists between the Missing Data and other predictors values for the same sample. The later is a more complex topic to cover, and we will try to investigate it here through the `ames` dataset.
 
-# Missing-data dataset creation
+# Missing Data dataset creation
 
 ## Ames missings understanding
 
 The `ames` dataset from  `{modeldata}`  contains a lot of _null values_ that the human analysis clearly understand as an implicit _"missing object"_ described by that value. We have for example pool surface of 0 square meters means "no pool", basement surface of 0 square meters means "no basement", ...  
 Many of those variables can be detected visually by inspecting the distribution of the values like, for example, the `Masonry veneer area` predictor :
 ```{r}
+#+ message = FALSE, warning = FALSE
 library(tidymodels, quietly = TRUE)
+#+
 library(tabnet)
 data("ames", package = "modeldata")
 qplot(ames$Mas_Vnr_Area)
 ```
 ![ames variable `Mas_Vnr_Area` histogram showing high occurrence of value zero](ames_mas_vnr_hist.png)
-We know that it will be extremely difficult for a model to capture an internal representation of such distribution, and thus we want to avoid the null values to penalize the model internal representation.
+We know that it will be extremely difficult for a model to capture an internal representation of such distribution, and thus we want to avoid the null values to bias the model internal representation.
 
 ## While keeping some room for freedom
 
@@ -46,7 +48,7 @@ Many of those variables come as a pair in the `ames` dataset, one for the qualit
 As human, we have the intuition that knowing if a pool is present is important for the modeling task. So we want the model to get an internal representation of the implicit `has_pool=FALSE` without having it explicit in the dataset. In order to do so, we have to let the model some freedom to infer the "no_pool" state and thus we should not mutate both variables in the pair `Pool_Area=NA` and `Pool_QC=NA` at the same time.  
 
 
-## Ames with missing data
+## Ames with Missing Data
 
 Let's turn those missing objects data explicitly into `NAs` in an new `ames_missing` dataset :
 
@@ -81,14 +83,19 @@ Let's pretrain one model for each of those dataset, and analyze variable importa
 ## Variable importance with raw `ames` dataset
 
 ```{r}
-ames_rec <- recipe(Sale_Price ~ ., data=ames) %>% 
+ames_rec <- recipe(Sale_Price ~ ., data = ames) %>% 
   step_normalize(all_numeric())
 
-cat_emb_dim <- map_dbl(ames %>% select_if(is.factor), ~log2(nlevels(.x)) %>% round)
+cat_emb_dim <- map_dbl(ames %>% select_if(is.factor), ~max(log(nlevels(.x)) %>% floor, 1))
 
-ames_pretrain <- tabnet_pretrain(ames_rec, data=ames,  epoch=50, cat_emb_dim = cat_emb_dim,
-                            valid_split = 0.2, verbose=TRUE, batch=2930, 
-                            early_stopping_patience = 3L, early_stopping_tolerance = 1e-4)
+pretrain_config <- tabnet_config(valid_split = 0.2, verbose = TRUE, batch_size = 2930, 
+                             cat_emb_dim = cat_emb_dim,
+                             early_stopping_patience = 5L,
+                             early_stopping_tolerance = 1e-3)
+
+
+ames_pretrain <- tabnet_pretrain(ames_rec, data = ames,  epoch = 70, 
+                                 config = pretrain_config)
 autoplot(ames_pretrain)
 ```
 
@@ -125,10 +132,10 @@ col_with_missings <- ames_missing %>%
 
 vip_color <- function(object, col_has_missing) {
   vip_data <- vip::vip(object)$data %>% arrange(Importance)
-  vis_miss_plus <- left_join(vip_data, col_has_missing , by="Variable") %>%
-    mutate(Variable=factor(Variable, levels = vip_data$Variable))
+  vis_miss_plus <- left_join(vip_data, col_has_missing , by = "Variable") %>%
+    mutate(Variable = factor(Variable, levels = vip_data$Variable))
   vis_miss_plus
-  ggplot(vis_miss_plus, aes(x=Variable, y=Importance, fill=has_missing)) +
+  ggplot(vis_miss_plus, aes(x = Variable, y = Importance, fill = has_missing)) +
     geom_col() + coord_flip() + scale_fill_grey()
 }
 vip_color(ames_pretrain, col_with_missings)
@@ -147,11 +154,14 @@ In order to compensate the 13% missingness already present in the `ames_missing`
 ```{r}
 ames_missing_rec <- recipe(Sale_Price ~ ., data=ames_missing) %>% 
   step_normalize(all_numeric())
-ames_missing_pretrain <- tabnet_pretrain(ames_missing_rec, data=ames_missing, epoch=50, 
-                                    cat_emb_dim = cat_emb_dim,
-                                    valid_split = 0.2, verbose=TRUE, batch=2930, 
-                                    pretraining_ratio=0.37, 
-                                    early_stopping_patience = 3L, early_stopping_tolerance = 1e-4)
+
+pretrain_config <- tabnet_config(valid_split = 0.2, verbose = TRUE, batch_size = 2930, 
+                             cat_emb_dim = cat_emb_dim, learn_rate = 0.04,
+                             pretraining_ratio=0.37, early_stopping_patience = 5L,
+                             early_stopping_tolerance = 1e-4)
+
+ames_missing_pretrain <- tabnet_pretrain(ames_missing_rec, data = ames_missing, epoch = 70, 
+                                    config = pretrain_config)
 autoplot(ames_missing_pretrain)
 vip_color(ames_missing_pretrain, col_with_missings)
 ```
@@ -183,10 +193,8 @@ We can see here no variables with high missingness is present in the top 10 impo
 ## Variable importance with raw `ames` dataset
 
 ```{r}
-ames_fit <- tabnet_pretrain(ames_rec, data=ames,  tabnet_model = ames_pretrain, 
-                            epoch=50, cat_emb_dim = cat_emb_dim,
-                            valid_split = 0.2, verbose=TRUE, batch=2930, 
-                            early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
+ames_fit <- tabnet_fit(ames_rec, data = ames,  tabnet_model = ames_pretrain, 
+                       epoch = 70, config = pretrain_config, learn_rate = 5e-3)
 autoplot(ames_fit)
 vip_color(ames_fit, col_with_missings)
 ```
@@ -201,10 +209,10 @@ Here again, the model uses two predictors `BasmFin_SF_2` and `Garage_Finish` tha
 ## Variable importance with `ames_missing` dataset
 
 ```{r}
-ames_missing_fit <- tabnet_pretrain(ames_rec, data=ames_missing,  tabnet_model = ames_missing_pretrain, 
-                            epoch=50, cat_emb_dim = cat_emb_dim,
-                            valid_split = 0.2, verbose=TRUE, batch=2930, 
-                            early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
+ames_missing_fit <- tabnet_fit(ames_missing_rec, data = ames_missing, 
+                               tabnet_model = ames_missing_pretrain,  epoch = 70,
+                               config = pretrain_config, learn_rate = 5e-3
+                            )
 autoplot(ames_missing_fit)
 vip_color(ames_missing_fit, col_with_missings)
 ```
@@ -216,7 +224,7 @@ Here we can see one predictors `Garage_Area` with 5 % missingness in the top 10.
 
 # Conclusion
 
-Even if the models have a huge variability in the variable importance among different training, we have the intuition that model trained with explicit missing data will provide better result than its counterpart trained with zero-imputed variables.
+Even if the models have a huge variability in the variable importance among different training, we have the intuition that model trained with explicit Missing Data will provide better result than its counterpart trained with zero-imputed variables.
 
 In any case, having the capability to pretrain and fit TabNet models with MAR dataset or MNAR dataset is of high convenience for the real-life use-cases. 
 

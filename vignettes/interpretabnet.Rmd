@@ -33,47 +33,101 @@ In this vignette, we will try to improve the workflow on Ames dataset debuted in
 
 Interprestability score associated with `tabnet_explain()` results, will help us to select more stable models.  
 
-Interprestability score is a metric for the stability of mask between models: score over 0.9 relates very-high stability, between 0.7 and 0.9 is high stability, between 0.5 and 0.7 is moderate and between 0.3 and 0.5 low stability of the interpretation on the model.
+Interprestability score is a metric for the stability of mask between models: score over 0.9 relates **very-high** stability, between 0.7 and 0.9 is **high** stability, between 0.5 and 0.7 is **moderate** and between 0.3 and 0.5 **low** stability of the interpretation on the model.
 
 
-The {tabnet} implementation compares the explainability parameters between the last 5 model checkpoints. So it is up to you to make the those last 5 checkpoints a good proxy of the model.
+The {tabnet} implementation compares the explainability parameters between the last 5 model checkpoints. So it is up to you to make those last 5 checkpoints a good proxy of the model.
 
 Let's experiment those on a pretraining scenario on the `ames` dataset : 
 
-## Interprestability on ames, the pretraining 
+## Interprestability on ames_missing 
 
-Let's train 6 different models on ames dataset for 60 epochs, and continue the training fro 5 epochs where we will record the checkpoints. 
+We will work here with the `ames_missing` dataset, transformation of the `ames` dataset done in vignette [Missing Data].
 
+* Experiment scenario
+Let's train 3 different models on ames_missing dataset with 2 flavors of parameter, tabnet and interpretabnet.
+We will train for the time needed for convergence via early-stopping, and continue the training for 5 epochs with a record of each checkpoints. 
+We will thus have a way to measure the interprestability and compare stability between thos 6 models
 
-```{r, 6 models pretrain}
+### 3 classical TabNet models
+```{r, 3 classical models }
 data("ames_missing", package = "tabnet")
 cat_emb_dim <- map_dbl(ames_missing %>% select_if(is.factor), ~log2(nlevels(.x)) %>% round)
 
-pretrain_no_checkpoints <- map(1:6, ~tabnet_pretrain(Sale_Price ~., 
-                                   data = ames_missing,
-                                   epochs = 54, valid_split = 0.2, checkpoint_epoch = 55,
-                                   num_steps = 3, attention_width = 2, num_shared = 2,
-                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE,
-                                   early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
-                   , .progress = TRUE)
-pretrain_with_checkpoints <- map(1:6, ~tabnet_pretrain(Sale_Price ~., 
-                                   data = ames_missing, tabnet_model = pretrain_no_checkpoints[[.x]],
-                                   epochs = 6, valid_split = 0.2, checkpoint_epoch = 1,
-                                   num_steps = 3, attention_width = 2, num_shared = 2,
-                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE)
-                   , .progress = TRUE)
+tabnet_config <- tabnet_config( num_steps = 3, attention_width = 8, num_shared = 2,
+                                num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE,
+                                early_stopping_patience = 12L, early_stopping_tolerance = 0.01,
+                                valid_split = 0.2)
+
+train_tabnet <- map(1:3, ~tabnet_fit(Sale_Price ~., data = ames_missing,
+                                     epochs = 100, checkpoint_epoch = 101,
+                                     config = tabnet_config, learn_rate = 5e-2),
+                    .progress = TRUE)
+```
+
+### 3 InterpreTabNet models
+
+The difference of interpretabnet models is 
+- the presence of a MLP adaptation layer in between steps
+- the encoder layer use a Multibranch Weighted Linear-Unit implemented as `nn_mb_wlu()`
+- the mask type switch to `entmax`
+
+You don't have to know them, as the handy `interpretabnet_config()` function change them all in once.
+
+For the training loop, you will realize that Interpretabnet models need many more epoch to train due to the MLP network.
+
+```{r, 3 interpretabnet models }
+interpretabnet_config <- interpretabnet_config( num_steps = 3, attention_width = 8, num_shared = 2,
+                                num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE,
+                                early_stopping_patience = 12L, early_stopping_tolerance = 0.01,
+                                valid_split = 0.2)
+
+
+train_tabnet <- c(train_tabnet,
+                  map(1:3, ~tabnet_fit(Sale_Price ~., data = ames_missing,
+                                     epochs = 150, checkpoint_epoch = 151,
+                                     config = interpretabnet_config, learn_rate = 5e-2),
+                    .progress = TRUE)
+)
 
 ```
 
-with first a close look at their training loss
+### Adding 5 checkpoont to each model
+
+With a small learning-rate, we will extend the fitted model for 5 epochs in order to measure the Inteprestability.
 
 ```{r, fig.width= 10}
-autoplot(pretrain_with_checkpoints[[1]]) + 
-  autoplot(pretrain_with_checkpoints[[2]]) + 
-  autoplot(pretrain_with_checkpoints[[3]]) + 
-  autoplot(pretrain_with_checkpoints[[4]]) + 
-  autoplot(pretrain_with_checkpoints[[5]])  +
-  autoplot(pretrain_with_checkpoints[[6]])  +
+autoplot(train_tabnet[[1]]) + 
+  autoplot(train_tabnet[[2]]) + 
+  autoplot(train_tabnet[[3]]) + 
+  autoplot(train_tabnet[[4]]) + 
+  autoplot(train_tabnet[[5]])  +
+  autoplot(train_tabnet[[6]])  +
+  plot_layout(axes = "collect", guides = "collect")
+  
+```
+
+```{r, trailing 5 checkpoint}
+
+models_checkpointed <- map(train_tabnet, ~tabnet_fit(Sale_Price ~., data = ames_missing,
+                                     tabnet_model = .x, epochs = 6, valid_split = 0.2,
+                                     checkpoint_epoch = 1, learn_rate = 1e-2),
+                           .progress = TRUE)
+
+```
+
+
+
+
+Let's first have a close look at their training convergence plot
+
+```{r, fig.width= 10}
+autoplot(models_checkpointed[[1]]) + 
+  autoplot(models_checkpointed[[2]]) + 
+  autoplot(models_checkpointed[[3]]) + 
+  autoplot(models_checkpointed[[4]]) + 
+  autoplot(models_checkpointed[[5]])  +
+  autoplot(models_checkpointed[[6]])  +
   plot_layout(axes = "collect", guides = "collect")
   
 ```
@@ -82,7 +136,7 @@ autoplot(pretrain_with_checkpoints[[1]]) +
 
 
 ```{r, explain pretraining}
-explain_lst <- map(pretrain_with_checkpoints, tabnet_explain, new_data = ames_missing)
+explain_lst <- map(models_checkpointed, tabnet_explain, new_data = ames_missing)
 interprestability <- map_dbl(explain_lst, "interprestability")
 interprestability
 ```
@@ -103,56 +157,9 @@ autoplot(explain_lst[[1]], quantile = 0.99) +
 
 ### Dataset preparation
 
-```{r, 6 models fit & explain}
-best_pretrain <- pretrain_with_checkpoints[[which(interprestability == max(interprestability))]]
+```{r, 6 models dataset}
 ames_split <- initial_split(ames_missing, strata = Sale_Price, prop = 0.8)
 ames_train <- training(ames_split)
 ames_test <- testing(ames_split)
 ```
 
-### The Training of 6 models
-
-```{r, 6 models fit & explain}
-fit_no_checkpoint <- map(1:6, ~tabnet_fit(Sale_Price ~., data = ames_train, tabnet_model = best_pretrain,
-                                   epochs = 54, valid_split = 0.2, checkpoint_epoch = 55,
-                                   num_steps = 3, attention_width = 2, num_shared = 2,
-                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE,
-                                   early_stopping_patience = 5L, early_stopping_tolerance = 1e-4)
-                   , .progress = TRUE)
-fit_with_checkpoint <- map(1:6, ~tabnet_fit(Sale_Price ~., data = ames_train, tabnet_model = fit_no_checkpoint[[.x]],
-                                   epochs = 6, valid_split = 0.2, checkpoint_epoch = 1,
-                                   num_steps = 3, attention_width = 2, num_shared = 2,
-                                   num_independent = 2, cat_emb_dim = cat_emb_dim, verbose = FALSE)
-                   , .progress = TRUE)
-```
-
-and their training plot
-
-```{r, fig.width= 10}
-autoplot(fit_with_checkpoint[[1]]) + 
-  autoplot(fit_with_checkpoint[[2]]) + 
-  autoplot(fit_with_checkpoint[[3]]) + 
-  autoplot(fit_with_checkpoint[[4]]) + 
-  autoplot(fit_with_checkpoint[[5]])  +
-  autoplot(fit_with_checkpoint[[6]])  +
-  plot_layout(axes = "collect", guides = "collect")
-  
-```
-
-### evolution of the Interpretabnet score along the checkpoints
-```{r}
-explain_lst <- map(fit_lst, tabnet_explain, new_data=ames)
-map_dbl(explain_lst, "interprestability")
-```
-
-### plot the evolution
-```{r, plot explain fit, fig.width= 13}
-autoplot(explain_lst[[1]], quantile = 0.99) + 
-  autoplot(explain_lst[[2]], quantile = 0.99) + 
-  autoplot(explain_lst[[3]], quantile = 0.99) + 
-  autoplot(explain_lst[[4]], quantile = 0.99) + 
-  autoplot(explain_lst[[5]], quantile = 0.99)  +
-  autoplot(explain_lst[[6]], quantile = 0.99)  +
-  plot_layout(axes = "collect", guides = "collect")
-  
-```

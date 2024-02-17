@@ -649,7 +649,7 @@ tabnet_train_supervised <- function(obj, x, y, config = interpretabnet_config(),
       }
     }
     if (config$early_stopping && epoch == 1 + epoch_shift) {
-      # initialise best_metric
+      # initialize best_metric
       best_metric <- current_loss
     }
 
