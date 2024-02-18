@@ -12,10 +12,13 @@
 - the Multi-branch Weighted Linear Unit activation `nn_mb_wlu()`
 - interprestability score output added to `tabnet_explain()`
 * Extend parsnip model argument to the full list of tabnet config parameters.
+* parsnip models now support `tabnet_model` and `from_epoch` parameters  (#143)
 
 ## Bugfixes
 
 * `tabnet_predict` is now running on GPU.
+*  `autoplot()` now position the "has_checkpoint" points correctly when a `tabnet_fit()` is continuing a previous training using `tabnet_model =`. (#150)
+*  Explicitely warn that `tabnet_model` option will not be used in `tabnet_pretrain()` tasks. (#150)
 
 # tabnet 0.5.0
 

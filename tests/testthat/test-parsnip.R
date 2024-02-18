@@ -1,7 +1,5 @@
 test_that("parsnip fit model works", {
 
-  data("ames", package = "modeldata")
-
   # default params
   expect_no_error(
     model <- tabnet() %>%
@@ -29,6 +27,22 @@ test_that("parsnip fit model works", {
   # new batch of setup params
   expect_no_error(
     model <- tabnet(penalty = 0.2, verbose = FALSE, early_stopping_tolerance = 1e-3) %>%
+      parsnip::set_mode("classification") %>%
+      parsnip::set_engine("torch")
+  )
+
+  expect_no_error(
+    fit <- model %>%
+      parsnip::fit(Overall_Cond ~ ., data = ames)
+  )
+
+})
+
+test_that("parsnip fit model works from a pretrained model", {
+
+  # default params
+  expect_no_error(
+    model <- tabnet(tabnet_model = ames_pretrain, from_epoch = 1, epoch = 1) %>%
       parsnip::set_mode("regression") %>%
       parsnip::set_engine("torch")
   )
@@ -37,6 +51,9 @@ test_that("parsnip fit model works", {
     fit <- model %>%
       parsnip::fit(Sale_Price ~ ., data = ames)
   )
+
+
+
 
 })
 

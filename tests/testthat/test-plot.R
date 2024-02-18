@@ -43,21 +43,28 @@ test_that("Autoplot a model without checkpoint", {
     print(autoplot(tabnet_fit))
   )
 
-  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3, valid_split=0.3,
-                           verbose = FALSE)
+  tabnet_fit <- tabnet_fit(attrix, attriy, epochs = 3, valid_split = 0.3)
   expect_no_error(
     print(autoplot(tabnet_fit))
   )
 
 })
 
-test_that("Autoplot of pretrain then fit scenario", {
+test_that("Autoplot of pretrain then fit scenario, pretrain without checkpoints, fit without valid", {
 
-  tabnet_fit <- tabnet_fit(attrix, attriy, tabnet_model=attr_pretrained_vsplit, epochs = 12,
-                           verbose = FALSE)
+  tabnet_fit <- tabnet_fit(attrix, attriy, tabnet_model = attr_pretrained_vsplit, epochs = 12)
 
   expect_no_error(
     print(autoplot(tabnet_fit))
+  )
+
+  fit_no_checkpoint <- tabnet_fit(Sale_Price ~., data = small_ames, epochs = 2, valid_split = 0.2, checkpoint_epoch = 3, batch_size = 64)
+  expect_no_error(
+    print(autoplot(fit_no_checkpoint))
+  )
+  fit_with_checkpoint <- tabnet_fit(Sale_Price ~., data = small_ames, tabnet_model = fit_no_checkpoint, epochs = 2, checkpoint_epoch = 1)
+  expect_no_error(
+    print(autoplot(fit_with_checkpoint))
   )
 
 })

@@ -178,11 +178,12 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
       if (config$verbose) pb$tick(tokens = m)
       train_metrics <- c(train_metrics, m)
     })
-    metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)
+    metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)$loss
 
     if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0) {
       network$to(device = "cpu")
       checkpoints[[length(checkpoints) + 1]] <- model_to_raw(network)
+      metrics[[epoch]][["checkpoint"]] <- TRUE
       network$to(device = device)
     }
 
@@ -192,26 +193,26 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
         m <- valid_batch_un(network, to_device(batch, device), config)
         valid_metrics <- c(valid_metrics, m)
       })
-      metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)
+      metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)$loss
     }
 
     if (config$verbose & !has_valid)
-      message(gettextf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train$loss)))
+      message(gettextf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train)))
     if (config$verbose & has_valid)
-      message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3f", epoch, mean(metrics[[epoch]]$train$loss), mean(metrics[[epoch]]$valid$loss)))
+      message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3f", epoch, mean(metrics[[epoch]]$train), mean(metrics[[epoch]]$valid)))
 
     # Early-stopping checks
     if (config$early_stopping && config$early_stopping_monitor=="valid_loss"){
-      current_loss <- mean(metrics[[epoch]]$valid$loss)
+      current_loss <- mean(metrics[[epoch]]$valid)
     } else {
-      current_loss <- mean(metrics[[epoch]]$train$loss)
+      current_loss <- mean(metrics[[epoch]]$train)
     }
     if (config$early_stopping && epoch > 1+epoch_shift) {
       # compute relative change, and compare to best_metric
       change <- (current_loss - best_metric) / current_loss
-      if (change > config$early_stopping_tolerance){
+      if (change > config$early_stopping_tolerance) {
         patience_counter <- patience_counter + 1
-        if (patience_counter >= config$early_stopping_patience){
+        if (patience_counter >= config$early_stopping_patience) {
           if (config$verbose)
             rlang::inform(sprintf("Early stopping at epoch %03d", epoch))
           break
@@ -222,7 +223,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
         patience_counter <- 0L
       }
     }
-    if (config$early_stopping && epoch == 1+epoch_shift) {
+    if (config$early_stopping && epoch == 1 + epoch_shift) {
       # initialise best_metric
       best_metric <- current_loss
     }

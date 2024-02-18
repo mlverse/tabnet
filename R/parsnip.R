@@ -377,6 +377,24 @@ add_parsnip_tabnet <- function() {
     has_submodel = FALSE
   )
 
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "tabnet_model",
+    original = "tabnet_model",
+    func = list(pkg = "dials", fun = "tabnet_model"),
+    has_submodel = FALSE
+  )
+
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
+    parsnip = "from_epoch",
+    original = "from_epoch",
+    func = list(pkg = "dials", fun = "from_epoch"),
+    has_submodel = FALSE
+  )
+
   parsnip::set_pred(
     model = "tabnet",
     eng = "torch",
@@ -434,7 +452,8 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
                    clip_value = NULL, drop_last = NULL, lr_scheduler = NULL, lr_decay = NULL, step_size = NULL,
                    checkpoint_epochs = NULL, verbose = NULL, importance_sample_size = NULL,
                    early_stopping_monitor = NULL, early_stopping_tolerance = NULL,
-                   early_stopping_patience = NULL, skip_importance = NULL
+                   early_stopping_patience = NULL, skip_importance = NULL,
+                   tabnet_model = NULL, from_epoch = NULL
                    ) {
 
   if (!requireNamespace("parsnip", quietly = TRUE))
@@ -479,7 +498,9 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
     early_stopping_monitor = rlang::enquo(early_stopping_monitor),
     early_stopping_tolerance = rlang::enquo(early_stopping_tolerance),
     early_stopping_patience = rlang::enquo(early_stopping_patience),
-    skip_importance = rlang::enquo(skip_importance)
+    skip_importance = rlang::enquo(skip_importance),
+    tabnet_model = rlang::enquo(tabnet_model),
+    from_epoch = rlang::enquo(from_epoch)
   )
 
   # Save some empty slots for future parts of the specification

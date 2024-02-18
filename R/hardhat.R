@@ -327,6 +327,19 @@ new_tabnet_pretrain <- function(pretrain, blueprint) {
   )
 }
 
+#' Triple dispatch on task, resume training and resume epoch
+#'
+#' Perform the triple dispatch and initialize the model (if needed) or
+#'  resume the model network weight to the right epoch
+#'
+#' @param processed the hardhat prerocessed dataset
+#' @param config the tabnet network config list of parameters
+#' @param tabnet_model the tabnet model to resume training on
+#' @param from_epoch the epoch to resume training from
+#' @param task "supervised" or "unsupervised"
+#'
+#' @return a fitted tabnet_model/tabnet_pretrain object list
+#' @noRd
 tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, from_epoch, task="supervised") {
   predictors <- processed$predictors
   outcomes <- processed$outcomes
@@ -394,6 +407,9 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   } else if (task == "unsupervised") {
 
+    if (!is.null(tabnet_model)) {
+      warning("`tabnet_pretrain()` from a model is not currently supported.\nThe pretraining here will start with a network initialization")
+    }
     pretrain_lst <- tabnet_train_unsupervised( predictors, config = config, epoch_shift)
     return(new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint))
 
