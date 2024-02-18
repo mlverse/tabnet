@@ -210,7 +210,7 @@ test_that("tabnet grid reduction - torch", {
 test_that("Check workflow can use case_weight", {
 
   small_ames_cw <- small_ames %>% dplyr::mutate(case_weight = hardhat::frequency_weights(Year_Sold))
-  model <- tabnet(epochs = 3, checkpoint_epochs = 1) %>%
+  model <- tabnet(epochs = 2) %>%
     parsnip::set_mode("regression") %>%
     parsnip::set_engine("torch")
 
@@ -221,6 +221,9 @@ test_that("Check workflow can use case_weight", {
 
   expect_no_error(
     fit <- wf %>% parsnip::fit(data = small_ames_cw)
+  )
+  expect_no_error(
+    predict(fit, small_ames)
   )
 
 
