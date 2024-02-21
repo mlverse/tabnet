@@ -114,6 +114,9 @@ tabnet_fit.default <- function(x, ...) {
 #' @rdname tabnet_fit
 tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ...,
                                   from_epoch = NULL, weights = NULL) {
+  if (!is.null(weights)) {
+    message(gettextf("Configured `weights` will not be used"))
+  }
   processed <- hardhat::mold(x, y)
   check_type(processed$outcomes)
 
@@ -134,6 +137,9 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
 #' @rdname tabnet_fit
 tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ...,
                                from_epoch = NULL, weights = NULL) {
+  if (!is.null(weights)) {
+    message(gettextf("Configured `weights` will not be used"))
+  }
   processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -160,6 +166,9 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
 #' @rdname tabnet_fit
 tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ...,
                               from_epoch = NULL, weights = NULL) {
+  if (!is.null(weights)) {
+    message(gettextf("Configured `weights` will not be used"))
+  }
   processed <- hardhat::mold(x, data)
   check_type(processed$outcomes)
 
