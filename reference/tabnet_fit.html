@@ -87,7 +87,8 @@
 <span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  config <span class="op">=</span> <span class="fu"><a href="tabnet_config.html">tabnet_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for formula</span></span>
@@ -97,7 +98,8 @@
 <span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  config <span class="op">=</span> <span class="fu"><a href="tabnet_config.html">tabnet_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for recipe</span></span>
@@ -107,7 +109,8 @@
 <span>  tabnet_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  config <span class="op">=</span> <span class="fu"><a href="tabnet_config.html">tabnet_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  from_epoch <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for Node</span></span>
@@ -159,6 +162,10 @@ If no argument is supplied, this will use the default values in <code><a href="t
 <dt>from_epoch</dt>
 <dd><p>When a <code>tabnet_model</code> is provided, restore the network weights from a specific epoch.
 Default is last available checkpoint for restored model, or last epoch for in-memory model.</p></dd>
+
+
+<dt>weights</dt>
+<dd><p>Unused.</p></dd>
 
 
 <dt>formula</dt>
