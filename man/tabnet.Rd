@@ -38,7 +38,9 @@ tabnet(
   early_stopping_monitor = NULL,
   early_stopping_tolerance = NULL,
   early_stopping_patience = NULL,
-  skip_importance = NULL
+  skip_importance = NULL,
+  tabnet_model = NULL,
+  from_epoch = NULL
 )
 }
 \arguments{
