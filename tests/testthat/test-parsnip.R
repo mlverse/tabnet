@@ -9,7 +9,7 @@ test_that("parsnip fit model works", {
 
   expect_no_error(
     fit <- model %>%
-      parsnip::fit(Sale_Price ~ ., data = ames)
+      parsnip::fit(Sale_Price ~ ., data = small_ames)
   )
 
   # some setup params
@@ -21,7 +21,7 @@ test_that("parsnip fit model works", {
 
   expect_no_error(
     fit <- model %>%
-      parsnip::fit(Sale_Price ~ ., data = ames)
+      parsnip::fit(Sale_Price ~ ., data = small_ames)
   )
 
   # new batch of setup params
@@ -33,7 +33,7 @@ test_that("parsnip fit model works", {
 
   expect_no_error(
     fit <- model %>%
-      parsnip::fit(Overall_Cond ~ ., data = ames)
+      parsnip::fit(Overall_Cond ~ ., data = small_ames)
   )
 
 })
@@ -49,7 +49,7 @@ test_that("parsnip fit model works from a pretrained model", {
 
   expect_no_error(
     fit <- model %>%
-      parsnip::fit(Sale_Price ~ ., data = ames)
+      parsnip::fit(Sale_Price ~ ., data = small_ames)
   )
 
 
@@ -63,22 +63,18 @@ test_that("multi_predict works as expected", {
     parsnip::set_mode("regression") %>%
     parsnip::set_engine("torch")
 
-  data("ames", package = "modeldata")
-
   expect_no_error(
     fit <- model %>%
-      parsnip::fit(Sale_Price ~ ., data = ames)
+      parsnip::fit(Sale_Price ~ ., data = small_ames)
   )
 
-  preds <- parsnip::multi_predict(fit, ames, epochs = c(1,2,3,4,5))
+  preds <- parsnip::multi_predict(fit, small_ames, epochs = c(1,2,3,4,5))
 
-  expect_equal(nrow(preds), nrow(ames))
+  expect_equal(nrow(preds), nrow(small_ames))
   expect_equal(nrow(preds$.pred[[1]]), 5)
 })
 
 test_that("Check we can finalize a workflow", {
-
-  data("ames", package = "modeldata")
 
   model <- tabnet(penalty = tune(), epochs = tune()) %>%
     parsnip::set_mode("regression") %>%
@@ -91,7 +87,7 @@ test_that("Check we can finalize a workflow", {
   wf <- tune::finalize_workflow(wf, tibble::tibble(penalty = 0.01, epochs = 1))
 
   expect_no_error(
-    fit <- wf %>% parsnip::fit(data = ames)
+    fit <- wf %>% parsnip::fit(data = small_ames)
   )
 
   expect_equal(rlang::eval_tidy(wf$fit$actions$model$spec$args$penalty), 0.01)
@@ -99,8 +95,6 @@ test_that("Check we can finalize a workflow", {
 })
 
 test_that("Check we can finalize a workflow from a tune_grid", {
-
-  data("ames", package = "modeldata")
 
   model <- tabnet(epochs = tune(), checkpoint_epochs = 1) %>%
     parsnip::set_mode("regression") %>%
@@ -111,7 +105,7 @@ test_that("Check we can finalize a workflow from a tune_grid", {
     workflows::add_formula(Sale_Price ~ .)
 
   custom_grid <- tidyr::crossing(epochs = c(1,2,3))
-  cv_folds <- ames %>%
+  cv_folds <- small_ames %>%
     rsample::vfold_cv(v = 2, repeats = 1)
 
   at <- tune::tune_grid(
@@ -211,4 +205,26 @@ test_that("tabnet grid reduction - torch", {
   for (i in 1:nrow(reg_grid_smol)) {
     expect_equal(reg_grid_smol$.submodels[[i]], list(`Ade Tukunbo` = 1:2))
   }
+})
+
+test_that("Check workflow can use case_weight", {
+
+  small_ames_cw <- small_ames %>% dplyr::mutate(case_weight = hardhat::frequency_weights(Year_Sold))
+  model <- tabnet(epochs = 2) %>%
+    parsnip::set_mode("regression") %>%
+    parsnip::set_engine("torch")
+
+  wf <- workflows::workflow() %>%
+    workflows::add_model(model) %>%
+    workflows::add_formula(Sale_Price ~ .) %>%
+    workflows::add_case_weights(case_weight)
+
+  expect_no_error(
+    fit <- wf %>% parsnip::fit(data = small_ames_cw)
+  )
+  expect_no_error(
+    predict(fit, small_ames)
+  )
+
+
 })
