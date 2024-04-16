@@ -31,6 +31,8 @@ set.seed(202402)
 
 # Interprestability 
 
+Interprestability is a lightweight evolution of Tabnet network design that provides, among other, a stability score of the interpretation mask provided through the `tabnet_explain()` function.
+
 In this vignette, we will try to improve the workflow on Ames dataset debuted in the [Training a Tabnet model from missing-values dataset](https://mlverse.github.io/tabnet/articles/Missing_data_predictors.html) vignette.
 
 Interprestability score associated with `tabnet_explain()` results, will help us to select more stable models.  
