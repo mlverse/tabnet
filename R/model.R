@@ -418,7 +418,7 @@ get_device_from_config <- function(config) {
   device
 }
 
-tabnet_initialize <- function(x, y, config = interpretabnet_config()) {
+tabnet_initialize <- function(x, y, config = tabnet_config()) {
 
   torch::torch_manual_seed(sample.int(1e6, 1))
   has_valid <- config$valid_split > 0
@@ -492,7 +492,7 @@ tabnet_initialize <- function(x, y, config = interpretabnet_config()) {
   )
 }
 
-tabnet_train_supervised <- function(obj, x, y, config = interpretabnet_config(), epoch_shift = 0L) {
+tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_shift = 0L) {
   stopifnot("tabnet_model shall be initialised or pretrained" = (length(obj$fit$network) > 0))
   torch::torch_manual_seed(sample.int(1e6, 1))
 
