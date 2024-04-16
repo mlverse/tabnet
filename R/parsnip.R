@@ -24,7 +24,7 @@ add_parsnip_tabnet <- function() {
     mode = "classification",
     value = list(
       interface = "formula",
-      protect = c("formula", "data"),
+      protect = c("formula", "data", "weights"),
       func = c(pkg = "tabnet", fun = "tabnet_fit"),
       defaults = list()
     )
@@ -36,7 +36,7 @@ add_parsnip_tabnet <- function() {
     mode = "regression",
     value = list(
       interface = "formula",
-      protect = c("formula", "data"),
+      protect = c("formula", "data", "weights"),
       func = c(pkg = "tabnet", fun = "tabnet_fit"),
       defaults = list()
     )

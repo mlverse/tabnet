@@ -19,7 +19,8 @@ tabnet_fit(x, ...)
   tabnet_model = NULL,
   config = tabnet_config(),
   ...,
-  from_epoch = NULL
+  from_epoch = NULL,
+  weights = NULL
 )
 
 \method{tabnet_fit}{formula}(
@@ -28,7 +29,8 @@ tabnet_fit(x, ...)
   tabnet_model = NULL,
   config = tabnet_config(),
   ...,
-  from_epoch = NULL
+  from_epoch = NULL,
+  weights = NULL
 )
 
 \method{tabnet_fit}{recipe}(
@@ -37,7 +39,8 @@ tabnet_fit(x, ...)
   tabnet_model = NULL,
   config = tabnet_config(),
   ...,
-  from_epoch = NULL
+  from_epoch = NULL,
+  weights = NULL
 )
 
 \method{tabnet_fit}{Node}(
@@ -81,6 +84,8 @@ If no argument is supplied, this will use the default values in \code{\link[=tab
 
 \item{from_epoch}{When a \code{tabnet_model} is provided, restore the network weights from a specific epoch.
 Default is last available checkpoint for restored model, or last epoch for in-memory model.}
+
+\item{weights}{Unused.}
 
 \item{formula}{A formula specifying the outcome terms on the left-hand side,
 and the predictor terms on the right-hand side.}

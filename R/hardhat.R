@@ -32,6 +32,7 @@
 #'  If no argument is supplied, this will use the default values in [tabnet_config()].
 #' @param from_epoch When a `tabnet_model` is provided, restore the network weights from a specific epoch.
 #'  Default is last available checkpoint for restored model, or last epoch for in-memory model.
+#' @param weights Unused.
 #' @param ... Model hyperparameters.
 #' Any hyperparameters set here will update those set by the config argument.
 #' See [tabnet_config()] for a list of all possible hyperparameters.
@@ -111,7 +112,11 @@ tabnet_fit.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ...,
+                                  from_epoch = NULL, weights = NULL) {
+  if (!is.null(weights)) {
+    message(gettextf("Configured `weights` will not be used"))
+  }
   processed <- hardhat::mold(x, y)
   check_type(processed$outcomes)
 
@@ -122,7 +127,11 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabnet_config(), ...,
+                               from_epoch = NULL, weights = NULL) {
+  if (!is.null(weights)) {
+    message(gettextf("Configured `weights` will not be used"))
+  }
   processed <- hardhat::mold(
     formula, data,
     blueprint = hardhat::default_formula_blueprint(
@@ -139,7 +148,11 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
 
 #' @export
 #' @rdname tabnet_fit
-tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ...,
+                              from_epoch = NULL, weights = NULL) {
+  if (!is.null(weights)) {
+    message(gettextf("Configured `weights` will not be used"))
+  }
   processed <- hardhat::mold(x, data)
   check_type(processed$outcomes)
 

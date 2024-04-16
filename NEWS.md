@@ -11,6 +11,7 @@
   - the Multi-branch Weighted Linear Unit activation `nn_mb_wlu()`
   - interprestability score output added to `tabnet_explain()`
 * Extend parsnip model argument to the full list of tabnet config parameters.
+* parsnip models now allow transparently passing case weights through `workflows::add_case_weights()` parameters  (#151)
 * parsnip models now support `tabnet_model` and `from_epoch` parameters  (#143)
 
 ## Bugfixes
