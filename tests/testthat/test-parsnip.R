@@ -116,7 +116,7 @@ test_that("Check we can finalize a workflow from a tune_grid", {
     control = tune::control_grid(verbose = F)
   )
 
-  best_rmse <- tune::select_best(at, "rmse")
+  best_rmse <- tune::select_best(at, metric = "rmse")
 
   expect_no_error(
     final_wf <- tune::finalize_workflow(wf, best_rmse)
