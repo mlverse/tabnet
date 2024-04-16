@@ -2,60 +2,63 @@ Package: tabnet
 Title: Fit 'TabNet' Models for Classification and Regression
 Version: 0.5.0.9000
 Authors@R: c(
-    person(given = "Daniel", family = "Falbel", role = c("aut"), email = "daniel@rstudio.com"),
-    person(family = "RStudio", role = c("cph")),
-    person(given = "Christophe", family = "Regouby", role = c("cre", "ctb"), email = "christophe.regouby@free.fr"),
-    person(given = "Egill", family = "Fridgeirsson", role = c("ctb")),
-    person(given = "Philipp", family = "Haarmeyer", role = c("ctb")),
-    person(given = "Sven", family = "Verweij", role = c("ctb"),  comment = c(ORCID = "0000-0002-5573-3952"))
-    )
-Description: Implements the 'TabNet' model by Sercan O. Arik et al. (2019) <arXiv:1908.07442> 
-    with 'Coherent Hierarchical Multi-label Classification Networks' by Giunchiglia et al.
-    <arXiv:2010.10151> and provides a consistent interface for fitting and creating 
-    predictions. It's also fully compatible with the 'tidymodels' ecosystem.
+    person("Daniel", "Falbel", , "daniel@rstudio.com", role = "aut"),
+    person(, "RStudio", role = "cph"),
+    person("Christophe", "Regouby", , "christophe.regouby@free.fr", role = c("cre", "ctb")),
+    person("Egill", "Fridgeirsson", role = "ctb"),
+    person("Philipp", "Haarmeyer", role = "ctb"),
+    person("Sven", "Verweij", role = "ctb",
+           comment = c(ORCID = "0000-0002-5573-3952"))
+  )
+Description: Implements the 'TabNet' model by Sercan O. Arik et al. (2019)
+    <arXiv:1908.07442> with 'Coherent Hierarchical Multi-label
+    Classification Networks' by Giunchiglia et al.  <arXiv:2010.10151> and
+    provides a consistent interface for fitting and creating predictions.
+    It's also fully compatible with the 'tidymodels' ecosystem.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
 URL: https://mlverse.github.io/tabnet/, https://github.com/mlverse/tabnet
 BugReports: https://github.com/mlverse/tabnet/issues
 Depends:
     R (>= 3.6)
 Imports: 
-    torch (>= 0.4.0),
+    coro,
+    dplyr,
     hardhat (>= 1.3.0),
     magrittr,
+    methods,
     progress,
     rlang,
-    methods,
-    dplyr,
     tibble,
     tidyr,
-    coro,
+    torch (>= 0.4.0),
     vctrs,
     zeallot
 Suggests: 
-    testthat (>= 3.0.0),
     data.tree,
+    dials,
+    ggplot2,
+    knitr,
     Matrix,
     modeldata,
-    recipes,
-    rsample,
     parsnip,
-    dials,
-    withr,
-    knitr,
-    rmarkdown,
-    vip,
-    tidyverse,
-    ggplot2,
     purrr,
+    recipes,
+    rmarkdown,
+    rsample,
     stringr,
+    testthat (>= 3.0.0),
+    tidyverse,
     tune,
+    vip,
+    withr,
     workflows,
     yardstick
-VignetteBuilder: knitr
+VignetteBuilder: 
+    knitr
 Config/testthat/edition: 3
 Config/testthat/parallel: false
 Config/testthat/start-first: interface, explain, params
+Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
