@@ -7,6 +7,7 @@
 
 ## Bugfixes
 
+*  Adapt `tune::finalize_workflow()` test to {parsnip} v1.2 breaking change. (#155)
 *  `autoplot()` now position the "has_checkpoint" points correctly when a `tabnet_fit()` is continuing a previous training using `tabnet_model =`. (#150)
 *  Explicitely warn that `tabnet_model` option will not be used in `tabnet_pretrain()` tasks. (#150)
 
