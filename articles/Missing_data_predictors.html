@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Training a Tabnet model from missing-values dataset • tabnet</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -53,10 +53,10 @@
       <a href="../articles/Hierarchical_classification.html">Hierarchical Classification</a>
     </li>
     <li>
-      <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
+      <a href="../articles/interpretation.html">Interpretation tools</a>
     </li>
     <li>
-      <a href="../articles/interpretation.html">Interpretation tools</a>
+      <a href="../articles/Missing_data_predictors.html">Training a Tabnet model from missing-values dataset</a>
     </li>
     <li>
       <a href="../articles/selfsupervised_training.html">Self-supervised training and fine-tuning</a>
@@ -95,7 +95,7 @@ dataset</h1>
                         <h4 data-toc-skip class="author">Christophe
 Regouby</h4>
             
-            <h4 data-toc-skip class="date">2024-02-21</h4>
+            <h4 data-toc-skip class="date">2024-04-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/HEAD/vignettes/Missing_data_predictors.Rmd" class="external-link"><code>vignettes/Missing_data_predictors.Rmd</code></a></small>
       <div class="hidden name"><code>Missing_data_predictors.Rmd</code></div>
@@ -184,9 +184,9 @@ the matching categorical predictors</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html" class="external-link">mutate_at</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bsmt_Exposure"</span>, <span class="st">"BsmtFin_Type_1"</span>, <span class="st">"BsmtFin_Type_2"</span><span class="op">)</span>, <span class="va">na_if</span>, <span class="st">"No_Basement"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">visdat</span><span class="fu">::</span><span class="fu">vis_miss</span><span class="op">(</span><span class="va">ames_missing</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="vis_miss_ames.png" alt=""><p class="caption">ames missing values visualization showing few
-variables with more than 90% missingness with a global 13% missing</p>
+<div class="float">
+<img src="vis_miss_ames.png" alt="ames missing values visualization showing few variables with more than 90% missingness with a global 13% missing"><div class="figcaption">ames missing values visualization showing few
+variables with more than 90% missingness with a global 13% missing</div>
 </div>
 <p>We can see here that variable are not missing at random, and thus we
 can expect the model to capture the missingness relation during the
@@ -210,7 +210,7 @@ learning step:</p>
 <code class="sourceCode R"><span><span class="va">ames_rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">Sale_Price</span> <span class="op">~</span> <span class="va">.</span>, data<span class="op">=</span><span class="va">ames</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_normalize.html" class="external-link">step_normalize</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_numeric</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cat_emb_dim</span> <span class="op">&lt;-</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">ames</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select_all.html" class="external-link">select_if</a></span><span class="op">(</span><span class="va">is.factor</span><span class="op">)</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="va">round</span><span class="op">)</span></span>
+<span><span class="va">cat_emb_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="va">ames</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select_all.html" class="external-link">select_if</a></span><span class="op">(</span><span class="va">is.factor</span><span class="op">)</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="va">round</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ames_pretrain</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">ames_rec</span>, data<span class="op">=</span><span class="va">ames</span>,  epoch<span class="op">=</span><span class="fl">50</span>, cat_emb_dim <span class="op">=</span> <span class="va">cat_emb_dim</span>,</span>
 <span>                            valid_split <span class="op">=</span> <span class="fl">0.2</span>, verbose<span class="op">=</span><span class="cn">TRUE</span>, batch<span class="op">=</span><span class="fl">2930</span>, </span>
@@ -234,8 +234,8 @@ learning step:</p>
 [Epoch 016] Loss: 6.618536 Valid loss: 1026789.625000
 [Epoch 017] Loss: 6.593469 Valid loss: 1033726.437500
 Early stopping at epoch 017</code></pre>
-<div class="figure">
-<img src="ames_pretrain.png" alt=""><p class="caption">ames_fit model training diagnostic plot</p>
+<div class="float">
+<img src="ames_pretrain.png" alt="ames_fit model training diagnostic plot"><div class="figcaption">ames_fit model training diagnostic plot</div>
 </div>
 <p>Now we capture the columns with missings, and create a convenience
 function to color the <code><a href="https://koalaverse.github.io/vip/reference/vip.html" class="external-link">vip::vip()</a></code> plot output according to
@@ -255,8 +255,8 @@ the missingness quality of the column</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_grey.html" class="external-link">scale_fill_grey</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="fu">vip_color</span><span class="op">(</span><span class="va">ames_pretrain</span>, <span class="va">col_with_missings</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="ames_pretrain_vip.png" alt=""><p class="caption">ames_fit model variable importance plot</p>
+<div class="float">
+<img src="ames_pretrain_vip.png" alt="ames_fit model variable importance plot"><div class="figcaption">ames_fit model variable importance plot</div>
 </div>
 <p>We get <code>BsmtFin_Type_1</code>, <code>BsmtFin_SF_1</code> and
 <code>Bsmt_Exposure</code> variables in the top ten important variables
@@ -318,8 +318,8 @@ having captured proper interactions between variables.</p>
 <span>                            early_stopping_patience <span class="op">=</span> <span class="fl">5L</span>, early_stopping_tolerance <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ames_fit</span><span class="op">)</span></span>
 <span><span class="fu">vip_color</span><span class="op">(</span><span class="va">ames_fit</span>, <span class="va">col_with_missings</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="ames_fit.png" alt=""><p class="caption">ames_fit model training diagnostic plot</p>
+<div class="float">
+<img src="ames_fit.png" alt="ames_fit model training diagnostic plot"><div class="figcaption">ames_fit model training diagnostic plot</div>
 </div>
 <p><img src="ames_fit_vip_.png" alt="ames_fit model training variable importance plot"> Here again,
 the model uses two predictors <code>BasmFin_SF_2</code> and
@@ -336,8 +336,8 @@ missingness.</p>
 <span>                            early_stopping_patience <span class="op">=</span> <span class="fl">5L</span>, early_stopping_tolerance <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ames_missing_fit</span><span class="op">)</span></span>
 <span><span class="fu">vip_color</span><span class="op">(</span><span class="va">ames_missing_fit</span>, <span class="va">col_with_missings</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="ames_missing_fit.png" alt=""><p class="caption">ames_fit model training diagnostic plot</p>
+<div class="float">
+<img src="ames_missing_fit.png" alt="ames_fit model training diagnostic plot"><div class="figcaption">ames_fit model training diagnostic plot</div>
 </div>
 <p><img src="ames_missing_fit_vip.png" alt="ames_fit model training variable importance plot"> Here we can
 see one predictors <code>Garage_Area</code> with 5 % missingness in the
@@ -374,7 +374,7 @@ real-life use-cases.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
       </footer>
