@@ -60,8 +60,9 @@ test_that("Autoplot of pretrain then fit scenario, pretrain without checkpoints,
     print(autoplot(fit_no_checkpoint))
   )
   fit_with_checkpoint <- tabnet_fit(Sale_Price ~., data = small_ames, tabnet_model = fit_no_checkpoint, epochs = 2, checkpoint_epoch = 1)
-  expect_no_error(
-    print(autoplot(fit_with_checkpoint))
+  expect_warning(
+    print(autoplot(fit_with_checkpoint)),
+    "Removed 2 rows containing missing values"
   )
 
 })
