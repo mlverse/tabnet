@@ -426,6 +426,11 @@ add_parsnip_tabnet <- function() {
 #' @param mode A single character string for the type of model. Possible values
 #'   for this model are "unknown", "regression", or "classification".
 #' @inheritParams tabnet_config
+#' @param tabnet_model A previously fitted TabNet model object to continue the fitting on.
+#'  if `NULL` (the default) a brand new model is initialized.
+#' @param from_epoch When a `tabnet_model` is provided, restore the network weights from a specific epoch.
+#'  Default is last available checkpoint for restored model, or last epoch for in-memory model.
+
 #'
 #' @inheritSection tabnet_fit Threading
 #' @seealso tabnet_fit
