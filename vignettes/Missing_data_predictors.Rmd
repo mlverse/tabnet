@@ -74,7 +74,9 @@ visdat::vis_miss(ames_missing)
 
 We can see here that variable are not missing at random, and thus we can expect the model to capture the missingness relation during the pretraining phase.
 
-Note: A better way to achieve proper value mutation to explicit NAs would be to also check if the qualitative column in the pair refers to `none` or to zero occurrence of the equipment. But this is beyond the scope of this vignette.
+Note: A proper value mutation to explicit NAs can also be achieved in a more complete wy: one should check if the qualitative column in the pair `<equipment>_count` - `<equipment>_size` refers to `none` or to zero occurrence of the equipment. But this is beyond the scope of this vignette.
+
+Note: the same dataset `ames_missing` is also present in the package. You can use it through `data("ames_missing", package = "tabnet")`. 
 
 # Model pretraining
 
