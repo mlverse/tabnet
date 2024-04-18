@@ -49,6 +49,7 @@ Let's experiment those on a pretraining scenario on the `ames` dataset :
 We will work here with the `ames_missing` dataset, transformation of the `ames` dataset done in vignette [Training a Tabnet model from missing-values dataset    ](https://mlverse.github.io/tabnet/articles/Missing_data_predictors.html).
 
 ```{r}
+data("ames_missing", package = "tabnet")
 ames_split <- initial_split(ames_missing, strata = Sale_Price, prop = 0.8)
 ames_train <- training(ames_split)
 ames_test <- testing(ames_split)
@@ -62,7 +63,6 @@ We will thus have a way to measure the interprestability and compare stability b
 
 ### A classical TabNet models
 ```{r, 1 classical model}
-data("ames_missing", package = "tabnet")
 cat_emb_dim <- map_dbl(ames_train %>% select_if(is.factor), ~max(log(nlevels(.x)) %>% floor, 1))
 
 tabnet_config <- tabnet_config( cat_emb_dim = cat_emb_dim, verbose = FALSE,
@@ -83,12 +83,12 @@ The difference of interpretabnet models is
 
 You don't have to know them, as the handy `interpretabnet_config()` function comes as a replacement of `tabnet_config()` to switch them all at once.
 
-For the training loop, you will realize that Interpretabnet models requires many more epoch to converge due to the MLP network.
+For the training loop, you will realize that Interpretabnet models requires much more epochs to converge due to the MLP network.
 
 ```{r, 3 interpretabnet models }
 interpretabnet_config <- interpretabnet_config( cat_emb_dim = cat_emb_dim, verbose = FALSE,
                                 early_stopping_patience = 12L, early_stopping_tolerance = 0.01,
-                                valid_split = 0.2, learn_rate = 1e-2, lr_scheduler = "step", 
+                                valid_split = 0.2, learn_rate = 5e-2, lr_scheduler = "step", 
                                 lr_decay = .7, step_size = 5)
 
 
@@ -108,7 +108,8 @@ autoplot(train_tabnet[[1]]) +
   autoplot(train_tabnet[[2]]) + 
   autoplot(train_tabnet[[3]]) + 
   autoplot(train_tabnet[[4]]) + 
-  plot_layout(axes = "collect", guides = "collect")
+  plot_layout(axes = "collect", guides = "collect") &
+  theme(legend.position = "bottom")
   
 ```
 
@@ -133,7 +134,8 @@ autoplot(models_checkpointed[[1]]) +
   autoplot(models_checkpointed[[2]]) + 
   autoplot(models_checkpointed[[3]]) + 
   autoplot(models_checkpointed[[4]]) + 
-  plot_layout(axes = "collect", guides = "collect")
+  plot_layout(axes = "collect", guides = "collect") &
+  theme(legend.position = "bottom")
   
 ```
 
@@ -153,7 +155,8 @@ autoplot(explain_lst[[1]], quantile = 0.99) +
   autoplot(explain_lst[[2]], quantile = 0.99) + 
   autoplot(explain_lst[[3]], quantile = 0.99) + 
   autoplot(explain_lst[[4]], quantile = 0.99) + 
-  plot_layout(axes = "collect", guides = "collect")
+  plot_layout(axes = "collect", guides = "collect") &
+  theme(legend.position = "bottom")
   
 ```
 

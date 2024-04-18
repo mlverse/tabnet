@@ -11,8 +11,6 @@
 #' See this links for the sources below for more information as well as
 #' `?AmesHousing::make_ames`.
 #'
-#' @includeRmd man/rmd/ames.md details
-#'
 #' @name ames_missing
 #' @aliases ames_missing
 #' @docType data
