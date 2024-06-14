@@ -98,13 +98,16 @@ cbind(test, predict(fit, test)) %>%
 #> 1 accuracy  binary         0.837
 #> 2 precision binary         0.837
 #> 3 recall    binary         1
+```
+
+``` r
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.548
+#> 1 roc_auc binary         0.546
 ```
 
 ## Explain model on test-set with attention map
