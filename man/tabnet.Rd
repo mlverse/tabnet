@@ -11,9 +11,6 @@ tabnet(
   attention_width = NULL,
   num_steps = NULL,
   mask_type = NULL,
-  mlp_hidden_multiplier = NULL,
-  mlp_activation = NULL,
-  encoder_activation = NULL,
   num_independent = NULL,
   num_shared = NULL,
   num_independent_decoder = NULL,
@@ -142,6 +139,12 @@ display a warning.}
 \item{early_stopping_patience}{Number of epochs without improving until stopping training. (default=5)}
 
 \item{skip_importance}{if feature importance calculation should be skipped (default: \code{FALSE})}
+
+\item{tabnet_model}{A previously fitted TabNet model object to continue the fitting on.
+if \code{NULL} (the default) a brand new model is initialized.}
+
+\item{from_epoch}{When a \code{tabnet_model} is provided, restore the network weights from a specific epoch.
+Default is last available checkpoint for restored model, or last epoch for in-memory model.}
 }
 \value{
 A TabNet \code{parsnip} instance. It can be used to fit tabnet models using

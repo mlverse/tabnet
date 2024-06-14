@@ -42,7 +42,6 @@ Imports:
     tune,
     utils,
     vctrs,
-    vip,
     withr,
     zeallot
 Suggests: 
@@ -55,6 +54,7 @@ Suggests:
     testthat (>= 3.0.0),
     tidymodels,
     tidyverse,
+    vip,
     visdat,
     workflows,
     yardstick

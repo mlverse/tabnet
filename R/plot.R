@@ -40,8 +40,8 @@ autoplot.tabnet_fit <- function(object, ...) {
 
   if ("checkpoint" %in% names(collect_metrics)) {
     checkpoints <- collect_metrics %>%
-      dplyr::filter(checkpoint == TRUE, dataset == "train") %>%
-      dplyr::select(-checkpoint) %>%
+      dplyr::filter(.data$checkpoint == TRUE, dataset == "train") %>%
+      dplyr::select(-.data$checkpoint) %>%
       dplyr::mutate(size = 2)
     p +
       ggplot2::geom_point(data = checkpoints, ggplot2::aes(x = epoch, y = loss, color = dataset, size = .data$size ))
