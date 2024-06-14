@@ -11,3 +11,5 @@
 ^.V8*
 ^doc$
 ^Meta$
+^CRAN-SUBMISSION$
+^revdep$
