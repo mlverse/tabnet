@@ -82,9 +82,6 @@
 <span>  attention_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  mask_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  mlp_hidden_multiplier <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  mlp_activation <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  encoder_activation <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_independent <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_shared <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_independent_decoder <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -276,6 +273,16 @@ display a warning.</p></dd>
 
 <dt>skip_importance</dt>
 <dd><p>if feature importance calculation should be skipped (default: <code>FALSE</code>)</p></dd>
+
+
+<dt>tabnet_model</dt>
+<dd><p>A previously fitted TabNet model object to continue the fitting on.
+if <code>NULL</code> (the default) a brand new model is initialized.</p></dd>
+
+
+<dt>from_epoch</dt>
+<dd><p>When a <code>tabnet_model</code> is provided, restore the network weights from a specific epoch.
+Default is last available checkpoint for restored model, or last epoch for in-memory model.</p></dd>
 
 </dl></div>
     <div id="value">
