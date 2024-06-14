@@ -459,10 +459,11 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
   if (!requireNamespace("parsnip", quietly = TRUE))
     stop("Package \"parsnip\" needed for this function to work. Please install it.", call. = FALSE)
 
-  if (!tabnet_env$parsnip_added) {
+  if (parsnip_is_missing_tabnet(tabnet_env)) {
     add_parsnip_tabnet()
     tabnet_env$parsnip_added <- TRUE
   }
+
 
   # Capture the arguments in quosures
   args <- list(
@@ -512,7 +513,8 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
 tabnet_env <- new.env()
 tabnet_env$parsnip_added <- FALSE
 
-
+#' @export
+#' @importFrom parsnip multi_predict
 multi_predict._tabnet_fit <- function(object, new_data, type = NULL, epochs = NULL, ...) {
 
   if (is.null(epochs))
@@ -567,3 +569,8 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
 }
 
 min_grid.tabnet <- function(x, grid, ...) tune::fit_max_value(x, grid, ...)
+
+parsnip_is_missing_tabnet <- function(tabnet_env) {
+  current <- parsnip::get_model_env()
+  !(any(current$models == "tabnet") || tabnet_env$parsnip_added)
+}
