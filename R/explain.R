@@ -83,7 +83,7 @@ tabnet_explain.tabnet_fit <- function(object, new_data, stability = TRUE) {
     computed_feature_importance <- purrr::map(
       object$fit$checkpoints[(n_checkpoints-5):n_checkpoints],
       ~compute_feature_importance(reload_model(.x), data$x, data$x_na_mask),
-      .progress = "InterpreStability score within last 6 models") %>%
+      .progress = "InterpreStability score within last 6 checkpoints") %>%
       data.frame() %>%
       rlang::set_names(as.character(seq(-5,0)))
     #

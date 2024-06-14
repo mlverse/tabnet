@@ -56,9 +56,10 @@ Let's experiment those on a pretraining scenario on the `ames` dataset :
 We will work here with the `ames_missing` dataset, transformation of the `ames` dataset done in vignette [Training a Tabnet model from missing-values dataset](https://mlverse.github.io/tabnet/articles/Missing_data_predictors.html).
 
 ```{r}
-# data("ames_missing", package = "tabnet")
-data(ames, package = "modeldata")
-ames_missing <- ames
+data("ames_missing", package = "tabnet")
+# data(ames, package = "modeldata")
+# Remove the columns with missing data. thus 74 -> 53 cols so plot is clearer, but no real gain.
+ames_missing <- ames_missing |> select_if(~!any(is.na(.x)))
 ```
 
 ### Scenario
@@ -80,8 +81,8 @@ Let's train 4 different models on `ames_missing` dataset with two different flav
 ### A classical TabNet model
 
 ```{r, 1 classical model}
-cat_emb_dim <- map_dbl(ames_missing %>% select_if(is.factor), ~ max(log(nlevels(.x)) %>% floor, 1))
-# cat_emb_dim <- 1
+# cat_emb_dim <- map_dbl(ames_missing %>% select_if(is.factor), ~ max(log(nlevels(.x)) %>% floor, 1))
+cat_emb_dim <- 1
 
 tabnet_config <-
   tabnet_config(
