@@ -46,4 +46,4 @@ attrition_tree <- attrition %>%
   data.tree::as.Node()
 
 # Run after all tests
-withr::defer(teardown_env())
+withr::defer(cleanup(), teardown_env())
