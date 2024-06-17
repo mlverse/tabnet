@@ -5,7 +5,7 @@ suppressPackageStartupMessages(library(data.tree))
 
 
 # ames small data
-data("ames", package = "modeldata")
+utils::data("ames", package = "modeldata")
 ids <- sample(nrow(ames), 256)
 small_ames <- ames[ids,]
 x <- ames[ids,-which(names(ames) == "Sale_Price")]
@@ -20,7 +20,7 @@ ames_fit_vsplit <- tabnet_fit(x, y, tabnet_model=ames_pretrain_vsplit, epochs = 
                               num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
 
 # attrition small data
-data("attrition", package = "modeldata")
+utils::data("attrition", package = "modeldata")
 ids <- sample(nrow(attrition), 256)
 
 # attrition common models
@@ -35,7 +35,7 @@ attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12)
 attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
 
 # data.tree Node dataset
-data("acme", package = "data.tree")
+utils::data("acme", package = "data.tree")
 acme_df <-  data.tree::ToDataFrameTypeCol(acme, acme$attributesAll) %>%
   select(-starts_with("level_"))
 
@@ -46,4 +46,4 @@ attrition_tree <- attrition %>%
   data.tree::as.Node()
 
 # Run after all tests
-withr::defer(teardown_env())
+withr::defer(testthat::teardown_env())
