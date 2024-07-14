@@ -408,7 +408,7 @@ tabnet_no_embedding <- torch::nn_module(
 #' @param n_d Dimension of the prediction layer (usually between 4 and 64).
 #' @param n_a Dimension of the attention layer (usually between 4 and 64).
 #' @param n_steps Number of successive steps in the network (usually between 3 and 10).
-#' @param gamma Float above 1, scaling factor for attention updates (usually between 1 and 2).
+#' @param gamma Scaling factor for attention updates (usually between 1 and 2).
 #' @param cat_idxs Index of each categorical column in the dataset.
 #' @param cat_dims Number of categories in each categorical column.
 #' @param cat_emb_dim Size of the embedding of categorical features if int, all categorical

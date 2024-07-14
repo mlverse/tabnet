@@ -34,7 +34,7 @@ binary classification etc.. Vector of those dimensions in case of multi-output.}
 
 \item{n_steps}{Number of successive steps in the network (usually between 3 and 10).}
 
-\item{gamma}{Float above 1, scaling factor for attention updates (usually between 1 and 2).}
+\item{gamma}{Scaling factor for attention updates (usually between 1 and 2).}
 
 \item{cat_idxs}{Index of each categorical column in the dataset.}
 

@@ -69,7 +69,7 @@ See \code{\link[=tabnet_config]{tabnet_config()}} for a list of all possible hyp
 
 \item{y}{(optional) When \code{x} is a \strong{data frame} or \strong{matrix}, \code{y} is the outcome}
 
-\item{tabnet_model}{A pretrained TabNet model object to continue the fitting on.
+\item{tabnet_model}{A pretrained \code{tabnet_model} object to continue the fitting on.
 if \code{NULL} (the default) a brand new model is initialized.}
 
 \item{config}{A set of hyperparameters created using the \code{tabnet_config} function.

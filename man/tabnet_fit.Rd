@@ -78,7 +78,7 @@ specified as:
 \item A \strong{vector}, either numeric or categorical.
 }}
 
-\item{tabnet_model}{A previously fitted TabNet model object to continue the fitting on.
+\item{tabnet_model}{A previously fitted \code{tabnet_model} object to continue the fitting on.
 if \code{NULL} (the default) a brand new model is initialized.}
 
 \item{config}{A set of hyperparameters created using the \code{tabnet_config} function.
@@ -120,7 +120,7 @@ The model fitting metrics append on top of the parent metrics in the returned Ta
 
 
 TabNet allows multi-outcome prediction, which is usually named \href{https://en.wikipedia.org/wiki/Multi-label_classification}{multi-label classification}
-or multi-output classification when outcomes are categorical.
+or multi-output regression when outcomes are numerical.
 Multi-outcome currently expect outcomes to be either all numeric or all categorical.
 }
 

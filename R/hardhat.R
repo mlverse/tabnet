@@ -28,7 +28,7 @@
 #'
 #' @param formula A formula specifying the outcome terms on the left-hand side,
 #'  and the predictor terms on the right-hand side.
-#' @param tabnet_model A previously fitted TabNet model object to continue the fitting on.
+#' @param tabnet_model A previously fitted `tabnet_model` object to continue the fitting on.
 #'  if `NULL` (the default) a brand new model is initialized.
 #' @param config A set of hyperparameters created using the `tabnet_config` function.
 #'  If no argument is supplied, this will use the default values in [tabnet_config()].
@@ -51,7 +51,7 @@
 #' @section Multi-outcome:
 #'
 #' TabNet allows multi-outcome prediction, which is usually named [multi-label classification](https://en.wikipedia.org/wiki/Multi-label_classification)
-#'   or multi-output classification when outcomes are categorical.
+#'   or multi-output regression when outcomes are numerical.
 #' Multi-outcome currently expect outcomes to be either all numeric or all categorical.
 #'
 #' @section Threading:
@@ -258,7 +258,7 @@ new_tabnet_fit <- function(fit, blueprint) {
 #'
 #' @param formula A formula specifying the outcome terms on the left-hand side,
 #'  and the predictor terms on the right-hand side.
-#' @param tabnet_model A pretrained TabNet model object to continue the fitting on.
+#' @param tabnet_model A pretrained `tabnet_model` object to continue the fitting on.
 #'  if `NULL` (the default) a brand new model is initialized.
 #' @param config A set of hyperparameters created using the `tabnet_config` function.
 #'  If no argument is supplied, this will use the default values in [tabnet_config()].

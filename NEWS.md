@@ -1,5 +1,10 @@
 # tabnet (development version)
 
+## Bugfixes
+
+* improve function documentation consistency before translation
+
+
 # tabnet 0.6.0
 
 ## New features

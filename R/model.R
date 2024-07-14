@@ -59,7 +59,7 @@ resolve_data <- function(x, y) {
 #'   in the original paper. The bigger this coefficient is, the sparser your model
 #'   will be in terms of feature selection. Depending on the difficulty of your
 #'   problem, reducing this value could help (default 1e-3).
-#' @param clip_value If a float is given this will clip the gradient at
+#' @param clip_value If a num is given this will clip the gradient at
 #'   clip_value. Pass `NULL` to not clip.
 #' @param loss (character or function) Loss function for training (default to mse
 #'   for regression and cross entropy for classification)
@@ -73,15 +73,15 @@ resolve_data <- function(x, y) {
 #'   the paper n_d = n_a is usually a good choice. (default=8)
 #' @param num_steps (int) Number of steps in the architecture
 #'   (usually between 3 and 10)
-#' @param feature_reusage (float) This is the coefficient for feature reusage in the masks.
+#' @param feature_reusage (num) This is the coefficient for feature reusage in the masks.
 #'   A value close to 1 will make mask selection least correlated between layers.
-#'   Values range from 1.0 to 2.0.
+#'   Values range from 1 to 2.
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
 #'   block, either `"sparsemax"` or `"entmax"`.Defaults to `"sparsemax"`.
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=256^2)
 #' @param learn_rate initial learning rate for the optimizer.
-#' @param optimizer the optimization method. currently only 'adam' is supported,
+#' @param optimizer the optimization method. currently only `"adam"` is supported,
 #'   you can also pass any torch optimizer function.
 #' @param valid_split (`[0, 1)`) The fraction of the dataset used for validation.
 #'   (default = 0 means no split)
