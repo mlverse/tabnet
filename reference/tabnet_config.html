@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Configuration for TabNet models</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/main/R/model.R" class="external-link"><code>R/model.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/v0.6.0/R/model.R" class="external-link"><code>R/model.R</code></a></small>
     <div class="hidden name"><code>tabnet_config.Rd</code></div>
     </div>
 
@@ -130,7 +130,7 @@ problem, reducing this value could help (default 1e-3).</p></dd>
 
 
 <dt id="arg-clip-value">clip_value<a class="anchor" aria-label="anchor" href="#arg-clip-value"></a></dt>
-<dd><p>If a num is given this will clip the gradient at
+<dd><p>If a float is given this will clip the gradient at
 clip_value. Pass <code>NULL</code> to not clip.</p></dd>
 
 
@@ -165,9 +165,9 @@ the paper n_d = n_a is usually a good choice. (default=8)</p></dd>
 
 
 <dt id="arg-feature-reusage">feature_reusage<a class="anchor" aria-label="anchor" href="#arg-feature-reusage"></a></dt>
-<dd><p>(num) This is the coefficient for feature reusage in the masks.
+<dd><p>(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
-Values range from 1 to 2.</p></dd>
+Values range from 1.0 to 2.0.</p></dd>
 
 
 <dt id="arg-mask-type">mask_type<a class="anchor" aria-label="anchor" href="#arg-mask-type"></a></dt>
@@ -190,7 +190,7 @@ block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <cod
 
 
 <dt id="arg-optimizer">optimizer<a class="anchor" aria-label="anchor" href="#arg-optimizer"></a></dt>
-<dd><p>the optimization method. currently only <code>"adam"</code> is supported,
+<dd><p>the optimization method. currently only 'adam' is supported,
 you can also pass any torch optimizer function.</p></dd>
 
 

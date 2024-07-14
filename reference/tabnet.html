@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Parsnip compatible tabnet model</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/main/R/parsnip.R" class="external-link"><code>R/parsnip.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/v0.6.0/R/parsnip.R" class="external-link"><code>R/parsnip.R</code></a></small>
     <div class="hidden name"><code>tabnet.Rd</code></div>
     </div>
 
@@ -176,9 +176,9 @@ problem, reducing this value could help (default 1e-3).</p></dd>
 
 
 <dt id="arg-feature-reusage">feature_reusage<a class="anchor" aria-label="anchor" href="#arg-feature-reusage"></a></dt>
-<dd><p>(num) This is the coefficient for feature reusage in the masks.
+<dd><p>(float) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
-Values range from 1 to 2.</p></dd>
+Values range from 1.0 to 2.0.</p></dd>
 
 
 <dt id="arg-momentum">momentum<a class="anchor" aria-label="anchor" href="#arg-momentum"></a></dt>
@@ -205,7 +205,7 @@ recommended. (default: 1024^2)</p></dd>
 
 
 <dt id="arg-optimizer">optimizer<a class="anchor" aria-label="anchor" href="#arg-optimizer"></a></dt>
-<dd><p>the optimization method. currently only <code>"adam"</code> is supported,
+<dd><p>the optimization method. currently only 'adam' is supported,
 you can also pass any torch optimizer function.</p></dd>
 
 
@@ -215,7 +215,7 @@ for regression and cross entropy for classification)</p></dd>
 
 
 <dt id="arg-clip-value">clip_value<a class="anchor" aria-label="anchor" href="#arg-clip-value"></a></dt>
-<dd><p>If a num is given this will clip the gradient at
+<dd><p>If a float is given this will clip the gradient at
 clip_value. Pass <code>NULL</code> to not clip.</p></dd>
 
 
@@ -278,7 +278,7 @@ display a warning.</p></dd>
 
 
 <dt id="arg-tabnet-model">tabnet_model<a class="anchor" aria-label="anchor" href="#arg-tabnet-model"></a></dt>
-<dd><p>A previously fitted <code>tabnet_model</code> object to continue the fitting on.
+<dd><p>A previously fitted TabNet model object to continue the fitting on.
 if <code>NULL</code> (the default) a brand new model is initialized.</p></dd>
 
 

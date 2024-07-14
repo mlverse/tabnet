@@ -18,7 +18,7 @@ Attentive Interpretable Tabular Deep Learning."><!-- mathjax --><script src="htt
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
       </span>
     </div>
 
@@ -67,7 +67,7 @@ Attentive Interpretable Tabular Deep Learning."><!-- mathjax --><script src="htt
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>TabNet Model Architecture</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/main/R/tab-network.R" class="external-link"><code>R/tab-network.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/v0.6.0/R/tab-network.R" class="external-link"><code>R/tab-network.R</code></a></small>
     <div class="hidden name"><code>tabnet_nn.Rd</code></div>
     </div>
 
@@ -105,16 +105,16 @@ Attentive Interpretable Tabular Deep Learning."><!-- mathjax --><script src="htt
 
 
 <dt id="arg-output-dim">output_dim<a class="anchor" aria-label="anchor" href="#arg-output-dim"></a></dt>
-<dd><p>Dimension of network output. Examples : one for regression, 2 for
+<dd><p>Dimension of network output examples : one for regression, 2 for
 binary classification etc.. Vector of those dimensions in case of multi-output.</p></dd>
 
 
 <dt id="arg-n-d">n_d<a class="anchor" aria-label="anchor" href="#arg-n-d"></a></dt>
-<dd><p>Dimension of the prediction layer (usually between 4 and 64).</p></dd>
+<dd><p>Dimension of the prediction  layer (usually between 4 and 64).</p></dd>
 
 
 <dt id="arg-n-a">n_a<a class="anchor" aria-label="anchor" href="#arg-n-a"></a></dt>
-<dd><p>Dimension of the attention layer (usually between 4 and 64).</p></dd>
+<dd><p>Dimension of the attention  layer (usually between 4 and 64).</p></dd>
 
 
 <dt id="arg-n-steps">n_steps<a class="anchor" aria-label="anchor" href="#arg-n-steps"></a></dt>
@@ -122,7 +122,7 @@ binary classification etc.. Vector of those dimensions in case of multi-output.<
 
 
 <dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
-<dd><p>Scaling factor for attention updates (usually between 1 and 2).</p></dd>
+<dd><p>Float above 1, scaling factor for attention updates (usually between 1 and 2).</p></dd>
 
 
 <dt id="arg-cat-idxs">cat_idxs<a class="anchor" aria-label="anchor" href="#arg-cat-idxs"></a></dt>
@@ -144,7 +144,7 @@ specific size.</p></dd>
 
 
 <dt id="arg-n-shared">n_shared<a class="anchor" aria-label="anchor" href="#arg-n-shared"></a></dt>
-<dd><p>Number of shared GLU layer in each GLU block of the encoder.</p></dd>
+<dd><p>Number of independent GLU layer in each GLU block of the encoder.</p></dd>
 
 
 <dt id="arg-epsilon">epsilon<a class="anchor" aria-label="anchor" href="#arg-epsilon"></a></dt>
