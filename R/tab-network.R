@@ -415,7 +415,7 @@ tabnet_no_embedding <- torch::nn_module(
 #'   features will have same embedding size if list of int, every corresponding feature will have
 #'   specific size.
 #' @param n_independent Number of independent GLU layer in each GLU block of the encoder.
-#' @param n_shared Number of independent GLU layer in each GLU block of the encoder.
+#' @param n_shared Number of shared GLU layer in each GLU block of the encoder.
 #' @param epsilon Avoid log(0), this should be kept very low.
 #' @param virtual_batch_size Batch size for Ghost Batch Normalization.
 #' @param momentum  Float value between 0 and 1 which will be used for momentum in all batch norm.

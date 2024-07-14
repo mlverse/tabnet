@@ -46,7 +46,7 @@ specific size.}
 
 \item{n_independent}{Number of independent GLU layer in each GLU block of the encoder.}
 
-\item{n_shared}{Number of independent GLU layer in each GLU block of the encoder.}
+\item{n_shared}{Number of shared GLU layer in each GLU block of the encoder.}
 
 \item{epsilon}{Avoid log(0), this should be kept very low.}
 
