@@ -1,81 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Hierarchical_classification.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Missing_data_predictors.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/interpretation.html</loc>
-  </url>
-  <url>
-    <loc>/articles/selfsupervised_training.html</loc>
-  </url>
-  <url>
-    <loc>/articles/tidymodels-interface.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/autoplot.tabnet_explain.html</loc>
-  </url>
-  <url>
-    <loc>/reference/autoplot.tabnet_fit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/check_compliant_node.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/nn_prune_head.html</loc>
-  </url>
-  <url>
-    <loc>/reference/node_to_df.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabnet.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabnet_config.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabnet_explain.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabnet_fit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabnet_nn.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabnet_params.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabnet_pretrain.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/Hierarchical_classification.html</loc></url>
+<url><loc>/articles/Missing_data_predictors.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/interpretation.html</loc></url>
+<url><loc>/articles/selfsupervised_training.html</loc></url>
+<url><loc>/articles/tidymodels-interface.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/autoplot.tabnet_explain.html</loc></url>
+<url><loc>/reference/autoplot.tabnet_fit.html</loc></url>
+<url><loc>/reference/check_compliant_node.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/nn_prune_head.html</loc></url>
+<url><loc>/reference/node_to_df.html</loc></url>
+<url><loc>/reference/pipe.html</loc></url>
+<url><loc>/reference/tabnet.html</loc></url>
+<url><loc>/reference/tabnet_config.html</loc></url>
+<url><loc>/reference/tabnet_explain.html</loc></url>
+<url><loc>/reference/tabnet_fit.html</loc></url>
+<url><loc>/reference/tabnet_nn.html</loc></url>
+<url><loc>/reference/tabnet_params.html</loc></url>
+<url><loc>/reference/tabnet_pretrain.html</loc></url>
 </urlset>
+

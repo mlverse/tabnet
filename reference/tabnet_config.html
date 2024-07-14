@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0.9000</span>
       </span>
     </div>
 
@@ -28,7 +28,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -53,20 +53,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/mlverse/tabnet/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Configuration for TabNet models</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/HEAD/R/model.R" class="external-link"><code>R/model.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/main/R/model.R" class="external-link"><code>R/model.R</code></a></small>
     <div class="hidden name"><code>tabnet_config.Rd</code></div>
     </div>
 
@@ -115,84 +115,86 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>batch_size</dt>
+
+
+<dl><dt id="arg-batch-size">batch_size<a class="anchor" aria-label="anchor" href="#arg-batch-size"></a></dt>
 <dd><p>(int) Number of examples per batch, large batch sizes are
 recommended. (default: 1024^2)</p></dd>
 
 
-<dt>penalty</dt>
+<dt id="arg-penalty">penalty<a class="anchor" aria-label="anchor" href="#arg-penalty"></a></dt>
 <dd><p>This is the extra sparsity loss coefficient as proposed
 in the original paper. The bigger this coefficient is, the sparser your model
 will be in terms of feature selection. Depending on the difficulty of your
 problem, reducing this value could help (default 1e-3).</p></dd>
 
 
-<dt>clip_value</dt>
-<dd><p>If a float is given this will clip the gradient at
+<dt id="arg-clip-value">clip_value<a class="anchor" aria-label="anchor" href="#arg-clip-value"></a></dt>
+<dd><p>If a num is given this will clip the gradient at
 clip_value. Pass <code>NULL</code> to not clip.</p></dd>
 
 
-<dt>loss</dt>
+<dt id="arg-loss">loss<a class="anchor" aria-label="anchor" href="#arg-loss"></a></dt>
 <dd><p>(character or function) Loss function for training (default to mse
 for regression and cross entropy for classification)</p></dd>
 
 
-<dt>epochs</dt>
+<dt id="arg-epochs">epochs<a class="anchor" aria-label="anchor" href="#arg-epochs"></a></dt>
 <dd><p>(int) Number of training epochs.</p></dd>
 
 
-<dt>drop_last</dt>
+<dt id="arg-drop-last">drop_last<a class="anchor" aria-label="anchor" href="#arg-drop-last"></a></dt>
 <dd><p>(logical) Whether to drop last batch if not complete during
 training</p></dd>
 
 
-<dt>decision_width</dt>
+<dt id="arg-decision-width">decision_width<a class="anchor" aria-label="anchor" href="#arg-decision-width"></a></dt>
 <dd><p>(int) Width of the decision prediction layer. Bigger values gives
 more capacity to the model with the risk of overfitting. Values typically
 range from 8 to 64.</p></dd>
 
 
-<dt>attention_width</dt>
+<dt id="arg-attention-width">attention_width<a class="anchor" aria-label="anchor" href="#arg-attention-width"></a></dt>
 <dd><p>(int) Width of the attention embedding for each mask. According to
 the paper n_d = n_a is usually a good choice. (default=8)</p></dd>
 
 
-<dt>num_steps</dt>
+<dt id="arg-num-steps">num_steps<a class="anchor" aria-label="anchor" href="#arg-num-steps"></a></dt>
 <dd><p>(int) Number of steps in the architecture
 (usually between 3 and 10)</p></dd>
 
 
-<dt>feature_reusage</dt>
-<dd><p>(float) This is the coefficient for feature reusage in the masks.
+<dt id="arg-feature-reusage">feature_reusage<a class="anchor" aria-label="anchor" href="#arg-feature-reusage"></a></dt>
+<dd><p>(num) This is the coefficient for feature reusage in the masks.
 A value close to 1 will make mask selection least correlated between layers.
-Values range from 1.0 to 2.0.</p></dd>
+Values range from 1 to 2.</p></dd>
 
 
-<dt>mask_type</dt>
+<dt id="arg-mask-type">mask_type<a class="anchor" aria-label="anchor" href="#arg-mask-type"></a></dt>
 <dd><p>(character) Final layer of feature selector in the attentive_transformer
 block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
 
 
-<dt>virtual_batch_size</dt>
+<dt id="arg-virtual-batch-size">virtual_batch_size<a class="anchor" aria-label="anchor" href="#arg-virtual-batch-size"></a></dt>
 <dd><p>(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)</p></dd>
 
 
-<dt>valid_split</dt>
+<dt id="arg-valid-split">valid_split<a class="anchor" aria-label="anchor" href="#arg-valid-split"></a></dt>
 <dd><p>(<code>[0, 1)</code>) The fraction of the dataset used for validation.
 (default = 0 means no split)</p></dd>
 
 
-<dt>learn_rate</dt>
+<dt id="arg-learn-rate">learn_rate<a class="anchor" aria-label="anchor" href="#arg-learn-rate"></a></dt>
 <dd><p>initial learning rate for the optimizer.</p></dd>
 
 
-<dt>optimizer</dt>
-<dd><p>the optimization method. currently only 'adam' is supported,
+<dt id="arg-optimizer">optimizer<a class="anchor" aria-label="anchor" href="#arg-optimizer"></a></dt>
+<dd><p>the optimization method. currently only <code>"adam"</code> is supported,
 you can also pass any torch optimizer function.</p></dd>
 
 
-<dt>lr_scheduler</dt>
+<dt id="arg-lr-scheduler">lr_scheduler<a class="anchor" aria-label="anchor" href="#arg-lr-scheduler"></a></dt>
 <dd><p>if <code>NULL</code>, no learning rate decay is used. If "step"
 decays the learning rate by <code>lr_decay</code> every <code>step_size</code> epochs. If "reduce_on_plateau"
 decays the learning rate by <code>lr_decay</code> when no improvement after <code>step_size</code> epochs.
@@ -200,103 +202,101 @@ It can also be a <a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class
 as parameter. The <code>step</code> method is called once per epoch.</p></dd>
 
 
-<dt>lr_decay</dt>
+<dt id="arg-lr-decay">lr_decay<a class="anchor" aria-label="anchor" href="#arg-lr-decay"></a></dt>
 <dd><p>multiplies the initial learning rate by <code>lr_decay</code> every
 <code>step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
 or <code>NULL</code>.</p></dd>
 
 
-<dt>step_size</dt>
+<dt id="arg-step-size">step_size<a class="anchor" aria-label="anchor" href="#arg-step-size"></a></dt>
 <dd><p>the learning rate scheduler step size. Unused if
 <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code> or <code>NULL</code>.</p></dd>
 
 
-<dt>checkpoint_epochs</dt>
+<dt id="arg-checkpoint-epochs">checkpoint_epochs<a class="anchor" aria-label="anchor" href="#arg-checkpoint-epochs"></a></dt>
 <dd><p>checkpoint model weights and architecture every
 <code>checkpoint_epochs</code>. (default is 10). This may cause large memory usage.
 Use <code>0</code> to disable checkpoints.</p></dd>
 
 
-<dt>cat_emb_dim</dt>
+<dt id="arg-cat-emb-dim">cat_emb_dim<a class="anchor" aria-label="anchor" href="#arg-cat-emb-dim"></a></dt>
 <dd><p>Size of the embedding of categorical features. If int, all categorical
 features will have same embedding size, if list of int, every corresponding feature will have
 specific embedding size.</p></dd>
 
 
-<dt>num_independent</dt>
+<dt id="arg-num-independent">num_independent<a class="anchor" aria-label="anchor" href="#arg-num-independent"></a></dt>
 <dd><p>Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.</p></dd>
 
 
-<dt>num_shared</dt>
+<dt id="arg-num-shared">num_shared<a class="anchor" aria-label="anchor" href="#arg-num-shared"></a></dt>
 <dd><p>Number of shared Gated Linear Units at each step of the encoder. Usual values
 at each step of the decoder. range from 1 to 5</p></dd>
 
 
-<dt>num_independent_decoder</dt>
+<dt id="arg-num-independent-decoder">num_independent_decoder<a class="anchor" aria-label="anchor" href="#arg-num-independent-decoder"></a></dt>
 <dd><p>For pretraining, number of independent Gated Linear Units layers
 Usual values range from 1 to 5.</p></dd>
 
 
-<dt>num_shared_decoder</dt>
+<dt id="arg-num-shared-decoder">num_shared_decoder<a class="anchor" aria-label="anchor" href="#arg-num-shared-decoder"></a></dt>
 <dd><p>For pretraining, number of shared Gated Linear Units at each step of the
 decoder. Usual values range from 1 to 5.</p></dd>
 
 
-<dt>momentum</dt>
+<dt id="arg-momentum">momentum<a class="anchor" aria-label="anchor" href="#arg-momentum"></a></dt>
 <dd><p>Momentum for batch normalization, typically ranges from 0.01
 to 0.4 (default=0.02)</p></dd>
 
 
-<dt>pretraining_ratio</dt>
+<dt id="arg-pretraining-ratio">pretraining_ratio<a class="anchor" aria-label="anchor" href="#arg-pretraining-ratio"></a></dt>
 <dd><p>Ratio of features to mask for reconstruction during
 pretraining.  Ranges from 0 to 1 (default=0.5)</p></dd>
 
 
-<dt>verbose</dt>
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>(logical) Whether to print progress and loss values during
 training.</p></dd>
 
 
-<dt>device</dt>
+<dt id="arg-device">device<a class="anchor" aria-label="anchor" href="#arg-device"></a></dt>
 <dd><p>the device to use for training. "cpu" or "cuda". The default ("auto")
 uses  to "cuda" if it's available, otherwise uses "cpu".</p></dd>
 
 
-<dt>importance_sample_size</dt>
+<dt id="arg-importance-sample-size">importance_sample_size<a class="anchor" aria-label="anchor" href="#arg-importance-sample-size"></a></dt>
 <dd><p>sample of the dataset to compute importance metrics.
 If the dataset is larger than 1e5 obs we will use a sample of size 1e5 and
 display a warning.</p></dd>
 
 
-<dt>early_stopping_monitor</dt>
+<dt id="arg-early-stopping-monitor">early_stopping_monitor<a class="anchor" aria-label="anchor" href="#arg-early-stopping-monitor"></a></dt>
 <dd><p>Metric to monitor for early_stopping. One of "valid_loss", "train_loss" or "auto" (defaults to "auto").</p></dd>
 
 
-<dt>early_stopping_tolerance</dt>
+<dt id="arg-early-stopping-tolerance">early_stopping_tolerance<a class="anchor" aria-label="anchor" href="#arg-early-stopping-tolerance"></a></dt>
 <dd><p>Minimum relative improvement to reset the patience counter.
 0.01 for 1% tolerance (default 0)</p></dd>
 
 
-<dt>early_stopping_patience</dt>
+<dt id="arg-early-stopping-patience">early_stopping_patience<a class="anchor" aria-label="anchor" href="#arg-early-stopping-patience"></a></dt>
 <dd><p>Number of epochs without improving until stopping training. (default=5)</p></dd>
 
 
-<dt>num_workers</dt>
+<dt id="arg-num-workers">num_workers<a class="anchor" aria-label="anchor" href="#arg-num-workers"></a></dt>
 <dd><p>(int, optional): how many subprocesses to use for data
 loading. 0 means that the data will be loaded in the main process.
 (default: <code>0</code>)</p></dd>
 
 
-<dt>skip_importance</dt>
+<dt id="arg-skip-importance">skip_importance<a class="anchor" aria-label="anchor" href="#arg-skip-importance"></a></dt>
 <dd><p>if feature importance calculation should be skipped (default: <code>FALSE</code>)</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A named list with all hyperparameters of the TabNet implementation.</p>
+    <p>A named list with all hyperparameters of the TabNet implementation.</p>
     </div>
 
   </div>
@@ -311,15 +311,15 @@ loading. 0 means that the data will be loaded in the main process.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
