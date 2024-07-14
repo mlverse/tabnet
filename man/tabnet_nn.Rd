@@ -25,12 +25,12 @@ tabnet_nn(
 \arguments{
 \item{input_dim}{Initial number of features.}
 
-\item{output_dim}{Dimension of network output examples : one for regression, 2 for
+\item{output_dim}{Dimension of network output. Examples : one for regression, 2 for
 binary classification etc.. Vector of those dimensions in case of multi-output.}
 
-\item{n_d}{Dimension of the prediction  layer (usually between 4 and 64).}
+\item{n_d}{Dimension of the prediction layer (usually between 4 and 64).}
 
-\item{n_a}{Dimension of the attention  layer (usually between 4 and 64).}
+\item{n_a}{Dimension of the attention layer (usually between 4 and 64).}
 
 \item{n_steps}{Number of successive steps in the network (usually between 3 and 10).}
 

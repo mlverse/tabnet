@@ -403,10 +403,10 @@ tabnet_no_embedding <- torch::nn_module(
 #' [Attentive Interpretable Tabular Deep Learning](https://arxiv.org/abs/1908.07442).
 #'
 #' @param input_dim Initial number of features.
-#' @param output_dim Dimension of network output examples : one for regression, 2 for
+#' @param output_dim Dimension of network output. Examples : one for regression, 2 for
 #'   binary classification etc.. Vector of those dimensions in case of multi-output.
-#' @param n_d Dimension of the prediction  layer (usually between 4 and 64).
-#' @param n_a Dimension of the attention  layer (usually between 4 and 64).
+#' @param n_d Dimension of the prediction layer (usually between 4 and 64).
+#' @param n_a Dimension of the attention layer (usually between 4 and 64).
 #' @param n_steps Number of successive steps in the network (usually between 3 and 10).
 #' @param gamma Float above 1, scaling factor for attention updates (usually between 1 and 2).
 #' @param cat_idxs Index of each categorical column in the dataset.

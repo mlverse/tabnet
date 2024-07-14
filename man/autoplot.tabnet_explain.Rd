@@ -4,7 +4,12 @@
 \alias{autoplot.tabnet_explain}
 \title{Plot tabnet_explain mask importance heatmap}
 \usage{
-\method{autoplot}{tabnet_explain}(object, type = c("mask_agg", "steps"), quantile = 1, ...)
+autoplot.tabnet_explain(
+  object,
+  type = c("mask_agg", "steps"),
+  quantile = 1,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{tabnet_explain} object as a result of \code{\link[=tabnet_explain]{tabnet_explain()}}.}
@@ -25,7 +30,7 @@ A \code{ggplot} object.
 Plot tabnet_explain mask importance heatmap
 }
 \details{
-Plot the tabnet_explain object mask importance per variable along the predicted dataset.
+Plot the \code{tabnet_explain} object mask importance per variable along the predicted dataset.
 \code{type="mask_agg"} output a single heatmap of mask aggregated values,
 \code{type="steps"} provides a plot faceted along the \code{n_steps} mask present in the model.
 \code{quantile=.995} may be used for strong outlier clipping, in order to better highlight

@@ -12,6 +12,8 @@
 #'  The predictor data should be standardized (e.g. centered or scaled).
 #'  The model treats categorical predictors internally thus, you don't need to
 #'  make any treatment.
+#'  The model treats missing values internally thus, you don't need to make any
+#'  treatment.
 #'
 #' @param y When `x` is a __data frame__ or __matrix__, `y` is the outcome
 #' specified as:
@@ -246,6 +248,8 @@ new_tabnet_fit <- function(fit, blueprint) {
 #'  The predictor data should be standardized (e.g. centered or scaled).
 #'  The model treats categorical predictors internally thus, you don't need to
 #'  make any treatment.
+#'  The model treats missing values internally thus, you don't need to make any
+#'  treatment.
 #'
 #' @param y (optional) When `x` is a __data frame__ or __matrix__, `y` is the outcome
 #' @param data When a __recipe__ or __formula__ is used, `data` is specified as:

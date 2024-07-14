@@ -59,7 +59,9 @@ created from \code{\link[recipes:recipe]{recipes::recipe()}}.
 
 The predictor data should be standardized (e.g. centered or scaled).
 The model treats categorical predictors internally thus, you don't need to
-make any treatment.}
+make any treatment.
+The model treats missing values internally thus, you don't need to make any
+treatment.}
 
 \item{...}{Model hyperparameters.
 Any hyperparameters set here will update those set by the config argument.

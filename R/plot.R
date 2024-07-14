@@ -64,7 +64,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #' @param ...  not used.
 #' @return A `ggplot` object.
 #' @details
-#'  Plot the tabnet_explain object mask importance per variable along the predicted dataset.
+#'  Plot the `tabnet_explain` object mask importance per variable along the predicted dataset.
 #'  `type="mask_agg"` output a single heatmap of mask aggregated values,
 #'  `type="steps"` provides a plot faceted along the `n_steps` mask present in the model.
 #'  `quantile=.995` may be used for strong outlier clipping, in order to better highlight
