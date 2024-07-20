@@ -246,7 +246,7 @@ new_tabnet_fit <- function(fit, blueprint) {
 #'   * A __matrix__ of predictors.
 #'   * A __recipe__ specifying a set of preprocessing steps
 #'     created from [recipes::recipe()].
-#'   * A __Node__ where tree will be used as hierarchical outcome,
+#'   * A __Node__ where tree leaves will be left out,
 #'     and attributes will be used as predictors.
 #'
 #'  The predictor data should be standardized (e.g. centered or scaled).
