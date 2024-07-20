@@ -131,7 +131,7 @@ on the predictor data exclusively (unsupervised training).</p>
 <li><p>A <strong>matrix</strong> of predictors.</p></li>
 <li><p>A <strong>recipe</strong> specifying a set of preprocessing steps
 created from <code><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipes::recipe()</a></code>.</p></li>
-<li><p>A <strong>Node</strong> where tree will be used as hierarchical outcome,
+<li><p>A <strong>Node</strong> where tree leaves will be left out,
 and attributes will be used as predictors.</p></li>
 </ul><p>The predictor data should be standardized (e.g. centered or scaled).
 The model treats categorical predictors internally thus, you don't need to
