@@ -83,7 +83,7 @@ resolve_data <- function(x, y) {
 #' @param learn_rate initial learning rate for the optimizer.
 #' @param optimizer the optimization method. currently only `"adam"` is supported,
 #'   you can also pass any torch optimizer function.
-#' @param valid_split (`[0, 1)`) The fraction of the dataset used for validation.
+#' @param valid_split In \[0, 1). The fraction of the dataset used for validation.
 #'   (default = 0 means no split)
 #' @param num_independent Number of independent Gated Linear Units layers at each step of the encoder.
 #'   Usual values range from 1 to 5.

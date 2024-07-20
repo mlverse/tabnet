@@ -55,6 +55,8 @@ tabnet_pretrain(x, ...)
 \item A \strong{matrix} of predictors.
 \item A \strong{recipe} specifying a set of preprocessing steps
 created from \code{\link[recipes:recipe]{recipes::recipe()}}.
+\item A \strong{Node} where tree will be used as hierarchical outcome,
+and attributes will be used as predictors.
 }
 
 The predictor data should be standardized (e.g. centered or scaled).

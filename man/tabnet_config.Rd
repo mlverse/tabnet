@@ -81,7 +81,7 @@ block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)}
 
-\item{valid_split}{(\verb{[0, 1)}) The fraction of the dataset used for validation.
+\item{valid_split}{In [0, 1). The fraction of the dataset used for validation.
 (default = 0 means no split)}
 
 \item{learn_rate}{initial learning rate for the optimizer.}

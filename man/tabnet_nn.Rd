@@ -52,7 +52,7 @@ specific size.}
 
 \item{virtual_batch_size}{Batch size for Ghost Batch Normalization.}
 
-\item{momentum}{Float value between 0 and 1 which will be used for momentum in all batch norm.}
+\item{momentum}{Numerical value between 0 and 1 which will be used for momentum in all batch norm.}
 
 \item{mask_type}{Either "sparsemax" or "entmax" : this is the masking function to use.}
 }
