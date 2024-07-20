@@ -18,7 +18,7 @@ on the predictor data exclusively (unsupervised training)."><!-- mathjax --><scr
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0.9000</span>
       </span>
     </div>
 
@@ -67,7 +67,7 @@ on the predictor data exclusively (unsupervised training)."><!-- mathjax --><scr
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Tabnet model</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/v0.6.0/R/hardhat.R" class="external-link"><code>R/hardhat.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/main/R/hardhat.R" class="external-link"><code>R/hardhat.R</code></a></small>
     <div class="hidden name"><code>tabnet_pretrain.Rd</code></div>
     </div>
 
@@ -131,9 +131,13 @@ on the predictor data exclusively (unsupervised training).</p>
 <li><p>A <strong>matrix</strong> of predictors.</p></li>
 <li><p>A <strong>recipe</strong> specifying a set of preprocessing steps
 created from <code><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipes::recipe()</a></code>.</p></li>
+<li><p>A <strong>Node</strong> where tree will be used as hierarchical outcome,
+and attributes will be used as predictors.</p></li>
 </ul><p>The predictor data should be standardized (e.g. centered or scaled).
 The model treats categorical predictors internally thus, you don't need to
-make any treatment.</p></dd>
+make any treatment.
+The model treats missing values internally thus, you don't need to make any
+treatment.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -147,7 +151,7 @@ See <code><a href="tabnet_config.html">tabnet_config()</a></code> for a list of 
 
 
 <dt id="arg-tabnet-model">tabnet_model<a class="anchor" aria-label="anchor" href="#arg-tabnet-model"></a></dt>
-<dd><p>A pretrained TabNet model object to continue the fitting on.
+<dd><p>A pretrained <code>tabnet_model</code> object to continue the fitting on.
 if <code>NULL</code> (the default) a brand new model is initialized.</p></dd>
 
 
