@@ -12,12 +12,18 @@ x <- ames[ids,-which(names(ames) == "Sale_Price")]
 y <- ames[ids,]$Sale_Price
 
 # ames common models
-ames_pretrain <- tabnet_pretrain(x, y, epoch = 2, checkpoint_epochs = 1)
+ames_pretrain <- tabnet_pretrain(x, y, epoch = 2, checkpoint_epochs = 1,
+                                 decision_width = 2, attention_width = 2, num_steps = 2,
+                                 num_shared = 1, num_independent = 1)
 ames_pretrain_vsplit <- tabnet_pretrain(x, y, epochs = 3, valid_split=.2,
-                                        num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
-ames_fit <- tabnet_fit(x, y, epochs = 5 , checkpoint_epochs = 2)
+                                        num_steps = 1, attention_width = 1, num_shared = 1,
+                                        num_independent = 1)
+ames_fit <- tabnet_fit(x, y, epochs = 5 , checkpoint_epochs = 2,
+                       decision_width = 2, attention_width = 2, num_steps = 2,
+                       num_shared = 1, num_independent = 1)
 ames_fit_vsplit <- tabnet_fit(x, y, tabnet_model=ames_pretrain_vsplit, epochs = 3,
-                              num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
+                              num_steps = 1, attention_width = 1, num_shared = 1,
+                              num_independent = 1)
 
 # attrition small data
 utils::data("attrition", package = "modeldata")
