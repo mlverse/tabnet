@@ -27,8 +27,8 @@ tabnet(
   clip_value = NULL,
   drop_last = NULL,
   lr_scheduler = NULL,
-  lr_decay = NULL,
-  step_size = NULL,
+  rate_decay = NULL,
+  rate_step_size = NULL,
   checkpoint_epochs = NULL,
   verbose = NULL,
   importance_sample_size = NULL,
@@ -112,13 +112,6 @@ decays the learning rate by \code{lr_decay} every \code{step_size} epochs. If "r
 decays the learning rate by \code{lr_decay} when no improvement after \code{step_size} epochs.
 It can also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
 as parameter. The \code{step} method is called once per epoch.}
-
-\item{lr_decay}{multiplies the initial learning rate by \code{lr_decay} every
-\code{step_size} epochs. Unused if \code{lr_scheduler} is a \code{torch::lr_scheduler}
-or \code{NULL}.}
-
-\item{step_size}{the learning rate scheduler step size. Unused if
-\code{lr_scheduler} is a \code{torch::lr_scheduler} or \code{NULL}.}
 
 \item{checkpoint_epochs}{checkpoint model weights and architecture every
 \code{checkpoint_epochs}. (default is 10). This may cause large memory usage.
