@@ -3,6 +3,11 @@ check_dials <- function() {
     stop("Package \"dials\" needed for this function to work. Please install it.", call. = FALSE)
 }
 
+check_cli <- function() {
+  if (!requireNamespace("cli", quietly = TRUE))
+    stop("Package \"cli\" needed for this function to work. Please install it.", call. = FALSE)
+}
+
 
 
 #' Parameters for the tabnet model
@@ -127,57 +132,61 @@ num_steps <- function(range = c(3L, 10L), trans = NULL) {
   )
 }
 
-#' @noRd
+#' Non-tunable parameters for the tabnet model
+#'
+#' @param range unused
+#' @param trans unused
+#' @rdname tabnet_non_tunable
 #' @export
 cat_emb_dim <- function(range = NULL, trans = NULL) {
-  check_dials()
+  check_cli()
   cli::cli_abort("{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet.")
 }
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 checkpoint_epochs <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 drop_last <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 encoder_activation <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 lr_scheduler <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 mlp_activation <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 mlp_hidden_multiplier <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 num_independent_decoder <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 num_shared_decoder <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 optimizer <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 penalty <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 verbose <- cat_emb_dim
 
-#' @noRd
+#' @rdname tabnet_non_tunable
 #' @export
 virtual_batch_size <- cat_emb_dim

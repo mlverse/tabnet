@@ -113,6 +113,13 @@ decays the learning rate by \code{lr_decay} when no improvement after \code{step
 It can also be a \link[torch:lr_scheduler]{torch::lr_scheduler} function that only takes the optimizer
 as parameter. The \code{step} method is called once per epoch.}
 
+\item{rate_decay}{multiplies the initial learning rate by \code{rate_decay} every
+\code{rate_step_size} epochs. Unused if \code{lr_scheduler} is a \code{torch::lr_scheduler}
+or \code{NULL}.}
+
+\item{rate_step_size}{the learning rate scheduler step size. Unused if
+\code{lr_scheduler} is a \code{torch::lr_scheduler} or \code{NULL}.}
+
 \item{checkpoint_epochs}{checkpoint model weights and architecture every
 \code{checkpoint_epochs}. (default is 10). This may cause large memory usage.
 Use \code{0} to disable checkpoints.}

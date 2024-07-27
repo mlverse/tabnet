@@ -427,6 +427,11 @@ add_parsnip_tabnet <- function() {
 #'   for this model are "unknown", "regression", or "classification".
 #' @inheritParams tabnet_config
 #' @inheritParams tabnet_fit
+#' @param rate_decay multiplies the initial learning rate by `rate_decay` every
+#'   `rate_step_size` epochs. Unused if `lr_scheduler` is a `torch::lr_scheduler`
+#'   or `NULL`.
+#' @param rate_step_size the learning rate scheduler step size. Unused if
+#'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
 #'
 #' @inheritSection tabnet_fit Threading
 #' @seealso tabnet_fit

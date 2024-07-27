@@ -21,7 +21,6 @@ BugReports: https://github.com/mlverse/tabnet/issues
 Depends:
     R (>= 3.6)
 Imports: 
-    cli,
     coro,
     data.tree,
     dials,
@@ -46,6 +45,7 @@ Imports:
     withr,
     zeallot
 Suggests: 
+    cli,
     knitr,
     modeldata,
     patchwork,
