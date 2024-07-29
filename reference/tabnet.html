@@ -98,8 +98,8 @@
 <span>  clip_value <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  drop_last <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  lr_scheduler <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  lr_decay <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  step_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rate_decay <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rate_step_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  checkpoint_epochs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  importance_sample_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -232,13 +232,13 @@ It can also be a <a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class
 as parameter. The <code>step</code> method is called once per epoch.</p></dd>
 
 
-<dt id="arg-lr-decay">lr_decay<a class="anchor" aria-label="anchor" href="#arg-lr-decay"></a></dt>
-<dd><p>multiplies the initial learning rate by <code>lr_decay</code> every
-<code>step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
+<dt id="arg-rate-decay">rate_decay<a class="anchor" aria-label="anchor" href="#arg-rate-decay"></a></dt>
+<dd><p>multiplies the initial learning rate by <code>rate_decay</code> every
+<code>rate_step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
 or <code>NULL</code>.</p></dd>
 
 
-<dt id="arg-step-size">step_size<a class="anchor" aria-label="anchor" href="#arg-step-size"></a></dt>
+<dt id="arg-rate-step-size">rate_step_size<a class="anchor" aria-label="anchor" href="#arg-rate-step-size"></a></dt>
 <dd><p>the learning rate scheduler step size. Unused if
 <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code> or <code>NULL</code>.</p></dd>
 
