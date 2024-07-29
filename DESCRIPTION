@@ -45,6 +45,7 @@ Imports:
     withr,
     zeallot
 Suggests: 
+    cli,
     knitr,
     modeldata,
     patchwork,

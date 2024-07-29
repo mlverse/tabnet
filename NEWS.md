@@ -3,6 +3,7 @@
 ## Bugfixes
 
 * improve function documentation consistency before translation
+* fix ".... is not an exported object from 'namespace:dials'" error when using tune() on tabnet parameters. (#160 @cphaarmeyer)
 
 
 # tabnet 0.6.0
