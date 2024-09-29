@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   Hierarchical_classification: Hierarchical_classification.html
@@ -7,4 +7,4 @@ articles:
   Missing_data_predictors: Missing_data_predictors.html
   selfsupervised_training: selfsupervised_training.html
   tidymodels-interface: tidymodels-interface.html
-last_built: 2024-07-29T16:51Z
+last_built: 2024-09-29T06:34Z
