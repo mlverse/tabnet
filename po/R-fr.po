@@ -2,15 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-21 22:37+0100\n"
-"PO-Revision-Date: 2024-02-21 22:42+0100\n"
+"POT-Creation-Date: 2024-09-29 08:20+0200\n"
+"PO-Revision-Date: 2024-09-29 08:25+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.5\n"
 
 #: dials.R:3
 msgid "Package \"dials\" needed for this function to work. Please install it."
@@ -18,46 +18,57 @@ msgstr ""
 "Le package \"dials\" doit être installé pour cette fonction. Merci de "
 "l'installer."
 
+#: dials.R:8
+msgid "Package \"cli\" needed for this function to work. Please install it."
+msgstr ""
+"Le package \"cli\" doit être installé pour cette fonction. Merci de "
+"l'installer."
+
+#: dials.R:143
+msgid "{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet."
+msgstr ""
+
 #: explain.R:48
 #, c-format
 msgid "`tabnet_explain()` is not defined for a '%s'."
 msgstr "`tabnet_explain()` n’est pas défini pour un '%s'."
 
-#: hardhat.R:109
+#: hardhat.R:113
 #, c-format
 msgid "`tabnet_fit()` is not defined for a '%s'."
 msgstr "`tabnet_fit()` n’est pas défini pour un '%s'."
 
-#: hardhat.R:118 hardhat.R:141 hardhat.R:170
+#: hardhat.R:122 hardhat.R:145 hardhat.R:174
 #, c-format
-msgid "Configured `weights` will not be used"
-msgstr "Les `weights` configurés ne seront pas utilisés."
+msgid "Configured `weights` variables will not be used as predictors"
+msgstr ""
+"Les variables `weights` configurées ne seront pas utilisés comme prédicteurs."
 
-#: hardhat.R:309
+#: hardhat.R:317
 #, c-format
 msgid "`tabnet_pretrain()` is not defined for a '%s'."
 msgstr "`tabnet_pretrain()` n’est pas défini pour un '%s'."
 
-#: hardhat.R:417
+#: hardhat.R:425
 #, c-format
 msgid "'%s' is not recognised as a proper TabNet model"
 msgstr "'%s' n’est pas reconnu comme un modèle TabNet correct"
 
-#: hardhat.R:424
+#: hardhat.R:432
 #, c-format
 msgid "The model was trained for less than '%s' epochs"
 msgstr "Le modèle a été entrainé sur moins de '%s' époques"
 
-#: hardhat.R:436
+#: hardhat.R:444
 #, c-format
 msgid "Found missing values in the `%s` outcome column."
 msgstr "Il y a des valeurs manquantes dans la colonne de résultats `%s`."
 
-#: hardhat.R:446 hardhat.R:561
+#: hardhat.R:454 hardhat.R:569
 msgid "Model dimensions don't match."
 msgstr "Les dimensions ne correspondent pas entre les modèles."
 
-#: hardhat.R:471
+#: hardhat.R:479
 #, c-format
 msgid ""
 "No model serialized weight can be found in `%s`, check the model history"
@@ -65,7 +76,7 @@ msgstr ""
 "Il n’y a pas de points sérialisés de modèle dans `%s`, veuillez vérifier "
 "l’historique du modèle"
 
-#: hardhat.R:479
+#: hardhat.R:487
 msgid ""
 "`tabnet_pretrain()` from a model is not currently supported.\n"
 "The pretraining here will start with a network initialization"
@@ -74,34 +85,34 @@ msgstr ""
 "pour l'instant.\n"
 "Le pré-entraînement va commencer par une initialisation du réseau."
 
-#: hardhat.R:516
+#: hardhat.R:524
 #, c-format
 msgid "The model was trained for less than `%s` epochs"
 msgstr "Le modèle a été entrainé sur moins de '%s' époques"
 
-#: hardhat.R:613
+#: hardhat.R:621
 #, c-format
 msgid "Mixed multi-outcome type '%s' is not supported"
 msgstr "Le type '%s' n’est pas supporté pour des modèles multi-résultat"
 
-#: hardhat.R:621
+#: hardhat.R:629
 #, c-format
 msgid "Unknown outcome type '%s'"
 msgstr "Le type `%s` est inconnu pour une colonne de résultat"
 
-#: hardhat.R:628
+#: hardhat.R:636
 #, c-format
 msgid "Outcome is factor and the prediction type is '%s'."
 msgstr ""
 "La colonne de résultats est catégorielle et la prédiction est de type '%s'."
 
-#: hardhat.R:631
+#: hardhat.R:639
 #, c-format
 msgid "Outcome is numeric and the prediction type is '%s'."
 msgstr ""
 "La colonne de résultats est numérique et la prédiction est de type '%s'."
 
-#: hardhat.R:669
+#: hardhat.R:677
 msgid ""
 "The provided hierarchical object is not recognized with a valid format that "
 "can be checked"
@@ -109,7 +120,7 @@ msgstr ""
 "L’objet hiérarchique fournit n’est pas reconnu dans un format valide qui "
 "peut être vérifié"
 
-#: hardhat.R:674
+#: hardhat.R:682
 #, c-format
 msgid ""
 "The attributes or colnames in the provided hierarchical object use the "
@@ -155,7 +166,7 @@ msgstr ""
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:592
+#: model.R:592 pretraining.R:217
 #, c-format
 msgid "Early stopping at epoch %03d"
 msgstr "Arrêt anticipé à l’époque %03d"
@@ -172,12 +183,16 @@ msgstr ""
 "aléatoirement à une taille de 1e5. Vous pouvez rendre ce message silencieux "
 "en configurant l’argument `importance_sample_size`."
 
-#: parsnip.R:460
+#: parsnip.R:465
 msgid ""
 "Package \"parsnip\" needed for this function to work. Please install it."
 msgstr ""
 "Le package \"parsnip\" est nécessaire pour exécuter cette fonction, Veuillez "
 "l'installer."
+
+#: parsnip.R:549
+msgid "parsnip"
+msgstr ""
 
 #: pretraining.R:243
 #, c-format

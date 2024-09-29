@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: tabnet 0.5.0.9000\n"
-"POT-Creation-Date: 2024-02-21 22:37+0100\n"
+"Project-Id-Version: tabnet 0.6.0.9000\n"
+"POT-Creation-Date: 2024-09-29 08:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,89 +14,97 @@ msgstr ""
 msgid "Package \"dials\" needed for this function to work. Please install it."
 msgstr ""
 
+#: dials.R:8
+msgid "Package \"cli\" needed for this function to work. Please install it."
+msgstr ""
+
+#: dials.R:143
+msgid "{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet."
+msgstr ""
+
 #: explain.R:48
 #, c-format
 msgid "`tabnet_explain()` is not defined for a '%s'."
 msgstr ""
 
-#: hardhat.R:109
+#: hardhat.R:113
 #, c-format
 msgid "`tabnet_fit()` is not defined for a '%s'."
 msgstr ""
 
-#: hardhat.R:118 hardhat.R:141 hardhat.R:170
+#: hardhat.R:122 hardhat.R:145 hardhat.R:174
 #, c-format
-msgid "Configured `weights` will not be used"
+msgid "Configured `weights` variables will not be used as predictors"
 msgstr ""
 
-#: hardhat.R:309
+#: hardhat.R:317
 #, c-format
 msgid "`tabnet_pretrain()` is not defined for a '%s'."
 msgstr ""
 
-#: hardhat.R:417
+#: hardhat.R:425
 #, c-format
 msgid "'%s' is not recognised as a proper TabNet model"
 msgstr ""
 
-#: hardhat.R:424
+#: hardhat.R:432
 #, c-format
 msgid "The model was trained for less than '%s' epochs"
 msgstr ""
 
-#: hardhat.R:436
+#: hardhat.R:444
 #, c-format
 msgid "Found missing values in the `%s` outcome column."
 msgstr ""
 
-#: hardhat.R:446 hardhat.R:561
+#: hardhat.R:454 hardhat.R:569
 msgid "Model dimensions don't match."
 msgstr ""
 
-#: hardhat.R:471
+#: hardhat.R:479
 #, c-format
 msgid ""
 "No model serialized weight can be found in `%s`, check the model history"
 msgstr ""
 
-#: hardhat.R:479
+#: hardhat.R:487
 msgid ""
 "`tabnet_pretrain()` from a model is not currently supported.\n"
 "The pretraining here will start with a network initialization"
 msgstr ""
 
-#: hardhat.R:516
+#: hardhat.R:524
 #, c-format
 msgid "The model was trained for less than `%s` epochs"
 msgstr ""
 
-#: hardhat.R:613
+#: hardhat.R:621
 #, c-format
 msgid "Mixed multi-outcome type '%s' is not supported"
 msgstr ""
 
-#: hardhat.R:621
+#: hardhat.R:629
 #, c-format
 msgid "Unknown outcome type '%s'"
 msgstr ""
 
-#: hardhat.R:628
+#: hardhat.R:636
 #, c-format
 msgid "Outcome is factor and the prediction type is '%s'."
 msgstr ""
 
-#: hardhat.R:631
+#: hardhat.R:639
 #, c-format
 msgid "Outcome is numeric and the prediction type is '%s'."
 msgstr ""
 
-#: hardhat.R:669
+#: hardhat.R:677
 msgid ""
 "The provided hierarchical object is not recognized with a valid format that "
 "can be checked"
 msgstr ""
 
-#: hardhat.R:674
+#: hardhat.R:682
 #, c-format
 msgid ""
 "The attributes or colnames in the provided hierarchical object use the "
@@ -134,7 +142,7 @@ msgstr ""
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:592
+#: model.R:592 pretraining.R:217
 #, c-format
 msgid "Early stopping at epoch %03d"
 msgstr ""
@@ -147,9 +155,13 @@ msgid ""
 "message by using the `importance_sample_size` argument."
 msgstr ""
 
-#: parsnip.R:460
+#: parsnip.R:465
 msgid ""
 "Package \"parsnip\" needed for this function to work. Please install it."
+msgstr ""
+
+#: parsnip.R:549
+msgid "parsnip"
 msgstr ""
 
 #: pretraining.R:243

@@ -89,7 +89,7 @@ If no argument is supplied, this will use the default values in \code{\link[=tab
 \item{from_epoch}{When a \code{tabnet_model} is provided, restore the network weights from a specific epoch.
 Default is last available checkpoint for restored model, or last epoch for in-memory model.}
 
-\item{weights}{Unused.}
+\item{weights}{Unused. Placeholder for hardhat::importance_weight() variables.}
 
 \item{formula}{A formula specifying the outcome terms on the left-hand side,
 and the predictor terms on the right-hand side.}
