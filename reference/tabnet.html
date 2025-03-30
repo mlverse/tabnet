@@ -228,19 +228,19 @@ training</p></dd>
 <dd><p>if <code>NULL</code>, no learning rate decay is used. If "step"
 decays the learning rate by <code>lr_decay</code> every <code>step_size</code> epochs. If "reduce_on_plateau"
 decays the learning rate by <code>lr_decay</code> when no improvement after <code>step_size</code> epochs.
-It can also be a <a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a> function that only takes the optimizer
+It can also be a <a href="https://torch.mlverse.org/docs/reference/lr_scheduler.html" class="external-link">torch::lr_scheduler</a> function that only takes the optimizer
 as parameter. The <code>step</code> method is called once per epoch.</p></dd>
 
 
 <dt id="arg-rate-decay">rate_decay<a class="anchor" aria-label="anchor" href="#arg-rate-decay"></a></dt>
 <dd><p>multiplies the initial learning rate by <code>rate_decay</code> every
-<code>rate_step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
+<code>rate_step_size</code> epochs. Unused if <code>lr_scheduler</code> is a <code><a href="https://torch.mlverse.org/docs/reference/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code>
 or <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-rate-step-size">rate_step_size<a class="anchor" aria-label="anchor" href="#arg-rate-step-size"></a></dt>
 <dd><p>the learning rate scheduler step size. Unused if
-<code>lr_scheduler</code> is a <code><a href="https://rdrr.io/pkg/torch/man/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code> or <code>NULL</code>.</p></dd>
+<code>lr_scheduler</code> is a <code><a href="https://torch.mlverse.org/docs/reference/lr_scheduler.html" class="external-link">torch::lr_scheduler</a></code> or <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-checkpoint-epochs">checkpoint_epochs<a class="anchor" aria-label="anchor" href="#arg-checkpoint-epochs"></a></dt>
