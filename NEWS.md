@@ -2,9 +2,10 @@
 
 ## Bugfixes
 
-* improve function documentation consistency before translation
-* fix ".... is not an exported object from 'namespace:dials'" error when using tune() on tabnet parameters. (#160 @cphaarmeyer)
-
+* fix `tabet_pretrain` wrongly used instead of `tabnet_fit` in Missing data predictor vignette
+* improve message related to case_weights not being used as predictors.
+* improve function documentation consistency before translation.
+* fix "..." is not an exported object from 'namespace:dials'" error when using tune() on tabnet parameters. (#160 @cphaarmeyer)
 
 # tabnet 0.6.0
 
