@@ -157,3 +157,14 @@ A named list with all hyperparameters of the TabNet implementation.
 \description{
 Configuration for TabNet models
 }
+\examples{
+\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+data("ames", package = "modeldata")
+
+# change the model config for an faster ignite optimizer
+config <- tabnet_config(optimizer = torch::optim_ignite_adamw)
+
+## Single-outcome regression using formula specification
+fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1, config = config)
+\dontshow{\}) # examplesIf}
+}

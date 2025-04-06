@@ -95,19 +95,16 @@ cbind(test, predict(fit, test)) %>%
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.837
-#> 2 precision binary         0.837
+#> 1 accuracy  binary         0.840
+#> 2 precision binary         0.840
 #> 3 recall    binary         1
-```
-
-``` r
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.546
+#> 1 roc_auc binary         0.544
 ```
 
 ## Explain model on test-set with attention map
@@ -157,26 +154,26 @@ values in the predictors variables.
 
 # Comparison with other implementations
 
-| Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
-|------------------|--------------------------------------|:------------------:|:-------------:|:-----------:|
-| Input format     | data-frame                           |         ✅         |      ✅       |     ✅      |
-|                  | formula                              |         ✅         |               |             |
-|                  | recipe                               |         ✅         |               |             |
-|                  | Node                                 |         ✅         |               |             |
-|                  | missings in predictor                |         ✅         |               |             |
-| Output format    | data-frame                           |         ✅         |      ✅       |     ✅      |
-|                  | workflow                             |         ✅         |               |             |
-| ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
-|                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
-|                  | regression                           |         ✅         |      ✅       |     ✅      |
-|                  | multi-outcome                        |         ✅         |      ✅       |             |
-|                  | hierarchical multi-label classif.    |         ✅         |               |             |
-| Model management | from / to file                       |         ✅         |      ✅       |      v      |
-|                  | resume from snapshot                 |         ✅         |               |             |
-|                  | training diagnostic                  |         ✅         |               |             |
-| Interpretability |                                      |         ✅         |      ✅       |     ✅      |
-| Performance      |                                      |        1 x         |    2 - 4 x    |             |
-| Code quality     | test coverage                        |        85%         |               |             |
-|                  | continuous integration               | 4 OS including GPU |               |             |
+| Group | Feature | {tabnet} | dreamquark-ai | fast-tabnet |
+|----|----|:--:|:--:|:--:|
+| Input format | data-frame | ✅ | ✅ | ✅ |
+|  | formula | ✅ |  |  |
+|  | recipe | ✅ |  |  |
+|  | Node | ✅ |  |  |
+|  | missings in predictor | ✅ |  |  |
+| Output format | data-frame | ✅ | ✅ | ✅ |
+|  | workflow | ✅ |  |  |
+| ML Tasks | self-supervised learning | ✅ | ✅ |  |
+|  | classification (binary, multi-class) | ✅ | ✅ | ✅ |
+|  | regression | ✅ | ✅ | ✅ |
+|  | multi-outcome | ✅ | ✅ |  |
+|  | hierarchical multi-label classif. | ✅ |  |  |
+| Model management | from / to file | ✅ | ✅ | v |
+|  | resume from snapshot | ✅ |  |  |
+|  | training diagnostic | ✅ |  |  |
+| Interpretability |  | ✅ | ✅ | ✅ |
+| Performance |  | 1 x | 2 - 4 x |  |
+| Code quality | test coverage | 85% |  |  |
+|  | continuous integration | 4 OS including GPU |  |  |
 
 Alternative TabNet implementation features
