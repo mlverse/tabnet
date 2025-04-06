@@ -1,4 +1,4 @@
-# tabnet (development version)
+# tabnet 0.7.0
 
 ## Bugfixes
 
