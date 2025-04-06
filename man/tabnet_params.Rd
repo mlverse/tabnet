@@ -43,3 +43,11 @@ A \code{dials} parameter to be used when tuning TabNet models.
 \description{
 Parameters for the tabnet model
 }
+\examples{
+\dontshow{if ((require("dials") && require("parsnip") && torch::torch_is_installed())) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+  model <- tabnet(attention_width = tune(), feature_reusage = tune(),
+    momentum = tune(), penalty = tune(), rate_step_size = tune()) \%>\%
+    parsnip::set_mode("regression") \%>\%
+    parsnip::set_engine("torch")
+\dontshow{\}) # examplesIf}
+}

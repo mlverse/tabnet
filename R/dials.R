@@ -22,6 +22,12 @@ check_cli <- function() {
 #' @rdname tabnet_params
 #' @return A `dials` parameter to be used when tuning TabNet models.
 #' @export
+#' @examplesIf (require("dials") && require("parsnip") && torch::torch_is_installed())
+#'   model <- tabnet(attention_width = tune(), feature_reusage = tune(),
+#'     momentum = tune(), penalty = tune(), rate_step_size = tune()) %>%
+#'     parsnip::set_mode("regression") %>%
+#'     parsnip::set_engine("torch")
+#'
 attention_width <- function(range = c(8L, 64L), trans = NULL) {
   check_dials()
   dials::new_quant_param(

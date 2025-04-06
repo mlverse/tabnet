@@ -130,6 +130,15 @@ resolve_data <- function(x, y) {
 #' @param skip_importance if feature importance calculation should be skipped (default: `FALSE`)
 #' @return A named list with all hyperparameters of the TabNet implementation.
 #'
+#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
+#' data("ames", package = "modeldata")
+#'
+#' # change the model config for an faster ignite optimizer
+#' config <- tabnet_config(optimizer = torch::optim_ignite_adamw)
+#'
+#' ## Single-outcome regression using formula specification
+#' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1, config = config)
+#'
 #' @export
 tabnet_config <- function(batch_size = 1024^2,
                           penalty = 1e-3,
