@@ -71,7 +71,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     valid_x <- x[valid_idx, ]
     valid_ds <-   torch::dataset(
       initialize = function() {},
-      .getbatch = function(batch) {resolve_data(valid_x[batch,], rep(1, length(batch)))},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], matrix(1L, nrow = length(batch)))},
       .length = function() {nrow(valid_x)}
     )()
 
@@ -88,7 +88,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # training dataset & dataloader
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], rep(1, length(batch)))},
+    .getbatch = function(batch) {resolve_data(x[batch,], matrix(1L, nrow = length(batch)))},
     .length = function() {nrow(x)}
   )()
   # we can get training_set parameters from the 2 first samples

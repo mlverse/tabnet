@@ -40,7 +40,7 @@ resolve_data <- function(x, y) {
     }
   } else {
     y_tensor <- torch::torch_tensor(as.matrix(y), dtype = torch::torch_float())
-    output_dim <- ncol(y)
+    output_dim <- y_tensor$shape[[1]]
   }
 
   input_dim <- ncol(x)
