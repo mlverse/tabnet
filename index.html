@@ -147,28 +147,27 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <span><span class="co">#&gt; # A tibble: 3 × 3</span></span>
 <span><span class="co">#&gt;   .metric   .estimator .estimate</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 accuracy  binary         0.837</span></span>
-<span><span class="co">#&gt; 2 precision binary         0.837</span></span>
-<span><span class="co">#&gt; 3 recall    binary         1</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  </span>
+<span><span class="co">#&gt; 1 accuracy  binary         0.840</span></span>
+<span><span class="co">#&gt; 2 precision binary         0.840</span></span>
+<span><span class="co">#&gt; 3 recall    binary         1</span></span>
+<span>  </span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">roc_auc</a></span><span class="op">(</span><span class="va">Attrition</span>, <span class="va">.pred_No</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
 <span><span class="co">#&gt;   .metric .estimator .estimate</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 roc_auc binary         0.546</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 roc_auc binary         0.544</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="explain-model-on-test-set-with-attention-map">Explain model on test-set with attention map<a class="anchor" aria-label="anchor" href="#explain-model-on-test-set-with-attention-map"></a>
 </h2>
 <p>TabNet has intrinsic explainability feature through the visualization of attention map, either <strong>aggregated</strong>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">explain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">explain</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-model-explain-1.png" width="100%"></p>
 <p>or at <strong>each layer</strong> through the <code>type = "steps"</code> option:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">explain</span>, type <span class="op">=</span> <span class="st">"steps"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-step-explain-1.png" width="100%"></p>
 </div>
@@ -176,7 +175,7 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <h2 id="self-supervised-pretraining">Self-supervised pretraining<a class="anchor" aria-label="anchor" href="#self-supervised-pretraining"></a>
 </h2>
 <p>For cases when a consistent part of your dataset has no outcome, TabNet offers a self-supervised training step allowing to model to capture predictors intrinsic features and predictors interactions, upfront the supervised task.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pretrain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pretrain</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-step-pretrain-1.png" width="100%"></p>
@@ -192,13 +191,6 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <h1 id="comparison-with-other-implementations">Comparison with other implementations<a class="anchor" aria-label="anchor" href="#comparison-with-other-implementations"></a>
 </h1>
 <table class="table">
-<colgroup>
-<col width="17%">
-<col width="36%">
-<col width="19%">
-<col width="14%">
-<col width="12%">
-</colgroup>
 <thead><tr class="header">
 <th>Group</th>
 <th>Feature</th>
