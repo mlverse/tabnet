@@ -648,7 +648,7 @@ predict_impl <- function(obj, x, batch_size = 1e5) {
   device = obj$fit$config$device
   predict_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], matrix(1L, nrow = nrow(x)))},
+    .getbatch = function(batch) {resolve_data(x[batch,], matrix(1L, nrow = length(batch)))},
     .length = function() {nrow(x)}
   )()
 
