@@ -12,7 +12,7 @@
 #' @examplesIf (torch::torch_is_installed() && require("modeldata"))
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")
-#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=11)
+#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition[1:25,], valid_split=0.2, epoch=11)
 #'
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
@@ -82,10 +82,10 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #'
 #' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
 #' data("ames", package = "modeldata")
-#' ids <- sample(nrow(ames), 256)
+#' ids <- sample(nrow(ames), 25)
 #' x <- ames[ids,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
 #' y <- ames[ids, c("Sale_Price", "Pool_Area")]
-#' ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
+#' ames_fit <- tabnet_fit(x, y, epochs = 1, verbose=TRUE)
 #' ames_explain <- tabnet_explain(ames_fit, x)
 #' autoplot(ames_explain, quantile = 0.99)
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {

@@ -72,13 +72,13 @@
 #'
 #' data("ames", package = "modeldata")
 #' data("attrition", package = "modeldata")
-#' ids <- sample(nrow(attrition), 256)
+#' ids <- sample(nrow(attrition), 25)
 #'
 #' ## Single-outcome regression using formula specification
-#' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1)
+#' fit <- tabnet_fit(Sale_Price ~ ., data = ames[ids,], epochs = 1)
 #'
 #' ## Single-outcome classification using data-frame specification
-#' attrition_x <- attrition[,-which(names(attrition) == "Attrition")]
+#' attrition_x <- attrition[ids,-which(names(attrition) == "Attrition")]
 #' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
 #'
 #' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
@@ -97,7 +97,7 @@
 #'
 #' acme_fit <- tabnet_fit(acme, epochs = 2, verbose = TRUE)
 #'
-#' # Note: Dataset number of rows and model number of epochs should be increased
+#' # Note: Dataset's number of rows and model's number of epochs should be increased
 #' # for publication-level results.
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'
