@@ -509,8 +509,8 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   if (!is.null(config$ancestor)) {
     config$ancestor_tt <- torch::torch_tensor(config$ancestor)$to(torch::torch_bool(), device = device)
   }
-  # define optimizer
-  if (rlang::is_function(config$optimizer)) {
+  # resolve optimizer
+  if (torch::is_optimizer(config$optimizer)) {
 
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
 
@@ -520,8 +520,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
     else
       stop("Currently only the 'adam' optimizer is supported.", call. = FALSE)
+  } else
+    stop("`optimizer` must be a torch optimizer.", call. = FALSE)
 
-  }
 
   # define scheduler
   if (is.null(config$lr_scheduler)) {
