@@ -98,6 +98,23 @@ test_that("step scheduler works", {
 
 })
 
+test_that("configuring optimizer works", {
+
+  expect_no_error(
+    fit <- tabnet_fit(x, y, epochs = 3, config = tabnet_config(optimizer = "adam"))
+  )
+
+  expect_no_error(
+    fit <- tabnet_fit(x, y, epochs = 3, optimizer = torch::optim_adamw)
+  )
+
+  expect_error(
+    fit <- tabnet_fit(x, y, epochs = 3, optimizer = "adamw"),
+    "Currently only 'adam' is supported"
+  )
+
+})
+
 test_that("reduce_on_plateau scheduler works", {
 
   expect_no_error(

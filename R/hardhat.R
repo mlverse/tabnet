@@ -124,16 +124,7 @@ tabnet_fit.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_con
   processed <- hardhat::mold(x, y)
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-    function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-    default_config,
-    new_config)
-    ]
-  config <- utils::modifyList(config, as.list(new_config))
-
+  config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -153,16 +144,7 @@ tabnet_fit.formula <- function(formula, data, tabnet_model = NULL, config = tabn
   )
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
-
+  config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -176,16 +158,7 @@ tabnet_fit.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_conf
   processed <- hardhat::mold(x, data)
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
-
+  config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -210,16 +183,7 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   ancestor_m <- Matrix::sparseMatrix(ancestor$from, ancestor$to, dims = dims, x = 1)
   check_type(processed$outcomes)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config, ancestor = ancestor_m))
-
+  config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -325,16 +289,7 @@ tabnet_pretrain.default <- function(x, ...) {
 tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
-
+  config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
@@ -348,17 +303,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
       intercept = FALSE
     )
   )
-
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
-
+  config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
@@ -367,16 +312,7 @@ tabnet_pretrain.formula <- function(formula, data, tabnet_model = NULL, config =
 tabnet_pretrain.recipe <- function(x, data, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, data)
 
-  default_config <- tabnet_config()
-  new_config <- do.call(tabnet_config, list(...))
-  new_config <- new_config[
-    mapply(
-      function(x, y) ifelse(is.null(x), !is.null(y), x != y),
-      default_config,
-      new_config)
-  ]
-  config <- utils::modifyList(config, as.list(new_config))
-
+  config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
 
@@ -548,13 +484,6 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   )
 }
 
-model_to_raw <- function(model) {
-  con <- rawConnection(raw(), open = "wr")
-  torch::torch_save(model, con)
-  on.exit({close(con)}, add = TRUE)
-  r <- rawConnectionValue(con)
-  r
-}
 
 model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
 
@@ -584,20 +513,6 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
   }
   tabnet_model_lst$network$load_state_dict(tabnet_state_dict)
   tabnet_model_lst
-}
-
-
-check_net_is_empty_ptr <- function(object) {
-  is_null_external_pointer(object$fit$network$.check$ptr)
-}
-
-# https://stackoverflow.com/a/27350487/3297472
-is_null_external_pointer <- function(pointer) {
-  a <- attributes(pointer)
-  attributes(pointer) <- NULL
-  out <- identical(pointer, methods::new("externalptr"))
-  attributes(pointer) <- a
-  out
 }
 
 #' Check consistency between modeling-task type and class of outcomes vars.
@@ -642,88 +557,6 @@ check_type <- function(outcome_ptype, type = NULL) {
   invisible(type)
 }
 
-
-#' Check that Node object names are compliant
-#'
-#' @param node the Node object, or a dataframe ready to be parsed by `data.tree::as.Node()`
-#'
-#' @return node if it is compliant, else an Error with the column names to fix
-#' @export
-#'
-#' @examplesIf (require("data.tree") || require("dplyr"))
-#' library(dplyr)
-#' library(data.tree)
-#' data(starwars)
-#' starwars_tree <- starwars %>%
-#'   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/"))
-#'
-#' # pre as.Node() check
-#' try(check_compliant_node(starwars_tree))
-#'
-#' # post as.Node() check
-#' check_compliant_node(as.Node(starwars_tree))
-#'
-check_compliant_node <- function(node) {
-  #  prevent reserved data.tree Node colnames and the level_1 ... level_n names used for coercion
-  if (inherits(node, "Node")) {
-    # Node has already lost its reserved colnames
-    reserved_names <- paste0("level_", c(1:node$height))
-    actual_names <- node$attributesAll
-  } else if (inherits(node, "data.frame") && "pathString" %in% colnames(node)) {
-    node_height <- max(stringr::str_count(node$pathString, "/"))
-    reserved_names <- c(paste0("level_", c(1:node_height)), data.tree::NODE_RESERVED_NAMES_CONST)
-    actual_names <- colnames(node)[!colnames(node) %in% "pathString"]
-  } else {
-    stop("The provided hierarchical object is not recognized with a valid format that can be checked", call. = FALSE)
-  }
-
-  if (any(actual_names %in% reserved_names)) {
-    stop(domain=NA,
-         gettextf("The attributes or colnames in the provided hierarchical object use the following reserved names : '%s'. Please change those names as they will lead to unexpected tabnet behavior.",
-          paste(actual_names[actual_names %in% reserved_names], collapse = "', '")
-         ),
-         call. = FALSE)
-  }
-
-  invisible(node)
-}
-
-#' Turn a Node object into predictor and outcome.
-#'
-#' @param x Node object
-#' @param drop_last_level TRUE unused
-#'
-#' @return a named list of x and y, being respectively the predictor data-frame and the outcomes data-frame,
-#'   as expected inputs for `hardhat::mold()` function.
-#' @export
-#'
-#' @examplesIf (require("data.tree") || require("dplyr"))
-#' library(dplyr)
-#' library(data.tree)
-#' data(starwars)
-#' starwars_tree <- starwars %>%
-#'   mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/")) %>%
-#'   as.Node()
-#' node_to_df(starwars_tree)$x %>% head()
-#' node_to_df(starwars_tree)$y %>% head()
-#' @importFrom dplyr last_col mutate mutate_if select starts_with where
-node_to_df <- function(x, drop_last_level = TRUE) {
-  # TODO get rid of all those import through base R equivalent
-  xy_df <- data.tree::ToDataFrameTypeCol(x, x$attributesAll)
-  x_df <- xy_df %>%
-    select(-starts_with("level_")) %>%
-    mutate_if(is.character, as.factor)
-  y_df <- xy_df %>%
-    select(starts_with("level_")) %>%
-    # drop first (and all zero-variance) column
-    select(where(~ nlevels(as.factor(.x)) > 1 )) %>%
-    # TODO take the drop_last_level param into account
-    # drop last level column
-    select(-last_col()) %>%
-    # TODO impute "NA" with parent through coalesce() via an option
-    mutate_if(is.character, as.factor)
-  return(list(x = x_df, y = y_df))
-}
 
 reload_model <- function(object) {
   con <- rawConnection(object)
@@ -784,4 +617,3 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
   }
 
 }
-
