@@ -126,19 +126,12 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   network$to(device = device)
 
-  # define optimizer
-  if (rlang::is_function(config$optimizer)) {
-
+  # instanciate optimizer
+  if (is_optim_generator(config$optimizer)) {
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
+  } else
+    stop("`optimizer` must be resolved into a torch optimizer generator.", call. = FALSE)
 
-  } else if (rlang::is_scalar_character(config$optimizer)) {
-
-    if (config$optimizer == "adam")
-      optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
-    else
-      stop("Currently only the 'adam' optimizer is supported.", call. = FALSE)
-
-  }
 
   # define scheduler
   if (is.null(config$lr_scheduler)) {
