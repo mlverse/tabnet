@@ -222,7 +222,22 @@ tabnet_config <- function(batch_size = 1024^2,
     skip_importance = skip_importance
   )
 }
-# thanks to https://github.com/tdhock/2023-res-baz-az/blob/main/HOCKING-slides-TRUG.R
+#' AUM loss
+#'
+#' Creates a criterion that measures the Area under the $Min(FPR, FNR)$ (AUM) between each
+#' element in the input \eqn{x} and target \eqn{y}. 
+#' 
+#' This is used for measuring the error of a reconstruction in highly unbalanced dataset, 
+#' where the goal is optimizing the ROC curve. Note that the targets \eqn{y} should be factor
+#' level of the binary outcome, i.e. `1L` and `2L`.
+#'
+#' @examples
+#' loss <- nn_aum_loss()
+#' input <- torch::torch_randn(4, 6, requires_grad = TRUE)
+#' target <- input > 1.5
+#' output <- loss(input, target)
+#' output$backward()
+#' @export
 nn_aum_loss <- torch::nn_module(
   "nn_aum_loss",
   inherit = torch::nn_mse_loss,
@@ -230,6 +245,7 @@ nn_aum_loss <- torch::nn_module(
     super$initialize()
   },
   forward = function(pred_tensor, label_tensor){
+    # thanks to https://github.com/tdhock/2023-res-baz-az/blob/main/HOCKING-slides-TRUG.R
     is_positive = label_tensor == 2L
     is_negative = is_positive$bitwise_not()
     # manage case when prediction error is null
