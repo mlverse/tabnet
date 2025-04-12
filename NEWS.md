@@ -1,3 +1,10 @@
+# tabnet development version
+
+## New features
+
+* add `nn_aum_loss()` function for area under the $Min(FPR,FNR)$ optimization for cases of 
+  unbalanced binary classification (#xxx)
+
 # tabnet 0.7.0
 
 ## Bugfixes

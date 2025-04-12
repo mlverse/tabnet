@@ -1,3 +1,4 @@
+# as per https://github.com/mlverse/torch/blob/main/tests/testthat/helper-tensor.R
 Sys.setenv(KMP_DUPLICATE_LIB_OK = TRUE)
 # torch_zeros(1, names="hello") # trigger warning about named tensors
 
