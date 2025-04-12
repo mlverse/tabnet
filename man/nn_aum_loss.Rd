@@ -7,13 +7,13 @@
 nn_aum_loss()
 }
 \description{
-Creates a criterion that measures the Area under the $Min(FPR, FNR)$ (AUM) between each
+Creates a criterion that measures the Area under the \eqn{Min(FPR, FNR)} (AUM) between each
 element in the input \eqn{x} and target \eqn{y}.
 }
 \details{
-This is used for measuring the error of a reconstruction in highly unbalanced dataset,
+This is used for measuring the error of a binary reconstruction within highly unbalanced dataset,
 where the goal is optimizing the ROC curve. Note that the targets \eqn{y} should be factor
-level of the binary outcome, i.e. \code{1L} and \code{2L}.
+level of the binary outcome, i.e. with values \code{1L} and \code{2L}.
 }
 \examples{
 loss <- nn_aum_loss()
