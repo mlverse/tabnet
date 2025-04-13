@@ -1,9 +1,12 @@
 merge_config_and_dots <- function(config, ...) {
   default_config <- tabnet_config()
   new_config <- do.call(tabnet_config, list(...))
+  # TODO currently we cannot not compare two nn_optimizer nor nn_loss values 
   new_config <- new_config[
     mapply(
-      function(x, y) ifelse(is_null_or_optim_generator(x), !is_null_or_optim_generator(y), x != y),
+      function(x, y) ifelse(is_null_or_optim_generator_or_loss(x), 
+                            !is_null_or_optim_generator_or_loss(y), # TRUE 
+                            ifelse(is_optim_generator_or_loss(y), TRUE, x != y)), # FALSE 
       default_config,
       new_config)
   ]
@@ -11,6 +14,12 @@ merge_config_and_dots <- function(config, ...) {
   merged_config$optimizer <- resolve_optimizer(merged_config$optimizer)
   merged_config
 }
+# 
+# is_different_param <- function(x, y) {
+#   if (rlang::inherits_any(x, c("nn_loss", "nn_optim_generatorclass"))) {
+#     
+#   }
+# }
 
 check_net_is_empty_ptr <- function(object) {
   is_null_external_pointer(object$fit$network$.check$ptr)
@@ -157,6 +166,11 @@ resolve_optimizer <- function(optimizer) {
 is_optim_generator <- function(x) {
   inherits(x, "torch_optimizer_generator")
 }
-is_null_or_optim_generator <- function(x) {
-  is.null(x) || is_optim_generator(x)
+
+is_null_or_optim_generator_or_loss <- function(x) {
+  is.null(x) || is_optim_generator(x) || inherits(x, "nn_loss")
+}
+
+is_optim_generator_or_loss <- function(x) {
+  is_optim_generator(x) || inherits(x, "nn_loss")
 }

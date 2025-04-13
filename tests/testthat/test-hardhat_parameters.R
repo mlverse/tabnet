@@ -5,6 +5,67 @@ test_that("errors when using an argument that do not exist", {
     "unused argument"
   )
 
+  expect_error(
+    fit <- tabnet_fit(x, y, config = tabnet_config(epochsas = 1)),
+    "unused argument"
+  )
+
+})
+
+test_that("merging parameters from config and dots works", {
+  
+  # we can merge non-atomic values on different variables (no comparison)
+  expect_no_error(
+    merged_conf <- tabnet:::merge_config_and_dots(
+      config = tabnet_config(optimizer = torch::optim_adamw),
+      loss = torch::nn_bce_loss)
+  )
+  expect_identical_modules(merged_conf$optimizer, torch::optim_adamw)
+  expect_identical_modules(merged_conf$loss, torch::nn_bce_loss)
+  
+  # we can merge non-atomic values on different variables while resolving optimizer
+  expect_no_error(
+    merged_conf <- tabnet:::merge_config_and_dots(
+      config = tabnet_config(optimizer = "adam"),
+      loss = torch::nn_bce_loss)
+  )
+  if(tabnet:::torch_has_optim_ignite()) {
+    expect_identical_modules(merged_conf$optimizer, torch::optim_ignite_adam)
+  } else {
+    expect_identical_modules(merged_conf$optimizer, torch::optim_adam)
+  }
+  expect_identical_modules(merged_conf$loss, torch::nn_bce_loss)
+  
+  # ... value wins over tabnet_config() value
+  expect_no_error(
+    merged_conf <- tabnet:::merge_config_and_dots(
+      config = tabnet_config(batch_size = 200),
+      batch_size = 400)
+  )
+  expect_identical(merged_conf$batch_size, 400)
+  
+  # ... value wins over tabnet_config() value for non-atomic parameter
+  expect_no_error(
+    merged_conf <- tabnet:::merge_config_and_dots(
+      config = tabnet_config(loss = torch::nn_cross_entropy_loss),
+      loss = torch::nn_bce_loss)
+  )
+  expect_identical_modules(merged_conf$loss, torch::nn_bce_loss)
+  
+  # NULL value get replaced and optimizer is resolved even lately
+  expect_no_error(
+    merged_conf <- tabnet:::merge_config_and_dots(
+      config = tabnet_config(loss = NULL, device = "cuda"),
+      loss = torch::nn_bce_loss, optimizer = "adam")
+  )
+  if(tabnet:::torch_has_optim_ignite()) {
+    expect_identical_modules(merged_conf$optimizer, torch::optim_ignite_adam)
+  } else {
+    expect_identical_modules(merged_conf$optimizer, torch::optim_adam)
+  }
+  expect_identical_modules(merged_conf$loss, torch::nn_bce_loss)
+
+  
 })
 
 test_that("pretrain and fit both work with early stopping", {
