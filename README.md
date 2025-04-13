@@ -32,10 +32,12 @@ outcomes.
 
 ## Installation
 
-You can install the released version from CRAN with:
+Tabnet is temporarily archived on CRAN. We are working hard to get it
+back. In the meantime, you can install the released version from
+r-universe with:
 
 ``` r
-install.packages("tabnet")
+install.packages('tabnet', repos = c('https://mlverse.r-universe.dev', 'https://cloud.r-project.org'))
 ```
 
 The development version can be installed from
