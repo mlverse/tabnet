@@ -2,15 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-06 23:45+0200\n"
-"PO-Revision-Date: 2024-09-29 08:25+0200\n"
+"POT-Creation-Date: 2025-04-13 10:35+0200\n"
+"PO-Revision-Date: 2025-04-13 10:43+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 
 #: dials.R:3
 msgid "Package \"dials\" needed for this function to work. Please install it."
@@ -27,6 +27,8 @@ msgstr ""
 #: dials.R:149
 msgid "{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet."
 msgstr ""
+"On ne peut pas utiliser {.var cat_emb_dim} comme paramêtre de {.fun tune}"
+"pour l'instant."
 
 #: explain.R:48
 #, c-format
@@ -38,37 +40,38 @@ msgstr "`tabnet_explain()` n’est pas défini pour un '%s'."
 msgid "`tabnet_fit()` is not defined for a '%s'."
 msgstr "`tabnet_fit()` n’est pas défini pour un '%s'."
 
-#: hardhat.R:122 hardhat.R:145 hardhat.R:174
+#: hardhat.R:122 hardhat.R:136 hardhat.R:156
 #, c-format
 msgid "Configured `weights` variables will not be used as predictors"
 msgstr ""
-"Les variables `weights` configurées ne seront pas utilisés comme prédicteurs."
+"Les variables configurées comme `weights` ne seront pas utilisés comme "
+"prédicteurs."
 
-#: hardhat.R:317
+#: hardhat.R:281
 #, c-format
 msgid "`tabnet_pretrain()` is not defined for a '%s'."
 msgstr "`tabnet_pretrain()` n’est pas défini pour un '%s'."
 
-#: hardhat.R:425
+#: hardhat.R:361
 #, c-format
 msgid "'%s' is not recognised as a proper TabNet model"
 msgstr "'%s' n’est pas reconnu comme un modèle TabNet correct"
 
-#: hardhat.R:432
+#: hardhat.R:368
 #, c-format
 msgid "The model was trained for less than '%s' epochs"
 msgstr "Le modèle a été entrainé sur moins de '%s' époques"
 
-#: hardhat.R:444
+#: hardhat.R:380
 #, c-format
 msgid "Found missing values in the `%s` outcome column."
 msgstr "Il y a des valeurs manquantes dans la colonne de résultats `%s`."
 
-#: hardhat.R:454 hardhat.R:569
+#: hardhat.R:390 hardhat.R:498
 msgid "Model dimensions don't match."
 msgstr "Les dimensions ne correspondent pas entre les modèles."
 
-#: hardhat.R:479
+#: hardhat.R:415
 #, c-format
 msgid ""
 "No model serialized weight can be found in `%s`, check the model history"
@@ -76,7 +79,7 @@ msgstr ""
 "Il n’y a pas de points sérialisés de modèle dans `%s`, veuillez vérifier "
 "l’historique du modèle"
 
-#: hardhat.R:487
+#: hardhat.R:423
 msgid ""
 "`tabnet_pretrain()` from a model is not currently supported.\n"
 "The pretraining here will start with a network initialization"
@@ -85,51 +88,32 @@ msgstr ""
 "pour l'instant.\n"
 "Le pré-entraînement va commencer par une initialisation du réseau."
 
-#: hardhat.R:524
+#: hardhat.R:460
 #, c-format
 msgid "The model was trained for less than `%s` epochs"
 msgstr "Le modèle a été entrainé sur moins de '%s' époques"
 
-#: hardhat.R:621
+#: hardhat.R:536
 #, c-format
 msgid "Mixed multi-outcome type '%s' is not supported"
 msgstr "Le type '%s' n’est pas supporté pour des modèles multi-résultat"
 
-#: hardhat.R:629
+#: hardhat.R:544
 #, c-format
 msgid "Unknown outcome type '%s'"
 msgstr "Le type `%s` est inconnu pour une colonne de résultat"
 
-#: hardhat.R:636
+#: hardhat.R:551
 #, c-format
 msgid "Outcome is factor and the prediction type is '%s'."
 msgstr ""
 "La colonne de résultats est catégorielle et la prédiction est de type '%s'."
 
-#: hardhat.R:639
+#: hardhat.R:554
 #, c-format
 msgid "Outcome is numeric and the prediction type is '%s'."
 msgstr ""
 "La colonne de résultats est numérique et la prédiction est de type '%s'."
-
-#: hardhat.R:677
-msgid ""
-"The provided hierarchical object is not recognized with a valid format that "
-"can be checked"
-msgstr ""
-"L’objet hiérarchique fournit n’est pas reconnu dans un format valide qui "
-"peut être vérifié"
-
-#: hardhat.R:682
-#, c-format
-msgid ""
-"The attributes or colnames in the provided hierarchical object use the "
-"following reserved names : '%s'. Please change those names as they will lead "
-"to unexpected tabnet behavior."
-msgstr ""
-"Les attributs ou noms de colonnes dans l’objet hiérarchique fournit utilise "
-"les noms réservés suivants : ‘%s’. Veuillez changer ces noms  pour éviter un "
-"comportement imprévisible de TabNet."
 
 #: model.R:251
 #, c-format
@@ -145,33 +129,34 @@ msgid ""
 msgstr ""
 "%s n’est pas une métrique valide d’arrêt anticipé avec `valid_split = %s`"
 
-#: model.R:522 pretraining.R:139
-msgid "Currently only the 'adam' optimizer is supported."
-msgstr "Seule la fonction d’optimisation ‘adam’ est supportée pour l’instant."
+#: model.R:517 pretraining.R:133
+msgid "`optimizer` must be resolved into a torch optimizer generator."
+msgstr ""
+"`optimizer` doit pouvoir être résolu en un objet `torch_optimizer_generator`."
 
-#: model.R:536 pretraining.R:153
+#: model.R:530 pretraining.R:146
 msgid ""
 "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
 msgstr ""
 "Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
 "l’instant."
 
-#: model.R:583 pretraining.R:200
+#: model.R:577 pretraining.R:193
 #, c-format
 msgid "[Epoch %03d] Loss: %3f"
 msgstr ""
 
-#: model.R:585 pretraining.R:202
+#: model.R:579 pretraining.R:195
 #, c-format
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:601 pretraining.R:217
+#: model.R:595 pretraining.R:210
 #, c-format
 msgid "Early stopping at epoch %03d"
 msgstr "Arrêt anticipé à l’époque %03d"
 
-#: model.R:628
+#: model.R:622
 #, c-format
 msgid ""
 "Computing importances for a dataset with size %s. This can consume too much "
@@ -194,7 +179,7 @@ msgstr ""
 msgid "parsnip"
 msgstr ""
 
-#: pretraining.R:243
+#: pretraining.R:236
 #, c-format
 msgid ""
 "Computing importances for a dataset with size %s. This can consume too much "
@@ -217,3 +202,28 @@ msgstr "’n_shared’ et ’n_independant’ ne peuvent pas être nuls simultan
 #: tab-network.R:493
 msgid "Please choose either 'sparsemax' or 'entmax' as 'mask_type'"
 msgstr "Vous devez choisir ‘sparsemax’ ou ‘entmax’ pour  ‘mask_type’"
+
+#: utils.R:68
+msgid ""
+"The provided hierarchical object is not recognized with a valid format that "
+"can be checked"
+msgstr ""
+"L’objet hiérarchique fournit n’est pas reconnu dans un format valide qui "
+"peut être vérifié"
+
+#: utils.R:73
+#, c-format
+msgid ""
+"The attributes or colnames in the provided hierarchical object use the "
+"following reserved names : '%s'. Please change those names as they will lead "
+"to unexpected tabnet behavior."
+msgstr ""
+"Les attributs ou noms de colonnes dans l’objet hiérarchique fournit utilise "
+"les noms réservés suivants : ‘%s’. Veuillez changer ces noms  pour éviter un "
+"comportement imprévisible de TabNet."
+
+#: utils.R:156 utils.R:159
+#, fuzzy
+#| msgid "Currently only the 'adam' optimizer is supported."
+msgid "Currently only 'adam' is supported as character for 'optimizer'."
+msgstr "Seule la fonction d’optimisation ‘adam’ est supportée pour l’instant."
