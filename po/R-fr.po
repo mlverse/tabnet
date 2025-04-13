@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.4.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-29 08:20+0200\n"
+"POT-Creation-Date: 2025-04-06 23:45+0200\n"
 "PO-Revision-Date: 2024-09-29 08:25+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Le package \"cli\" doit être installé pour cette fonction. Merci de "
 "l'installer."
 
-#: dials.R:143
+#: dials.R:149
 msgid "{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet."
 msgstr ""
 
@@ -131,47 +131,47 @@ msgstr ""
 "les noms réservés suivants : ‘%s’. Veuillez changer ces noms  pour éviter un "
 "comportement imprévisible de TabNet."
 
-#: model.R:242
+#: model.R:251
 #, c-format
 msgid "`%s` is not a valid loss for outcome of type %s"
 msgstr ""
 "`%s` n’est pas une fonction objectif valide pour les colonnes de résultat de "
 "type %s"
 
-#: model.R:253
+#: model.R:262
 #, c-format
 msgid ""
 "%s is not a valid early-stopping metric to monitor with `valid_split` = %s"
 msgstr ""
 "%s n’est pas une métrique valide d’arrêt anticipé avec `valid_split = %s`"
 
-#: model.R:513 pretraining.R:139
+#: model.R:522 pretraining.R:139
 msgid "Currently only the 'adam' optimizer is supported."
 msgstr "Seule la fonction d’optimisation ‘adam’ est supportée pour l’instant."
 
-#: model.R:527 pretraining.R:153
+#: model.R:536 pretraining.R:153
 msgid ""
 "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
 msgstr ""
 "Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
 "l’instant."
 
-#: model.R:574 pretraining.R:200
+#: model.R:583 pretraining.R:200
 #, c-format
 msgid "[Epoch %03d] Loss: %3f"
 msgstr ""
 
-#: model.R:576 pretraining.R:202
+#: model.R:585 pretraining.R:202
 #, c-format
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:592 pretraining.R:217
+#: model.R:601 pretraining.R:217
 #, c-format
 msgid "Early stopping at epoch %03d"
 msgstr "Arrêt anticipé à l’époque %03d"
 
-#: model.R:619
+#: model.R:628
 #, c-format
 msgid ""
 "Computing importances for a dataset with size %s. This can consume too much "
