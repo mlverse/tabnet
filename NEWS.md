@@ -1,3 +1,14 @@
+# tabnet development version
+
+## New features
+
+* tabnet is now using the `torch_ignite_adam` when available. 
+  Result is 30% faster pretraining and fitting tasks.
+
+## Bugfixes
+
+* fix config parameter merging issues when parameter is a torch loss or torch optimizer generator.
+
 # tabnet 0.7.0
 
 ## Bugfixes
