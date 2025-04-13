@@ -1,4 +1,4 @@
-# tabnet development version
+# tabnet (development version)
 
 ## New features
 
