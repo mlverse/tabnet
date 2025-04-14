@@ -167,6 +167,10 @@ is_optim_generator <- function(x) {
   inherits(x, "torch_optimizer_generator")
 }
 
+is_loss_generator <- function(x) {
+  rlang::inherits_all(x, c("nn_loss", "nn_module_generator"))
+}
+
 is_null_or_optim_generator_or_loss <- function(x) {
   is.null(x) || is_optim_generator(x) || inherits(x, "nn_loss")
 }

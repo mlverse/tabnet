@@ -33,8 +33,10 @@ outcomes.
 ## Installation
 
 Tabnet is temporarily archived on CRAN. We are working hard to get it
-back. In the meantime, you can install the released version from
-r-universe with:
+back.
+
+In the meantime, you can install the released version from r-universe
+with:
 
 ``` r
 install.packages('tabnet', repos = c('https://mlverse.r-universe.dev', 'https://cloud.r-project.org'))
@@ -154,6 +156,9 @@ will gives you the complete correct workflow step-by-step.
 you don’t have to remove the entries in your dataset with some missing
 values in the predictors variables.
 
+See
+[`vignette("Missing_data_predictors")`](articles/Missing_data_predictors.html)
+
 # Comparison with other implementations
 
 | Group | Feature | {tabnet} | dreamquark-ai | fast-tabnet |
@@ -167,6 +172,7 @@ values in the predictors variables.
 |  | workflow | ✅ |  |  |
 | ML Tasks | self-supervised learning | ✅ | ✅ |  |
 |  | classification (binary, multi-class) | ✅ | ✅ | ✅ |
+|  | unbalanced binary classification | ✅ |  |  |
 |  | regression | ✅ | ✅ | ✅ |
 |  | multi-outcome | ✅ | ✅ |  |
 |  | hierarchical multi-label classif. | ✅ |  |  |

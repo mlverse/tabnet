@@ -21,16 +21,15 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
-An R implementation of: [TabNet: Attentive Interpretable Tabular Learning](https://arxiv.org/abs/1908.07442) [(Sercan O. Arik, Tomas Pfister)]( 	
-https://doi.org/10.48550/arXiv.1908.07442).   
-The code in this repository is an R port using the [torch](https://github.com/mlverse/torch) package of [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet) PyTorch's implementation.  
-TabNet is augmented with [Coherent Hierarchical Multi-label Classification Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf) [(Eleonora Giunchiglia et Al.)]( 	https://doi.org/10.48550/arXiv.2010.10151) for hierarchical outcomes.
+An R implementation of: [TabNet: Attentive Interpretable Tabular Learning](https://arxiv.org/abs/1908.07442) [(Sercan O. Arik, Tomas Pfister)](https://doi.org/10.48550/arXiv.1908.07442).\
+The code in this repository is an R port using the [torch](https://github.com/mlverse/torch) package of [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet) PyTorch's implementation.\
+TabNet is augmented with [Coherent Hierarchical Multi-label Classification Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf) [(Eleonora Giunchiglia et Al.)](https://doi.org/10.48550/arXiv.2010.10151) for hierarchical outcomes.
 
 ## Installation
 
-Tabnet is temporarily archived on CRAN. We are working hard to get it back.
-In the meantime, you can install the released version from r-universe with:
+Tabnet is temporarily archived on CRAN. We are working hard to get it back.  
 
+In the meantime, you can install the released version from r-universe with:
 ``` r
 install.packages('tabnet', repos = c('https://mlverse.r-universe.dev', 'https://cloud.r-project.org'))
 ```
@@ -113,28 +112,31 @@ The example here is a toy example as the `train` dataset does actually contain o
 
 {tabnet} leverage the masking mechanism to deal with missing data, so you don't have to remove the entries in your dataset with some missing values in the predictors variables.
 
+See [`vignette("Missing_data_predictors")`](articles/Missing_data_predictors.html)
+
 # Comparison with other implementations
 
-| Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
-|-------------|---------------------|:--------:|:-------------:|:----------:|
-| Input format     | data-frame                            |         ✅         |      ✅       |     ✅      |
-|                  | formula                              |         ✅         |               |             |
-|                  | recipe                               |         ✅         |               |             |
-|                  | Node                                 |         ✅         |               |             |
-|                  | missings in predictor                |         ✅         |               |             |
-| Output format    | data-frame                            |         ✅         |      ✅       |     ✅      |
-|                  | workflow                             |         ✅         |               |             |
-| ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
-|                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
-|                  | regression                           |         ✅         |      ✅       |     ✅      |
-|                  | multi-outcome                        |         ✅         |      ✅       |             |
-|                  | hierarchical multi-label classif.    |         ✅         |               |             |
-| Model management | from / to file                       |         ✅         |      ✅       |      v      |
-|                  | resume from snapshot                 |         ✅         |               |             |
-|                  | training diagnostic                  |         ✅         |               |             |
-| Interpretability |                                      |         ✅         |      ✅       |     ✅      |
-| Performance      |                                      |        1 x         |    2 - 4 x    |             |
-| Code quality     | test coverage                        |        85%         |               |             |
-|                  | continuous integration               | 4 OS including GPU |               |             |
+| Group | Feature | {tabnet} | dreamquark-ai | fast-tabnet |
+|--------------|-----------------|:------------:|:------------:|:------------:|
+| Input format | data-frame | ✅ | ✅ | ✅ |
+|  | formula | ✅ |  |  |
+|  | recipe | ✅ |  |  |
+|  | Node | ✅ |  |  |
+|  | missings in predictor | ✅ |  |  |
+| Output format | data-frame | ✅ | ✅ | ✅ |
+|  | workflow | ✅ |  |  |
+| ML Tasks | self-supervised learning | ✅ | ✅ |  |
+|  | classification (binary, multi-class) | ✅ | ✅ | ✅ |
+|  | unbalanced binary classification | ✅ |  |  |
+|  | regression | ✅ | ✅ | ✅ |
+|  | multi-outcome | ✅ | ✅ |  |
+|  | hierarchical multi-label classif. | ✅ |  |  |
+| Model management | from / to file | ✅ | ✅ | v |
+|  | resume from snapshot | ✅ |  |  |
+|  | training diagnostic | ✅ |  |  |
+| Interpretability |  | ✅ | ✅ | ✅ |
+| Performance |  | 1 x | 2 - 4 x |  |
+| Code quality | test coverage | 85% |  |  |
+|  | continuous integration | 4 OS including GPU |  |  |
 
 : Alternative TabNet implementation features

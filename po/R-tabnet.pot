@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: tabnet 0.7.0\n"
-"POT-Creation-Date: 2025-04-13 10:35+0200\n"
+"Project-Id-Version: tabnet 0.7.0.9000\n"
+"POT-Creation-Date: 2025-04-13 19:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,42 +98,42 @@ msgstr ""
 msgid "Outcome is numeric and the prediction type is '%s'."
 msgstr ""
 
-#: model.R:251
+#: model.R:313
 #, c-format
 msgid "`%s` is not a valid loss for outcome of type %s"
 msgstr ""
 
-#: model.R:262
+#: model.R:324
 #, c-format
 msgid ""
 "%s is not a valid early-stopping metric to monitor with `valid_split` = %s"
 msgstr ""
 
-#: model.R:517 pretraining.R:133
+#: model.R:579 pretraining.R:144
 msgid "`optimizer` must be resolved into a torch optimizer generator."
 msgstr ""
 
-#: model.R:530 pretraining.R:146
+#: model.R:592 pretraining.R:157
 msgid ""
 "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
 msgstr ""
 
-#: model.R:577 pretraining.R:193
+#: model.R:639 pretraining.R:204
 #, c-format
 msgid "[Epoch %03d] Loss: %3f"
 msgstr ""
 
-#: model.R:579 pretraining.R:195
+#: model.R:641 pretraining.R:206
 #, c-format
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:595 pretraining.R:210
+#: model.R:657 pretraining.R:221
 #, c-format
 msgid "Early stopping at epoch %03d"
 msgstr ""
 
-#: model.R:622
+#: model.R:684
 #, c-format
 msgid ""
 "Computing importances for a dataset with size %s. This can consume too much "
@@ -150,7 +150,7 @@ msgstr ""
 msgid "parsnip"
 msgstr ""
 
-#: pretraining.R:236
+#: pretraining.R:247
 #, c-format
 msgid ""
 "Computing importances for a dataset with size %s. This can consume too much "

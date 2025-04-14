@@ -246,19 +246,19 @@ nn_aum_loss <- torch::nn_module(
   },
   forward = function(pred_tensor, label_tensor){
     # thanks to https://github.com/tdhock/2023-res-baz-az/blob/main/HOCKING-slides-TRUG.R
-    is_positive = label_tensor == 2L
+    is_positive = label_tensor == label_tensor$max()
     is_negative = is_positive$bitwise_not()
-    # manage case when prediction error is null
+    # manage case when prediction error is null (prevent division by 0)
     if(as.logical(torch::torch_sum(is_positive) == 0) || as.logical(torch::torch_sum(is_negative) == 0)){
       return(torch::torch_sum(pred_tensor*0))
     }
     # nominal case
     fn_diff = torch::torch_where(is_positive, -1, 0)
     fp_diff = torch::torch_where(is_positive, 0, 1)
-    thresh_tensor = -pred_tensor$flatten()
-    sorted_indices = torch::torch_argsort(thresh_tensor)
+    thresh_tensor = -pred_tensor[,1] # pred tensor is [prediction, class_probability]. wee keep only prediction
     fp_denom = torch::torch_sum(is_negative) #or 1 for AUM based on count instead of rate
     fn_denom = torch::torch_sum(is_positive) #or 1 for AUM based on count instead of rate
+    sorted_indices = torch::torch_argsort(thresh_tensor)
     sorted_fp_cum = fp_diff[sorted_indices]$cumsum(dim=1)/fp_denom
     sorted_fn_cum = -fn_diff[sorted_indices]$flip(1)$cumsum(dim=1)$flip(1)/fn_denom
     sorted_thresh = thresh_tensor[sorted_indices]
@@ -271,16 +271,15 @@ nn_aum_loss <- torch::nn_module(
     FPR = torch::torch_cat(c(torch::torch_tensor(0.0), uniq_fp_after))
     FNR = torch::torch_cat(c(uniq_fn_before, torch::torch_tensor(0.0)))
     roc = list(
-      FPR=FPR,
-      FNR=FNR,
-      TPR=1 - FNR,
+      FPR = FPR,
+      FNR = FNR,
+      TPR = 1 - FNR,
       "min(FPR,FNR)"=torch::torch_minimum(FPR, FNR),
       min_constant=torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
       max_constant=torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf))))
     min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
     constant_diff = roc$min_constant[2:N]$diff()
     torch::torch_sum(min_FPR_FNR * constant_diff)
-    
     
   }
 )
@@ -302,7 +301,9 @@ max_constraint_output <- function(output, labels, ancestor) {
 resolve_loss <- function(config, dtype) {
   loss <- config$loss
 
-  if (is.function(loss))
+  if (is_loss_generator(loss))
+    loss_fn <- loss()
+  else if (is.function(loss))
     loss_fn <- loss
   else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
     loss_fn <- torch::nn_mse_loss()
