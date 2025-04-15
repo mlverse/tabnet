@@ -48,6 +48,7 @@ reusage
 sparsemax
 subprocesses
 th
+tibble
 tidymodels
 tunable
 zeallot

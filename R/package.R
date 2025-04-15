@@ -7,7 +7,7 @@
   vctrs::s3_register("ggplot2::autoplot", "tabnet_explain")
   vctrs::s3_register("torch::nn_prune_head", "tabnet_fit")
   vctrs::s3_register("torch::nn_prune_head", "tabnet_pretrain")
-  vctrs::s3_register("generics::min_grid", "tabnet")
+  vctrs::s3_register("tune::min_grid", "tabnet")
 }
 
 

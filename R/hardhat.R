@@ -760,7 +760,8 @@ print.tabnet_pretrain <- print.tabnet_fit
 #' ames_pretrain <- tabnet_pretrain(x, y, epoch = 2, checkpoint_epochs = 1)
 #' # prune classification head to get an embedding model
 #' pruned_pretrain <- torch::nn_prune_head(ames_pretrain, 1)
-#'
+#
+#' @importFrom torch nn_prune_head
 #' @export
 nn_prune_head.tabnet_fit <- function(x, head_size) {
   if (check_net_is_empty_ptr(x)) {
@@ -769,17 +770,18 @@ nn_prune_head.tabnet_fit <- function(x, head_size) {
     net <- x$fit$network
   }
   # here we assemble nn_prune_head(x, 1) with nn_prune_head(x$tabnet, 1)
-  x <- torch::nn_prune_head(net, 1)
-  x$add_module(name= "tabnet", module=torch::nn_prune_head(net$tabnet,head_size=head_size))
+  x <- nn_prune_head(net, 1)
+  x$add_module(name= "tabnet", module=nn_prune_head(net$tabnet,head_size=head_size))
 
 }
+#' @importFrom torch nn_prune_head
 #' @rdname nn_prune_head
 #' @export
 nn_prune_head.tabnet_pretrain <- function(x, head_size) {
   if (check_net_is_empty_ptr(x)) {
-    torch::nn_prune_head(reload_model(x$serialized_net), head_size=head_size)
+    nn_prune_head(reload_model(x$serialized_net), head_size=head_size)
   } else {
-    torch::nn_prune_head(x$fit$network, head_size=head_size)
+    nn_prune_head(x$fit$network, head_size=head_size)
   }
 
 }

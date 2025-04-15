@@ -573,8 +573,38 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
   )
 }
 
+#' Determine the minimum set of model fits
+#'
+#' `min_grid()` determines exactly what models should be fit in order to
+#'  evaluate the entire set of tuning parameter combinations. This is for
+#'  internal use only and the API may change in the near future.
+#'
+#' `fit_max_value()` can be used in other packages to implement a `min_grid()`
+#' method.
+#' @param x A model specification.
+#' @param grid A tibble with tuning parameter combinations.
+#' @param ... Not currently used.
+#' @return A tibble with the minimum tuning parameters to fit and an additional
+#' list column with the parameter combinations used for prediction.
+#' @keywords internal
+#' @examples
+#' library(dials)
+#' library(tune)
+#' library(parsnip)
+#'
+#' tabnet_spec <- tabnet(decision_width = tune(), attention_width = tune()) %>%
+#'   set_mode("regression") %>%
+#'   set_engine("torch")
+#'
+#' tabnet_grid <-
+#'   tabnet_spec %>%
+#'   extract_parameter_set_dials() %>%
+#'   grid_regular(levels = 3)
+#'
+#' min_grid(tabnet_spec, tabnet_grid)
+#' 
+#' @importFrom tune min_grid
 #' @export
-#' @noRd
 min_grid.tabnet <- function(x, grid, ...) tune::fit_max_value(x, grid, ...)
 
 parsnip_is_missing_tabnet <- function(tabnet_env) {

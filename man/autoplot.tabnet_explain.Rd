@@ -4,12 +4,7 @@
 \alias{autoplot.tabnet_explain}
 \title{Plot tabnet_explain mask importance heatmap}
 \usage{
-autoplot.tabnet_explain(
-  object,
-  type = c("mask_agg", "steps"),
-  quantile = 1,
-  ...
-)
+\method{autoplot}{tabnet_explain}(object, type = c("mask_agg", "steps"), quantile = 1, ...)
 }
 \arguments{
 \item{object}{A \code{tabnet_explain} object as a result of \code{\link[=tabnet_explain]{tabnet_explain()}}.}
