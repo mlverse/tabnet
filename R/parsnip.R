@@ -573,7 +573,7 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
   )
 }
 
-#' @exportS3Method generics::min_grid
+#' @export
 #' @noRd
 min_grid.tabnet <- function(x, grid, ...) tune::fit_max_value(x, grid, ...)
 
