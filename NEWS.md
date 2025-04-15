@@ -1,4 +1,6 @@
-# tabnet (development version)
+# tabnet 0.7.1
+
+* Remove long-run example raising a Note.
 
 # tabnet 0.7.0
 

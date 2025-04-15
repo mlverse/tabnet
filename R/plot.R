@@ -9,14 +9,15 @@
 #'  A dot is added on epochs where model snapshot is available, helping
 #'  the choice of `from_epoch` value for later model training resume.
 #'
-#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
+#' @examples
+#'  \dontrun{
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")
-#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition[1:25,], valid_split=0.2, epoch=11)
+#' attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=11)
 #'
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
-#'
+#' }
 #' @importFrom rlang .data
 #'
 autoplot.tabnet_fit <- function(object, ...) {
@@ -70,7 +71,8 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #'  `quantile=.995` may be used for strong outlier clipping, in order to better highlight
 #'  low values. `quantile=1`, the default, do not clip any values.
 #'
-#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
+#' @examples
+#'  \dontrun{
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")
 #'
@@ -82,12 +84,12 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #'
 #' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
 #' data("ames", package = "modeldata")
-#' ids <- sample(nrow(ames), 25)
-#' x <- ames[ids,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
-#' y <- ames[ids, c("Sale_Price", "Pool_Area")]
+#' x <- ames[,-which(names(ames) %in% c("Sale_Price", "Pool_Area"))]
+#' y <- ames[, c("Sale_Price", "Pool_Area")]
 #' ames_fit <- tabnet_fit(x, y, epochs = 1, verbose=TRUE)
 #' ames_explain <- tabnet_explain(ames_fit, x)
 #' autoplot(ames_explain, quantile = 0.99)
+#' }
 autoplot.tabnet_explain <- function(object, type = c("mask_agg", "steps"), quantile = 1, ...) {
   type <- match.arg(type)
 

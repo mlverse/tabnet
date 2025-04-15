@@ -140,36 +140,33 @@ torch::torch_set_num_interop_threads(1)
 }
 
 \examples{
-\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-
+\dontrun{
 data("ames", package = "modeldata")
 data("attrition", package = "modeldata")
-ids <- sample(nrow(attrition), 25)
 
 ## Single-outcome regression using formula specification
-fit <- tabnet_fit(Sale_Price ~ ., data = ames[ids,], epochs = 1)
+fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 4)
 
 ## Single-outcome classification using data-frame specification
 attrition_x <- attrition[ids,-which(names(attrition) == "Attrition")]
-fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
+fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 4, verbose = TRUE)
 
 ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
-ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames[ids,], epochs = 2, valid_split = 0.2)
+ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames, epochs = 4, valid_split = 0.2)
 
 ## Multi-label classification on `Attrition` and `JobSatisfaction` in
 ## `attrition` dataset using recipe
 library(recipes)
-rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition[ids,]) \%>\%
+rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition) \%>\%
   step_normalize(all_numeric(), -all_outcomes())
 
-attrition_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
+attrition_fit <- tabnet_fit(rec, data = attrition, epochs = 4, valid_split = 0.2)
 
 ## Hierarchical classification on  `acme`
 data(acme, package = "data.tree")
 
-acme_fit <- tabnet_fit(acme, epochs = 2, verbose = TRUE)
+acme_fit <- tabnet_fit(acme, epochs = 4, verbose = TRUE)
 
-# Note: Dataset's number of rows and model's number of epochs should be increased
-# for publication-level results.
-\dontshow{\}) # examplesIf}
+# Note: Model's number of epochs should be increased for publication-level results.
+}
 }
