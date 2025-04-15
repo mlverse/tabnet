@@ -139,10 +139,10 @@ use the defaults.</p>
 <p>And finally, fit the model:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_rs</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">fit_resamples</span><span class="op">(</span><span class="va">folds</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">fit_resamples</a></span><span class="op">(</span><span class="va">folds</span><span class="op">)</span></span></code></pre></div>
 <p>After a few minutes we can get the results:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">collect_metrics</span><span class="op">(</span><span class="va">fit_rs</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://tune.tidymodels.org/reference/collect_predictions.html" class="external-link">collect_metrics</a></span><span class="op">(</span><span class="va">fit_rs</span><span class="op">)</span></span></code></pre></div>
 <pre><code># A tibble: 2 x 5
   .metric  .estimator  mean     n  std_err
   &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
