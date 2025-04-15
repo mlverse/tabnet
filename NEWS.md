@@ -1,11 +1,8 @@
-# tabnet 0.7.1
-
-* Remove long-run example raising a Note.
-
 # tabnet 0.7.0
 
 ## Bugfixes
 
+* Remove long-run example raising a Note.
 * fix `tabet_pretrain` failing with `value_error("Can't convert data of class: 'NULL'")` in R 4.5
 * fix `tabet_pretrain` wrongly used instead of `tabnet_fit` in Missing data predictor vignette
 * improve message related to case_weights not being used as predictors.
