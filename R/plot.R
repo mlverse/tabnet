@@ -9,7 +9,7 @@
 #'  A dot is added on epochs where model snapshot is available, helping
 #'  the choice of `from_epoch` value for later model training resume.
 #'
-#' @examples
+#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
 #'  \dontrun{
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")
@@ -17,7 +17,7 @@
 #'
 #' # Plot the model loss over epochs
 #' autoplot(attrition_fit)
-#' }
+#'}
 #' @importFrom rlang .data
 #'
 autoplot.tabnet_fit <- function(object, ...) {
@@ -71,7 +71,7 @@ autoplot.tabnet_pretrain <- autoplot.tabnet_fit
 #'  `quantile=.995` may be used for strong outlier clipping, in order to better highlight
 #'  low values. `quantile=1`, the default, do not clip any values.
 #'
-#' @examples
+#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
 #'  \dontrun{
 #' library(ggplot2)
 #' data("attrition", package = "modeldata")

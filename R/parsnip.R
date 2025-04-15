@@ -573,6 +573,8 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
   )
 }
 
+#' @exportS3Method generics::min_grid
+#' @noRd
 min_grid.tabnet <- function(x, grid, ...) tune::fit_max_value(x, grid, ...)
 
 parsnip_is_missing_tabnet <- function(tabnet_env) {

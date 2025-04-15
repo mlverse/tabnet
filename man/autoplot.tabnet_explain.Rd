@@ -4,12 +4,7 @@
 \alias{autoplot.tabnet_explain}
 \title{Plot tabnet_explain mask importance heatmap}
 \usage{
-autoplot.tabnet_explain(
-  object,
-  type = c("mask_agg", "steps"),
-  quantile = 1,
-  ...
-)
+\method{autoplot}{tabnet_explain}(object, type = c("mask_agg", "steps"), quantile = 1, ...)
 }
 \arguments{
 \item{object}{A \code{tabnet_explain} object as a result of \code{\link[=tabnet_explain]{tabnet_explain()}}.}
@@ -37,6 +32,7 @@ Plot the \code{tabnet_explain} object mask importance per variable along the pre
 low values. \code{quantile=1}, the default, do not clip any values.
 }
 \examples{
+\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
  \dontrun{
 library(ggplot2)
 data("attrition", package = "modeldata")
@@ -55,4 +51,5 @@ ames_fit <- tabnet_fit(x, y, epochs = 1, verbose=TRUE)
 ames_explain <- tabnet_explain(ames_fit, x)
 autoplot(ames_explain, quantile = 0.99)
 }
+\dontshow{\}) # examplesIf}
 }

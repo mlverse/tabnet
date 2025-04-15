@@ -140,6 +140,7 @@ torch::torch_set_num_interop_threads(1)
 }
 
 \examples{
+\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 \dontrun{
 data("ames", package = "modeldata")
 data("attrition", package = "modeldata")
@@ -169,4 +170,5 @@ acme_fit <- tabnet_fit(acme, epochs = 4, verbose = TRUE)
 
 # Note: Model's number of epochs should be increased for publication-level results.
 }
+\dontshow{\}) # examplesIf}
 }

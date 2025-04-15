@@ -68,7 +68,7 @@
 #' torch::torch_set_num_interop_threads(1)
 #' ```
 #'
-#' @examples
+#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
 #' \dontrun{
 #' data("ames", package = "modeldata")
 #' data("attrition", package = "modeldata")
