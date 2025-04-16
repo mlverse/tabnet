@@ -22,13 +22,13 @@ Prune \code{head_size} last layers of a tabnet network in order to
 use the pruned module as a sequential embedding module.
 }
 \examples{
-\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((torch::torch_is_installed())) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 data("ames", package = "modeldata")
 x <- ames[,-which(names(ames) == "Sale_Price")]
 y <- ames$Sale_Price
 # pretrain a tabnet model on ames dataset
 ames_pretrain <- tabnet_pretrain(x, y, epoch = 2, checkpoint_epochs = 1)
 # prune classification head to get an embedding model
-pruned_pretrain <- nn_prune_head(ames_pretrain, 1)
+pruned_pretrain <- torch::nn_prune_head(ames_pretrain, 1)
 \dontshow{\}) # examplesIf}
 }
