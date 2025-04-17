@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tabnet</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0.9000</span>
       </span>
     </div>
 
@@ -92,7 +92,7 @@
       <h1 data-toc-skip>Self-supervised training and fine-tuning</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/v0.7.0/vignettes/selfsupervised_training.Rmd" class="external-link"><code>vignettes/selfsupervised_training.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/main/vignettes/selfsupervised_training.Rmd" class="external-link"><code>vignettes/selfsupervised_training.Rmd</code></a></small>
       <div class="hidden name"><code>selfsupervised_training.Rmd</code></div>
 
     </div>
@@ -147,10 +147,11 @@ training.</p>
 <div class="section level2">
 <h2 id="self-supervised-training-step">Self-supervised training step<a class="anchor" aria-label="anchor" href="#self-supervised-training-step"></a>
 </h2>
-<p>Next, we pre-train our model with a <a href="https://paperswithcode.com/task/self-supervised-learning" class="external-link">self-supervised
-learning</a> task. This step will gives us a
+<p>Next, we pre-train our model with a <a href="https://en.wikipedia.org/wiki/Self-supervised_learning#Autoassociative_self-supervised_learning" class="external-link">autoassociative
+self-supervised learning</a> task. This step will gives us a
 <code>tabnet_pretrain</code> object that will contain a representation
-of the dataset variables and their interactions.<br>
+of the dataset variables and their interactions in its latent
+space.<br>
 We are going to train for 50 epochs with a batch size of 5000 i.e. half
 of the dataset because it is small enough to fit into memory. There are
 other hyperparameters available, but we are going to use the default
