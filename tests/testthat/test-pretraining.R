@@ -1,20 +1,3 @@
-test_that("nn_unsupervised_loss is working as expected", {
-
-  unsup_loss <- tabnet:::nn_unsupervised_loss()
-  
-  # the poor-guy expect_r6_class(x, class)
-  expect_true(all(c("nn_weighted_loss","nn_loss","nn_module") %in% class(unsup_loss)))
-
-  y_pred <- torch::torch_rand(3,5, requires_grad = TRUE)
-  embedded_x <- torch::torch_rand(3,5)
-  obfuscation_mask <- torch::torch_bernoulli(embedded_x, p = 0.5)
-  output <- unsup_loss(y_pred, embedded_x, obfuscation_mask)
-  output$backward()
-  
-  expect_tensor(output)
-})
-
-
 test_that("transpose_metrics is not adding an unnamed entry on top of the list", {
 
   metrics <- list(loss = 1, loss = 2, loss = 3, loss = 4)

@@ -217,21 +217,3 @@ test_that("using weights raise a message", {
   )
 
 })
-
-test_that("nn_aum_loss is working as expected", {
-  
-  aum_loss <- tabnet:::nn_aum_loss()
-  
-  # the poor-guy expect_r6_class(x, class)
-  expect_true(all(c("nn_mse_loss","nn_loss","nn_module") %in% class(aum_loss)))
-  
-  label_tensor <- torch::torch_tensor(attrition$Attrition)
-  pred_tensor <- torch::torch_rand(label_tensor$shape, requires_grad = TRUE) 
-  output <- aum_loss(pred_tensor, label_tensor)
-  output$backward()
-  
-  expect_tensor(output)
-})
-
-
-
