@@ -5,9 +5,9 @@
 \alias{nn_prune_head.tabnet_pretrain}
 \title{Prune top layer(s) of a tabnet network}
 \usage{
-nn_prune_head.tabnet_fit(x, head_size)
+\method{nn_prune_head}{tabnet_fit}(x, head_size)
 
-nn_prune_head.tabnet_pretrain(x, head_size)
+\method{nn_prune_head}{tabnet_pretrain}(x, head_size)
 }
 \arguments{
 \item{x}{nn_network to prune}
@@ -22,7 +22,7 @@ Prune \code{head_size} last layers of a tabnet network in order to
 use the pruned module as a sequential embedding module.
 }
 \examples{
-\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((torch::torch_is_installed())) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 data("ames", package = "modeldata")
 x <- ames[,-which(names(ames) == "Sale_Price")]
 y <- ames$Sale_Price

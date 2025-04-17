@@ -68,37 +68,36 @@
 #' torch::torch_set_num_interop_threads(1)
 #' ```
 #'
-#' @examplesIf torch::torch_is_installed()
-#'
+#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
+#' \dontrun{
 #' data("ames", package = "modeldata")
 #' data("attrition", package = "modeldata")
-#' ids <- sample(nrow(attrition), 25)
 #'
 #' ## Single-outcome regression using formula specification
-#' fit <- tabnet_fit(Sale_Price ~ ., data = ames[ids,], epochs = 1)
+#' fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 4)
 #'
 #' ## Single-outcome classification using data-frame specification
 #' attrition_x <- attrition[ids,-which(names(attrition) == "Attrition")]
-#' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 1, verbose = TRUE)
+#' fit <- tabnet_fit(attrition_x, attrition$Attrition, epochs = 4, verbose = TRUE)
 #'
 #' ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset using formula,
-#' ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames[ids,], epochs = 2, valid_split = 0.2)
+#' ames_fit <- tabnet_fit(Sale_Price + Pool_Area ~ ., data = ames, epochs = 4, valid_split = 0.2)
 #'
 #' ## Multi-label classification on `Attrition` and `JobSatisfaction` in
 #' ## `attrition` dataset using recipe
 #' library(recipes)
-#' rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition[ids,]) %>%
+#' rec <- recipe(Attrition + JobSatisfaction ~ ., data = attrition) %>%
 #'   step_normalize(all_numeric(), -all_outcomes())
 #'
-#' attrition_fit <- tabnet_fit(rec, data = attrition[ids,], epochs = 2, valid_split = 0.2)
+#' attrition_fit <- tabnet_fit(rec, data = attrition, epochs = 4, valid_split = 0.2)
 #'
 #' ## Hierarchical classification on  `acme`
 #' data(acme, package = "data.tree")
 #'
-#' acme_fit <- tabnet_fit(acme, epochs = 2, verbose = TRUE)
+#' acme_fit <- tabnet_fit(acme, epochs = 4, verbose = TRUE)
 #'
-#' # Note: Dataset's number of rows and model's number of epochs should be increased
-#' # for publication-level results.
+#' # Note: Model's number of epochs should be increased for publication-level results.
+#' }
 #' @return A TabNet model object. It can be used for serialization, predictions, or further fitting.
 #'
 #' @export
@@ -586,7 +585,7 @@ print.tabnet_pretrain <- print.tabnet_fit
 #'
 #' @return a tabnet network with the top nn_layer removed
 #' @rdname nn_prune_head
-#' @examplesIf (torch::torch_is_installed() && require("modeldata"))
+#' @examplesIf (torch::torch_is_installed())
 #' data("ames", package = "modeldata")
 #' x <- ames[,-which(names(ames) == "Sale_Price")]
 #' y <- ames$Sale_Price
@@ -594,7 +593,8 @@ print.tabnet_pretrain <- print.tabnet_fit
 #' ames_pretrain <- tabnet_pretrain(x, y, epoch = 2, checkpoint_epochs = 1)
 #' # prune classification head to get an embedding model
 #' pruned_pretrain <- torch::nn_prune_head(ames_pretrain, 1)
-#'
+#
+#' @importFrom torch nn_prune_head
 #' @export
 nn_prune_head.tabnet_fit <- function(x, head_size) {
   if (check_net_is_empty_ptr(x)) {
@@ -603,17 +603,18 @@ nn_prune_head.tabnet_fit <- function(x, head_size) {
     net <- x$fit$network
   }
   # here we assemble nn_prune_head(x, 1) with nn_prune_head(x$tabnet, 1)
-  x <- torch::nn_prune_head(net, 1)
-  x$add_module(name= "tabnet", module=torch::nn_prune_head(net$tabnet,head_size=head_size))
+  x <- nn_prune_head(net, 1)
+  x$add_module(name= "tabnet", module=nn_prune_head(net$tabnet,head_size=head_size))
 
 }
+#' @importFrom torch nn_prune_head
 #' @rdname nn_prune_head
 #' @export
 nn_prune_head.tabnet_pretrain <- function(x, head_size) {
   if (check_net_is_empty_ptr(x)) {
-    torch::nn_prune_head(reload_model(x$serialized_net), head_size=head_size)
+    nn_prune_head(reload_model(x$serialized_net), head_size=head_size)
   } else {
-    torch::nn_prune_head(x$fit$network, head_size=head_size)
+    nn_prune_head(x$fit$network, head_size=head_size)
   }
 
 }
