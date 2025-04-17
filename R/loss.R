@@ -50,43 +50,57 @@ nn_aum_loss <- torch::nn_module(
   inherit = torch::nn_mse_loss,
   initialize = function(){
     super$initialize()
+    self$roc_aum <- tibble::tibble()
   },
   forward = function(pred_tensor, label_tensor){
-    # thanks to https://github.com/tdhock/2023-res-baz-az/blob/main/HOCKING-slides-TRUG.R
-    is_positive = label_tensor == label_tensor$max()
-    is_negative = is_positive$bitwise_not()
+    # thanks to https://tdhock.github.io/blog/2024/auto-grad-overhead/
+    is_positive <- label_tensor == label_tensor$max()
+    is_negative <- is_positive$bitwise_not()
     # manage case when prediction error is null (prevent division by 0)
     if(as.logical(torch::torch_sum(is_positive) == 0) || as.logical(torch::torch_sum(is_negative) == 0)){
       return(torch::torch_sum(pred_tensor*0))
     }
+
+    # pred tensor may be [prediction, class_probability]. wee keep only prediction
+    if (pred_tensor$ndim > label_tensor$ndim) {
+      thresh_tensor <- -pred_tensor[,1,]$squeeze(2) 
+    } else {
+      thresh_tensor <- -pred_tensor
+    }
+    
     # nominal case
-    fn_diff = torch::torch_where(is_positive, -1, 0)
-    fp_diff = torch::torch_where(is_positive, 0, 1)
-    thresh_tensor = -pred_tensor[,1] # pred tensor is [prediction, class_probability]. wee keep only prediction
-    fp_denom = torch::torch_sum(is_negative) #or 1 for AUM based on count instead of rate
-    fn_denom = torch::torch_sum(is_positive) #or 1 for AUM based on count instead of rate
-    sorted_indices = torch::torch_argsort(thresh_tensor)
-    sorted_fp_cum = fp_diff[sorted_indices]$cumsum(dim=1)/fp_denom
-    sorted_fn_cum = -fn_diff[sorted_indices]$flip(1)$cumsum(dim=1)$flip(1)/fn_denom
-    sorted_thresh = thresh_tensor[sorted_indices]
-    sorted_is_diff = sorted_thresh$diff() != 0
-    sorted_fp_end = torch::torch_cat(c(sorted_is_diff, torch::torch_tensor(TRUE)))
-    sorted_fn_end = torch::torch_cat(c(torch::torch_tensor(TRUE), sorted_is_diff))
-    uniq_thresh = sorted_thresh[sorted_fp_end]
-    uniq_fp_after = sorted_fp_cum[sorted_fp_end]
-    uniq_fn_before = sorted_fn_cum[sorted_fn_end]
-    FPR = torch::torch_cat(c(torch::torch_tensor(0.0), uniq_fp_after))
-    FNR = torch::torch_cat(c(uniq_fn_before, torch::torch_tensor(0.0)))
-    roc = list(
-      FPR = FPR,
-      FNR = FNR,
-      TPR = 1 - FNR,
-      "min(FPR,FNR)"=torch::torch_minimum(FPR, FNR),
-      min_constant=torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
-      max_constant=torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf))))
-    min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
-    constant_diff = roc$min_constant[2:N]$diff()
-    torch::torch_sum(min_FPR_FNR * constant_diff)
+    fn_diff <- -1L * is_positive
+    fp_diff <- is_negative$to(dtype = torch::torch_long())
+    fp_denom <- torch::torch_sum(is_negative) # or 1 for AUM based on count instead of rate
+    fn_denom <- torch::torch_sum(is_positive) # or 1 for AUM based on count instead of rate
+    sorted_indices <- torch::torch_argsort(thresh_tensor, dim = 1)$squeeze(-1)
+    
+    sorted_fp_cum <- fp_diff[sorted_indices]$cumsum(dim = 1) / fp_denom
+    sorted_fn_cum <- -fn_diff[sorted_indices]$flip(1)$cumsum(dim = 1)$flip(1) / fn_denom
+    sorted_thresh <- thresh_tensor[sorted_indices]
+    sorted_is_diff <- sorted_thresh$diff(dim = 1) != 0
+    # pad removed last element
+    padding <- torch::torch_ones_like(sorted_is_diff$slice(dim = 1, 1,2))$to(dtype = torch::torch_bool()) # torch_tensor 1 [BoolType{1,1,1,...}]
+    sorted_fp_end <- torch::torch_cat(c(sorted_is_diff, padding))
+    sorted_fn_end <- torch::torch_cat(c(padding, sorted_is_diff))
+    uniq_thresh <- sorted_thresh[sorted_fp_end]
+    uniq_fp_after <- sorted_fp_cum[sorted_fp_end]
+    uniq_fn_before <- sorted_fn_cum[sorted_fn_end]
+    if (pred_tensor$ndim == 1) {
+      FPR <- torch::torch_cat(c(padding$logical_not(), uniq_fp_after)) # FPR with trailing 0
+      FNR <-  torch::torch_cat(c(uniq_fn_before, padding$logical_not())) # FNR with leading 0
+      self$roc_aum <- list(
+        FPR = FPR,
+        FNR = FNR,
+        TPR = 1 - FNR,
+        "min(FPR,FNR)" = torch::torch_minimum(FNR, FPR), # full-range min(FNR, FPR)
+        constant_range_low = torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
+        constant_range_high = torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf)))
+      ) |> purrr::map_dfc(torch::as_array)
+    }
+    min_FPR_FNR <- torch::torch_minimum(uniq_fp_after[1:-2], uniq_fn_before[2:N])
+    constant_range <- uniq_thresh$diff() # range splits leading to {FPR, FNR } errors (see roc_aum row)
+    torch::torch_sum(min_FPR_FNR * constant_range)
     
   }
 )
