@@ -5,7 +5,8 @@
 * tabnet is now using the `torch_ignite_adam` when available. 
   Result is 30% faster pretraining and fitting tasks.
 * add `nn_aum_loss()` function for area under the $Min(FPR,FNR)$ optimization for cases of 
-  unbalanced binary classification (#xxx).
+  unbalanced binary classification (#178).
+* add a vignette on imbalanced binary classification with `nn_aum_loss()` (#178).
 
 ## Bugfixes
 
