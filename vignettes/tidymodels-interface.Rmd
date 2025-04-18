@@ -21,7 +21,7 @@ library(tidymodels)
 library(modeldata)
 ```
 
-In this vignette we show how to create a TabNet model using the tidymodels interface.
+In this vignette, we show how to create a TabNet model using the tidymodels interface.
 
 We are going to use the `lending_club` dataset available
 in the `modeldata` package.
@@ -46,7 +46,7 @@ rec <- recipe(Class ~ ., train) %>%
 Next, we define our model. We are going to train for 50 epochs with a batch size of 128. There are other hyperparameters but, we are going to use the defaults.
 
 ```{r}
-mod <- tabnet(epochs = 50, batch_size = 128) %>%
+mod <- tabnet(epochs = 50) %>%
   set_engine("torch", verbose = TRUE) %>%
   set_mode("classification")
 ```
@@ -68,8 +68,7 @@ folds <- vfold_cv(train, v = 5)
 And finally, fit the model:
 
 ```{r}
-fit_rs <- wf %>%
-  fit_resamples(folds)
+fit_rs <- wf %>% fit_resamples(folds)
 ```
 
 After a few minutes we can get the results:
@@ -79,22 +78,21 @@ collect_metrics(fit_rs)
 ```
 
 ```
-# A tibble: 2 x 5
-  .metric  .estimator  mean     n  std_err
-  <chr>    <chr>      <dbl> <int>    <dbl>
-1 accuracy binary     0.946     5 0.000713
-2 roc_auc  binary     0.732     5 0.00539 
+# A tibble: 3 × 6
+  .metric     .estimator   mean     n  std_err .config             
+  <chr>       <chr>       <dbl> <int>    <dbl> <chr>               
+1 accuracy    binary     0.945      5 0.000869 Preprocessor1_Model1
+2 brier_class binary     0.0535     5 0.00122  Preprocessor1_Model1
+3 roc_auc     binary     0.611      5 0.0153   Preprocessor1_Model1
 ```
 
 And finally, we can verify the results in our test set:
 
 ```{r}
 model <- wf %>% fit(train)
-test %>% 
-  bind_cols(
-    predict(model, test, type = "prob")
-  ) %>% 
-  roc_auc(Class, .pred_bad)
+model %>%
+  augment( test) %>% 
+  roc_auc(Class, .pred_good, event_level = "second")
 ```
 
 ```
