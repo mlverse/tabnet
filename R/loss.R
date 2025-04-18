@@ -63,7 +63,7 @@ nn_aum_loss <- torch::nn_module(
 
     # pred tensor may be [prediction, class_probability]. wee keep only prediction
     if (pred_tensor$ndim > label_tensor$ndim) {
-      thresh_tensor <- -pred_tensor[,1,]$squeeze(2) 
+      thresh_tensor <- -pred_tensor$slice(dim = 2, 1, 2)$squeeze(2) 
     } else {
       thresh_tensor <- -pred_tensor
     }
@@ -79,8 +79,8 @@ nn_aum_loss <- torch::nn_module(
     sorted_fn_cum <- -fn_diff[sorted_indices]$flip(1)$cumsum(dim = 1)$flip(1) / fn_denom
     sorted_thresh <- thresh_tensor[sorted_indices]
     sorted_is_diff <- sorted_thresh$diff(dim = 1) != 0
-    # pad removed last element
-    padding <- torch::torch_ones_like(sorted_is_diff$slice(dim = 1, 1,2))$to(dtype = torch::torch_bool()) # torch_tensor 1 [BoolType{1,1,1,...}]
+    # pad to replace removed last element
+    padding <- sorted_is_diff$slice(dim = 1, 1, 2) # torch_tensor 1 [BoolType{1,...}] on the same device 
     sorted_fp_end <- torch::torch_cat(c(sorted_is_diff, padding))
     sorted_fn_end <- torch::torch_cat(c(padding, sorted_is_diff))
     uniq_thresh <- sorted_thresh[sorted_fp_end]

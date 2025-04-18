@@ -12,6 +12,7 @@ test_that("nn_unsupervised_loss is working as expected", {
   output$backward()
   
   expect_tensor(output)
+  expect_equal_to_r(output >= 0, TRUE) 
   expect_false(rlang::is_null(output$grad_fn))
   expect_equal(output$dim(), 0)
 })
@@ -31,6 +32,7 @@ test_that("nn_aum_loss works as expected with 1-dim label", {
   output$backward()
   
   expect_tensor(output)
+  expect_equal_to_r(output >= 0, TRUE) 
   expect_false(rlang::is_null(output$grad_fn))
   expect_equal(output$dim(), 0)
   
@@ -46,6 +48,7 @@ test_that("nn_aum_loss works as expected with 2-dim label", {
   output$backward()
   
   expect_tensor(output)
+  expect_equal_to_r(output >= 0, TRUE) 
   expect_false(rlang::is_null(output$grad_fn))
   expect_equal(output$dim(), 0)
 })
@@ -61,6 +64,7 @@ test_that("nn_aum_loss works as expected with {n, 2} shape prediction", {
   
   
   expect_tensor(output)
+  expect_equal_to_r(output >= 0, TRUE) 
   expect_false(rlang::is_null(output$grad_fn))
   expect_equal(output$dim(), 0)
   
