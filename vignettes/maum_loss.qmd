@@ -1,0 +1,235 @@
+---
+title: "Using ROC AUM loss for imbalanced binary classification"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using ROC AUM loss for imbalanced binary classification}
+  %\VignetteEngine{quarto::htm}
+  %\VignetteEncoding{UTF-8}
+format: 
+  html:
+    fig-width: 9
+    fig-height: 6
+    fig-cap-location: "top"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = TRUE
+)
+```
+
+```{r setup}
+library(tabnet)
+suppressPackageStartupMessages(library(tidymodels))
+library(modeldata)
+data("ames", package = "modeldata")
+set.seed(20250409)
+```
+
+::: callout-note
+This vignette is a continuation of `vignette("tidymodels-interface")`. So we highly encourage you to start with it to be up to speed with this vignette.
+:::
+
+## Introduction
+
+The previously used `ames` dataset is highly imbalanced, leading to challenging result in the binary classification task. Despite we got fairly good accuracy with default model design, the `roc_auc()` metric was poor, mainly due to this imbalanced problem.
+
+Here, we will see how tabnet features allow improved performance on such family of classification problems.
+
+## How imbalance is my problem ?
+
+The target variable `Bldg_Type` imbalance can be evaluated through the class imbalance Ratio :
+
+```{r}
+class_ratio <- map_dbl(levels(ames$Bldg_Type),  ~ames |> summarize(sum( Bldg_Type == "OneFam") / sum( Bldg_Type == .x)) |> pull())
+
+class_ratio
+```
+
+With a mean class_ratio of 23.9 for the 4 minority classes, the target variable is fairly imbalanced, making multiple minority classes much harder to model.
+
+## Solutions to improve imbalanced classification models
+
+First, usual solution to such problem is over-sampling of the minority classes, and/or down-sampling the majority class in the training data. It is then difficult to maintain the class balance, with difficult stratification scenario. We won't cover this here.
+
+The second solution is case weighting. As {tidymodels} offers the framework to manage such case weighting, we'll first use it to compare two model families - XGBoost and Tabnet - with that feature.
+
+Last, we would like to also **optimize** the model according to the metric we are looking at. As the metric of choice for imbalanced dataset are `roc_auc()` or `roc_pr()`, we definitively want a **loss function** that is a proxy of those. This loss is available in {tabnet} with the `nn_maum_loss()` extrapolated from [Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection (J Hillman, TD Hocking)](https://jmlr.org/papers/v24/21-0751.html).
+
+## Using the AUC metric and `pr_curve()` plots
+
+Measuring the ROC_AUC or AUC_PR can't be separated from plotting the `pr_curve()`.
+
+Let's baseline our models on two different workflows, one for tabnet, the other for XGBoost. This is a big chunk of code, but it is mainly a copy of the previous vignette.
+
+```{r}
+ames <- ames |>
+  mutate(
+    case_wts = case_when(
+      Bldg_Type == "TwoFmCon" ~ class_ratio[[2]],
+      Bldg_Type == "Duplex" ~ class_ratio[[3]],
+      Bldg_Type == "Twnhs" ~ class_ratio[[4]],
+      Bldg_Type == "TwnhsE" ~ class_ratio[[5]],
+      TRUE ~ 1),
+    case_wts = importance_weights(case_wts)
+  )
+
+split <- initial_split(ames, strata = Bldg_Type)
+train <- training(split)
+test  <- testing(split)
+
+tab_rec <- train |>
+  recipe() |>
+  update_role(Bldg_Type, new_role = "outcome") |>
+  update_role(-has_role(c("outcome", "id", "case_weights")), new_role = "predictor")
+
+xgb_rec <- tab_rec |> 
+  step_dummy(MS_SubClass, MS_Zoning, Street, Alley, Lot_Shape, Land_Contour, Utilities, Lot_Config, Land_Slope, Neighborhood, Condition_1, Condition_2, House_Style, Overall_Cond, Roof_Style, Roof_Matl, Exterior_1st, Exterior_2nd, Mas_Vnr_Type, Exter_Cond, Foundation, Bsmt_Cond, Bsmt_Exposure, BsmtFin_Type_1, BsmtFin_Type_2, Heating, Heating_QC, Central_Air, Electrical, Functional, Garage_Type, Garage_Finish, Garage_Cond, Paved_Drive, Pool_QC,        
+Fence, Misc_Feature, Sale_Type, Sale_Condition)
+
+tab_mod <- tabnet(epochs = 100) |> 
+  set_engine("torch", device = "cpu") |> 
+  set_mode("classification")
+
+xgb_mod <- boost_tree(trees = 100) |> 
+  set_engine("xgboost") |> 
+  set_mode("classification")
+
+tab_wf <- workflow() |> 
+  add_model(tab_mod) |> 
+  add_recipe(tab_rec) |> 
+  add_case_weights(case_wts)
+
+xgb_wf <- workflow() |> 
+  add_model(xgb_mod) |> 
+  add_recipe(xgb_rec) |> 
+  add_case_weights(case_wts)
+```
+
+Few details to be noticed
+
+-   we compute and tag as `importance_weight()` a new column `case_wts` in the `ames` dataset.
+
+-   this column is excluded from the recipe() predictors role.
+
+-   we explicitly mention this column roe in each `workflow()` via `add_case_weights()`.
+
+We can now `fit()` each model and plot the precision-recall curve on the test-set :
+
+```{r}
+#| label: "vanilia_models_fitting"
+#| layout-ncol: 2
+#| fig-cap: 
+#|   - "Tabnet, no case-weight, default loss"
+#|   - "XGBoost, no case-weight"
+#| 
+tab_fit <- tab_wf |> fit(train)
+xgb_fit <- xgb_wf |> fit(train)
+
+tab_test <- tab_fit |> augment(test)
+xgb_test <- xgb_fit |> augment(test)
+
+tab_test |> 
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE) |> 
+  autoplot()
+
+xgb_test |>
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE) |>
+  autoplot()
+
+```
+
+XGBoost provides very good results
+
+## Case-weight
+
+Weighting each observation by the importance weight of the class is made available in {tabnet} through
+
+-   marking one variable as importance weight variable via `workflow::add_case_weights()`
+
+-   using the case_weight variable as such at inference time through the `case_weights =` parameter in functions that allows it.
+
+Let's proceed
+
+```{r}
+#| label: "case-weights_prediction"
+#| layout-ncol: 2
+#| fig-cap: 
+#|   - "Tabnet, with case-weight, default loss"
+#|   - "XGBoost, with case-weight"
+#| 
+tab_test |> 
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE, case_weights = case_wts) |> 
+  autoplot() 
+
+xgb_test |>
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE, case_weights = case_wts) |>
+  autoplot() 
+```
+
+
+## ROC_AUM loss
+
+{tabnet} implement the ROC AUM loss that will drive the torch optimizer to the best possible AUC. Let's use it to compare to previous models :
+
+```{r}
+#| label: "AUM_based_model_fit"
+# configure the AUM loss
+tab_aum_mod <- tabnet(epochs = 100, loss = tabnet::nn_maum_loss, learn_rate = 0.02) |> 
+  set_engine("torch", device = "cpu") |> 
+  set_mode("classification")
+
+# derive a workflow
+tab_aum_wf <- workflow() |> 
+  add_model(tab_aum_mod) |> 
+  add_recipe(tab_rec) |> 
+  add_case_weights(case_wts)
+
+# fit and augment the test dataset with prediction
+tab_aum_fit <- tab_aum_wf |> fit(train)
+tab_aum_test <- tab_aum_fit |> augment(test)
+```
+
+Now let's compare the result on the PR curve with the default loss side by side:
+
+```{r}
+#| label: "AUM_model_pr_curve"
+#| layout-ncol: 2
+#| fig-cap: 
+#|   - "Tabnet, no case-weight, default loss"
+#|   - "Tabnet, no case-weight, ROC_AUM loss"
+#|   
+tab_test |> 
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE) |> 
+  autoplot() 
+
+tab_aum_test |> 
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE) |> 
+  autoplot() 
+```
+
+
+## All together
+
+Nothing prevent us to use both features, as they are independent. That is what we do here. Moreover, it is here without additional computation, as it is done post inference.
+
+```{r}
+#| label: "AUM_and_case-weights_prediction"
+#| layout-ncol: 2
+#| fig-cap: 
+#|   - "Tabnet, with case-weight, default loss"
+#|   - "Tabnet, with case-weight, ROC_AUM loss"
+#| 
+tab_test |> 
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE, case_weights = case_wts) |> 
+  autoplot() 
+
+
+tab_aum_test |> 
+  pr_curve(Bldg_Type, .pred_OneFam, .pred_TwoFmCon, .pred_Duplex, .pred_Twnhs, .pred_TwnhsE, case_weights = case_wts) |> 
+  autoplot() 
+```
+
+
