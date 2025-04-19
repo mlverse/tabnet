@@ -40,7 +40,7 @@ jobs:
           use-public-rspm: true
 
       - name: Setup R dependencies
-      - uses: r-lib/actions/setup-r-dependencies@v2
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
