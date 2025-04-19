@@ -16,9 +16,11 @@ where the goal is optimizing the ROC curve. Note that the targets \eqn{label_ten
 level of the binary outcome, i.e. with values \code{1L} and \code{2L}.
 }
 \examples{
+\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 loss <- nn_aum_loss()
 input <- torch::torch_randn(4, 6, requires_grad = TRUE)
 target <- input > 1.5
 output <- loss(input, target)
 output$backward()
+\dontshow{\}) # examplesIf}
 }

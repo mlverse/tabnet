@@ -71,3 +71,24 @@ test_that("nn_aum_loss works as expected with {n, 2} shape prediction", {
 })
 
 
+test_that("nn_maum_loss works as expected with 1-dim label", {
+  
+  maum_loss <- tabnet::nn_maum_loss()
+  
+  # the poor-guy expect_r6_class(x, class)
+  expect_true(all(c("nn_mse_loss","nn_loss","nn_module") %in% class(maum_loss)))
+  
+  # 1-dim label, 2-dim prediction
+  label_tensor <- torch::torch_tensor(ames$Bldg_Type)
+  pred_tensor <- torch::torch_rand(c(label_tensor$shape, nlevels(ames$Bldg_Type)), requires_grad = TRUE) 
+  output <- maum_loss(pred_tensor, label_tensor)
+  output$backward()
+  
+  expect_tensor(output)
+  expect_equal_to_r(output >= 0, TRUE) 
+  expect_false(rlang::is_null(output$grad_fn))
+  expect_equal(output$dim(), 0)
+  
+})
+
+
