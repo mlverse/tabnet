@@ -38,7 +38,7 @@ nn_unsupervised_loss <- torch::nn_module(
 #' where the goal is optimizing the ROC curve. Note that the targets \eqn{label_tensor} should be factor
 #' level of the binary outcome, i.e. with values `1L` and `2L`.
 #'
-#' @examples
+#' @examplesIf torch::torch_is_installed()
 #' loss <- nn_aum_loss()
 #' input <- torch::torch_randn(4, 6, requires_grad = TRUE)
 #' target <- input > 1.5
@@ -60,12 +60,10 @@ nn_aum_loss <- torch::nn_module(
     if(as.logical(torch::torch_sum(is_positive) == 0) || as.logical(torch::torch_sum(is_negative) == 0)){
       return(torch::torch_sum(pred_tensor*0))
     }
-
-    # pred tensor may be [prediction, class_probability]. wee keep only prediction
+    
+    # pred tensor may be [prediction, case_wts] when add_case_weight() is used. We keep only prediction
     if (pred_tensor$ndim > label_tensor$ndim) {
-      thresh_tensor <- -pred_tensor$slice(dim = 2, 1, 2)$squeeze(2) 
-    } else {
-      thresh_tensor <- -pred_tensor
+      pred_tensor <- pred_tensor$slice(dim = 2, 0, 1)$squeeze(2) 
     }
     
     # nominal case
@@ -73,17 +71,17 @@ nn_aum_loss <- torch::nn_module(
     fp_diff <- is_negative$to(dtype = torch::torch_long())
     fp_denom <- torch::torch_sum(is_negative) # or 1 for AUM based on count instead of rate
     fn_denom <- torch::torch_sum(is_positive) # or 1 for AUM based on count instead of rate
-    sorted_indices <- torch::torch_argsort(thresh_tensor, dim = 1)$squeeze(-1)
+    sorted_pred_ids <- torch::torch_argsort(pred_tensor, dim = 1, descending = TRUE)$squeeze(-1)
     
-    sorted_fp_cum <- fp_diff[sorted_indices]$cumsum(dim = 1) / fp_denom
-    sorted_fn_cum <- -fn_diff[sorted_indices]$flip(1)$cumsum(dim = 1)$flip(1) / fn_denom
-    sorted_thresh <- thresh_tensor[sorted_indices]
-    sorted_is_diff <- sorted_thresh$diff(dim = 1) != 0
+    sorted_fp_cum <- fp_diff[sorted_pred_ids]$cumsum(dim = 1) / fp_denom
+    sorted_fn_cum <- -fn_diff[sorted_pred_ids]$flip(1)$cumsum(dim = 1)$flip(1) / fn_denom
+    sorted_thresh_gr <- -pred_tensor[sorted_pred_ids]
+    sorted_dedup <- sorted_thresh_gr$diff(dim = 1) != 0
     # pad to replace removed last element
-    padding <- sorted_is_diff$slice(dim = 1, 1, 2) # torch_tensor 1 [BoolType{1,...}] on the same device 
-    sorted_fp_end <- torch::torch_cat(c(sorted_is_diff, padding))
-    sorted_fn_end <- torch::torch_cat(c(padding, sorted_is_diff))
-    uniq_thresh <- sorted_thresh[sorted_fp_end]
+    padding <- sorted_dedup$slice(dim = 1, 0, 1) # torch_tensor 1 w same dtype, same shape, same device 
+    sorted_fp_end <- torch::torch_cat(c(sorted_dedup, padding))
+    sorted_fn_end <- torch::torch_cat(c(padding, sorted_dedup))
+    uniq_thresh_gr <- sorted_thresh_gr[sorted_fp_end]
     uniq_fp_after <- sorted_fp_cum[sorted_fp_end]
     uniq_fn_before <- sorted_fn_cum[sorted_fn_end]
     if (pred_tensor$ndim == 1) {
@@ -94,13 +92,13 @@ nn_aum_loss <- torch::nn_module(
         FNR = FNR,
         TPR = 1 - FNR,
         "min(FPR,FNR)" = torch::torch_minimum(FNR, FPR), # full-range min(FNR, FPR)
-        constant_range_low = torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
-        constant_range_high = torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf)))
-      ) |> purrr::map_dfc(torch::as_array)
+        constant_range_low = torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh_gr)),
+        constant_range_high = torch::torch_cat(c(uniq_thresh_gr, torch::torch_tensor(Inf)))
+      ) %>% purrr::map_dfc(torch::as_array)
     }
     min_FPR_FNR <- torch::torch_minimum(uniq_fp_after[1:-2], uniq_fn_before[2:N])
-    constant_range <- uniq_thresh$diff() # range splits leading to {FPR, FNR } errors (see roc_aum row)
-    torch::torch_sum(min_FPR_FNR * constant_range)
+    constant_range_gr <- uniq_thresh_gr$diff() # range splits leading to {FPR, FNR } errors (see roc_aum row)
+    torch::torch_sum(min_FPR_FNR * constant_range_gr, dim = 1)
     
   }
 )
