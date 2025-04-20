@@ -1,5 +1,7 @@
 # tabnet (development version)
 
+* add optimal threshold and support size to `entmax()` and `sparsemax()`
+
 # tabnet 0.7.0
 
 ## Bugfixes
