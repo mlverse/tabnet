@@ -24,7 +24,7 @@
 #'
 #' @param input The input tensor to compute thresholds over.
 #' @param dim The dimension along which to apply sparsemax.
-#' @param k The number of largest elements to partial-sort over. For optimal
+#' @param k The n largest elements to partial-sort input over. For optimal
 #' performance, should be slightly bigger than the expected number of
 #' nonzeros in the solution. If the solution is more than k-sparse,
 #' this function is recursively called with a2*k schedule. If `NULL`, full
@@ -38,13 +38,14 @@
 #'
 #' @examples
 #' # example usage
-#' input <- torch::torch.randn(10,5)
+#' input <- torch::torch_randn(10,5)
 #' dim <-1
 #' k <-3
 #' result <- .sparsemax_threshold_and_support(input, dim, k)
 #' print(result)
 #' @noRd
-.sparsemax_threshold_and_support <- function(ctx, input, dim = -1L, k = NULL) {
+.sparsemax_threshold_and_support <- function(input, dim = -1L, k = NULL) {
+  tau_ <- ss_ <- NULL # avoid NOTE
   if (is.null(k) || k >= input$size(dim)) { # do full sort
     topk <- input$sort(dim = dim, descending = TRUE)[[1]]
   } else {
@@ -59,22 +60,23 @@
   tau <- topk_cumsum$gather(dim, support_size)
   tau <- tau / support_size$to(dtype = input$dtype)
   
-  if (!is.null(k) & k < dim(input)[dim]) {
+  if (!is.null(k) && k < input$size(dim)) {
     unsolved <- (support_size == k)$squeeze(dim)
     
-    if (unsolved$sum() > 0) {
-      in_ <- .roll_last(input, dim)[unsolved]
-      c(tau_, ss_) %<-% .sparsemax_threshold_and_support(in_, dim = -1L, k = 2 * k)
-      .roll_last(tau, dim)[unsolved] <- tau_
-      .roll_last(support_size, dim)[unsolved] <- ss_
+    if (as.numeric(unsolved$sum()) > 0) {
+      input_ <- .roll_last(input, dim)[unsolved]
+      c(tau_, ss_) %<-% .sparsemax_threshold_and_support(input_, dim = -1L, k = 2 * k)
+      tau_rl <- .roll_last(tau, dim)
+      tau_rl[unsolved] <- tau_
+      tau <- .roll_last(tau_rl, dim)
+      support_size_rl <- .roll_last(support_size, dim)
+      support_size_rl[unsolved] <- ss_
+      support_size <- .roll_last(support_size_rl, dim)
+      
     }
   }
   
-  ctx$save_for_backward(supp_size = support_size, dim = dim)
-  list(
-    tau,
-    support_size
-  )
+  list(tau, support_size)
 }
 
 
@@ -93,7 +95,7 @@ sparsemax_function <- torch::autograd_function(
     grad_input <- grad_output$clone()
     grad_input[output == 0] <- 0
 
-    v_hat <- grad_input$sum(dim=dim) / supp_size$to(dtype = output$dtype)$squeeze(dim)
+    v_hat <- grad_input$sum(dim = dim) / supp_size$to(dtype = output$dtype)$squeeze(dim)
     v_hat <- v_hat$unsqueeze(dim)
     grad_input <- torch::torch_where(output != 0, grad_input - v_hat, grad_input)
 
@@ -119,7 +121,7 @@ sparsemax <- torch::nn_module(
 #'
 #' @param input The input tensor to compute thresholds over.
 #' @param dim The dimension along which to apply 1.5-entmax.
-#' @param k The number of largest elements to partial-sort over. For optimal
+#' @param k The n largest elements to partial-sort input over. For optimal
 #'   performance, should be slightly bigger than the expected number of
 #'   nonzeros in the solution. If the solution is more than k-sparse,
 #'   this function is recursively called with a 2*k schedule. If `NULL`, full
@@ -133,13 +135,14 @@ sparsemax <- torch::nn_module(
 #'
 #' @examples
 #' # example usage
-#' input <- torch::torch.randn(10, 5)
+#' input <- torch::torch_randn(10, 5)
 #' dim <- 1
 #' k <- 3
 #' result <- .entmax_threshold_and_support(input, dim, k)
 #' print(result)
 #' @noRd
-.entmax_threshold_and_support <- function(input, dim, k = NULL) {
+.entmax_threshold_and_support <- function(input, dim = -1L, k = NULL) {
+  tau_ <- ss_ <- NULL # avoid NOTE
   if (is.null(k) || k >= input$size(dim)) { # do full sort
     sorted_input <- input$sort(dim = dim, descending = TRUE)[[1]]
   } else {
@@ -161,21 +164,22 @@ sparsemax <- torch::nn_module(
   support_size <- (tau <= sorted_input)$sum(dim)$unsqueeze(dim)
   tau_star <- tau$gather(dim, support_size)
   
-  if (!is.null(k) && k < dim(input)[dim]) {
+  if (!is.null(k) && k < input$size(dim)) {
     unsolved <- (support_size == k)$squeeze(dim)
     
-    if (unsolved$sum() > 0) {
-      X_ <- .roll_last(input, dim)[unsolved]
-      c(tau_, ss_ ) %<-% .entmax_threshold_and_support(X_, dim = -1L, k = 2 * k)
-      tau_star[unsolved] <- tau_
-      support_size[unsolved] <- ss_
+    if (as.numeric(unsolved$sum()) > 0) {
+      input_ <- .roll_last(input, dim)[unsolved]
+      c(tau_, ss_ ) %<-% .entmax_threshold_and_support(input_, dim = -1L, k = 2 * k)
+      tau_star_rl <- .roll_last(tau_star, dim)
+      tau_star_rl[unsolved] <- tau_
+      tau_star <- .roll_last(tau_star_rl, dim)
+      support_size_rl <- .roll_last(support_size, dim)
+      support_size_rl[unsolved] <- ss_
+      support_size <- .roll_last(support_size_rl, dim)
     }
   }
   
-  list(
-    tau_star,
-    support_size
-  )
+  list( tau_star, support_size)
 }
 
 
@@ -237,7 +241,7 @@ entmax <- torch::nn_module(
 #' @export
 get_tau <- function(input, dim = -1L, k = NULL) {
   tau_ <- ss_ <- NULL # avoid note 
-  if (is.null(k) || k >= input$dim()[dim]) { # do full sort
+  if (is.null(k) || k >= input$size(dim)) { # do full sort
     sorted_input <- input$sort(dim = dim, descending = TRUE)[[1]]
   } else {
     sorted_input <- input$topk(k = k, dim = dim)[[1]]
@@ -261,7 +265,7 @@ get_tau <- function(input, dim = -1L, k = NULL) {
   if (!is.null(k) && k < input$size(dim)) {
     unsolved <- (support_size == k)$squeeze(dim)
     
-    if (unsolved$sum() > 0) {
+    if (as.numeric(unsolved$sum()) > 0) {
       input_ <- .roll_last(input, dim)[unsolved]
       c(tau_, ss_) %<-% .entmax_threshold_and_support(input_, dim = -1L, k = 2 * k)
       tau_star[unsolved] <- tau_
