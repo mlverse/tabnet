@@ -16,6 +16,7 @@ tabnet_config(
   num_steps = 3,
   feature_reusage = 1.3,
   mask_type = "sparsemax",
+  mask_topk = NULL,
   virtual_batch_size = 256^2,
   valid_split = 0,
   learn_rate = 0.02,
@@ -77,6 +78,8 @@ Values range from 1 to 2.}
 
 \item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
 block, either \code{"sparsemax"}, \code{"entmax"} or \code{"entmax15"}.Defaults to \code{"sparsemax"}.}
+
+\item{mask_topk}{(int) mask sparcity top-k for \code{sparsemax} and \code{entmax15.} See \code{\link[=entmax15]{entmax15()}} for detail.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)}

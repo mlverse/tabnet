@@ -19,7 +19,8 @@ tabnet_nn(
   epsilon = 1e-15,
   virtual_batch_size = 128,
   momentum = 0.02,
-  mask_type = "sparsemax"
+  mask_type = "sparsemax",
+  mask_topk = NULL
 )
 }
 \arguments{
@@ -55,6 +56,9 @@ specific size.}
 \item{momentum}{Numerical value between 0 and 1 which will be used for momentum in all batch norm.}
 
 \item{mask_type}{Either "sparsemax", "entmax" or "entmax15": the sparse masking function to use.}
+
+\item{mask_topk}{the mask top-k value for k-sparcity selection in the mask for \code{sparsemax} and \code{entmax15}.
+defaults to 1/4 of last \code{input_dim} if \code{NULL}. See \link{entmax15} for details.}
 }
 \description{
 This is a \code{nn_module} representing the TabNet architecture from

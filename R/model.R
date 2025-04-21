@@ -78,6 +78,7 @@ resolve_data <- function(x, y) {
 #'   Values range from 1 to 2.
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
 #'   block, either `"sparsemax"`, `"entmax"` or `"entmax15"`.Defaults to `"sparsemax"`.
+#' @param mask_topk (int) mask sparcity top-k for `sparsemax` and `entmax15.` See [entmax15()] for detail.
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=256^2)
 #' @param learn_rate initial learning rate for the optimizer.
@@ -151,6 +152,7 @@ tabnet_config <- function(batch_size = 1024^2,
                           num_steps = 3,
                           feature_reusage = 1.3,
                           mask_type = "sparsemax",
+                          mask_topk = NULL,
                           virtual_batch_size = 256^2,
                           valid_split = 0,
                           learn_rate = 2e-2,
@@ -196,6 +198,7 @@ tabnet_config <- function(batch_size = 1024^2,
     n_steps = num_steps,
     gamma = feature_reusage,
     mask_type = mask_type,
+    mask_topk = mask_topk,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
     learn_rate = learn_rate,
