@@ -59,7 +59,7 @@ the paper n_d = n_a is usually a good choice. (default=8)}
 (usually between 3 and 10)}
 
 \item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
-block, either \code{"sparsemax"} or \code{"entmax"}.Defaults to \code{"sparsemax"}.}
+block, either \code{"sparsemax"}, \code{"entmax"} or \code{"entmax15"}.Defaults to \code{"sparsemax"}.}
 
 \item{num_independent}{Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.}

@@ -27,7 +27,7 @@
 #' @param k The n largest elements to partial-sort input over. For optimal
 #' performance, should be slightly bigger than the expected number of
 #' nonzeros in the solution. If the solution is more than k-sparse,
-#' this function is recursively called with a2*k schedule. If `NULL`, full
+#' this function is recursively called with a 2*k schedule. If `NULL`, full
 #' sorting is performed from the beginning.
 #'
 #' @return A list containing:
@@ -107,13 +107,40 @@ sparsemax_function <- torch::autograd_function(
   }
 )
 
+#' Sparsemax 
+#' 
+#' Normalizing sparse transform (a la softmax).
+#'
+#' Solves the projection:
+#' 
+#' \eqn{\min_P ||input - P||_2 \text{ s.t. } P \geq0, \sum(P) ==1}
+#'
+#'
+#' @param input The input tensor.
+#' @param dim The dimension along which to apply sparsemax.
+#' @param k The number of largest elements to partial-sort input over. For optimal
+#' performance, `k` should be slightly bigger than the expected number of
+#' nonzeros in the solution. If the solution is more than k-sparse,
+#' this function is recursively called with a 2*k schedule. If `NULL`, full
+#' sorting is performed from the beginning.
+#'
+#' @return The projection result, such that \eqn{P$sum(dim=dim) ==1} elementwise.
+#'
+#' @examples
+#' # example usage
+#' X <- torch::torch.randn(10,5)
+#' dim <-1
+#' k <-3
+#' result <- sparsemax(X, dim, k)
+#' print(result)
 sparsemax <- torch::nn_module(
   "sparsemax",
-  initialize = function(dim = -1L) {
+  initialize = function(dim = -1L, k=NULL) {
     self$dim <- dim
+    self$k <- k
   },
   forward = function(input) {
-    sparsemax_function(input, self$dim)
+    sparsemax_function(input, self$dim, self$k)
   }
 )
 
@@ -122,7 +149,7 @@ sparsemax <- torch::nn_module(
 #' @param input The input tensor to compute thresholds over.
 #' @param dim The dimension along which to apply 1.5-entmax.
 #' @param k The n largest elements to partial-sort input over. For optimal
-#'   performance, should be slightly bigger than the expected number of
+#'   performance, `k` should be slightly bigger than the expected number of
 #'   nonzeros in the solution. If the solution is more than k-sparse,
 #'   this function is recursively called with a 2*k schedule. If `NULL`, full
 #'   sorting is performed from the beginning.
@@ -194,13 +221,13 @@ entmax_function <- torch::autograd_function(
     ctx$save_for_backward(supp_size = tau_supp[[2]], output = output, dim = dim)
     output
   },
-  backward = function(ctx, grad_output) {
 
+  backward = function(ctx, grad_output) {
     # supp_size, output = ctx$saved_variables
     saved <- ctx$saved_variables
     dim <- saved$dim
-    Y <- saved$output
-    gppr <- Y$sqrt()
+    output <- saved$output
+    gppr <- output$sqrt()
     dX <- grad_output * gppr
     q <- dX$sum(dim) / gppr$sum(dim)
     q <- q$unsqueeze(dim)
@@ -223,6 +250,77 @@ entmax <- torch::nn_module(
       self$dim <- input$dim()
     }
     entmax_function(input, self$dim)
+  }
+)
+
+entmax_15_function <- torch::autograd_function(
+  forward = function(ctx, input, dim = 1L, k = NULL) {
+    max_val <- input$max(dim = dim, keepdim = TRUE)[[1]]
+    input$sub_(max_val) # same numerical stability trick as for softmax
+    input <- input / 2
+
+    tau_star <- .entmax_threshold_and_support(input, dim = dim, k = k)[[1]]
+    output <- torch::torch_clamp(input - tau_star, min = 0) ^ 2
+    ctx$save_for_backward(output = output, dim = dim)
+    output
+  },
+
+  backward = function(ctx, grad_output) {
+    # supp_size, output = ctx$saved_variables
+    saved <- ctx$saved_variables
+    dim <- saved$dim
+    output <- saved$output
+    gppr <- output$sqrt()
+    dX <- grad_output * gppr
+    q <- dX$sum(dim) / gppr$sum(dim)
+    q <- q$unsqueeze(dim)
+    dX$sub_(q*gppr)
+
+    list(
+      input = dX,
+      dim = NULL,
+      k = NULL
+    )
+  }
+)
+
+#' 1.5-entmax 
+#' 
+#' Normalizing sparse transform (a la softmax).
+#'
+#' Solves the optimization problem:
+#' \eqn{\max_p <input, P> - H_{1.5}(P) \text{ s.t. } P \geq 0, \sum(P) == 1}
+#' where \eqn{H_{1.5}(P)} is the Tsallis alpha-entropy with \eqn{\alpha=1.5}.
+#'
+#' @param input The input tensor.
+#' @param dim The dimension along which to apply 1.5-entmax.
+#' @param k The number of largest elements to partial-sort input over. For optimal
+#' performance, should be slightly bigger than the expected number of
+#' nonzeros in the solution. If the solution is more than k-sparse,
+#' this function is recursively called with a 2*k schedule. If `NULL`, full
+#' sorting is performed from the beginning.
+#'
+#' @return The projection result P  of the same shape as input, such that
+#'   \eqn{P$sum(dim=dim) == 1} elementwise.
+#'
+#' @examples
+#' # example usage
+#' X <- torch::torch$randn(10,5)
+#' dim <- 1
+#' k <- 3
+#' result <- entmax15(X, dim, k)
+#' print(result)
+entmax15 <- torch::nn_module(
+  "entmax_15",
+  initialize = function(dim = -1L, k = NULL) {
+    self$dim <- dim
+    self$k <- k
+  },
+  forward = function(input) {
+    if (self$dim == -1L) {
+      self$dim <- input$dim()
+    }
+    entmax_15_function(input, self$dim, self$k)
   }
 )
 
@@ -276,11 +374,11 @@ get_tau <- function(input, dim = -1L, k = NULL) {
 }
 
 relu15_function <- torch::autograd_function(
-  forward = function(ctx, X, dim = 0L, tau = 0) {
-    logit <- torch::torch_clamp(X / 2 - tau, min = 0)
+  forward = function(ctx, input, dim = 0L, tau = 0) {
+    logit <- torch::torch_clamp(input / 2 - tau, min = 0)
     ctx$save_for_backward(logit)
-    Y <- logit$pow(2)
-    return(Y)
+    output <- logit$pow(2)
+    output
   },
   backward = function(ctx, dY) {
     logit <- ctx$get_saved_tensors()

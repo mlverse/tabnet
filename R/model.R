@@ -77,7 +77,7 @@ resolve_data <- function(x, y) {
 #'   A value close to 1 will make mask selection least correlated between layers.
 #'   Values range from 1 to 2.
 #' @param mask_type (character) Final layer of feature selector in the attentive_transformer
-#'   block, either `"sparsemax"` or `"entmax"`.Defaults to `"sparsemax"`.
+#'   block, either `"sparsemax"`, `"entmax"` or `"entmax15"`.Defaults to `"sparsemax"`.
 #' @param virtual_batch_size (int) Size of the mini batches used for
 #'   "Ghost Batch Normalization" (default=256^2)
 #' @param learn_rate initial learning rate for the optimizer.

@@ -54,7 +54,7 @@ specific size.}
 
 \item{momentum}{Numerical value between 0 and 1 which will be used for momentum in all batch norm.}
 
-\item{mask_type}{Either "sparsemax" or "entmax" : this is the masking function to use.}
+\item{mask_type}{Either "sparsemax", "entmax" or "entmax15": the sparse masking function to use.}
 }
 \description{
 This is a \code{nn_module} representing the TabNet architecture from
