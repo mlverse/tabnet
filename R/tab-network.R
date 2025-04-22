@@ -34,8 +34,7 @@ tabnet_encoder <- torch::nn_module(
                         n_d=8, n_a=8,
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
-                        virtual_batch_size=128, momentum = 0.02,
-                        mask_type="sparsemax", mask_topk=NULL) {
+                        virtual_batch_size=128, momentum = 0.02) {
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
@@ -47,7 +46,6 @@ tabnet_encoder <- torch::nn_module(
     self$n_independent <- n_independent
     self$n_shared <- n_shared
     self$virtual_batch_size <- virtual_batch_size
-    self$mask_type <- mask_type
     self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
     if (self$n_shared > 0) {
@@ -89,9 +87,7 @@ tabnet_encoder <- torch::nn_module(
                                       momentum = momentum)
       attention <- attentive_transformer(n_a, self$input_dim,
                                          virtual_batch_size = self$virtual_batch_size,
-                                         momentum = momentum,
-                                         mask_type = self$mask_type, 
-                                         mask_topk = mask_topk)
+                                         momentum = momentum)
 
       self$feat_transformers$append(transformer)
       self$att_transformers$append(attention)
@@ -288,9 +284,7 @@ tabnet_pretrainer <- torch::nn_module(
       n_shared = n_shared,
       epsilon = epsilon,
       virtual_batch_size = virtual_batch_size,
-      momentum = momentum,
-      mask_type = mask_type,
-      mask_topk = mask_topk
+      momentum = momentum
     )
     self$decoder = tabnet_decoder(
       self$post_embed_dim,
@@ -340,7 +334,7 @@ tabnet_no_embedding <- torch::nn_module(
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size=128, momentum = 0.02,
-                        mask_type="sparsemax", mask_topk=NULL) {
+                        mask_type, mask_topk) {
 
     self$input_dim <- input_dim
     self$output_dim <- output_dim
@@ -353,9 +347,9 @@ tabnet_no_embedding <- torch::nn_module(
     self$n_independent <- n_independent
     self$n_shared <- n_shared
     self$virtual_batch_size <- virtual_batch_size
+    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
     self$mask_type <- mask_type
     self$mask_topk <- mask_topk
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
     self$encoder <- tabnet_encoder(
       input_dim = input_dim,
@@ -368,9 +362,7 @@ tabnet_no_embedding <- torch::nn_module(
       n_shared = n_shared,
       epsilon = epsilon,
       virtual_batch_size = virtual_batch_size,
-      momentum = momentum,
-      mask_type = mask_type,
-      mask_topk = mask_topk
+      momentum = momentum
     )
     if (self$is_multi_outcome) {
       self$multi_outcome_mapping <- torch::nn_module_list()
@@ -483,30 +475,28 @@ attentive_transformer <- torch::nn_module(
   "attentive_transformer",
   initialize = function(input_dim, output_dim,
                         virtual_batch_size = 128,
-                        momentum = 0.02,
-                        mask_type="sparsemax", 
-                        mask_topk = NULL) {
+                        momentum = 0.02) {
     self$fc <- torch::nn_linear(input_dim, sum(output_dim), bias=FALSE)
     initialize_non_glu(self$fc, input_dim, sum(output_dim))
     self$bn <- gbn(sum(output_dim), virtual_batch_size=virtual_batch_size,
                   momentum = momentum)
 
-
-    if (mask_type == "sparsemax") {
-      if (is.null(mask_topk)) {
+    # TODO shift left into a resolve_mask function
+    if (self$mask_type == "sparsemax") {
+      if (is.null(self$mask_topk)) {
         self$mask_topk <- input_dim[-1L] / 4
       } else {
-        self$mask_topk <- as.integer(mask_topk)
+        self$mask_topk <- as.integer(self$mask_topk)
       }
       self$selector <- sparsemax(dim = -1L, k = self$mask_topk)
-    } else if (mask_type == "entmax15") {
-      if (is.null(mask_topk)) {
+    } else if (self$mask_type == "entmax15") {
+      if (is.null(self$mask_topk)) {
         self$mask_topk <- input_dim[-1L] / 4
       } else {
-        self$mask_topk <- as.integer(mask_topk)
+        self$mask_topk <- as.integer(self$mask_topk)
       }
       self$selector <- entmax15(dim = -1L, k = self$mask_topk)
-    } else if (mask_type == "entmax")
+    } else if (self$mask_type == "entmax")
       self$selector <- entmax(dim = -1L)
     else
       stop("Please choose either 'sparsemax', 'entmax' or 'entmax15' as 'mask_type'")
