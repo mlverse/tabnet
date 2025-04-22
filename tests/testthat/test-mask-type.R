@@ -6,7 +6,7 @@ test_that(".sparsemax_threshold_and_support works as expected with default value
   )
   expect_type(result, "list")
   expect_length(result, 2)
-
+  
   tau <- result[[1]]
   support_size <- result[[2]]
   expect_tensor(tau)
@@ -24,14 +24,14 @@ test_that(".sparsemax_threshold_and_support works as expected with k < input$siz
   )
   expect_type(result, "list")
   expect_length(result, 2)
-
+  
   tau <- result[[1]]
   support_size <- result[[2]]
   expect_tensor(tau)
   expect_tensor_shape(tau, c(1, input$shape[2]))
   expect_tensor(support_size)
   expect_tensor_shape(support_size, c(1, input$shape[2]))
-
+  
 })
 
 test_that(".sparsemax_threshold_and_support works as expected with k >= input$size(dim)", {
@@ -43,7 +43,7 @@ test_that(".sparsemax_threshold_and_support works as expected with k >= input$si
   )
   expect_type(result, "list")
   expect_length(result, 2)
-
+  
   tau <- result[[1]]
   support_size <- result[[2]]
   expect_tensor(tau)
@@ -61,7 +61,7 @@ test_that(".entmax_threshold_and_support works as expected with default values",
   )
   expect_type(result, "list")
   expect_length(result, 2)
-
+  
   tau_star <- result[[1]]
   support_size <- result[[2]]
   expect_tensor(tau_star)
@@ -80,7 +80,7 @@ test_that(".entmax_threshold_and_support works as expected with k < input$size(d
   )
   expect_type(result, "list")
   expect_length(result, 2)
-
+  
   tau_star <- result[[1]]
   support_size <- result[[2]]
   expect_tensor(tau_star)
@@ -99,7 +99,7 @@ test_that(".entmax_threshold_and_support works as expected with k >= input$size(
   )
   expect_type(result, "list")
   expect_length(result, 2)
-
+  
   tau_star <- result[[1]]
   support_size <- result[[2]]
   expect_tensor(tau_star)
