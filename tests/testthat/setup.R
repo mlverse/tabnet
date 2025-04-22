@@ -35,9 +35,13 @@ attri_mult_x <- attrix[-which(names(attrix) == "JobSatisfaction")]
 
 attriy <- attrition[ids,]$Attrition
 
-attr_pretrained <- tabnet_pretrain(attrix, attriy, epochs = 12)
+attr_pretrained <- tabnet_pretrain(attrix, attriy, epochs = 12, num_steps = 1,
+                                   decision_width = 2, attention_width = 1, num_shared = 1,
+                                   num_independent = 1 )
 attr_pretrained_vsplit <- tabnet_pretrain(attrix, attriy, epochs = 12, valid_split=0.3)
-attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12)
+attr_fitted <- tabnet_fit(attrix, attriy, epochs = 12, num_steps = 1,
+                          decision_width = 2, attention_width = 1, num_shared = 1,
+                          num_independent = 1 )
 attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
 
 # data.tree Node dataset
