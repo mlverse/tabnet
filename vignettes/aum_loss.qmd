@@ -3,7 +3,7 @@ title: "Using ROC AUM loss for imbalanced binary classification"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using ROC AUM loss for imbalanced binary classification}
-  %\VignetteEngine{quarto::htm}
+  %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 format: 
   html:
