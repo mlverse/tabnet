@@ -49,6 +49,7 @@ Suggests:
     knitr,
     modeldata,
     patchwork,
+    quarto,
     recipes,
     rmarkdown,
     rsample,
