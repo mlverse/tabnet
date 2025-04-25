@@ -4,6 +4,7 @@
 <url><loc>/LICENSE.html</loc></url>
 <url><loc>/articles/Hierarchical_classification.html</loc></url>
 <url><loc>/articles/Missing_data_predictors.html</loc></url>
+<url><loc>/articles/aum_loss.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/articles/interpretation.html</loc></url>
 <url><loc>/articles/selfsupervised_training.html</loc></url>
@@ -16,6 +17,7 @@
 <url><loc>/reference/check_compliant_node.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/min_grid.tabnet.html</loc></url>
+<url><loc>/reference/nn_aum_loss.html</loc></url>
 <url><loc>/reference/nn_prune_head.html</loc></url>
 <url><loc>/reference/node_to_df.html</loc></url>
 <url><loc>/reference/pipe.html</loc></url>
