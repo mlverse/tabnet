@@ -106,7 +106,7 @@ Few details to be noticed
 
 -   this column is excluded from the recipe() predictors role.
 
--   we explicitly mention this column roe in each `workflow()` via `add_case_weights()`.
+-   we explicitly mention this column role in each `workflow()` via `add_case_weights()`.
 
 We can now `fit()` each model and plot the precision-recall curve on the test-set :
 

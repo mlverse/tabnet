@@ -86,13 +86,12 @@ sparsemax_function <- torch::autograd_function(
     input$sub_(max_val) # same numerical stability trick as for softmax
     c(tau, supp_size) %<-% .sparsemax_threshold_and_support(input, dim = dim, k = k)
     output <- torch::torch_clamp(input - tau, min = 0)
-    ctx$save_for_backward(supp_size = supp_size, output = output)
+    ctx$save_for_backward(supp_size = supp_size, output = output, dim = dim)
     output
   },
 
   backward = function(ctx, grad_output) {
-    c(supp_size, output) %<-% ctx$saved_variables
-    dim <- self$dim
+    c(supp_size, output, dim) %<-% ctx$saved_variables
     grad_input <- grad_output$clone()
     grad_input[output == 0] <- 0
 
@@ -131,9 +130,21 @@ sparsemax_function <- torch::autograd_function(
 #' X <- torch::torch.randn(10,5)
 #' dim <-1
 #' k <-3
-#' result <- sparsemax(X, dim, k)
+#' result <- sparsemax(X, dim)
 #' print(result)
 sparsemax <- torch::nn_module(
+  "sparsemax",
+  initialize = function(dim = -1L) {
+    self$dim <- dim
+  },
+  forward = function(input) {
+    sparsemax_function(input, self$dim)
+  }
+)
+
+#' alpha-Sparsemax with alph equal 1.5 
+#' @rdname sparsemax
+sparsemax15 <- torch::nn_module(
   "sparsemax",
   initialize = function(dim = -1L, k=NULL) {
     self$dim <- dim

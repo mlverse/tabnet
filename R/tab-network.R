@@ -492,7 +492,7 @@ attentive_transformer <- torch::nn_module(
                   momentum = momentum)
 
 
-    if (mask_type == "sparsemax") {
+    if (mask_type == "sparsemax15") {
       if (is.null(mask_topk)) {
         mask_topk <- round(input_dim[-1L] / 4)
       } else {
@@ -508,6 +508,8 @@ attentive_transformer <- torch::nn_module(
       self$selector <- entmax15(dim = -1L, k = mask_topk)
     } else if (mask_type == "entmax")
       self$selector <- entmax(dim = -1L)
+    else if (mask_type == "sparsemax")
+      self$selector <- sparsemax(dim = -1L)
     else
       stop("Please choose either 'sparsemax', 'entmax' or 'entmax15' as 'mask_type'")
 

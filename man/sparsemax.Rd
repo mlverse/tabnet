@@ -2,9 +2,12 @@
 % Please edit documentation in R/mask-type.R
 \name{sparsemax}
 \alias{sparsemax}
+\alias{sparsemax15}
 \title{Sparsemax}
 \usage{
-sparsemax(dim = -1L, k = NULL)
+sparsemax(dim = -1L)
+
+sparsemax15(dim = -1L, k = NULL)
 }
 \arguments{
 \item{dim}{The dimension along which to apply sparsemax.}
@@ -33,6 +36,6 @@ Solves the projection:
 X <- torch::torch.randn(10,5)
 dim <-1
 k <-3
-result <- sparsemax(X, dim, k)
+result <- sparsemax(X, dim)
 print(result)
 }
