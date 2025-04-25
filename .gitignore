@@ -12,3 +12,6 @@ revdep/
 tabnet.Rcheck
 ..Rcheck
 tabnet_*.tar.gz
+tabnet.Rproj
+po/glossary.csv
+inst/IMPORTLIST

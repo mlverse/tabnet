@@ -85,7 +85,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "cat_emb_dim",
     original = "cat_emb_dim",
-    func = list(pkg = "dials", fun = "cat_emb_dim"),
+    func = list(pkg = "tabnet", fun = "cat_emb_dim"),
     has_submodel = FALSE
   )
 
@@ -94,7 +94,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "decision_width",
     original = "decision_width",
-    func = list(pkg = "dials", fun = "decision_width"),
+    func = list(pkg = "tabnet", fun = "decision_width"),
     has_submodel = FALSE
   )
 
@@ -103,7 +103,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "attention_width",
     original = "attention_width",
-    func = list(pkg = "dials", fun = "attention_width"),
+    func = list(pkg = "tabnet", fun = "attention_width"),
     has_submodel = FALSE
   )
 
@@ -112,7 +112,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "num_steps",
     original = "num_steps",
-    func = list(pkg = "dials", fun = "num_steps"),
+    func = list(pkg = "tabnet", fun = "num_steps"),
     has_submodel = FALSE
   )
 
@@ -121,7 +121,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "mask_type",
     original = "mask_type",
-    func = list(pkg = "dials", fun = "mask_type"),
+    func = list(pkg = "tabnet", fun = "mask_type"),
     has_submodel = FALSE
   )
 
@@ -130,7 +130,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "mlp_hidden_multiplier",
     original = "mlp_hidden_multiplier",
-    func = list(pkg = "dials", fun = "mlp_hidden_multiplier"),
+    func = list(pkg = "tabnet", fun = "mlp_hidden_multiplier"),
     has_submodel = FALSE
   )
 
@@ -139,7 +139,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "mlp_activation",
     original = "mlp_activation",
-    func = list(pkg = "dials", fun = "mlp_activation"),
+    func = list(pkg = "tabnet", fun = "mlp_activation"),
     has_submodel = FALSE
   )
 
@@ -148,7 +148,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "encoder_activation",
     original = "encoder_activation",
-    func = list(pkg = "dials", fun = "encoder_activation"),
+    func = list(pkg = "tabnet", fun = "encoder_activation"),
     has_submodel = FALSE
   )
 
@@ -157,7 +157,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "num_independent",
     original = "num_independent",
-    func = list(pkg = "dials", fun = "num_independent"),
+    func = list(pkg = "tabnet", fun = "num_independent"),
     has_submodel = FALSE
   )
 
@@ -166,7 +166,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "num_shared",
     original = "num_shared",
-    func = list(pkg = "dials", fun = "num_shared"),
+    func = list(pkg = "tabnet", fun = "num_shared"),
     has_submodel = FALSE
   )
 
@@ -175,7 +175,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "num_independent_decoder",
     original = "num_independent_decoder",
-    func = list(pkg = "dials", fun = "num_independent_decoder"),
+    func = list(pkg = "tabnet", fun = "num_independent_decoder"),
     has_submodel = FALSE
   )
 
@@ -184,7 +184,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "num_shared_decoder",
     original = "num_shared_decoder",
-    func = list(pkg = "dials", fun = "num_shared_decoder"),
+    func = list(pkg = "tabnet", fun = "num_shared_decoder"),
     has_submodel = FALSE
   )
 
@@ -202,7 +202,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "feature_reusage",
     original = "feature_reusage",
-    func = list(pkg = "dials", fun = "feature_reusage"),
+    func = list(pkg = "tabnet", fun = "feature_reusage"),
     has_submodel = FALSE
   )
 
@@ -238,7 +238,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "virtual_batch_size",
     original = "virtual_batch_size",
-    func = list(pkg = "dials", fun = "virtual_batch_size"),
+    func = list(pkg = "tabnet", fun = "virtual_batch_size"),
     has_submodel = FALSE
   )
 
@@ -256,7 +256,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "optimizer",
     original = "optimizer",
-    func = list(pkg = "dials", fun = "optimizer"),
+    func = list(pkg = "tabnet", fun = "optimizer"),
     has_submodel = FALSE
   )
 
@@ -265,7 +265,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "loss",
     original = "loss",
-    func = list(pkg = "dials", fun = "loss"),
+    func = list(pkg = "tabnet", fun = "loss"),
     has_submodel = FALSE
   )
 
@@ -274,7 +274,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "clip_value",
     original = "clip_value",
-    func = list(pkg = "dials", fun = "clip_value"),
+    func = list(pkg = "tabnet", fun = "clip_value"),
     has_submodel = FALSE
   )
 
@@ -283,7 +283,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "drop_last",
     original = "drop_last",
-    func = list(pkg = "dials", fun = "drop_last"),
+    func = list(pkg = "tabnet", fun = "drop_last"),
     has_submodel = FALSE
   )
 
@@ -292,25 +292,25 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "lr_scheduler",
     original = "lr_scheduler",
-    func = list(pkg = "dials", fun = "lr_scheduler"),
+    func = list(pkg = "tabnet", fun = "lr_scheduler"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "lr_decay",
+    parsnip = "rate_decay",
     original = "lr_decay",
-    func = list(pkg = "dials", fun = "lr_decay"),
+    func = list(pkg = "dials", fun = "rate_decay"),
     has_submodel = FALSE
   )
 
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
-    parsnip = "step_size",
+    parsnip = "rate_step_size",
     original = "step_size",
-    func = list(pkg = "dials", fun = "step_size"),
+    func = list(pkg = "dials", fun = "rate_step_size"),
     has_submodel = FALSE
   )
 
@@ -319,7 +319,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "checkpoint_epochs",
     original = "checkpoint_epochs",
-    func = list(pkg = "dials", fun = "checkpoint_epochs"),
+    func = list(pkg = "tabnet", fun = "checkpoint_epochs"),
     has_submodel = FALSE
   )
 
@@ -328,7 +328,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "verbose",
     original = "verbose",
-    func = list(pkg = "dials", fun = "verbose"),
+    func = list(pkg = "tabnet", fun = "verbose"),
     has_submodel = FALSE
   )
 
@@ -337,7 +337,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "importance_sample_size",
     original = "importance_sample_size",
-    func = list(pkg = "dials", fun = "importance_sample_size"),
+    func = list(pkg = "tabnet", fun = "importance_sample_size"),
     has_submodel = FALSE
   )
 
@@ -346,7 +346,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "early_stopping_monitor",
     original = "early_stopping_monitor",
-    func = list(pkg = "dials", fun = "early_stopping_monitor"),
+    func = list(pkg = "tabnet", fun = "early_stopping_monitor"),
     has_submodel = FALSE
   )
 
@@ -355,7 +355,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "early_stopping_tolerance",
     original = "early_stopping_tolerance",
-    func = list(pkg = "dials", fun = "early_stopping_tolerance"),
+    func = list(pkg = "tabnet", fun = "early_stopping_tolerance"),
     has_submodel = FALSE
   )
 
@@ -364,7 +364,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "early_stopping_patience",
     original = "early_stopping_patience",
-    func = list(pkg = "dials", fun = "early_stopping_patience"),
+    func = list(pkg = "tabnet", fun = "early_stopping_patience"),
     has_submodel = FALSE
   )
 
@@ -382,7 +382,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "tabnet_model",
     original = "tabnet_model",
-    func = list(pkg = "dials", fun = "tabnet_model"),
+    func = list(pkg = "tabnet", fun = "tabnet_model"),
     has_submodel = FALSE
   )
 
@@ -391,7 +391,7 @@ add_parsnip_tabnet <- function() {
     eng = "torch",
     parsnip = "from_epoch",
     original = "from_epoch",
-    func = list(pkg = "dials", fun = "from_epoch"),
+    func = list(pkg = "tabnet", fun = "from_epoch"),
     has_submodel = FALSE
   )
 
@@ -427,6 +427,11 @@ add_parsnip_tabnet <- function() {
 #'   for this model are "unknown", "regression", or "classification".
 #' @inheritParams tabnet_config
 #' @inheritParams tabnet_fit
+#' @param rate_decay multiplies the initial learning rate by `rate_decay` every
+#'   `rate_step_size` epochs. Unused if `lr_scheduler` is a `torch::lr_scheduler`
+#'   or `NULL`.
+#' @param rate_step_size the learning rate scheduler step size. Unused if
+#'   `lr_scheduler` is a `torch::lr_scheduler` or `NULL`.
 #'
 #' @inheritSection tabnet_fit Threading
 #' @seealso tabnet_fit
@@ -449,7 +454,7 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
                    num_independent_decoder = NULL, num_shared_decoder = NULL, penalty = NULL,
                    feature_reusage = NULL, momentum = NULL, epochs = NULL, batch_size = NULL,
                    virtual_batch_size = NULL, learn_rate = NULL, optimizer = NULL, loss = NULL,
-                   clip_value = NULL, drop_last = NULL, lr_scheduler = NULL, lr_decay = NULL, step_size = NULL,
+                   clip_value = NULL, drop_last = NULL, lr_scheduler = NULL, rate_decay = NULL, rate_step_size = NULL,
                    checkpoint_epochs = NULL, verbose = NULL, importance_sample_size = NULL,
                    early_stopping_monitor = NULL, early_stopping_tolerance = NULL,
                    early_stopping_patience = NULL, skip_importance = NULL,
@@ -488,8 +493,8 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
     clip_value = rlang::enquo(clip_value),
     drop_last = rlang::enquo(drop_last),
     lr_scheduler = rlang::enquo(lr_scheduler),
-    lr_decay = rlang::enquo(lr_decay),
-    step_size = rlang::enquo(step_size),
+    lr_decay = rlang::enquo(rate_decay),
+    step_size = rlang::enquo(rate_step_size),
     checkpoint_epochs = rlang::enquo(checkpoint_epochs),
     verbose = rlang::enquo(verbose),
     importance_sample_size = rlang::enquo(importance_sample_size),
@@ -568,6 +573,38 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
   )
 }
 
+#' Determine the minimum set of model fits
+#'
+#' `min_grid()` determines exactly what models should be fit in order to
+#'  evaluate the entire set of tuning parameter combinations. This is for
+#'  internal use only and the API may change in the near future.
+#'
+#' `fit_max_value()` can be used in other packages to implement a `min_grid()`
+#' method.
+#' @param x A model specification.
+#' @param grid A tibble with tuning parameter combinations.
+#' @param ... Not currently used.
+#' @return A tibble with the minimum tuning parameters to fit and an additional
+#' list column with the parameter combinations used for prediction.
+#' @keywords internal
+#' @examples
+#' library(dials)
+#' library(tune)
+#' library(parsnip)
+#'
+#' tabnet_spec <- tabnet(decision_width = tune(), attention_width = tune()) %>%
+#'   set_mode("regression") %>%
+#'   set_engine("torch")
+#'
+#' tabnet_grid <-
+#'   tabnet_spec %>%
+#'   extract_parameter_set_dials() %>%
+#'   grid_regular(levels = 3)
+#'
+#' min_grid(tabnet_spec, tabnet_grid)
+#' 
+#' @importFrom tune min_grid
+#' @export
 min_grid.tabnet <- function(x, grid, ...) tune::fit_max_value(x, grid, ...)
 
 parsnip_is_missing_tabnet <- function(tabnet_env) {

@@ -27,12 +27,14 @@ A dot is added on epochs where model snapshot is available, helping
 the choice of \code{from_epoch} value for later model training resume.
 }
 \examples{
-\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+ \dontrun{
 library(ggplot2)
 data("attrition", package = "modeldata")
 attrition_fit <- tabnet_fit(Attrition ~. , data=attrition, valid_split=0.2, epoch=11)
 
 # Plot the model loss over epochs
 autoplot(attrition_fit)
+}
 \dontshow{\}) # examplesIf}
 }

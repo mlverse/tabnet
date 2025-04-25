@@ -1,10 +1,14 @@
+AUM
 Ames
 Arik
 Bugfixes
 Eleonora
 Explicitely
+FNR
+FPR
 GLU
 Giunchiglia
+Hillman
 Interpretability
 Interpretable
 Lifecycle
@@ -15,13 +19,15 @@ Pretrain
 Sercan
 TabNet
 TabNet's
-adam
+XGBoost
 ai
 al
 ames
 arXiv
+autoassociative
 autograd
 beeing
+callout
 classif
 config
 cpu
@@ -37,6 +43,7 @@ ggplot
 interpretable
 mse
 nn
+num
 orginal
 overfit
 overfits
@@ -48,5 +55,7 @@ reusage
 sparsemax
 subprocesses
 th
+tibble
 tidymodels
+tunable
 zeallot

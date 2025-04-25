@@ -1,9 +1,28 @@
 # tabnet (development version)
 
+## New features
+
+* tabnet is now using the `torch_ignite_adam` when available. 
+  Result is 30% faster pretraining and fitting tasks.
+* add `nn_aum_loss()` function for area under the $Min(FPR,FNR)$ optimization for cases of 
+  unbalanced binary classification (#178).
+* add a vignette on imbalanced binary classification with `nn_aum_loss()` (#178).
+
 ## Bugfixes
 
-* improve function documentation consistency before translation
+* fix config parameter merging issues when parameter is a torch loss or torch optimizer generator.
+* `nn_unsupervised_loss()` is now a proper loss function.
 
+# tabnet 0.7.0
+
+## Bugfixes
+
+* Remove long-run example raising a Note.
+* fix `tabet_pretrain` failing with `value_error("Can't convert data of class: 'NULL'")` in R 4.5
+* fix `tabet_pretrain` wrongly used instead of `tabnet_fit` in Missing data predictor vignette
+* improve message related to case_weights not being used as predictors.
+* improve function documentation consistency before translation.
+* fix "..." is not an exported object from 'namespace:dials'" error when using tune() on tabnet parameters. (#160 @cphaarmeyer)
 
 # tabnet 0.6.0
 

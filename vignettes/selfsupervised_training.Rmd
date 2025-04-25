@@ -64,7 +64,7 @@ We now have the normalized dataset ready for self-supervised training.
 
 ## Self-supervised training step  
 
-Next, we pre-train our model with a [self-supervised learning](https://paperswithcode.com/task/self-supervised-learning) task. This step will gives us a `tabnet_pretrain` object that will contain a representation of the dataset variables and their interactions.  
+Next, we pre-train our model with a [autoassociative self-supervised learning](https://en.wikipedia.org/wiki/Self-supervised_learning#Autoassociative_self-supervised_learning) task. This step will gives us a `tabnet_pretrain` object that will contain a representation of the dataset variables and their interactions in its latent space.  
 We are going to train for 50 epochs with a batch size of 5000 i.e. half of the dataset because it is small enough to fit into memory. There are other hyperparameters available, but we are going to use the default values here.
 
 ```{r}

@@ -39,7 +39,7 @@ Interpretation metrics from a TabNet model
 
 set.seed(2021)
 
-n <- 1000
+n <- 256
 x <- data.frame(
   x = rnorm(n),
   y = rnorm(n),
@@ -48,7 +48,7 @@ x <- data.frame(
 
 y <- x$x
 
-fit <- tabnet_fit(x, y, epochs = 20,
+fit <- tabnet_fit(x, y, epochs = 10,
                   num_steps = 1,
                   batch_size = 512,
                   attention_width = 1,

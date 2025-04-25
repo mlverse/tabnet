@@ -28,22 +28,29 @@ Classification
 Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
 [(Eleonora Giunchiglia et
 Al.)](https://doi.org/10.48550/arXiv.2010.10151) for hierarchical
-outcomes.
+outcomes and [Optimizing ROC Curves with a Sort-Based Surrogate Loss for
+Binary Classification and Changepoint Detection (J Hillman, TD
+Hocking)](https://jmlr.org/papers/v24/21-0751.html) for imbalanced
+binary classification.
 
 ## Installation
 
-You can install the released version from CRAN with:
+Install [{tabnet} from
+CRAN](https://cran.r-project.org/web/packages/tabnet/index.html) with:
+
+In the meantime, you can install the released version from r-universe
+with:
 
 ``` r
-install.packages("tabnet")
+install.packages('tabnet')
 ```
 
 The development version can be installed from
 [GitHub](https://github.com/mlverse/tabnet) with:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("mlverse/tabnet")
+# install.packages("pak")
+pak::pak("mlverse/tabnet")
 ```
 
 ## Basic Binary Classification Example
@@ -95,19 +102,16 @@ cbind(test, predict(fit, test)) %>%
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.837
-#> 2 precision binary         0.837
+#> 1 accuracy  binary         0.840
+#> 2 precision binary         0.840
 #> 3 recall    binary         1
-```
-
-``` r
   
 cbind(test, predict(fit, test, type = "prob")) %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.546
+#> 1 roc_auc binary         0.544
 ```
 
 ## Explain model on test-set with attention map
@@ -130,6 +134,15 @@ autoplot(explain, type = "steps")
 
 <img src="man/figures/README-step-explain-1.png" width="100%" />
 
+## {tidymodels} integration
+
+The integration within tidymodels workflows offers you unlimited
+opportunity to compare {tabnet} models with its challengers.
+
+Don’t miss the
+[`vignette("tidymodels-interface")`](articles/tidymodels-interface.html)
+for that.
+
 ## Self-supervised pretraining
 
 For cases when a consistent part of your dataset has no outcome, TabNet
@@ -145,8 +158,8 @@ autoplot(pretrain)
 <img src="man/figures/README-step-pretrain-1.png" width="100%" />
 
 The example here is a toy example as the `train` dataset does actually
-contain outcomes. The vignette on [Self-supervised training and
-fine-tuning](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html)
+contain outcomes. The vignette
+[`vignette("selfsupervised_training")`](articles/selfsupervised_training.html)
 will gives you the complete correct workflow step-by-step.
 
 ## Missing data in predictors
@@ -155,28 +168,40 @@ will gives you the complete correct workflow step-by-step.
 you don’t have to remove the entries in your dataset with some missing
 values in the predictors variables.
 
+See
+[`vignette("Missing_data_predictors")`](articles/Missing_data_predictors.html)
+
+## Imbalanced binary classification
+
+{tabnet} includes a Area under the $Min(FPR,FNR)$ (AUM) loss function
+`nn_aum_loss()` dedicated to your imbalanced binary classification
+tasks.
+
+Try it out in [`vignette("aum_loss")`](articles/aum_loss.html)
+
 # Comparison with other implementations
 
-| Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
-|------------------|--------------------------------------|:------------------:|:-------------:|:-----------:|
-| Input format     | data-frame                           |         ✅         |      ✅       |     ✅      |
-|                  | formula                              |         ✅         |               |             |
-|                  | recipe                               |         ✅         |               |             |
-|                  | Node                                 |         ✅         |               |             |
-|                  | missings in predictor                |         ✅         |               |             |
-| Output format    | data-frame                           |         ✅         |      ✅       |     ✅      |
-|                  | workflow                             |         ✅         |               |             |
-| ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
-|                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
-|                  | regression                           |         ✅         |      ✅       |     ✅      |
-|                  | multi-outcome                        |         ✅         |      ✅       |             |
-|                  | hierarchical multi-label classif.    |         ✅         |               |             |
-| Model management | from / to file                       |         ✅         |      ✅       |      v      |
-|                  | resume from snapshot                 |         ✅         |               |             |
-|                  | training diagnostic                  |         ✅         |               |             |
-| Interpretability |                                      |         ✅         |      ✅       |     ✅      |
-| Performance      |                                      |        1 x         |    2 - 4 x    |             |
-| Code quality     | test coverage                        |        85%         |               |             |
-|                  | continuous integration               | 4 OS including GPU |               |             |
+| Group | Feature | {tabnet} | dreamquark-ai | fast-tabnet |
+|----|----|:--:|:--:|:--:|
+| Input format | data-frame | ✅ | ✅ | ✅ |
+|  | formula | ✅ |  |  |
+|  | recipe | ✅ |  |  |
+|  | Node | ✅ |  |  |
+|  | missings in predictor | ✅ |  |  |
+| Output format | data-frame | ✅ | ✅ | ✅ |
+|  | workflow | ✅ |  |  |
+| ML Tasks | self-supervised learning | ✅ | ✅ |  |
+|  | classification (binary, multi-class) | ✅ | ✅ | ✅ |
+|  | unbalanced binary classification | ✅ |  |  |
+|  | regression | ✅ | ✅ | ✅ |
+|  | multi-outcome | ✅ | ✅ |  |
+|  | hierarchical multi-label classif. | ✅ |  |  |
+| Model management | from / to file | ✅ | ✅ | v |
+|  | resume from snapshot | ✅ |  |  |
+|  | training diagnostic | ✅ |  |  |
+| Interpretability |  | ✅ | ✅ | ✅ |
+| Performance |  | 1 x | 2 - 4 x |  |
+| Code quality | test coverage | 85% |  |  |
+|  | continuous integration | 4 OS including GPU |  |  |
 
 Alternative TabNet implementation features

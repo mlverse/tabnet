@@ -37,7 +37,8 @@ Plot the \code{tabnet_explain} object mask importance per variable along the pre
 low values. \code{quantile=1}, the default, do not clip any values.
 }
 \examples{
-\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+ \dontrun{
 library(ggplot2)
 data("attrition", package = "modeldata")
 
@@ -49,11 +50,11 @@ autoplot(attrition_explain)
 
 ## Multi-outcome regression on `Sale_Price` and `Pool_Area` in `ames` dataset,
 data("ames", package = "modeldata")
-ids <- sample(nrow(ames), 256)
-x <- ames[ids,-which(names(ames) \%in\% c("Sale_Price", "Pool_Area"))]
-y <- ames[ids, c("Sale_Price", "Pool_Area")]
-ames_fit <- tabnet_fit(x, y, epochs = 5, verbose=TRUE)
+x <- ames[,-which(names(ames) \%in\% c("Sale_Price", "Pool_Area"))]
+y <- ames[, c("Sale_Price", "Pool_Area")]
+ames_fit <- tabnet_fit(x, y, epochs = 1, verbose=TRUE)
 ames_explain <- tabnet_explain(ames_fit, x)
 autoplot(ames_explain, quantile = 0.99)
+}
 \dontshow{\}) # examplesIf}
 }

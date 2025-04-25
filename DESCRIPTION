@@ -1,6 +1,6 @@
 Package: tabnet
 Title: Fit 'TabNet' Models for Classification and Regression
-Version: 0.6.0.9000
+Version: 0.7.0.9000
 Authors@R: c(
     person("Daniel", "Falbel", , "daniel@rstudio.com", role = "aut"),
     person(, "RStudio", role = "cph"),
@@ -45,9 +45,11 @@ Imports:
     withr,
     zeallot
 Suggests: 
+    cli,
     knitr,
     modeldata,
     patchwork,
+    quarto,
     recipes,
     rmarkdown,
     rsample,
@@ -58,9 +60,10 @@ Suggests:
     vip,
     visdat,
     workflows,
+    xgboost,
     yardstick
 VignetteBuilder: 
-    knitr
+    quarto
 Config/testthat/edition: 3
 Config/testthat/parallel: false
 Config/testthat/start-first: interface, explain, params
@@ -68,3 +71,5 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Language: en-US
+SystemRequirements: Quarto command line tool
+    (<https://github.com/quarto-dev/quarto-cli>).

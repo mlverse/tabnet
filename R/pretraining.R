@@ -43,20 +43,6 @@ transpose_metrics <- function(metrics) {
   out[-1]
 }
 
-unsupervised_loss <- function(y_pred, embedded_x, obfuscation_mask, eps = 1e-9) {
-
-  errors <- y_pred - embedded_x
-  reconstruction_errors <- torch::torch_mul(errors, obfuscation_mask)^2
-  batch_stds <- torch::torch_std(embedded_x, dim=1)^2 + eps
-
-  # compute the number of obfuscated variables to reconstruct
-  nb_reconstructed_variables <- torch::torch_sum(obfuscation_mask, dim=2)
-
-  # take the mean of the reconstructed variable errors
-  features_loss <- torch::torch_matmul(reconstruction_errors, 1/batch_stds) / (nb_reconstructed_variables + eps)
-  loss <- torch::torch_mean(features_loss)
-  loss
-}
 
 tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift = 0L) {
   torch::torch_manual_seed(sample.int(1e6, 1))
@@ -71,7 +57,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     valid_x <- x[valid_idx, ]
     valid_ds <-   torch::dataset(
       initialize = function() {},
-      .getbatch = function(batch) {resolve_data(valid_x[batch,], rep(1, length(batch)))},
+      .getbatch = function(batch) {resolve_data(valid_x[batch,], matrix(1L, nrow = length(batch)))},
       .length = function() {nrow(valid_x)}
     )()
 
@@ -88,7 +74,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   # training dataset & dataloader
   train_ds <-   torch::dataset(
     initialize = function() {},
-    .getbatch = function(batch) {resolve_data(x[batch,], rep(1, length(batch)))},
+    .getbatch = function(batch) {resolve_data(x[batch,], matrix(1L, nrow = length(batch)))},
     .length = function() {nrow(x)}
   )()
   # we can get training_set parameters from the 2 first samples
@@ -103,7 +89,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   )
 
   # resolve loss (shortcutted from config)
-  config$loss_fn <- unsupervised_loss
+  config$loss_fn <- nn_unsupervised_loss()
 
   # create network
   network <- tabnet_pretrainer(
@@ -126,19 +112,12 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   network$to(device = device)
 
-  # define optimizer
-  if (rlang::is_function(config$optimizer)) {
-
+  # instanciate optimizer
+  if (is_optim_generator(config$optimizer)) {
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
+  } else
+    stop("`optimizer` must be resolved into a torch optimizer generator.", call. = FALSE)
 
-  } else if (rlang::is_scalar_character(config$optimizer)) {
-
-    if (config$optimizer == "adam")
-      optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
-    else
-      stop("Currently only the 'adam' optimizer is supported.", call. = FALSE)
-
-  }
 
   # define scheduler
   if (is.null(config$lr_scheduler)) {
