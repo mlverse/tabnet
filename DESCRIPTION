@@ -60,6 +60,7 @@ Suggests:
     vip,
     visdat,
     workflows,
+    xgboost,
     yardstick
 VignetteBuilder: 
     quarto

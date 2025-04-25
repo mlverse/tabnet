@@ -9,15 +9,12 @@ format:
     fig-width: 9
     fig-height: 6
     fig-cap-location: "top"
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
+    eval: true
 ---
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = TRUE
-)
-```
 
 ```{r setup}
 library(tabnet)
