@@ -202,7 +202,7 @@ tabnet_config <- function(batch_size = 1024^2,
     virtual_batch_size = virtual_batch_size,
     valid_split = valid_split,
     learn_rate = learn_rate,
-    optimizer = optimizer,
+    optimizer = resolve_optimizer(optimizer),
     lr_scheduler = lr_scheduler,
     lr_decay = lr_decay,
     step_size = step_size,
@@ -243,7 +243,9 @@ max_constraint_output <- function(output, labels, ancestor) {
 resolve_loss <- function(config, dtype) {
   loss <- config$loss
 
-  if (is.function(loss))
+  if (is_loss_generator(loss))
+    loss_fn <- loss()
+  else if (is.function(loss))
     loss_fn <- loss
   else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
     loss_fn <- torch::nn_mse_loss()
@@ -512,18 +514,12 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   if (!is.null(config$ancestor)) {
     config$ancestor_tt <- torch::torch_tensor(config$ancestor)$to(torch::torch_bool(), device = device)
   }
-  # define optimizer
-  if (rlang::is_function(config$optimizer)) {
 
+  # instanciate optimizer
+  if (is_optim_generator(config$optimizer)) {
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
-
-  } else if (rlang::is_scalar_character(config$optimizer)) {
-
-    if (config$optimizer == "adam")
-      optimizer <- torch::optim_adam(network$parameters, lr = config$learn_rate)
-    else
-      stop("Currently only the 'adam' optimizer is supported.", call. = FALSE)
-
+  } else {
+    stop("`optimizer` must be resolved into a torch optimizer generator.", call. = FALSE)
   }
 
   # define scheduler
@@ -760,16 +756,4 @@ predict_impl_class_multiple <- function(obj, x, batch_size, outcome_nlevels) {
     ~factor(.y[.x], levels = .y)
   )
   hardhat::spruce_class_multiple(!!!p_factor_lst)
-}
-
-to_device <- function(x, device) {
-  lapply(x, function(x) {
-    if (inherits(x, "torch_tensor")) {
-      x$to(device=device)
-    } else if (is.list(x)) {
-      lapply(x, to_device)
-    } else {
-      x
-    }
-  })
 }

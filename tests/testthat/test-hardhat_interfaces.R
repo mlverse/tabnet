@@ -217,4 +217,3 @@ test_that("using weights raise a message", {
   )
 
 })
-
