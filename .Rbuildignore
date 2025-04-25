@@ -13,3 +13,4 @@
 ^Meta$
 ^CRAN-SUBMISSION$
 ^revdep$
+^vignettes/*_files$

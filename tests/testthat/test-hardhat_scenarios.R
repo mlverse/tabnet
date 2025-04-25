@@ -80,6 +80,23 @@ test_that("Supervised training can continue unsupervised training, with or wo fr
 
 })
 
+test_that("Supervised training can continue unsupervised training, with a Libtorch optimizer", {
+  testthat::skip_if(!torch_has_optim_ignite())
+
+  expect_no_error(
+    tabnet_pretrain(x, y, epoch = 1, config = tabnet_config(
+      optimizer = torch::optim_ignite_adamw)
+      )
+  )
+
+  expect_no_error(
+    tabnet_fit(Attrition ~ ., data = attrition, tabnet_model = attr_pretrained, epochs = 1, 
+      optimizer = torch::optim_ignite_adamw
+      )
+  )
+})
+
+
 test_that("serialization of tabnet_pretrain with saveRDS just works", {
 
   fit <- tabnet_fit(x, y, ames_pretrain, epoch = 1, learn_rate = 1e-12)

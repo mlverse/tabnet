@@ -1,5 +1,18 @@
 # tabnet (development version)
 
+## New features
+
+* tabnet is now using the `torch_ignite_adam` when available. 
+  Result is 30% faster pretraining and fitting tasks.
+* add `nn_aum_loss()` function for area under the $Min(FPR,FNR)$ optimization for cases of 
+  unbalanced binary classification (#178).
+* add a vignette on imbalanced binary classification with `nn_aum_loss()` (#178).
+
+## Bugfixes
+
+* fix config parameter merging issues when parameter is a torch loss or torch optimizer generator.
+* `nn_unsupervised_loss()` is now a proper loss function.
+
 # tabnet 0.7.0
 
 ## Bugfixes

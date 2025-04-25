@@ -28,12 +28,18 @@ Classification
 Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
 [(Eleonora Giunchiglia et
 Al.)](https://doi.org/10.48550/arXiv.2010.10151) for hierarchical
-outcomes.
+outcomes and [Optimizing ROC Curves with a Sort-Based Surrogate Loss for
+Binary Classification and Changepoint Detection (J Hillman, TD
+Hocking)](https://jmlr.org/papers/v24/21-0751.html) for imbalanced
+binary classification.
 
 ## Installation
 
 Install [{tabnet} from
 CRAN](https://cran.r-project.org/web/packages/tabnet/index.html) with:
+
+In the meantime, you can install the released version from r-universe
+with:
 
 ``` r
 install.packages('tabnet')
@@ -43,8 +49,8 @@ The development version can be installed from
 [GitHub](https://github.com/mlverse/tabnet) with:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("mlverse/tabnet")
+# install.packages("pak")
+pak::pak("mlverse/tabnet")
 ```
 
 ## Basic Binary Classification Example
@@ -128,6 +134,15 @@ autoplot(explain, type = "steps")
 
 <img src="man/figures/README-step-explain-1.png" width="100%" />
 
+## {tidymodels} integration
+
+The integration within tidymodels workflows offers you unlimited
+opportunity to compare {tabnet} models with its challengers.
+
+Don’t miss the
+[`vignette("tidymodels-interface")`](articles/tidymodels-interface.html)
+for that.
+
 ## Self-supervised pretraining
 
 For cases when a consistent part of your dataset has no outcome, TabNet
@@ -143,8 +158,8 @@ autoplot(pretrain)
 <img src="man/figures/README-step-pretrain-1.png" width="100%" />
 
 The example here is a toy example as the `train` dataset does actually
-contain outcomes. The vignette on [Self-supervised training and
-fine-tuning](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html)
+contain outcomes. The vignette
+[`vignette("selfsupervised_training")`](articles/selfsupervised_training.html)
 will gives you the complete correct workflow step-by-step.
 
 ## Missing data in predictors
@@ -152,6 +167,17 @@ will gives you the complete correct workflow step-by-step.
 {tabnet} leverage the masking mechanism to deal with missing data, so
 you don’t have to remove the entries in your dataset with some missing
 values in the predictors variables.
+
+See
+[`vignette("Missing_data_predictors")`](articles/Missing_data_predictors.html)
+
+## Imbalanced binary classification
+
+{tabnet} includes a Area under the $Min(FPR,FNR)$ (AUM) loss function
+`nn_aum_loss()` dedicated to your imbalanced binary classification
+tasks.
+
+Try it out in [`vignette("aum_loss")`](articles/aum_loss.html)
 
 # Comparison with other implementations
 
@@ -166,6 +192,7 @@ values in the predictors variables.
 |  | workflow | ✅ |  |  |
 | ML Tasks | self-supervised learning | ✅ | ✅ |  |
 |  | classification (binary, multi-class) | ✅ | ✅ | ✅ |
+|  | unbalanced binary classification | ✅ |  |  |
 |  | regression | ✅ | ✅ | ✅ |
 |  | multi-outcome | ✅ | ✅ |  |
 |  | hierarchical multi-label classif. | ✅ |  |  |
