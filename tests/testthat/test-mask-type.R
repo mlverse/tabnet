@@ -107,3 +107,45 @@ test_that(".entmax_threshold_and_support works as expected with k >= input$size(
   expect_tensor(support_size)
   expect_tensor_shape(support_size, c(input$shape[1], 1))
 })
+
+
+test_that("fit works with entmax mask-type", {
+  
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  
+  expect_no_error(
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+               config = tabnet_config( mask_type="entmax"))
+  )
+})
+
+test_that("fit works with entmax15 mask-type", {
+  
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  
+  expect_no_error(
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+               config = tabnet_config( mask_type="entmax15"))
+  )
+  expect_no_error(
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+               config = tabnet_config( mask_type="entmax15", mask_topk = 12))
+  )
+})
+
+test_that("fit works with sparsemax15 mask-type", {
+  
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  
+  expect_no_error(
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+               config = tabnet_config( mask_type="sparsemax15"))
+  )
+  expect_no_error(
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+               config = tabnet_config( mask_type="sparsemax15", mask_topk = 12))
+  )
+})
