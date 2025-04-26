@@ -120,20 +120,31 @@ test_that("fit works with entmax mask-type", {
   )
 })
 
-test_that("fit works with entmax15 mask-type", {
+
+test_that("sparsemax_15_function works as a proper autograd", {
   
-  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
-    step_normalize(all_numeric(), -all_outcomes())
-  
+  input = torch::torch_rand(10,2, requires_grad = TRUE)
+
   expect_no_error(
-    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-               config = tabnet_config( mask_type = "entmax15"))
+    output <- tabnet:::sparsemax_function(input, 2L, 3)
   )
   expect_no_error(
-    tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
-               config = tabnet_config( mask_type = "entmax15", mask_topk = 12))
+    output$backward
   )
 })
+
+test_that("entmax_15_function works as a proper autograd", {
+  
+  input = torch::torch_rand(10,2, requires_grad = TRUE)
+
+  expect_no_error(
+    output <- tabnet:::entmax_15_function(input, 2L, 3)
+  )
+  expect_no_error(
+    output$backward
+  )
+})
+
 
 test_that("fit works with sparsemax15 mask-type", {
   
@@ -147,5 +158,20 @@ test_that("fit works with sparsemax15 mask-type", {
   expect_no_error(
     tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
                config = tabnet_config( mask_type = "sparsemax15", mask_topk = 12))
+  )
+})
+
+test_that("fit works with entmax15 mask-type", {
+  
+  rec <- recipe(EnvironmentSatisfaction ~ ., data = attrition[ids, ]) %>%
+    step_normalize(all_numeric(), -all_outcomes())
+  
+  expect_no_error(
+    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
+               config = tabnet_config( mask_type = "entmax15"))
+  )
+  expect_no_error(
+    tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+               config = tabnet_config( mask_type = "entmax15", mask_topk = 12))
   )
 })

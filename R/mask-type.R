@@ -83,7 +83,7 @@
 sparsemax_function <- torch::autograd_function(
   forward = function(ctx, input, dim = -1L, k = NULL) {
     max_val <- input$max(dim = dim, keepdim = TRUE)[[1]]
-    input$sub_(max_val) # same numerical stability trick as for softmax
+    input <- input - max_val # same numerical stability trick as for softmax
     c(tau, supp_size) %<-% .sparsemax_threshold_and_support(input, dim = dim, k = k)
     output <- torch::torch_clamp(input - tau, min = 0)
     ctx$save_for_backward(supp_size = supp_size, output = output, dim = dim, k = k)
@@ -268,8 +268,7 @@ entmax <- torch::nn_module(
 entmax_15_function <- torch::autograd_function(
   forward = function(ctx, input, dim = 1L, k = NULL) {
     max_val <- input$max(dim = dim, keepdim = TRUE)[[1]]
-    input$sub_(max_val) # same numerical stability trick as for softmax
-    input <- input / 2
+    input <- (input - max_val)/2 # same numerical stability trick as for softmax
 
     tau_star <- .entmax_threshold_and_support(input, dim = dim, k = k)[[1]]
     output <- torch::torch_clamp(input - tau_star, min = 0) ^ 2
