@@ -37,66 +37,45 @@ tabnet_encoder <- torch::nn_module(
                         virtual_batch_size=128, momentum = 0.02,
                         mask_type="sparsemax", mask_topk=NULL) {
 
-    self$input_dim <- input_dim
-    self$output_dim <- output_dim
     self$n_d <- n_d
-    self$n_a <- n_a
     self$n_steps <- n_steps
     self$gamma <- gamma
     self$epsilon <- epsilon
-    self$n_independent <- n_independent
-    self$n_shared <- n_shared
-    self$virtual_batch_size <- virtual_batch_size
-    self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
+    self$initial_bn <- torch::nn_batch_norm1d(input_dim, momentum = momentum)
 
-    if (self$n_shared > 0) {
-      shared_feat_transform <- torch::nn_module_list()
-
-      for (i in seq_len(self$n_shared)) {
-        if (i == 1) {
-          shared_feat_transform$append(torch::nn_linear(
-            self$input_dim,
-            2*(n_d + n_a),
-            bias = FALSE)
-          )
+    if (n_shared > 0) {
+      shared_feat_transform <- torch::nn_module_list(purrr::map(1:n_shared, 
+        ~ if (.x == 1) {
+          torch::nn_linear(input_dim, 2*(n_d + n_a), bias = FALSE)
         } else {
-          shared_feat_transform$append(torch::nn_linear(
-            n_d + n_a, 2*(n_d + n_a), bias = FALSE
-          ))
+          torch::nn_linear(n_d + n_a, 2*(n_d + n_a), bias = FALSE)
         }
-      }
-
+      ))
     } else {
       shared_feat_transform <- NULL
     }
-
+    
     self$initial_splitter <- feat_transformer(
-      self$input_dim, n_d + n_a, shared_feat_transform,
-      n_glu_independent = self$n_independent,
-      virtual_batch_size = self$virtual_batch_size,
+      input_dim, n_d + n_a, shared_feat_transform,
+      n_glu_independent = n_independent,
+      virtual_batch_size = virtual_batch_size,
       momentum = momentum
     )
+    
+    self$feat_transformers <- torch::nn_module_list(purrr::map(1:n_steps, 
+       ~ feat_transformer(input_dim, n_d + n_a, shared_feat_transform,
+                        n_glu_independent = n_independent,
+                        virtual_batch_size = virtual_batch_size,
+                        momentum = momentum)                                                        
+    ))
+    self$att_transformers <- torch::nn_module_list(purrr::map(1:n_steps, 
+      ~ attentive_transformer(n_a, input_dim,
+                              virtual_batch_size = virtual_batch_size,
+                              momentum = momentum,
+                              mask_type = mask_type, 
+                              mask_topk = mask_topk)
+    ))
 
-    self$feat_transformers <- torch::nn_module_list()
-    self$att_transformers <- torch::nn_module_list()
-
-    for (step in seq_len(n_steps)) {
-
-      transformer <- feat_transformer(self$input_dim, n_d + n_a, shared_feat_transform,
-                                      n_glu_independent = self$n_independent,
-                                      virtual_batch_size = self$virtual_batch_size,
-                                      momentum = momentum)
-      attention <- attentive_transformer(n_a, self$input_dim,
-                                         virtual_batch_size = self$virtual_batch_size,
-                                         momentum = momentum,
-                                         mask_type = self$mask_type, 
-                                         mask_topk = mask_topk)
-
-      self$feat_transformers$append(transformer)
-      self$att_transformers$append(attention)
-
-    }
 
   },
   forward = function(x, prior) {
