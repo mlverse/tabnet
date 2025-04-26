@@ -86,12 +86,12 @@ sparsemax_function <- torch::autograd_function(
     input$sub_(max_val) # same numerical stability trick as for softmax
     c(tau, supp_size) %<-% .sparsemax_threshold_and_support(input, dim = dim, k = k)
     output <- torch::torch_clamp(input - tau, min = 0)
-    ctx$save_for_backward(supp_size = supp_size, output = output, dim = dim)
+    ctx$save_for_backward(supp_size = supp_size, output = output, dim = dim, k = k)
     output
   },
 
   backward = function(ctx, grad_output) {
-    c(supp_size, output, dim) %<-% ctx$saved_variables
+    c(supp_size, output, dim, k) %<-% ctx$saved_variables
     grad_input <- grad_output$clone()
     grad_input[output == 0] <- 0
 
@@ -101,7 +101,8 @@ sparsemax_function <- torch::autograd_function(
 
     list(
       input = grad_input,
-      dim = dim
+      dim = dim,
+      k = k
     )
   }
 )
@@ -246,7 +247,7 @@ entmax_function <- torch::autograd_function(
 
     list(
       input = dX,
-      dim = NULL
+      dim = dim
     )
   }
 )
@@ -272,25 +273,23 @@ entmax_15_function <- torch::autograd_function(
 
     tau_star <- .entmax_threshold_and_support(input, dim = dim, k = k)[[1]]
     output <- torch::torch_clamp(input - tau_star, min = 0) ^ 2
-    ctx$save_for_backward(output = output, dim = dim)
+    ctx$save_for_backward(output = output, dim = dim, k = k)
     output
   },
 
   backward = function(ctx, grad_output) {
     # supp_size, output = ctx$saved_variables
-    saved <- ctx$saved_variables
-    dim <- saved$dim
-    output <- saved$output
-    gppr <- output$sqrt()
+    s <- ctx$saved_variables
+    gppr <- s$output$sqrt()
     dX <- grad_output * gppr
-    q <- dX$sum(dim) / gppr$sum(dim)
-    q <- q$unsqueeze(dim)
+    q <- dX$sum(s$dim) / gppr$sum(s$dim)
+    q <- q$unsqueeze(s$dim)
     dX$sub_(q*gppr)
 
     list(
       input = dX,
-      dim = NULL,
-      k = NULL
+      dim = dim,
+      k = s$k
     )
   }
 )

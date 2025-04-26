@@ -116,7 +116,7 @@ test_that("fit works with entmax mask-type", {
   
   expect_no_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-               config = tabnet_config( mask_type="entmax"))
+               config = tabnet_config( mask_type = "entmax"))
   )
 })
 
@@ -127,11 +127,11 @@ test_that("fit works with entmax15 mask-type", {
   
   expect_no_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-               config = tabnet_config( mask_type="entmax15"))
+               config = tabnet_config( mask_type = "entmax15"))
   )
   expect_no_error(
-    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-               config = tabnet_config( mask_type="entmax15", mask_topk = 12))
+    tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+               config = tabnet_config( mask_type = "entmax15", mask_topk = 12))
   )
 })
 
@@ -142,10 +142,10 @@ test_that("fit works with sparsemax15 mask-type", {
   
   expect_no_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-               config = tabnet_config( mask_type="sparsemax15"))
+               config = tabnet_config( mask_type = "sparsemax15"))
   )
   expect_no_error(
-    tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
-               config = tabnet_config( mask_type="sparsemax15", mask_topk = 12))
+    tabnet_fit(rec, attrition, epochs = 1, verbose = TRUE,
+               config = tabnet_config( mask_type = "sparsemax15", mask_topk = 12))
   )
 })

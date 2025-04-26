@@ -498,7 +498,7 @@ attentive_transformer <- torch::nn_module(
       } else {
         mask_topk <- as.integer(mask_topk)
       }
-      self$selector <- sparsemax(dim = -1L, k = mask_topk)
+      self$selector <- sparsemax15(dim = -1L, k = mask_topk)
     } else if (mask_type == "entmax15") {
       if (is.null(mask_topk)) {
         mask_topk <- round(input_dim[-1L] / 4)
