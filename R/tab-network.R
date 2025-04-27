@@ -223,7 +223,6 @@ tabnet_pretrainer <- torch::nn_module(
                         virtual_batch_size = 128, momentum = 0.02,
                         mask_type = "sparsemax", mask_topk=NULL) {
 
-    self$input_dim <- input_dim
     # a check par, just to easily find out when we need to
     # reload the model
     self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
@@ -390,11 +389,14 @@ tabnet_nn <- torch::nn_module(
                         virtual_batch_size = 128, momentum = 0.02,
                         mask_type="sparsemax", mask_topk=NULL) {
 
-    # a check par, just to easily find out when we need to
-    # reload the model
+    # a check par, just to easily find out when we need to reload the model
     self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
+    
+    # 3 vars reused for sum_embedding_masks()
     self$input_dim <- input_dim
-
+    self$cat_idxs <- cat_idxs
+    self$cat_emb_dim <- cat_emb_dim
+    
     if (n_steps <= 0)
       stop("'n_steps' should be a positive integer.")
     if (n_independent == 0 && n_shared == 0)
@@ -428,6 +430,7 @@ attentive_transformer <- torch::nn_module(
                         momentum = 0.02,
                         mask_type="sparsemax", 
                         mask_topk = NULL) {
+    self$mask_topk <- mask_topk # debug purpose
     self$fc <- torch::nn_linear(input_dim, sum(output_dim), bias=FALSE)
     initialize_non_glu(self$fc, input_dim, sum(output_dim))
     self$bn <- gbn(sum(output_dim), virtual_batch_size=virtual_batch_size,
@@ -440,20 +443,20 @@ attentive_transformer <- torch::nn_module(
       } else {
         mask_topk <- as.integer(mask_topk)
       }
-      self$selector <- sparsemax15(dim = -1L, k = mask_topk)
+      self$selector <- sparsemax15(dim = -1L, k = self$mask_topk)
     } else if (mask_type == "entmax15") {
       if (is.null(mask_topk)) {
         mask_topk <- round(input_dim[-1L] / 4)
       } else {
         mask_topk <- as.integer(mask_topk)
       }
-      self$selector <- entmax15(dim = -1L, k = mask_topk)
+      self$selector <- entmax15(dim = -1L, k = self$mask_topk)
     } else if (mask_type == "entmax")
       self$selector <- entmax(dim = -1L)
     else if (mask_type == "sparsemax")
       self$selector <- sparsemax(dim = -1L)
     else
-      stop("Please choose either 'sparsemax', 'entmax' or 'entmax15' as 'mask_type'")
+      stop("Please choose either 'sparsemax', 'sparsemax15', 'entmax' or 'entmax15' as 'mask_type'")
 
   },
   forward = function(priors, processed_feat) {

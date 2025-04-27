@@ -146,7 +146,7 @@ sparsemax <- torch::nn_module(
 #' alpha-Sparsemax with alph equal 1.5 
 #' @rdname sparsemax
 sparsemax15 <- torch::nn_module(
-  "sparsemax",
+  "sparsemax_15",
   initialize = function(dim = -1L, k=NULL) {
     self$dim <- dim
     self$k <- k

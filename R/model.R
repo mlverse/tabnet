@@ -433,7 +433,8 @@ tabnet_initialize <- function(x, y, config = tabnet_config()) {
     n_independent = config$n_independent,
     n_shared = config$n_shared,
     momentum = config$momentum,
-    mask_type = config$mask_type
+    mask_type = config$mask_type,
+    mask_topk = config$mask_topk
   )
 
   # main loop
