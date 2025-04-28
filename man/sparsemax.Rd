@@ -33,7 +33,7 @@ Solves the projection:
 }
 \examples{
 # example usage
-X <- torch::torch.randn(10,5)
+X <- torch::torch_randn(10,5)
 dim <-1
 k <-3
 result <- sparsemax(X, dim)

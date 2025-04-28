@@ -11,6 +11,7 @@ tabnet(
   attention_width = NULL,
   num_steps = NULL,
   mask_type = NULL,
+  mask_topk = NULL,
   num_independent = NULL,
   num_shared = NULL,
   num_independent_decoder = NULL,
@@ -60,6 +61,8 @@ the paper n_d = n_a is usually a good choice. (default=8)}
 
 \item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
 block, either \code{"sparsemax"}, \code{"entmax"} or \code{"entmax15"}.Defaults to \code{"sparsemax"}.}
+
+\item{mask_topk}{(int) mask sparsity top-k for \code{sparsemax15} and \code{entmax15.} See \code{\link[=entmax15]{entmax15()}} for detail.}
 
 \item{num_independent}{Number of independent Gated Linear Units layers at each step of the encoder.
 Usual values range from 1 to 5.}

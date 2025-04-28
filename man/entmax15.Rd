@@ -31,7 +31,7 @@ where \eqn{H_{1.5}(P)} is the Tsallis alpha-entropy with \eqn{\alpha=1.5}.
 }
 \examples{
 # example usage
-X <- torch::torch$randn(10,5)
+X <- torch::torch_randn(10,5)
 dim <- 1
 k <- 3
 result <- entmax15(X, dim, k)

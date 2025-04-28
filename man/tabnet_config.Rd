@@ -79,7 +79,7 @@ Values range from 1 to 2.}
 \item{mask_type}{(character) Final layer of feature selector in the attentive_transformer
 block, either \code{"sparsemax"}, \code{"entmax"} or \code{"entmax15"}.Defaults to \code{"sparsemax"}.}
 
-\item{mask_topk}{(int) mask sparcity top-k for \code{sparsemax} and \code{entmax15.} See \code{\link[=entmax15]{entmax15()}} for detail.}
+\item{mask_topk}{(int) mask sparsity top-k for \code{sparsemax15} and \code{entmax15.} See \code{\link[=entmax15]{entmax15()}} for detail.}
 
 \item{virtual_batch_size}{(int) Size of the mini batches used for
 "Ghost Batch Normalization" (default=256^2)}

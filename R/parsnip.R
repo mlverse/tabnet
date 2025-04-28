@@ -128,6 +128,15 @@ add_parsnip_tabnet <- function() {
   parsnip::set_model_arg(
     model = "tabnet",
     eng = "torch",
+    parsnip = "mask_topk",
+    original = "mask_topk",
+    func = list(pkg = "tabnet", fun = "mask_topk"),
+    has_submodel = FALSE
+  )
+  
+  parsnip::set_model_arg(
+    model = "tabnet",
+    eng = "torch",
     parsnip = "mlp_hidden_multiplier",
     original = "mlp_hidden_multiplier",
     func = list(pkg = "tabnet", fun = "mlp_hidden_multiplier"),
@@ -450,7 +459,7 @@ add_parsnip_tabnet <- function() {
 #'
 #' @export
 tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL, attention_width = NULL,
-                   num_steps = NULL, mask_type = NULL, num_independent = NULL, num_shared = NULL,
+                   num_steps = NULL, mask_type = NULL, mask_topk = NULL, num_independent = NULL, num_shared = NULL,
                    num_independent_decoder = NULL, num_shared_decoder = NULL, penalty = NULL,
                    feature_reusage = NULL, momentum = NULL, epochs = NULL, batch_size = NULL,
                    virtual_batch_size = NULL, learn_rate = NULL, optimizer = NULL, loss = NULL,
@@ -477,6 +486,7 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
     attention_width = rlang::enquo(attention_width),
     num_steps = rlang::enquo(num_steps),
     mask_type = rlang::enquo(mask_type),
+    mask_topk = rlang::enquo(mask_topk),
     num_independent = rlang::enquo(num_independent),
     num_shared = rlang::enquo(num_shared),
     num_independent_decoder = rlang::enquo(num_independent_decoder),
