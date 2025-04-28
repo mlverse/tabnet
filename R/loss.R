@@ -60,8 +60,13 @@ nn_aum_loss <- torch::nn_module(
     if(as.logical(torch::torch_sum(is_positive) == 0) || as.logical(torch::torch_sum(is_negative) == 0)){
       return(torch::torch_sum(pred_tensor*0))
     }
+<<<<<<< HEAD
 
     # pred tensor may be [[prediction, case_wts] when add_case_weight() is used. We keep only prediction
+=======
+    
+    # pred tensor may be [prediction, case_wts] when add_case_weight() is used. We keep only prediction
+>>>>>>> main
     if (pred_tensor$ndim > label_tensor$ndim) {
       pred_tensor <- pred_tensor$slice(dim = 2, 0, 1)$squeeze(2) 
     }
@@ -102,6 +107,7 @@ nn_aum_loss <- torch::nn_module(
     
   }
 )
+<<<<<<< HEAD
 
 
 #' Multiclass AUM loss
@@ -182,3 +188,5 @@ roc_aum <- function(label_tensor, level_id, pred_tensor) {
   constant_range_gr <- uniq_thresh_gr$diff() # range splits leading to {FPR, FNR } errors (see roc_aum row)
   return(torch::torch_sum(min_FPR_FNR * constant_range_gr, dim = 1))
 }
+=======
+>>>>>>> main
