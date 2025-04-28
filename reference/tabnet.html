@@ -55,6 +55,7 @@
 <span>  attention_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  mask_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mask_topk <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_independent <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_shared <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_independent_decoder <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -118,7 +119,11 @@ the paper n_d = n_a is usually a good choice. (default=8)</p></dd>
 
 <dt id="arg-mask-type">mask_type<a class="anchor" aria-label="anchor" href="#arg-mask-type"></a></dt>
 <dd><p>(character) Final layer of feature selector in the attentive_transformer
-block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
+block, either <code>"sparsemax"</code>, <code>"entmax"</code> or <code>"entmax15"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
+
+
+<dt id="arg-mask-topk">mask_topk<a class="anchor" aria-label="anchor" href="#arg-mask-topk"></a></dt>
+<dd><p>(int) mask sparsity top-k for <code>sparsemax15</code> and <code>entmax15.</code> See <code><a href="entmax15.html">entmax15()</a></code> for detail.</p></dd>
 
 
 <dt id="arg-num-independent">num_independent<a class="anchor" aria-label="anchor" href="#arg-num-independent"></a></dt>

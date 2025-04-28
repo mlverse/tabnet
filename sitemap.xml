@@ -15,12 +15,15 @@
 <url><loc>/reference/autoplot.tabnet_explain.html</loc></url>
 <url><loc>/reference/autoplot.tabnet_fit.html</loc></url>
 <url><loc>/reference/check_compliant_node.html</loc></url>
+<url><loc>/reference/entmax15.html</loc></url>
+<url><loc>/reference/get_tau.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/min_grid.tabnet.html</loc></url>
 <url><loc>/reference/nn_aum_loss.html</loc></url>
 <url><loc>/reference/nn_prune_head.html</loc></url>
 <url><loc>/reference/node_to_df.html</loc></url>
 <url><loc>/reference/pipe.html</loc></url>
+<url><loc>/reference/sparsemax.html</loc></url>
 <url><loc>/reference/tabnet.html</loc></url>
 <url><loc>/reference/tabnet_config.html</loc></url>
 <url><loc>/reference/tabnet_explain.html</loc></url>

@@ -60,6 +60,7 @@
 <span>  num_steps <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  feature_reusage <span class="op">=</span> <span class="fl">1.3</span>,</span>
 <span>  mask_type <span class="op">=</span> <span class="st">"sparsemax"</span>,</span>
+<span>  mask_topk <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  virtual_batch_size <span class="op">=</span> <span class="fl">256</span><span class="op">^</span><span class="fl">2</span>,</span>
 <span>  valid_split <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  learn_rate <span class="op">=</span> <span class="fl">0.02</span>,</span>
@@ -145,7 +146,11 @@ Values range from 1 to 2.</p></dd>
 
 <dt id="arg-mask-type">mask_type<a class="anchor" aria-label="anchor" href="#arg-mask-type"></a></dt>
 <dd><p>(character) Final layer of feature selector in the attentive_transformer
-block, either <code>"sparsemax"</code> or <code>"entmax"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
+block, either <code>"sparsemax"</code>, <code>"entmax"</code> or <code>"entmax15"</code>.Defaults to <code>"sparsemax"</code>.</p></dd>
+
+
+<dt id="arg-mask-topk">mask_topk<a class="anchor" aria-label="anchor" href="#arg-mask-topk"></a></dt>
+<dd><p>(int) mask sparsity top-k for <code>sparsemax15</code> and <code>entmax15.</code> See <code><a href="entmax15.html">entmax15()</a></code> for detail.</p></dd>
 
 
 <dt id="arg-virtual-batch-size">virtual_batch_size<a class="anchor" aria-label="anchor" href="#arg-virtual-batch-size"></a></dt>

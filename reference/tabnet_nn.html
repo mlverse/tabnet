@@ -66,7 +66,8 @@ Attentive Interpretable Tabular Deep Learning."></head><body>
 <span>  epsilon <span class="op">=</span> <span class="fl">1e-15</span>,</span>
 <span>  virtual_batch_size <span class="op">=</span> <span class="fl">128</span>,</span>
 <span>  momentum <span class="op">=</span> <span class="fl">0.02</span>,</span>
-<span>  mask_type <span class="op">=</span> <span class="st">"sparsemax"</span></span>
+<span>  mask_type <span class="op">=</span> <span class="st">"sparsemax"</span>,</span>
+<span>  mask_topk <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -134,7 +135,12 @@ specific size.</p></dd>
 
 
 <dt id="arg-mask-type">mask_type<a class="anchor" aria-label="anchor" href="#arg-mask-type"></a></dt>
-<dd><p>Either "sparsemax" or "entmax" : this is the masking function to use.</p></dd>
+<dd><p>Either "sparsemax", "entmax" or "entmax15": the sparse masking function to use.</p></dd>
+
+
+<dt id="arg-mask-topk">mask_topk<a class="anchor" aria-label="anchor" href="#arg-mask-topk"></a></dt>
+<dd><p>the mask top-k value for k-sparsity selection in the mask for <code>sparsemax</code> and <code>entmax15</code>.
+defaults to 1/4 of last <code>input_dim</code> if <code>NULL</code>. See <a href="entmax15.html">entmax15</a> for details.</p></dd>
 
 </dl></div>
 
