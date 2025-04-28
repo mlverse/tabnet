@@ -17,8 +17,10 @@ OOM
 Pfister
 Pretrain
 Sercan
+Sparsemax
 TabNet
 TabNet's
+Tsallis
 XGBoost
 ai
 al
@@ -52,6 +54,7 @@ pretrain
 pretrained
 pretraining
 reusage
+softmax
 sparsemax
 subprocesses
 th
