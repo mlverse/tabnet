@@ -227,6 +227,10 @@ tabnet_pretrainer <- torch::nn_module(
     # reload the model
     self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
 
+    # 3 vars reused for sum_embedding_masks() within compute_feature_importance()
+    self$input_dim <- input_dim
+    self$cat_idxs <- cat_idxs
+    self$cat_emb_dim <- cat_emb_dim
     self$mask_topk <- mask_topk # debug purpose
     self$initial_bn <- torch::nn_batch_norm1d(input_dim, momentum = momentum)
 
