@@ -13,7 +13,7 @@ get_tau(input, dim = -1L, k = NULL)
 
 \item{k}{The number of largest elements to partial-sort over. For optimal
 performance, should be slightly bigger than the expected number of
-nonzeros in the solution. If the solution is more than k-sparse,
+non-zeros in the solution. If the solution is more than k-sparse,
 this function is recursively called with a 2*k schedule. If \code{NULL},
 full sorting is performed from the beginning. Default is NULL.}
 }

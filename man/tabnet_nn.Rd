@@ -57,7 +57,7 @@ specific size.}
 
 \item{mask_type}{Either "sparsemax", "entmax" or "entmax15": the sparse masking function to use.}
 
-\item{mask_topk}{the mask top-k value for k-sparcity selection in the mask for \code{sparsemax} and \code{entmax15}.
+\item{mask_topk}{the mask top-k value for k-sparsity selection in the mask for \code{sparsemax} and \code{entmax15}.
 defaults to 1/4 of last \code{input_dim} if \code{NULL}. See \link{entmax15} for details.}
 }
 \description{

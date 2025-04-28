@@ -382,7 +382,7 @@ tabnet_no_embedding <- torch::nn_module(
 #' @param virtual_batch_size Batch size for Ghost Batch Normalization.
 #' @param momentum  Numerical value between 0 and 1 which will be used for momentum in all batch norm.
 #' @param mask_type Either "sparsemax", "entmax" or "entmax15": the sparse masking function to use.
-#' @param mask_topk the mask top-k value for k-sparcity selection in the mask for `sparsemax` and `entmax15`.
+#' @param mask_topk the mask top-k value for k-sparsity selection in the mask for `sparsemax` and `entmax15`.
 #'  defaults to 1/4 of last `input_dim` if `NULL`. See [entmax15] for details.
 #' @export
 tabnet_nn <- torch::nn_module(

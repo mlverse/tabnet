@@ -26,23 +26,15 @@
 #' @param dim The dimension along which to apply sparsemax.
 #' @param k The n largest elements to partial-sort input over. For optimal
 #' performance, should be slightly bigger than the expected number of
-#' nonzeros in the solution. If the solution is more than k-sparse,
+#' non-zeros in the solution. If the solution is more than k-sparse,
 #' this function is recursively called with a 2*k schedule. If `NULL`, full
 #' sorting is performed from the beginning.
 #'
 #' @return A list containing:
 #' \itemize{
 #' \item{\code{tau}}{The threshold value for each vector, with all but the \code{dim} dimension intact.}
-#' \item{\code{support_size}}{The number of nonzeros in each vector.}
+#' \item{\code{support_size}}{The number of non-zeros in each vector.}
 #' }
-#'
-#' @examples
-#' # example usage
-#' input <- torch::torch_randn(10,5)
-#' dim <-1
-#' k <-3
-#' result <- .sparsemax_threshold_and_support(input, dim, k)
-#' print(result)
 #' @noRd
 .sparsemax_threshold_and_support <- function(input, dim = -1L, k = NULL) {
   tau_ <- ss_ <- NULL # avoid NOTE
@@ -116,23 +108,22 @@ sparsemax_function <- torch::autograd_function(
 #' \eqn{\min_P ||input - P||_2 \text{ s.t. } P \geq0, \sum(P) ==1}
 #'
 #'
-#' @param input The input tensor.
 #' @param dim The dimension along which to apply sparsemax.
 #' @param k The number of largest elements to partial-sort input over. For optimal
 #' performance, `k` should be slightly bigger than the expected number of
-#' nonzeros in the solution. If the solution is more than k-sparse,
+#' non-zeros in the solution. If the solution is more than k-sparse,
 #' this function is recursively called with a 2*k schedule. If `NULL`, full
 #' sorting is performed from the beginning.
 #'
 #' @return The projection result, such that \eqn{P$sum(dim=dim) ==1} elementwise.
 #'
 #' @examples
-#' # example usage
-#' X <- torch::torch_randn(10,5)
-#' dim <-1
-#' k <-3
-#' result <- sparsemax(X, dim)
+#' input <- torch::torch_randn(10, 5, requires_grad = TRUE)
+#' # create a top3 alpha=1.5 sparsemax on last input dimension
+#' nn_sparsemax <- sparsemax15(dim=1, k=3)
+#' result <- nn_sparsemax(input)
 #' print(result)
+#' @export
 sparsemax <- torch::nn_module(
   "sparsemax",
   initialize = function(dim = -1L) {
@@ -143,8 +134,9 @@ sparsemax <- torch::nn_module(
   }
 )
 
-#' alpha-Sparsemax with alph equal 1.5 
+#' Alpha-Sparsemax with alpha equal 1.5 
 #' @rdname sparsemax
+#' @export
 sparsemax15 <- torch::nn_module(
   "sparsemax_15",
   initialize = function(dim = -1L, k=NULL) {
@@ -162,23 +154,15 @@ sparsemax15 <- torch::nn_module(
 #' @param dim The dimension along which to apply 1.5-entmax.
 #' @param k The n largest elements to partial-sort input over. For optimal
 #'   performance, `k` should be slightly bigger than the expected number of
-#'   nonzeros in the solution. If the solution is more than k-sparse,
+#'   non-zeros in the solution. If the solution is more than k-sparse,
 #'   this function is recursively called with a 2*k schedule. If `NULL`, full
 #'   sorting is performed from the beginning.
 #'
 #' @return A list containing:
 #'   \itemize{
 #'     \item{\code{tau_star}}{The threshold value for each vector, with all but the \code{dim} dimension intact.}
-#'     \item{\code{support_size}}{The number of nonzeros in each vector.}
+#'     \item{\code{support_size}}{The number of non-zeros in each vector.}
 #'   }
-#'
-#' @examples
-#' # example usage
-#' input <- torch::torch_randn(10, 5)
-#' dim <- 1
-#' k <- 3
-#' result <- .entmax_threshold_and_support(input, dim, k)
-#' print(result)
 #' @noRd
 .entmax_threshold_and_support <- function(input, dim = -1L, k = NULL) {
   tau_ <- ss_ <- NULL # avoid NOTE
@@ -252,6 +236,8 @@ entmax_function <- torch::autograd_function(
   }
 )
 
+#' @export
+#' @rdname entmax15
 entmax <- torch::nn_module(
   "entmax",
   initialize = function(dim = -1) {
@@ -293,19 +279,18 @@ entmax_15_function <- torch::autograd_function(
   }
 )
 
-#' 1.5-entmax 
+#' Alpha-entmax 
 #' 
-#' Normalizing sparse transform (a la softmax).
+#' With alpha = 1.5 and normalizing sparse transform (a la softmax).
 #'
 #' Solves the optimization problem:
 #' \eqn{\max_p <input, P> - H_{1.5}(P) \text{ s.t. } P \geq 0, \sum(P) == 1}
 #' where \eqn{H_{1.5}(P)} is the Tsallis alpha-entropy with \eqn{\alpha=1.5}.
 #'
-#' @param input The input tensor.
 #' @param dim The dimension along which to apply 1.5-entmax.
 #' @param k The number of largest elements to partial-sort input over. For optimal
 #' performance, should be slightly bigger than the expected number of
-#' nonzeros in the solution. If the solution is more than k-sparse,
+#' non-zeros in the solution. If the solution is more than k-sparse,
 #' this function is recursively called with a 2*k schedule. If `NULL`, full
 #' sorting is performed from the beginning.
 #'
@@ -313,12 +298,11 @@ entmax_15_function <- torch::autograd_function(
 #'   \eqn{P$sum(dim=dim) == 1} elementwise.
 #'
 #' @examples
-#' # example usage
-#' X <- torch::torch_randn(10,5)
-#' dim <- 1
-#' k <- 3
-#' result <- entmax15(X, dim, k)
-#' print(result)
+#' input <- torch::torch_randn(10,5, requires_grad = TRUE)
+#' # create a top3 alpha=1.5 entmax on last input dimension
+#' nn_entmax <- entmax15(dim=-1L, k = 3)
+#' result <- nn_entmax(input)
+#' @export
 entmax15 <- torch::nn_module(
   "entmax_15",
   initialize = function(dim = -1L, k = NULL) {
@@ -339,13 +323,12 @@ entmax15 <- torch::nn_module(
 #' @param dim The dimension along which to apply 1.5-entmax. Default is -1.
 #' @param k The number of largest elements to partial-sort over. For optimal
 #'   performance, should be slightly bigger than the expected number of
-#'   nonzeros in the solution. If the solution is more than k-sparse,
+#'   non-zeros in the solution. If the solution is more than k-sparse,
 #'   this function is recursively called with a 2*k schedule. If `NULL`, 
 #'   full sorting is performed from the beginning. Default is NULL.
 #'
 #' @return The threshold value for each vector, with all but the `dim` 
 #'   dimension intact.
-#' @export
 get_tau <- function(input, dim = -1L, k = NULL) {
   tau_ <- ss_ <- NULL # avoid note 
   if (is.null(k) || k >= input$size(dim)) { # do full sort

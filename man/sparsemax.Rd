@@ -14,11 +14,9 @@ sparsemax15(dim = -1L, k = NULL)
 
 \item{k}{The number of largest elements to partial-sort input over. For optimal
 performance, \code{k} should be slightly bigger than the expected number of
-nonzeros in the solution. If the solution is more than k-sparse,
+non-zeros in the solution. If the solution is more than k-sparse,
 this function is recursively called with a 2*k schedule. If \code{NULL}, full
 sorting is performed from the beginning.}
-
-\item{input}{The input tensor.}
 }
 \value{
 The projection result, such that \eqn{P$sum(dim=dim) ==1} elementwise.
@@ -32,10 +30,9 @@ Solves the projection:
 \eqn{\min_P ||input - P||_2 \text{ s.t. } P \geq0, \sum(P) ==1}
 }
 \examples{
-# example usage
-X <- torch::torch_randn(10,5)
-dim <-1
-k <-3
-result <- sparsemax(X, dim)
+input <- torch::torch_randn(10, 5, requires_grad = TRUE)
+# create a top3 alpha=1.5 sparsemax on last input dimension
+nn_sparsemax <- sparsemax15(dim=1, k=3)
+result <- nn_sparsemax(input)
 print(result)
 }
