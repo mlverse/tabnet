@@ -107,7 +107,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     n_shared = config$n_shared,
     n_independent_decoder = config$n_independent_decoder,
     n_shared_decoder = config$n_shared_decoder,
-    momentum = config$momentum
+    momentum = config$momentum,
+    mask_type = config$mask_type,
+    mask_topk = config$mask_topk
   )
 
   network$to(device = device)

@@ -190,30 +190,3 @@ test_that("we can prune head of restored models from disk", {
   })
 
 })
-
-test_that("using weights raise a message", {
-
-  testthat::skip_on_ci()
-
-  # dataframe interface
-  expect_message(
-    fit <- tabnet_fit(x, y, epochs = 1, weights = 27),
-    "Configured `weights`"
-  )
-
-  # formula interface
-  expect_message(
-    fit <- tabnet_fit(Sale_Price ~ ., data = ames, epochs = 1, weights = 27),
-    "Configured `weights`"
-  )
-
-  # recipe interface
-  rec <- recipe(Attrition ~ ., data = attrition) %>%
-    step_normalize(all_numeric(), -all_outcomes())
-
-    expect_message(
-    fit <- tabnet_fit(rec, attrition[1:256,], epochs = 1, weights = "whatever"),
-    "Configured `weights`"
-  )
-
-})

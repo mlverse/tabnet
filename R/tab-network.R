@@ -14,9 +14,8 @@ initialize_glu <- function(module, input_dim, output_dim) {
 gbn <- torch::nn_module(
   "gbn",
   initialize = function(input_dim, virtual_batch_size=128, momentum = 0.02) {
-    self$input_dim <- input_dim
     self$virtual_batch_size <- virtual_batch_size
-    self$bn = torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
+    self$bn = torch::nn_batch_norm1d(input_dim, momentum = momentum)
   },
   forward = function(x) {
     chunks <- x$chunk(as.integer(ceiling(x$shape[1] / self$virtual_batch_size)), 1)
@@ -35,69 +34,49 @@ tabnet_encoder <- torch::nn_module(
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size=128, momentum = 0.02,
-                        mask_type="sparsemax") {
+                        mask_type="sparsemax", mask_topk=NULL) {
 
-    self$input_dim <- input_dim
-    self$output_dim <- output_dim
     self$n_d <- n_d
-    self$n_a <- n_a
     self$n_steps <- n_steps
     self$gamma <- gamma
     self$epsilon <- epsilon
-    self$n_independent <- n_independent
-    self$n_shared <- n_shared
-    self$virtual_batch_size <- virtual_batch_size
-    self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
+    self$mask_topk <- mask_topk # debug purpose
+    self$initial_bn <- torch::nn_batch_norm1d(input_dim, momentum = momentum)
 
-    if (self$n_shared > 0) {
-      shared_feat_transform <- torch::nn_module_list()
-
-      for (i in seq_len(self$n_shared)) {
-        if (i == 1) {
-          shared_feat_transform$append(torch::nn_linear(
-            self$input_dim,
-            2*(n_d + n_a),
-            bias = FALSE)
-          )
+    if (n_shared > 0) {
+      shared_feat_transform <- torch::nn_module_list(purrr::map(1:n_shared, 
+        ~ if (.x == 1) {
+          torch::nn_linear(input_dim, 2*(n_d + n_a), bias = FALSE)
         } else {
-          shared_feat_transform$append(torch::nn_linear(
-            n_d + n_a, 2*(n_d + n_a), bias = FALSE
-          ))
+          torch::nn_linear(n_d + n_a, 2*(n_d + n_a), bias = FALSE)
         }
-      }
-
+      ))
     } else {
       shared_feat_transform <- NULL
     }
-
+    
     self$initial_splitter <- feat_transformer(
-      self$input_dim, n_d + n_a, shared_feat_transform,
-      n_glu_independent = self$n_independent,
-      virtual_batch_size = self$virtual_batch_size,
+      input_dim, n_d + n_a, shared_feat_transform,
+      n_glu_independent = n_independent,
+      virtual_batch_size = virtual_batch_size,
       momentum = momentum
     )
-
-    self$feat_transformers <- torch::nn_module_list()
-    self$att_transformers <- torch::nn_module_list()
-
-    for (step in seq_len(n_steps)) {
-
-      transformer <- feat_transformer(self$input_dim, n_d + n_a, shared_feat_transform,
-                                      n_glu_independent = self$n_independent,
-                                      virtual_batch_size = self$virtual_batch_size,
-                                      momentum = momentum)
-      attention <- attentive_transformer(n_a, self$input_dim,
-                                         virtual_batch_size = self$virtual_batch_size,
-                                         momentum = momentum,
-                                         mask_type = self$mask_type)
-
-      self$feat_transformers$append(transformer)
-      self$att_transformers$append(attention)
-
-    }
-
+    # stack as many steps as needed of feature_transformer and attentive_transformer
+    self$feat_transformers <- torch::nn_module_list(purrr::map(1:n_steps, 
+       ~ feat_transformer(input_dim, n_d + n_a, shared_feat_transform,
+                        n_glu_independent = n_independent,
+                        virtual_batch_size = virtual_batch_size,
+                        momentum = momentum)                                                        
+    ))
+    self$att_transformers <- torch::nn_module_list(purrr::map(1:n_steps, 
+      ~ attentive_transformer(n_a, input_dim,
+                              virtual_batch_size = virtual_batch_size,
+                              momentum = momentum,
+                              mask_type = mask_type, 
+                              mask_topk = mask_topk)
+    ))
   },
+
   forward = function(x, prior) {
     res <- torch::torch_tensor(0, device = x$device)
     x <- self$initial_bn(x)
@@ -242,39 +221,29 @@ tabnet_pretrainer <- torch::nn_module(
                         n_shared = 2, n_independent_decoder = 1,
                         n_shared_decoder = 1, epsilon = 1e-15,
                         virtual_batch_size = 128, momentum = 0.02,
-                        mask_type = "sparsemax") {
-
-    self$input_dim <- input_dim
-    self$pretraining_ratio <- pretraining_ratio
+                        mask_type = "sparsemax", mask_topk=NULL) {
 
     # a check par, just to easily find out when we need to
     # reload the model
     self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
-    self$n_d <- n_d
-    self$n_a <- n_a
-    self$n_steps <- n_steps
-    self$gamma <- gamma
-    self$cat_idxs <- cat_idxs
-    self$cat_dims <- cat_dims
-    self$cat_emb_dim <- cat_emb_dim
-    self$epsilon <- epsilon
-    self$n_independent <- n_independent
-    self$n_shared <- n_shared
-    self$n_independent_decoder <- n_independent_decoder
-    self$n_shared_decoder <- n_shared_decoder
-    self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
 
-    if (self$n_steps <= 0)
+    # 3 vars reused for sum_embedding_masks() within compute_feature_importance()
+    self$input_dim <- input_dim
+    self$cat_idxs <- cat_idxs
+    self$cat_emb_dim <- cat_emb_dim
+    self$mask_topk <- mask_topk # debug purpose
+    self$initial_bn <- torch::nn_batch_norm1d(input_dim, momentum = momentum)
+
+    if (n_steps <= 0)
       stop("'n_steps' should be a positive integer.")
-    if (self$n_independent == 0 && self$n_shared == 0)
+    if (n_independent == 0 && n_shared == 0)
       stop("'n_shared' and 'n_independant' can't be both zero.")
 
-    self$virtual_batch_size <- virtual_batch_size
+    # self$virtual_batch_size <- virtual_batch_size
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$post_embed_dim <- self$embedder$post_embed_dim
-    self$masker = random_obfuscator(self$pretraining_ratio)
+    self$masker = random_obfuscator(pretraining_ratio)
     self$encoder = tabnet_encoder(
       input_dim = self$post_embed_dim,
       output_dim = self$post_embed_dim,
@@ -287,7 +256,8 @@ tabnet_pretrainer <- torch::nn_module(
       epsilon = epsilon,
       virtual_batch_size = virtual_batch_size,
       momentum = momentum,
-      mask_type = mask_type
+      mask_type = mask_type,
+      mask_topk = mask_topk
     )
     self$decoder = tabnet_decoder(
       self$post_embed_dim,
@@ -337,21 +307,12 @@ tabnet_no_embedding <- torch::nn_module(
                         n_steps=3, gamma=1.3,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size=128, momentum = 0.02,
-                        mask_type="sparsemax") {
+                        mask_type="sparsemax", mask_topk=NULL) {
 
-    self$input_dim <- input_dim
-    self$output_dim <- output_dim
     self$is_multi_outcome <- !is.atomic(output_dim)
-    self$n_d <- n_d
-    self$n_a <- n_a
-    self$n_steps <- n_steps
-    self$gamma <- gamma
-    self$epsilon <- epsilon
-    self$n_independent <- n_independent
-    self$n_shared <- n_shared
-    self$virtual_batch_size <- virtual_batch_size
-    self$mask_type <- mask_type
-    self$initial_bn <- torch::nn_batch_norm1d(self$input_dim, momentum = momentum)
+
+    self$mask_topk <- mask_topk # debug purpose
+    self$initial_bn <- torch::nn_batch_norm1d(input_dim, momentum = momentum)
 
     self$encoder <- tabnet_encoder(
       input_dim = input_dim,
@@ -365,7 +326,8 @@ tabnet_no_embedding <- torch::nn_module(
       epsilon = epsilon,
       virtual_batch_size = virtual_batch_size,
       momentum = momentum,
-      mask_type = mask_type
+      mask_type = mask_type,
+      mask_topk = mask_topk
     )
     if (self$is_multi_outcome) {
       self$multi_outcome_mapping <- torch::nn_module_list()
@@ -419,7 +381,9 @@ tabnet_no_embedding <- torch::nn_module(
 #' @param epsilon Avoid log(0), this should be kept very low.
 #' @param virtual_batch_size Batch size for Ghost Batch Normalization.
 #' @param momentum  Numerical value between 0 and 1 which will be used for momentum in all batch norm.
-#' @param mask_type Either "sparsemax" or "entmax" : this is the masking function to use.
+#' @param mask_type Either "sparsemax", "entmax" or "entmax15": the sparse masking function to use.
+#' @param mask_topk the mask top-k value for k-sparsity selection in the mask for `sparsemax` and `entmax15`.
+#'  defaults to 1/4 of last `input_dim` if `NULL`. See [entmax15] for details.
 #' @export
 tabnet_nn <- torch::nn_module(
   "tabnet",
@@ -427,29 +391,19 @@ tabnet_nn <- torch::nn_module(
                         n_steps=3, gamma=1.3, cat_idxs=c(), cat_dims=c(), cat_emb_dim=1,
                         n_independent=2, n_shared=2, epsilon=1e-15,
                         virtual_batch_size = 128, momentum = 0.02,
-                        mask_type="sparsemax") {
-    self$cat_idxs <- cat_idxs
-    self$cat_dims <- cat_dims
-    self$cat_emb_dim <- cat_emb_dim
+                        mask_type="sparsemax", mask_topk=NULL) {
 
-    # a check par, just to easily find out when we need to
-    # reload the model
+    # a check par, just to easily find out when we need to reload the model
     self$.check <- torch::nn_parameter(torch::torch_tensor(1, requires_grad = TRUE))
-
+    
+    # 3 vars reused for sum_embedding_masks()
     self$input_dim <- input_dim
-    self$output_dim <- output_dim
-    self$n_d <- n_d
-    self$n_a <- n_a
-    self$n_steps <- n_steps
-    self$gamma <- gamma
-    self$epsilon <- epsilon
-    self$n_independent <- n_independent
-    self$n_shared <-  n_shared
-    self$mask_type <- mask_type
-
-    if (self$n_steps <= 0)
+    self$cat_idxs <- cat_idxs
+    self$cat_emb_dim <- cat_emb_dim
+    
+    if (n_steps <= 0)
       stop("'n_steps' should be a positive integer.")
-    if (self$n_independent == 0 && self$n_shared == 0)
+    if (n_independent == 0 && n_shared == 0)
       stop("'n_shared' and 'n_independant' can't be both zero.")
 
     self$virtual_batch_size <- virtual_batch_size
@@ -458,7 +412,7 @@ tabnet_nn <- torch::nn_module(
     self$post_embed_dim <- self$embedder$post_embed_dim
     self$tabnet <- tabnet_no_embedding(self$post_embed_dim, output_dim, n_d, n_a, n_steps,
                                      gamma, n_independent, n_shared, epsilon,
-                                     virtual_batch_size, momentum, mask_type)
+                                     virtual_batch_size, momentum, mask_type, mask_topk)
 
   },
   forward = function(x, x_na_mask) {
@@ -478,19 +432,35 @@ attentive_transformer <- torch::nn_module(
   initialize = function(input_dim, output_dim,
                         virtual_batch_size = 128,
                         momentum = 0.02,
-                        mask_type="sparsemax") {
+                        mask_type="sparsemax", 
+                        mask_topk = NULL) {
+    self$mask_topk <- mask_topk # debug purpose
     self$fc <- torch::nn_linear(input_dim, sum(output_dim), bias=FALSE)
     initialize_non_glu(self$fc, input_dim, sum(output_dim))
     self$bn <- gbn(sum(output_dim), virtual_batch_size=virtual_batch_size,
                   momentum = momentum)
 
 
-    if (mask_type == "sparsemax")
-      self$selector <- torch::nn_contrib_sparsemax(dim =-1)
-    else if (mask_type == "entmax")
-      self$selector <- entmax(dim = -1)
+    if (mask_type == "sparsemax15") {
+      if (is.null(mask_topk)) {
+        mask_topk <- round(input_dim[-1L] / 4)
+      } else {
+        mask_topk <- as.integer(mask_topk)
+      }
+      self$selector <- sparsemax15(dim = -1L, k = self$mask_topk)
+    } else if (mask_type == "entmax15") {
+      if (is.null(mask_topk)) {
+        mask_topk <- round(input_dim[-1L] / 4)
+      } else {
+        mask_topk <- as.integer(mask_topk)
+      }
+      self$selector <- entmax15(dim = -1L, k = self$mask_topk)
+    } else if (mask_type == "entmax")
+      self$selector <- entmax(dim = -1L)
+    else if (mask_type == "sparsemax")
+      self$selector <- sparsemax(dim = -1L)
     else
-      stop("Please choose either 'sparsemax' or 'entmax' as 'mask_type'")
+      stop("Please choose either 'sparsemax', 'sparsemax15', 'entmax' or 'entmax15' as 'mask_type'")
 
   },
   forward = function(priors, processed_feat) {
