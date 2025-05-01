@@ -108,7 +108,7 @@ tabnet_fit <- function(x, ...) {
 #' @export
 #' @rdname tabnet_fit
 tabnet_fit.default <- function(x, ...) {
-  type_error("`tabnet_fit()` is not defined for a {.type {class(x)[1])}}.")
+  type_error("{.fn tabnet_fit} is not defined for a {.type {class(x)[1])}}.")
 }
 
 #' @export
@@ -265,7 +265,7 @@ tabnet_pretrain <- function(x, ...) {
 #' @export
 #' @rdname tabnet_pretrain
 tabnet_pretrain.default <- function(x, ...) {
-  type_error("`tabnet_pretrain()` is not defined for a {.type {class(x)[1])}}.")
+  type_error("{.fn tabnet_pretrain} is not defined for a {.type {class(x)[1])}}.")
 }
 
 
@@ -405,7 +405,8 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   } else if (task == "unsupervised") {
 
     if (!is.null(tabnet_model)) {
-      warn("Using `tabnet_pretrain()` from a model is not currently supported.","The pretraining will start with a new network initialization")
+      warn("Using {.fn tabnet_pretrain} from a model is not currently supported.",
+           "Pretraining will start from a new network initialization")
     }
     pretrain_lst <- tabnet_train_unsupervised( predictors, config = config, epoch_shift)
     return(new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint))
@@ -518,7 +519,7 @@ check_type <- function(outcome_ptype, type = NULL) {
   outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
 
   if (!outcome_all_numeric && !outcome_all_factor)
-    type_error("Mixed multi-outcome type {.type {unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}} is not supported")
+    not_implemented_error("Mixed multi-outcome type {.type {unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}} is not supported")
 
   if (is.null(type)) {
     if (outcome_all_factor)

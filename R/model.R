@@ -253,7 +253,7 @@ resolve_loss <- function(config, dtype) {
     # cross entropy loss is required
     loss_fn <- torch::nn_cross_entropy_loss()
   else
-    stop(gettextf("`%s` is not a valid loss for outcome of type %s", loss, dtype), call. = FALSE)
+    value_error("{.val {loss}} is not a valid loss for outcome of type {.type {dtype}}")
 
   loss_fn
 }
@@ -264,7 +264,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   else if (early_stopping_monitor %in% c("train_loss", "auto"))
     early_stopping_monitor <- "train_loss"
   else
-    stop(gettextf("%s is not a valid early-stopping metric to monitor with `valid_split` = %s", early_stopping_monitor, valid_split), call. = FALSE)
+    value_error("{.val {early_stopping_monitor}} is not a valid early-stopping metric to monitor with {.var valid_split}{.val = {valid_split}}")
 
   early_stopping_monitor
 }
@@ -516,11 +516,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     config$ancestor_tt <- torch::torch_tensor(config$ancestor)$to(torch::torch_bool(), device = device)
   }
 
-  # instanciate optimizer
+  # instantiate optimizer
   if (is_optim_generator(config$optimizer)) {
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
   } else {
-    stop("`optimizer` must be resolved into a torch optimizer generator.", call. = FALSE)
+    type_error("{.var optimizer} must be resolved into a torch optimizer generator.")
   }
 
   # define scheduler
@@ -533,7 +533,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   } else if (config$lr_scheduler == "step") {
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   } else {
-    stop("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.", call. = FALSE)
+    not_implemented_error("Currently only the {.str step} and {.str reduce_on_plateau} scheduler are supported.", call. = FALSE)
   }
 
   # restore previous metrics & checkpoints

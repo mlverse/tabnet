@@ -1,11 +1,11 @@
 check_dials <- function() {
   if (!requireNamespace("dials", quietly = TRUE))
-    stop("Package \"dials\" needed for this function to work. Please install it.", call. = FALSE)
+    runtime_error("Package {.pkg dials} needed for this function to work. Please install it.")
 }
 
 check_cli <- function() {
   if (!requireNamespace("cli", quietly = TRUE))
-    stop("Package \"cli\" needed for this function to work. Please install it.", call. = FALSE)
+    runtime_error("Package {.pkg cli} needed for this function to work. Please install it.")
 }
 
 
