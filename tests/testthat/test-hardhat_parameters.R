@@ -186,7 +186,7 @@ test_that("reduce_on_plateau scheduler works", {
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "multiplicative",
                       lr_decay = 0.1, step_size = 1),
-    "only the 'step' and 'reduce_on_plateau' scheduler"
+    "only the \"step\" and \"reduce_on_plateau\" scheduler"
   )
 
   sc_fn <- function(optimizer) {
