@@ -264,7 +264,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
   else if (early_stopping_monitor %in% c("train_loss", "auto"))
     early_stopping_monitor <- "train_loss"
   else
-    value_error("{.val {early_stopping_monitor}} is not a valid early-stopping metric to monitor with {.var valid_split}{.val = {valid_split}}")
+    value_error("{.val {early_stopping_monitor}} is not a valid early-stopping metric to monitor with {.val valid_split = {valid_split}}")
 
   early_stopping_monitor
 }

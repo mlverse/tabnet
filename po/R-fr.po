@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.7.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-28 09:11+0200\n"
-"PO-Revision-Date: 2025-04-28 09:16+0200\n"
+"POT-Creation-Date: 2025-05-01 19:54+0200\n"
+"PO-Revision-Date: 2025-05-01 20:00+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
@@ -13,15 +13,16 @@ msgstr ""
 "X-Generator: Poedit 3.6\n"
 
 #: dials.R:3
-msgid "Package \"dials\" needed for this function to work. Please install it."
+msgid ""
+"Package {.pkg dials} needed for this function to work. Please install it."
 msgstr ""
-"Le package \"dials\" doit être installé pour cette fonction. Merci de "
+"Le package {.pkg dials} doit être installé pour cette fonction. Merci de "
 "l'installer."
 
 #: dials.R:8
-msgid "Package \"cli\" needed for this function to work. Please install it."
+msgid "Package {.pkg cli} needed for this function to work. Please install it."
 msgstr ""
-"Le package \"cli\" doit être installé pour cette fonction. Merci de "
+"Le package {.pkg cli} doit être installé pour cette fonction. Merci de "
 "l'installer."
 
 #: dials.R:149
@@ -30,109 +31,106 @@ msgstr ""
 "On ne peut pas utiliser {.var cat_emb_dim} comme paramêtre de {.fun tune}"
 "pour l'instant."
 
-#: explain.R:48
-#, c-format
-msgid "`tabnet_explain()` is not defined for a '%s'."
-msgstr "`tabnet_explain()` n’est pas défini pour un '%s'."
+#: explain.R:47
+msgid "{.fn tabnet_explain} is not defined for a {.type {class(object)[1]}}."
+msgstr ""
+"{.fn tabnet_explain} n’est pas défini pour un {.type {class(object)[1]}}."
 
-#: hardhat.R:112
-#, c-format
-msgid "`tabnet_fit()` is not defined for a '%s'."
-msgstr "`tabnet_fit()` n’est pas défini pour un '%s'."
+#: hardhat.R:111
+msgid "{.fn tabnet_fit} is not defined for a {.type {class(x)[1])}}."
+msgstr "{.fn tabnet_fit} n’est pas défini pour un {.type {class(x)[1])}}."
 
-#: hardhat.R:271
-#, c-format
-msgid "`tabnet_pretrain()` is not defined for a '%s'."
-msgstr "`tabnet_pretrain()` n’est pas défini pour un '%s'."
+#: hardhat.R:268
+msgid "{.fn tabnet_pretrain} is not defined for a {.type {class(x)[1])}}."
+msgstr "{.fn tabnet_pretrain} n’est pas défini pour un {.type {class(x)[1])}}."
 
-#: hardhat.R:351
-#, c-format
-msgid "'%s' is not recognised as a proper TabNet model"
-msgstr "'%s' n’est pas reconnu comme un modèle TabNet correct"
+#: hardhat.R:347
+msgid "{.var {tabnet_model}} is not recognised as a proper TabNet model"
+msgstr "{.var {tabnet_model}} n’est pas reconnu comme un modèle TabNet correct"
 
-#: hardhat.R:358
-#, c-format
-msgid "The model was trained for less than '%s' epochs"
-msgstr "Le modèle a été entrainé sur moins de '%s' époques"
+#: hardhat.R:353
+msgid "The model was trained for less than {.val {from_epoch}} epochs"
+msgstr "Le modèle a été entrainé sur moins de {.val {from_epoch}} époques"
 
-#: hardhat.R:370
-#, c-format
-msgid "Found missing values in the `%s` outcome column."
-msgstr "Il y a des valeurs manquantes dans la colonne de résultats `%s`."
+#: hardhat.R:365
+msgid "Found missing values in the {.var {names(outcomes)}} outcome column."
+msgstr ""
+"Il y a des valeurs manquantes dans la colonne de résultats  {.var "
+"{names(outcomes)}}."
 
-#: hardhat.R:380 hardhat.R:488
+#: hardhat.R:375 hardhat.R:484
 msgid "Model dimensions don't match."
 msgstr "Les dimensions ne correspondent pas entre les modèles."
 
-#: hardhat.R:405
-#, c-format
+#: hardhat.R:400
 msgid ""
-"No model serialized weight can be found in `%s`, check the model history"
+"No model serialized weight can be found in {.var {tabnet_model}}, check the "
+"model history"
 msgstr ""
-"Il n’y a pas de points sérialisés de modèle dans `%s`, veuillez vérifier "
-"l’historique du modèle"
+"Il n’y a pas de points sérialisés de modèle dans {.var {tabnet_model}}, "
+"veuillez vérifier l’historique du modèle"
 
-#: hardhat.R:413
+#: hardhat.R:408
+msgid "Using {.fn tabnet_pretrain} from a model is not currently supported."
+msgstr ""
+
+#: hardhat.R:409
+msgid "Pretraining will start from a new network initialization"
+msgstr ""
+
+#: hardhat.R:446
+msgid "The model was trained for less than {.val {epoch}} epochs"
+msgstr "Le modèle a été entrainé sur moins de {.val {epoch}} époques"
+
+#: hardhat.R:522
 msgid ""
-"`tabnet_pretrain()` from a model is not currently supported.\n"
-"The pretraining here will start with a network initialization"
+"Mixed multi-outcome type {.type {unique(purrr::map_chr(outcome_ptype, "
+"~class(.x)[[1]]))}} is not supported"
 msgstr ""
-"La reprise de l’entraînement avec `tabnet_pretrain()` n'est pas supportée "
-"pour l'instant.\n"
-"Le pré-entraînement va commencer par une initialisation du réseau."
 
-#: hardhat.R:450
-#, c-format
-msgid "The model was trained for less than `%s` epochs"
-msgstr "Le modèle a été entrainé sur moins de '%s' époques"
-
-#: hardhat.R:526
-#, c-format
-msgid "Mixed multi-outcome type '%s' is not supported"
-msgstr "Le type '%s' n’est pas supporté pour des modèles multi-résultat"
-
-#: hardhat.R:534
-#, c-format
-msgid "Unknown outcome type '%s'"
-msgstr "Le type `%s` est inconnu pour une colonne de résultat"
-
-#: hardhat.R:541
-#, c-format
-msgid "Outcome is factor and the prediction type is '%s'."
+#: hardhat.R:530
+msgid "Unknown outcome type {.type {class(outcome_ptype)}}"
 msgstr ""
-"La colonne de résultats est catégorielle et la prédiction est de type '%s'."
 
-#: hardhat.R:544
-#, c-format
-msgid "Outcome is numeric and the prediction type is '%s'."
+#: hardhat.R:537
+msgid "Outcome is factor and the prediction type is {.type {type}}."
 msgstr ""
-"La colonne de résultats est numérique et la prédiction est de type '%s'."
+"La colonne de résultats est catégorielle et la prédiction est de type {.type "
+"{type}}."
+
+#: hardhat.R:540
+msgid "Outcome is numeric and the prediction type is {.type {type}}."
+msgstr ""
+"La colonne de résultats est numérique et la prédiction est de type {.type "
+"{type}}."
 
 #: model.R:256
-#, c-format
-msgid "`%s` is not a valid loss for outcome of type %s"
+msgid "{.val {loss}} is not a valid loss for outcome of type {.type {dtype}}"
 msgstr ""
-"`%s` n’est pas une fonction objectif valide pour les colonnes de résultat de "
-"type %s"
+"{.val {loss}} n’est pas une fonction objectif valide pour les colonnes de "
+"résultat de type {.type {dtype}}."
 
 #: model.R:267
-#, c-format
 msgid ""
-"%s is not a valid early-stopping metric to monitor with `valid_split` = %s"
+"{.val {early_stopping_monitor}} is not a valid early-stopping metric to "
+"monitor with {.val valid_split = {valid_split}}"
 msgstr ""
-"%s n’est pas une métrique valide d’arrêt anticipé avec `valid_split = %s`"
+"{.val {early_stopping_monitor}} n’est pas une métrique valide d’arrêt "
+"anticipé avec  {.val valid_split = {valid_split}}."
 
-#: model.R:523 pretraining.R:121
-msgid "`optimizer` must be resolved into a torch optimizer generator."
+#: model.R:523
+msgid "{.var optimizer} must be resolved into a torch optimizer generator."
 msgstr ""
-"`optimizer` doit pouvoir être résolu en un objet `torch_optimizer_generator`."
+"{.var optimizer} doit pouvoir être résolu en un objet "
+"`torch_optimizer_generator`."
 
-#: model.R:536 pretraining.R:134
+#: model.R:536
 msgid ""
-"Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
+"Currently only the {.str step} and {.str reduce_on_plateau} scheduler are "
+"supported."
 msgstr ""
-"Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
-"l’instant."
+"Seule les planifications {.str step} et {.str reduce_on_plateau} sont "
+"supportées pour l’instant."
 
 #: model.R:583 pretraining.R:181
 #, c-format
@@ -161,16 +159,28 @@ msgstr ""
 "aléatoirement à une taille de 1e5. Vous pouvez rendre ce message silencieux "
 "en configurant l’argument `importance_sample_size`."
 
-#: parsnip.R:465
+#: parsnip.R:474
 msgid ""
 "Package \"parsnip\" needed for this function to work. Please install it."
 msgstr ""
 "Le package \"parsnip\" est nécessaire pour exécuter cette fonction, Veuillez "
 "l'installer."
 
-#: parsnip.R:549
+#: parsnip.R:559
 msgid "parsnip"
 msgstr ""
+
+#: pretraining.R:121
+msgid "`optimizer` must be resolved into a torch optimizer generator."
+msgstr ""
+"`optimizer` doit pouvoir être résolu en un objet `torch_optimizer_generator`."
+
+#: pretraining.R:134
+msgid ""
+"Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
+msgstr ""
+"Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
+"l’instant."
 
 #: pretraining.R:224
 #, c-format
@@ -224,6 +234,26 @@ msgid "Currently only 'adam' is supported as character for 'optimizer'."
 msgstr ""
 "Seule le nom 'adam' est pris en compte comme a fonction d’optimisation pour "
 "l’instant."
+
+#~ msgid ""
+#~ "`tabnet_pretrain()` from a model is not currently supported.\n"
+#~ "The pretraining here will start with a network initialization"
+#~ msgstr ""
+#~ "La reprise de l’entraînement avec `tabnet_pretrain()` n'est pas supportée "
+#~ "pour l'instant.\n"
+#~ "Le pré-entraînement va commencer par une initialisation du réseau."
+
+#, c-format
+#~ msgid "The model was trained for less than `%s` epochs"
+#~ msgstr "Le modèle a été entrainé sur moins de '%s' époques"
+
+#, c-format
+#~ msgid "Mixed multi-outcome type '%s' is not supported"
+#~ msgstr "Le type '%s' n’est pas supporté pour des modèles multi-résultat"
+
+#, c-format
+#~ msgid "Unknown outcome type '%s'"
+#~ msgstr "Le type `%s` est inconnu pour une colonne de résultat"
 
 #, c-format
 #~ msgid "Configured `weights` variables will not be used as predictors"

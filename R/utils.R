@@ -181,21 +181,21 @@ is_optim_generator_or_loss <- function(x) {
 
 
 value_error <- function(..., env = rlang::caller_env()) {
-  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], call = env)
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
 }
 
 type_error <- function(..., env = rlang::caller_env()) {
-  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], call = env)
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
 }
 
 runtime_error <- function(..., env = rlang::caller_env()) {
-  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], call = env)
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
 }
 
 not_implemented_error <- function(..., env = rlang::caller_env()) {
-  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], call = env)
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
 }
 
 warn <- function(..., env = rlang::caller_env()) {
-  cli::cli_warn(gettext(..., domain = "R-tabnet")[[1]], call = env)
+  cli::cli_warn(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
 }
