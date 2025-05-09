@@ -46,7 +46,9 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
       
       - name: Install wget on macOS for quarto download
-        run: if [ "$RUNNER_OS" == "macOS" ]; then brew install wget
+        if: runner.os == 'macOS'
+        run:  
+          brew install wget
       
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
