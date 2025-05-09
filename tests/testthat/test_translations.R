@@ -1,6 +1,6 @@
 test_that("early stopping message get translated in french", {
-  # skip on linux on ci
-  testthat::skip_if((testthat:::on_ci() & testthat:::system_os() == "linux"))
+  # skip on linux & macOS on ci due to accentuation
+  testthat::skip_if((testthat:::on_ci() && testthat:::system_os() %in% c("linux", "macos")))
   testthat::skip_on_cran()
   withr::with_language(lang = "fr",
                        expect_error(
@@ -13,8 +13,8 @@ test_that("early stopping message get translated in french", {
 })
 
 test_that("scheduler message translated in french", {
-  # skip on linux on ci
-  testthat::skip_if((testthat:::on_ci() & testthat:::system_os() == "linux"))
+  # skip on linux on ci due to missing language in image
+  testthat::skip_if((testthat:::on_ci() && testthat:::system_os() == "linux"))
   testthat::skip_on_cran()
   withr::with_language(lang = "fr",
                        expect_error(

@@ -73,7 +73,9 @@ test_that("fit accept missing value in `Node` predictor", {
 
   starwars_tree <- starwars %>%
     rename(`_name` = "name", `_height` = "height") %>%
-    mutate(pathString = paste("StarWars_characters", species, homeworld, `_name`, sep = "/")) %>%
+    # iconv translation ensure compatibility on macintosh
+    mutate(pathString = paste("StarWars_characters", species, homeworld, `_name`, sep = "/") %>%
+             iconv(from = "UTF-8", to = "ASCII//TRANSLIT")) %>%
     as.Node()
 
   expect_no_error(
