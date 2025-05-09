@@ -45,6 +45,9 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
       
+      - name: Install wget on macOS for quarto download
+        run: if [ "$RUNNER_OS" == "macOS" ]; then brew install wget
+      
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: 1.7.30
@@ -78,7 +81,7 @@ jobs:
       DEBIAN_FRONTEND: 'noninteractive'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - run: |
           apt-get update -y
@@ -88,6 +91,10 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
 
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.7.30
+      
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
