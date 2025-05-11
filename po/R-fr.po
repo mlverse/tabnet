@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.7.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-01 19:54+0200\n"
-"PO-Revision-Date: 2025-05-01 20:00+0200\n"
+"POT-Creation-Date: 2025-05-12 00:22+0200\n"
+"PO-Revision-Date: 2025-05-12 00:34+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
@@ -13,22 +13,19 @@ msgstr ""
 "X-Generator: Poedit 3.6\n"
 
 #: dials.R:3
+#, fuzzy
+#| msgid ""
+#| "Package {.pkg dials} needed for this function to work. Please install it."
 msgid ""
-"Package {.pkg dials} needed for this function to work. Please install it."
+"Package {.pkg dials} is needed for this function to work. Please install it."
 msgstr ""
 "Le package {.pkg dials} doit être installé pour cette fonction. Merci de "
 "l'installer."
 
-#: dials.R:8
-msgid "Package {.pkg cli} needed for this function to work. Please install it."
-msgstr ""
-"Le package {.pkg cli} doit être installé pour cette fonction. Merci de "
-"l'installer."
-
-#: dials.R:149
+#: dials.R:142
 msgid "{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet."
 msgstr ""
-"On ne peut pas utiliser {.var cat_emb_dim} comme paramêtre de {.fun tune}"
+"On ne peut pas utiliser {.var cat_emb_dim} comme paramètre de {.fun tune} "
 "pour l'instant."
 
 #: explain.R:47
@@ -73,10 +70,14 @@ msgstr ""
 #: hardhat.R:408
 msgid "Using {.fn tabnet_pretrain} from a model is not currently supported."
 msgstr ""
+"On ne peut pas utiliser {.fn tabnet_pretrain} à partir d'un modèle, pour "
+"l'instant."
 
 #: hardhat.R:409
 msgid "Pretraining will start from a new network initialization"
 msgstr ""
+"Le préapprentissage va démarrer à partir d'une nouvelle initialisation du "
+"réseau"
 
 #: hardhat.R:446
 msgid "The model was trained for less than {.val {epoch}} epochs"
@@ -87,10 +88,14 @@ msgid ""
 "Mixed multi-outcome type {.type {unique(purrr::map_chr(outcome_ptype, "
 "~class(.x)[[1]]))}} is not supported"
 msgstr ""
+"Les sorties multiples ne sont pas compatible avec les typages {.type "
+"{unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}}."
 
 #: hardhat.R:530
 msgid "Unknown outcome type {.type {class(outcome_ptype)}}"
 msgstr ""
+"Le typage de la colonne de résultat {.type {class(outcome_ptype)}} est "
+"inconnu."
 
 #: hardhat.R:537
 msgid "Outcome is factor and the prediction type is {.type {type}}."
@@ -118,97 +123,91 @@ msgstr ""
 "{.val {early_stopping_monitor}} n’est pas une métrique valide d’arrêt "
 "anticipé avec  {.val valid_split = {valid_split}}."
 
-#: model.R:523
+#: model.R:523 pretraining.R:121
 msgid "{.var optimizer} must be resolved into a torch optimizer generator."
 msgstr ""
 "{.var optimizer} doit pouvoir être résolu en un objet "
 "`torch_optimizer_generator`."
 
-#: model.R:536
+#: model.R:536 pretraining.R:135
 msgid ""
 "Currently only the {.str step} and {.str reduce_on_plateau} scheduler are "
 "supported."
 msgstr ""
-"Seule les planifications {.str step} et {.str reduce_on_plateau} sont "
-"supportées pour l’instant."
+"Seule les planifications {.str step} et {.str reduce_on_plateau} sont prises "
+"en compte pour l’instant."
 
-#: model.R:583 pretraining.R:181
+#: model.R:583 pretraining.R:182
 #, c-format
 msgid "[Epoch %03d] Loss: %3f"
 msgstr ""
 
-#: model.R:585 pretraining.R:183
+#: model.R:585 pretraining.R:184
 #, c-format
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:601 pretraining.R:198
+#: model.R:601 pretraining.R:199
 #, c-format
-msgid "Early stopping at epoch %03d"
-msgstr "Arrêt anticipé à l’époque %03d"
+msgid "Early-stopping at epoch {.val epoch}"
+msgstr "Arrêt anticipé à l’époque {.val epoch}."
 
-#: model.R:628
-#, c-format
+#: model.R:626 pretraining.R:224
 msgid ""
-"Computing importances for a dataset with size %s. This can consume too much "
-"memory. We are going to use a sample of size 1e5, You can disable this "
-"message by using the `importance_sample_size` argument."
+"Computing importances for a dataset with size {.val {train_ds$.length()}}. \n"
+"           This can consume too much memory. We are going to use a sample of "
+"size 1e5. \n"
+"           You can disable this message by using the "
+"`importance_sample_size` argument."
 msgstr ""
-"Calcul de l’importance sur un jeu de données de taille %s. Il se peut que "
-"cela consomme trop de mémoire. Aussi le jeu de donnée sera réduit "
-"aléatoirement à une taille de 1e5. Vous pouvez rendre ce message silencieux "
-"en configurant l’argument `importance_sample_size`."
+"Calcul de l’importance sur un jeu de données de taille {.val {train_ds$."
+"length()}}. Il se peut que cela consomme trop de mémoire. \n"
+"Aussi le jeu de donnée sera réduit aléatoirement à une taille de 1e5. Vous "
+"pouvez rendre ce message silencieux en configurant l’argument "
+"`importance_sample_size`."
 
 #: parsnip.R:474
 msgid ""
-"Package \"parsnip\" needed for this function to work. Please install it."
+"Package {.pkg parsnip} is needed for this function to work. Please install "
+"it."
 msgstr ""
-"Le package \"parsnip\" est nécessaire pour exécuter cette fonction, Veuillez "
+"Le package {.pkg parsnip} doit être installé pour cette fonction. Merci de "
 "l'installer."
 
 #: parsnip.R:559
 msgid "parsnip"
 msgstr ""
 
-#: pretraining.R:121
-msgid "`optimizer` must be resolved into a torch optimizer generator."
-msgstr ""
-"`optimizer` doit pouvoir être résolu en un objet `torch_optimizer_generator`."
-
-#: pretraining.R:134
-msgid ""
-"Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
-msgstr ""
-"Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
-"l’instant."
-
-#: pretraining.R:224
-#, c-format
-msgid ""
-"Computing importances for a dataset with size %s. This can consume too much "
-"memory. We are going to use a sample of size 1e5. You can disable this "
-"message by using the `importance_sample_size` argument."
-msgstr ""
-"Calcul de l’importance sur un jeu de données de taille %s. Il se peut que "
-"cela consomme trop de mémoire. Aussi le jeu de donnée sera réduit "
-"aléatoirement à une taille de 1e5. Vous pouvez rendre ce message silencieux "
-"en configurant l’argument `importance_sample_size`."
-
 #: tab-network.R:238 tab-network.R:405
-msgid "'n_steps' should be a positive integer."
-msgstr "'n_steps' doit être un nombre entier positif."
+msgid "{.var n_steps} should be a positive integer."
+msgstr "{.var n_steps} doit être un nombre entier positif."
 
 #: tab-network.R:240 tab-network.R:407
-msgid "'n_shared' and 'n_independant' can't be both zero."
-msgstr "'n_shared' et 'n_independant' ne peuvent pas être nuls simultanément."
+msgid "{.var n_shared} and {.var n_independant} can't be both zero."
+msgstr ""
+"{.var n_shared} et {.var n_independant} ne peuvent pas être nuls "
+"simultanément."
 
 #: tab-network.R:463
 msgid ""
-"Please choose either 'sparsemax', 'sparsemax15', 'entmax' or 'entmax15' as "
-"'mask_type'"
+"Please choose either {.val sparsemax}, {.val sparsemax15}, {.val entmax} or "
+"{.val entmax15} as {.var mask_type}"
 msgstr ""
-"Vous devez choisir parmi 'sparsemax', 'sparsemax15', 'entmax' ou 'entmax15' "
-"pour 'mask_type'."
+"Vous devez choisir parmi {.val sparsemax}, {.val sparsemax15}, {.val entmax} "
+"ou {.val entmax15} pour {.var mask_type}."
+
+#: tab-network.R:627
+msgid ""
+"{.var cat_emb_dim} length must be 1 or the number of categorical "
+"predictors, \n"
+"                  got length {.val {length(self$cat_emb_dims)}} for {.val "
+"{length(cat_dims)}} \n"
+"                  categorical predictors"
+msgstr ""
+"{.var cat_emb_dim} doit être soit de longueur 1 ou du nombre de prédicteur "
+"catégoriels, \n"
+"Sa longueur est {.val {length(self$cat_emb_dims)}} pour {.val "
+"{length(cat_dims)}} prédicteurs catégoriels."
 
 #: utils.R:68
 msgid ""
@@ -218,22 +217,59 @@ msgstr ""
 "L’objet hiérarchique fournit n’est pas reconnu dans un format valide qui "
 "peut être vérifié"
 
-#: utils.R:73
-#, c-format
+#: utils.R:72
 msgid ""
 "The attributes or colnames in the provided hierarchical object use the "
-"following reserved names : '%s'. Please change those names as they will lead "
-"to unexpected tabnet behavior."
+"following reserved names:\n"
+"                {.vars {actual_names[actual_names %in% reserved_names]}}. \n"
+"                Please change those names as they will lead to unexpected "
+"tabnet behavior."
 msgstr ""
 "Les attributs ou noms de colonnes dans l’objet hiérarchique fournit utilise "
-"les noms réservés suivants : ‘%s’. Veuillez changer ces noms  pour éviter un "
-"comportement imprévisible de TabNet."
+"les noms réservés suivants : {.vars {actual_names[actual_names %in% "
+"reserved_names]}}. Veuillez changer ces noms pour éviter un comportement "
+"imprévisible de TabNet."
 
-#: utils.R:156 utils.R:159
-msgid "Currently only 'adam' is supported as character for 'optimizer'."
+#: utils.R:154 utils.R:157
+msgid ""
+"Currently only {.val adam} is supported as character for {.var optimizer}."
 msgstr ""
-"Seule le nom 'adam' est pris en compte comme a fonction d’optimisation pour "
-"l’instant."
+"Seule le nom {.val adam} est pris en compte comme a fonction d’optimisation "
+"pour l’instant."
+
+#~ msgid ""
+#~ "Package \"parsnip\" needed for this function to work. Please install it."
+#~ msgstr ""
+#~ "Le package \"parsnip\" est nécessaire pour exécuter cette fonction, "
+#~ "Veuillez l'installer."
+
+#~ msgid "`optimizer` must be resolved into a torch optimizer generator."
+#~ msgstr ""
+#~ "`optimizer` doit pouvoir être résolu en un objet "
+#~ "`torch_optimizer_generator`."
+
+#~ msgid ""
+#~ "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
+#~ msgstr ""
+#~ "Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées "
+#~ "pour l’instant."
+
+#~ msgid ""
+#~ "Package {.pkg cli} needed for this function to work. Please install it."
+#~ msgstr ""
+#~ "Le package {.pkg cli} doit être installé pour cette fonction. Merci de "
+#~ "l'installer."
+
+#, c-format
+#~ msgid ""
+#~ "Computing importances for a dataset with size %s. This can consume too "
+#~ "much memory. We are going to use a sample of size 1e5, You can disable "
+#~ "this message by using the `importance_sample_size` argument."
+#~ msgstr ""
+#~ "Calcul de l’importance sur un jeu de données de taille %s. Il se peut que "
+#~ "cela consomme trop de mémoire. Aussi le jeu de donnée sera réduit "
+#~ "aléatoirement à une taille de 1e5. Vous pouvez rendre ce message "
+#~ "silencieux en configurant l’argument `importance_sample_size`."
 
 #~ msgid ""
 #~ "`tabnet_pretrain()` from a model is not currently supported.\n"

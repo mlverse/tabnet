@@ -114,12 +114,13 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
 
   network$to(device = device)
 
-  # instanciate optimizer
+  # instantiate optimizer
   if (is_optim_generator(config$optimizer)) {
     optimizer <- config$optimizer(network$parameters, config$learn_rate)
-  } else
-    stop("`optimizer` must be resolved into a torch optimizer generator.", call. = FALSE)
-
+  } else {
+    type_error("{.var optimizer} must be resolved into a torch optimizer generator.")
+  }
+  
 
   # define scheduler
   if (is.null(config$lr_scheduler)) {
@@ -131,7 +132,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   } else if (config$lr_scheduler == "step") {
     scheduler <- torch::lr_step(optimizer, config$step_size, config$lr_decay)
   } else {
-    stop("Currently only the 'step' and 'reduce_on_plateau' scheduler are supported.", call. = FALSE)
+    not_implemented_error("Currently only the {.str step} and {.str reduce_on_plateau} scheduler are supported.", call. = FALSE)
   }
 
   # initialize metrics & checkpoints
@@ -195,7 +196,7 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
         patience_counter <- patience_counter + 1
         if (patience_counter >= config$early_stopping_patience) {
           if (config$verbose)
-            rlang::inform(sprintf("Early stopping at epoch %03d", epoch))
+            cli::cli_alert_success(gettextf("Early-stopping at epoch {.val epoch}"))
           break
         }
       } else {
@@ -220,9 +221,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   if(!config$skip_importance) {
     importance_sample_size <- config$importance_sample_size
     if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
-      warn("Computing importances for a dataset with size {train_ds$.length()}.", 
-           "This can consume too much memory. We are going to use a sample of size 1e5 ",
-           "You can disable this message by using the `importance_sample_size` argument.")
+      warn("Computing importances for a dataset with size {.val {train_ds$.length()}}. 
+           This can consume too much memory. We are going to use a sample of size 1e5. 
+           You can disable this message by using the `importance_sample_size` argument.")
       importance_sample_size <- 1e5
     }
     indexes <- as.numeric(torch::torch_randint(

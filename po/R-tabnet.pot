@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tabnet 0.7.0.9000\n"
-"POT-Creation-Date: 2025-05-01 19:54+0200\n"
+"POT-Creation-Date: 2025-05-12 00:22+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,14 +12,10 @@ msgstr ""
 
 #: dials.R:3
 msgid ""
-"Package {.pkg dials} needed for this function to work. Please install it."
+"Package {.pkg dials} is needed for this function to work. Please install it."
 msgstr ""
 
-#: dials.R:8
-msgid "Package {.pkg cli} needed for this function to work. Please install it."
-msgstr ""
-
-#: dials.R:149
+#: dials.R:142
 msgid "{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet."
 msgstr ""
 
@@ -97,77 +93,70 @@ msgid ""
 "monitor with {.val valid_split = {valid_split}}"
 msgstr ""
 
-#: model.R:523
+#: model.R:523 pretraining.R:121
 msgid "{.var optimizer} must be resolved into a torch optimizer generator."
 msgstr ""
 
-#: model.R:536
+#: model.R:536 pretraining.R:135
 msgid ""
 "Currently only the {.str step} and {.str reduce_on_plateau} scheduler are "
 "supported."
 msgstr ""
 
-#: model.R:583 pretraining.R:181
+#: model.R:583 pretraining.R:182
 #, c-format
 msgid "[Epoch %03d] Loss: %3f"
 msgstr ""
 
-#: model.R:585 pretraining.R:183
+#: model.R:585 pretraining.R:184
 #, c-format
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model.R:601 pretraining.R:198
+#: model.R:601 pretraining.R:199
 #, c-format
-msgid "Early stopping at epoch %03d"
+msgid "Early-stopping at epoch {.val epoch}"
 msgstr ""
 
-#: model.R:628
-#, c-format
+#: model.R:626 pretraining.R:224
 msgid ""
-"Computing importances for a dataset with size %s. This can consume too much "
-"memory. We are going to use a sample of size 1e5, You can disable this "
-"message by using the `importance_sample_size` argument."
+"Computing importances for a dataset with size {.val {train_ds$.length()}}. \n"
+"           This can consume too much memory. We are going to use a sample of "
+"size 1e5. \n"
+"           You can disable this message by using the "
+"`importance_sample_size` argument."
 msgstr ""
 
 #: parsnip.R:474
 msgid ""
-"Package \"parsnip\" needed for this function to work. Please install it."
+"Package {.pkg parsnip} is needed for this function to work. Please install "
+"it."
 msgstr ""
 
 #: parsnip.R:559
 msgid "parsnip"
 msgstr ""
 
-#: pretraining.R:121
-msgid "`optimizer` must be resolved into a torch optimizer generator."
-msgstr ""
-
-#: pretraining.R:134
-msgid ""
-"Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
-msgstr ""
-
-#: pretraining.R:224
-#, c-format
-msgid ""
-"Computing importances for a dataset with size %s. This can consume too much "
-"memory. We are going to use a sample of size 1e5. You can disable this "
-"message by using the `importance_sample_size` argument."
-msgstr ""
-
 #: tab-network.R:238 tab-network.R:405
-msgid "'n_steps' should be a positive integer."
+msgid "{.var n_steps} should be a positive integer."
 msgstr ""
 
 #: tab-network.R:240 tab-network.R:407
-msgid "'n_shared' and 'n_independant' can't be both zero."
+msgid "{.var n_shared} and {.var n_independant} can't be both zero."
 msgstr ""
 
 #: tab-network.R:463
 msgid ""
-"Please choose either 'sparsemax', 'sparsemax15', 'entmax' or 'entmax15' as "
-"'mask_type'"
+"Please choose either {.val sparsemax}, {.val sparsemax15}, {.val entmax} or "
+"{.val entmax15} as {.var mask_type}"
+msgstr ""
+
+#: tab-network.R:627
+msgid ""
+"{.var cat_emb_dim} length must be 1 or the number of categorical predictors, \n"
+"                  got length {.val {length(self$cat_emb_dims)}} for {.val "
+"{length(cat_dims)}} \n"
+"                  categorical predictors"
 msgstr ""
 
 #: utils.R:68
@@ -176,14 +165,16 @@ msgid ""
 "can be checked"
 msgstr ""
 
-#: utils.R:73
-#, c-format
+#: utils.R:72
 msgid ""
 "The attributes or colnames in the provided hierarchical object use the "
-"following reserved names : '%s'. Please change those names as they will lead "
-"to unexpected tabnet behavior."
+"following reserved names:\n"
+"                {.vars {actual_names[actual_names %in% reserved_names]}}. \n"
+"                Please change those names as they will lead to unexpected "
+"tabnet behavior."
 msgstr ""
 
-#: utils.R:156 utils.R:159
-msgid "Currently only 'adam' is supported as character for 'optimizer'."
+#: utils.R:154 utils.R:157
+msgid ""
+"Currently only {.val adam} is supported as character for {.var optimizer}."
 msgstr ""
