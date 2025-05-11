@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   aum_loss: aum_loss.html
@@ -8,4 +8,4 @@ articles:
   Missing_data_predictors: Missing_data_predictors.html
   selfsupervised_training: selfsupervised_training.html
   tidymodels-interface: tidymodels-interface.html
-last_built: 2025-04-28T10:07Z
+last_built: 2025-05-11T11:23Z
