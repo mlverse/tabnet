@@ -196,11 +196,11 @@ msgstr ""
 
 #: tab-network.R:238 tab-network.R:405
 msgid "'n_steps' should be a positive integer."
-msgstr "’n_steps’ doit être un nombre entier positif."
+msgstr "'n_steps' doit être un nombre entier positif."
 
 #: tab-network.R:240 tab-network.R:407
 msgid "'n_shared' and 'n_independant' can't be both zero."
-msgstr "’n_shared’ et ’n_independant’ ne peuvent pas être nuls simultanément."
+msgstr "'n_shared' et 'n_independant' ne peuvent pas être nuls simultanément."
 
 #: tab-network.R:463
 msgid ""
