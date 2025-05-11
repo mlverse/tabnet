@@ -20,7 +20,7 @@ test_that("scheduler message translated in french", {
                        expect_error(
                          fit <- tabnet_pretrain(x, y, epochs = 3, lr_scheduler = "multiplicative",
                                            lr_decay = 0.1, step_size = 1),
-                       regexp = "planifications ‘step’ et ‘reduce_on_plateau’ sont "
+                       regexp = "planifications 'step' et 'reduce_on_plateau' sont "
                        )
   )
 })

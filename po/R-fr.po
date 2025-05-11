@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: tabnet 0.7.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-04-28 09:11+0200\n"
-"PO-Revision-Date: 2025-04-28 09:16+0200\n"
+"PO-Revision-Date: 2025-05-11 12:58+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
@@ -120,7 +120,7 @@ msgstr ""
 msgid ""
 "%s is not a valid early-stopping metric to monitor with `valid_split` = %s"
 msgstr ""
-"%s n’est pas une métrique valide d’arrêt anticipé avec `valid_split = %s`"
+"%s n'est pas une métrique valide d’arrêt anticipé avec `valid_split = %s`"
 
 #: model.R:523 pretraining.R:121
 msgid "`optimizer` must be resolved into a torch optimizer generator."
@@ -131,7 +131,7 @@ msgstr ""
 msgid ""
 "Currently only the 'step' and 'reduce_on_plateau' scheduler are supported."
 msgstr ""
-"Seule les planifications ‘step’ et ‘reduce_on_plateau’ sont supportées pour "
+"Seule les planifications 'step' et 'reduce_on_plateau' sont supportées pour "
 "l’instant."
 
 #: model.R:583 pretraining.R:181
@@ -186,11 +186,11 @@ msgstr ""
 
 #: tab-network.R:238 tab-network.R:405
 msgid "'n_steps' should be a positive integer."
-msgstr "’n_steps’ doit être un nombre entier positif."
+msgstr "'n_steps' doit être un nombre entier positif."
 
 #: tab-network.R:240 tab-network.R:407
 msgid "'n_shared' and 'n_independant' can't be both zero."
-msgstr "’n_shared’ et ’n_independant’ ne peuvent pas être nuls simultanément."
+msgstr "'n_shared' et 'n_independant' ne peuvent pas être nuls simultanément."
 
 #: tab-network.R:463
 msgid ""
