@@ -623,10 +623,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   if(!config$skip_importance) {
     importance_sample_size <- config$importance_sample_size
     if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
-      warning(
-        gettextf(
-          "Computing importances for a dataset with size %s. This can consume too much memory. We are going to use a sample of size 1e5, You can disable this message by using the `importance_sample_size` argument.",
-          train_ds$.length()))
+      warn("Computing importances for a dataset with size {train_ds$.length()}.", 
+      "This can consume too much memory. We are going to use a sample of size 1e5 ",
+      "You can disable this message by using the `importance_sample_size` argument.")
       importance_sample_size <- 1e5
     }
     indexes <- as.numeric(torch::torch_randint(
@@ -643,6 +642,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   } else {
     importances <- NULL
   }
+  
   list(
     network = network,
     metrics = metrics,

@@ -217,26 +217,28 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
   }
 
   network$to(device = "cpu")
-
-  importance_sample_size <- config$importance_sample_size
-  if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
-    warning(domain=NA,
-            gettextf("Computing importances for a dataset with size %s. This can consume too much memory. We are going to use a sample of size 1e5. You can disable this message by using the `importance_sample_size` argument.", train_ds$.length()),
-            call. = FALSE)
-    importance_sample_size <- 1e5
-  }
-  indexes <- as.numeric(torch::torch_randint(
-    1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
-    dtype = torch::torch_long()
-  ))
-  importances <- tibble::tibble(
-    variables = colnames(x),
-    importance = compute_feature_importance(
-      network,
-      train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
-      train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu")
+  if(!config$skip_importance) {
+    importance_sample_size <- config$importance_sample_size
+    if (is.null(config$importance_sample_size) && train_ds$.length() > 1e5) {
+      warn("Computing importances for a dataset with size {train_ds$.length()}.", 
+           "This can consume too much memory. We are going to use a sample of size 1e5 ",
+           "You can disable this message by using the `importance_sample_size` argument.")
+      importance_sample_size <- 1e5
+    }
+    indexes <- as.numeric(torch::torch_randint(
+      1, train_ds$.length(), min(importance_sample_size, train_ds$.length()),
+      dtype = torch::torch_long()
+    ))
+    importances <- tibble::tibble(
+      variables = colnames(x),
+      importance = compute_feature_importance(
+        network,
+        train_ds$.getbatch(batch =indexes)$x$to(device = "cpu"),
+        train_ds$.getbatch(batch =indexes)$x_na_mask$to(device = "cpu"))
     )
-  )
+  } else {
+    importances <- NULL
+  }
 
   list(
     network = network,
