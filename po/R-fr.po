@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: tabnet 0.7.0.9000\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-05-12 00:22+0200\n"
-"PO-Revision-Date: 2025-05-12 00:34+0200\n"
+"PO-Revision-Date: 2025-05-12 00:48+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: fr\n"
 "Language: fr\n"
@@ -39,7 +39,7 @@ msgstr "{.fn tabnet_fit} n’est pas défini pour un {.type {class(x)[1])}}."
 
 #: hardhat.R:268
 msgid "{.fn tabnet_pretrain} is not defined for a {.type {class(x)[1])}}."
-msgstr "{.fn tabnet_pretrain} n’est pas défini pour un {.type {class(x)[1])}}."
+msgstr "{.fn tabnet_pretrain} n'est pas défini pour un {.type {class(x)[1])}}."
 
 #: hardhat.R:347
 msgid "{.var {tabnet_model}} is not recognised as a proper TabNet model"
@@ -120,8 +120,8 @@ msgid ""
 "{.val {early_stopping_monitor}} is not a valid early-stopping metric to "
 "monitor with {.val valid_split = {valid_split}}"
 msgstr ""
-"{.val {early_stopping_monitor}} n’est pas une métrique valide d’arrêt "
-"anticipé avec  {.val valid_split = {valid_split}}."
+"{.val {early_stopping_monitor}} n'est pas une métrique valide d’arrêt "
+"anticipé avec {.val valid_split = {valid_split}}."
 
 #: model.R:523 pretraining.R:121
 msgid "{.var optimizer} must be resolved into a torch optimizer generator."
