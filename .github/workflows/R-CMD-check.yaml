@@ -23,7 +23,8 @@ jobs:
       matrix:
         config:
           - {os: windows-latest, r: 'release'}
-          - {os: macOS-latest, r: 'release'}
+          # on m1 the R version is whicherver is installed in the runner machine.
+          - {os: macOS, r: 'release', version: cpu-m1, runner: [self-hosted, macOS, ARM64]}
           - {os: ubuntu-22.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/jammy/latest"}
           - {os: ubuntu-22.04, r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/jammy/latest"}
 
@@ -43,7 +44,16 @@ jobs:
           r-version: ${{ matrix.config.r }}
 
       - uses: r-lib/actions/setup-pandoc@v2
-
+      
+      - name: Install wget on macOS for quarto download
+        if: runner.os == 'macOS'
+        run:  
+          brew install wget
+      
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.7.30
+        
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck, local::.
@@ -73,7 +83,7 @@ jobs:
       DEBIAN_FRONTEND: 'noninteractive'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - run: |
           apt-get update -y
@@ -83,9 +93,13 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
 
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.7.30
+      
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck, local::.
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
