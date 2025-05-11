@@ -2,6 +2,7 @@
 
 ## New features
 
+* messaging improved with {cli} 
 * add optimal threshold and support size into new 1.5 alpha `entmax15()` and `sparsemax15()`
   `mask_types`. Add an optional `mask_topk` config parameter. (#180)
 * tabnet is now using the `torch_ignite_adam` when available. 

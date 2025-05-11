@@ -44,9 +44,7 @@ tabnet_explain <- function(object, new_data) {
 #' @export
 #' @rdname tabnet_explain
 tabnet_explain.default <- function(object, new_data) {
-  stop(domain=NA,
-       gettextf("`tabnet_explain()` is not defined for a '%s'.", class(object)[1]),
-       call. = FALSE)
+  type_error("{.fn tabnet_explain} is not defined for a {.type {class(object)[1]}}.")
 }
 
 #' @export

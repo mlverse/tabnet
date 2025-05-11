@@ -471,8 +471,8 @@ tabnet <- function(mode = "unknown",  cat_emb_dim = NULL, decision_width = NULL,
                    ) {
 
   if (!requireNamespace("parsnip", quietly = TRUE))
-    stop("Package \"parsnip\" needed for this function to work. Please install it.", call. = FALSE)
-
+    runtime_error("Package {.pkg parsnip} is needed for this function to work. Please install it.")
+  
   if (parsnip_is_missing_tabnet(tabnet_env)) {
     add_parsnip_tabnet()
     tabnet_env$parsnip_added <- TRUE

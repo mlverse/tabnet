@@ -108,9 +108,7 @@ tabnet_fit <- function(x, ...) {
 #' @export
 #' @rdname tabnet_fit
 tabnet_fit.default <- function(x, ...) {
-  stop(domain=NA,
-       gettextf("`tabnet_fit()` is not defined for a '%s'.", class(x)[1]),
-       call. = FALSE)
+  type_error("{.fn tabnet_fit} is not defined for a {.type {class(x)[1])}}.")
 }
 
 #' @export
@@ -267,9 +265,7 @@ tabnet_pretrain <- function(x, ...) {
 #' @export
 #' @rdname tabnet_pretrain
 tabnet_pretrain.default <- function(x, ...) {
-  stop(domain=NA,
-       gettextf("`tabnet_pretrain()` is not defined for a '%s'.", class(x)[1]),
-       call. = FALSE)
+  type_error("{.fn tabnet_pretrain} is not defined for a {.type {class(x)[1])}}.")
 }
 
 
@@ -348,14 +344,13 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   epoch_shift <- 0L
 
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
-    stop(gettextf("'%s' is not recognised as a proper TabNet model", tabnet_model),
-         call. = FALSE)
+    type_error("{.var {tabnet_model}} is not recognised as a proper TabNet model")
 
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
     # model must be loaded from checkpoint
 
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
-      stop(gettextf("The model was trained for less than '%s' epochs", from_epoch), call. = FALSE)
+      value_error("The model was trained for less than {.val {from_epoch}} epochs")
 
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
@@ -367,7 +362,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
   if (task == "supervised") {
     if (sum(is.na(outcomes)) > 0) {
-      stop(gettextf("Found missing values in the `%s` outcome column.", names(outcomes)), call. = FALSE)
+      value_error("Found missing values in the {.var {names(outcomes)}} outcome column.")
     }
     if (is.null(tabnet_model)) {
       # new supervised model needs network initialization
@@ -377,7 +372,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     } else if (!check_net_is_empty_ptr(tabnet_model) && inherits(tabnet_model, "tabnet_fit")) {
       # resume training from supervised
       if (!identical(processed$blueprint, tabnet_model$blueprint))
-        stop("Model dimensions don't match.", call. = FALSE)
+        runtime_error("Model dimensions don't match.")
 
       # model is available from tabnet_model$serialized_net
       m <- reload_model(tabnet_model$serialized_net)
@@ -402,7 +397,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
       tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
-    } else stop(gettextf("No model serialized weight can be found in `%s`, check the model history", tabnet_model), call. = FALSE)
+    } else runtime_error("No model serialized weight can be found in {.var {tabnet_model}}, check the model history")
 
     fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
@@ -410,7 +405,8 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   } else if (task == "unsupervised") {
 
     if (!is.null(tabnet_model)) {
-      warning("`tabnet_pretrain()` from a model is not currently supported.\nThe pretraining here will start with a network initialization")
+      warn("Using {.fn tabnet_pretrain} from a model is not currently supported.",
+           "Pretraining will start from a new network initialization")
     }
     pretrain_lst <- tabnet_train_unsupervised( predictors, config = config, epoch_shift)
     return(new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint))
@@ -447,7 +443,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   if (!is.null(epoch)) {
 
     if (epoch > (length(object$fit$checkpoints) * object$fit$config$checkpoint_epoch))
-      stop(gettextf("The model was trained for less than `%s` epochs", epoch), call. = FALSE)
+      value_error("The model was trained for less than {.val {epoch}} epochs")
 
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch
@@ -485,7 +481,7 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
   m <- reload_model(obj$serialized_net)
 
   if (m$input_dim != tabnet_model_lst$network$input_dim)
-    stop("Model dimensions don't match.", call. = FALSE)
+    runtime_error("Model dimensions don't match.")
 
   # perform update of selected weights into new tabnet_model
   m_stat_dict <- m$state_dict()
@@ -523,7 +519,7 @@ check_type <- function(outcome_ptype, type = NULL) {
   outcome_all_numeric <- all(purrr::map_lgl(outcome_ptype, is.numeric))
 
   if (!outcome_all_numeric && !outcome_all_factor)
-    stop(gettextf("Mixed multi-outcome type '%s' is not supported", unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))), call. = FALSE)
+    not_implemented_error("Mixed multi-outcome type {.type {unique(purrr::map_chr(outcome_ptype, ~class(.x)[[1]]))}} is not supported")
 
   if (is.null(type)) {
     if (outcome_all_factor)
@@ -531,17 +527,17 @@ check_type <- function(outcome_ptype, type = NULL) {
     else if (outcome_all_numeric)
       type <- "numeric"
     else if (ncol(outcome_ptype) == 1)
-      stop(gettextf("Unknown outcome type '%s'", class(outcome_ptype)), call. = FALSE)
+      type_error("Unknown outcome type {.type {class(outcome_ptype)}}")
   }
 
   type <- rlang::arg_match(type, c("numeric", "prob", "class"))
 
   if (outcome_all_factor) {
     if (!type %in% c("prob", "class"))
-      stop(gettextf("Outcome is factor and the prediction type is '%s'.", type), call. = FALSE)
+      type_error("Outcome is factor and the prediction type is {.type {type}}.")
   } else if (outcome_all_numeric) {
     if (type != "numeric")
-      stop(gettextf("Outcome is numeric and the prediction type is '%s'.", type), call. = FALSE)
+      type_error("Outcome is numeric and the prediction type is {.type {type}}.")
   }
 
   invisible(type)
