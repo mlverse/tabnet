@@ -82,7 +82,10 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># pre as.Node() check</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu">check_compliant_node</span><span class="op">(</span><span class="va">starwars_tree</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : The attributes or colnames in the provided hierarchical object use the following reserved names : 'name', 'height'. Please change those names as they will lead to unexpected tabnet behavior.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Error in check_compliant_node(starwars_tree) : </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   The attributes or colnames in the provided hierarchical object use the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> following reserved names: name and height.  Please change those names as they</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> will lead to unexpected tabnet behavior.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># post as.Node() check</span></span></span>
 <span class="r-in"><span><span class="fu">check_compliant_node</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/data.tree/man/as.Node.html" class="external-link">as.Node</a></span><span class="op">(</span><span class="va">starwars_tree</span><span class="op">)</span><span class="op">)</span></span></span>
