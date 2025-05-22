@@ -73,14 +73,14 @@ test_that("pretrain and fit both work with early stopping", {
   expect_message(
     pretrain <- tabnet_pretrain(attrix, attriy, epochs = 100, valid_split = 0.5, verbose=TRUE,
                                 early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
-    "Early stopping at epoch"
+    "Early-stopping at epoch"
   )
   expect_lt(length(pretrain$fit$metrics),100)
 
   expect_message(
     fit <- tabnet_fit(attrix, attriy, epochs = 100, valid_split = 0.5, verbose=TRUE,
                       early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
-    "Early stopping at epoch"
+    "Early-stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),100)
 
@@ -93,7 +93,7 @@ test_that("early stopping works wo validation split", {
     pretrain <- tabnet_pretrain(attrix, attriy, epochs = 100, verbose=TRUE,
                                 early_stopping_monitor="train_loss",
                                 early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.2),
-    "Early stopping at epoch"
+    "Early-stopping at epoch"
   )
   expect_lt(length(pretrain$fit$metrics),100)
 
@@ -109,7 +109,7 @@ test_that("early stopping works wo validation split", {
     fit <- tabnet_fit(attrix, attriy, epochs = 200, verbose=TRUE,
                       early_stopping_monitor="train_loss",
                       early_stopping_tolerance=1e-7, early_stopping_patience=3, learn_rate = 0.3),
-    "Early stopping at epoch"
+    "Early-stopping at epoch"
   )
   expect_lt(length(fit$fit$metrics),200)
 
@@ -171,7 +171,7 @@ test_that("configuring optimizer works", {
 
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 3, optimizer = "adamw"),
-    "Currently only 'adam' is supported"
+    "Currently only \"adam\" is supported"
   )
 
 })
@@ -186,7 +186,7 @@ test_that("reduce_on_plateau scheduler works", {
   expect_error(
     fit <- tabnet_fit(x, y, epochs = 3, lr_scheduler = "multiplicative",
                       lr_decay = 0.1, step_size = 1),
-    "only the 'step' and 'reduce_on_plateau' scheduler"
+    "only the \"step\" and \"reduce_on_plateau\" scheduler"
   )
 
   sc_fn <- function(optimizer) {
@@ -225,7 +225,7 @@ test_that("fit raise an error with non-supported mask-type", {
   expect_error(
     tabnet_fit(rec, attrition, epochs = 1, valid_split = 0.25, verbose = TRUE,
                       config = tabnet_config( mask_type="max_entropy")),
-    regexp = "either 'sparsemax', 'sparsemax15', 'entmax' or 'entmax15' as"
+    regexp = "either \"sparsemax\", \"sparsemax15\", \"entmax\" or \"entmax15\" as"
   )
 
 })

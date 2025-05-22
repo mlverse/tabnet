@@ -1,13 +1,7 @@
 check_dials <- function() {
   if (!requireNamespace("dials", quietly = TRUE))
-    stop("Package \"dials\" needed for this function to work. Please install it.", call. = FALSE)
+    runtime_error("Package {.pkg dials} is needed for this function to work. Please install it.")
 }
-
-check_cli <- function() {
-  if (!requireNamespace("cli", quietly = TRUE))
-    stop("Package \"cli\" needed for this function to work. Please install it.", call. = FALSE)
-}
-
 
 
 #' Parameters for the tabnet model
@@ -91,7 +85,7 @@ mask_type <- function(values = c("sparsemax", "entmax")) {
   dials::new_qual_param(
     type = "character",
     values = values,
-    label = c(mask_type = "Final layer of feature selector, either sparsemax or entmax"),
+    label = c(mask_type = "Final layer of feature selector, either 'sparsemax' or 'entmax'"),
     finalize = NULL
   )
 }
@@ -145,7 +139,6 @@ num_steps <- function(range = c(3L, 10L), trans = NULL) {
 #' @rdname tabnet_non_tunable
 #' @export
 cat_emb_dim <- function(range = NULL, trans = NULL) {
-  check_cli()
   cli::cli_abort("{.var cat_emb_dim} cannot be used as a {.fun tune} parameter yet.")
 }
 

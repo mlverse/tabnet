@@ -235,9 +235,9 @@ tabnet_pretrainer <- torch::nn_module(
     self$initial_bn <- torch::nn_batch_norm1d(input_dim, momentum = momentum)
 
     if (n_steps <= 0)
-      stop("'n_steps' should be a positive integer.")
+      value_error("{.var n_steps} should be a positive integer.")
     if (n_independent == 0 && n_shared == 0)
-      stop("'n_shared' and 'n_independant' can't be both zero.")
+      value_error("{.var n_shared} and {.var n_independant} can't be both zero.")
 
     # self$virtual_batch_size <- virtual_batch_size
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
@@ -402,10 +402,10 @@ tabnet_nn <- torch::nn_module(
     self$cat_emb_dim <- cat_emb_dim
     
     if (n_steps <= 0)
-      stop("'n_steps' should be a positive integer.")
+      value_error("{.var n_steps} should be a positive integer.")
     if (n_independent == 0 && n_shared == 0)
-      stop("'n_shared' and 'n_independant' can't be both zero.")
-
+      value_error("{.var n_shared} and {.var n_independant} can't be both zero.")
+    
     self$virtual_batch_size <- virtual_batch_size
     self$embedder <- embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
     self$embedder_na <- na_embedding_generator(input_dim, cat_dims, cat_idxs, cat_emb_dim)
@@ -460,8 +460,7 @@ attentive_transformer <- torch::nn_module(
     else if (mask_type == "sparsemax")
       self$selector <- sparsemax(dim = -1L)
     else
-      stop("Please choose either 'sparsemax', 'sparsemax15', 'entmax' or 'entmax15' as 'mask_type'")
-
+      value_error("Please choose either {.val sparsemax}, {.val sparsemax15}, {.val entmax} or {.val entmax15} as {.var mask_type}")
   },
   forward = function(priors, processed_feat) {
     x <- self$fc(processed_feat)
@@ -625,8 +624,9 @@ embedding_generator <- torch::nn_module(
 
     # check that all embeddings dimensions are provided
     if (length(self$cat_emb_dims) != length(cat_dims)){
-      msg = paste0("`cat_emb_dim` length must be 1 or the number of categorical predictors, got length ",length(self$cat_emb_dims)," for ",length(cat_dims)," categorical predictors")
-      stop(msg)
+      value_error("{.var cat_emb_dim} length must be 1 or the number of categorical predictors, 
+                  got length {.val {length(self$cat_emb_dims)}} for {.val {length(cat_dims)}} 
+                  categorical predictors")
     }
 
     self$post_embed_dim <- as.integer(input_dim + sum(self$cat_emb_dims) - length(self$cat_emb_dims))

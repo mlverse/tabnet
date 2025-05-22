@@ -65,15 +65,13 @@ check_compliant_node <- function(node) {
     reserved_names <- c(paste0("level_", c(1:node_height)), data.tree::NODE_RESERVED_NAMES_CONST)
     actual_names <- colnames(node)[!colnames(node) %in% "pathString"]
   } else {
-    stop("The provided hierarchical object is not recognized with a valid format that can be checked", call. = FALSE)
+    type_error("The provided hierarchical object is not recognized with a valid format that can be checked")
   }
   
   if (any(actual_names %in% reserved_names)) {
-    stop(domain=NA,
-         gettextf("The attributes or colnames in the provided hierarchical object use the following reserved names : '%s'. Please change those names as they will lead to unexpected tabnet behavior.",
-                  paste(actual_names[actual_names %in% reserved_names], collapse = "', '")
-         ),
-         call. = FALSE)
+    value_error("The attributes or colnames in the provided hierarchical object use the following reserved names:
+                {.vars {actual_names[actual_names %in% reserved_names]}}. 
+                Please change those names as they will lead to unexpected tabnet behavior.")
   }
   
   invisible(node)
@@ -153,10 +151,10 @@ resolve_optimizer <- function(optimizer) {
     } else if (optimizer == "adam") {
       torch_optimizer <- torch::optim_adam
     } else {
-      stop("Currently only 'adam' is supported as character for 'optimizer'.")
+      value_error("Currently only {.val adam} is supported as character for {.var optimizer}.")
     }
   } else {
-    stop("Currently only 'adam' is supported as character for 'optimizer'.")
+    value_error("Currently only {.val adam} is supported as character for {.var optimizer}.")
   }
   torch_optimizer
   
@@ -177,4 +175,25 @@ is_null_or_optim_generator_or_loss <- function(x) {
 
 is_optim_generator_or_loss <- function(x) {
   is_optim_generator(x) || inherits(x, "nn_loss")
+}
+
+
+value_error <- function(..., env = rlang::caller_env()) {
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
+}
+
+type_error <- function(..., env = rlang::caller_env()) {
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
+}
+
+runtime_error <- function(..., env = rlang::caller_env()) {
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
+}
+
+not_implemented_error <- function(..., env = rlang::caller_env()) {
+  cli::cli_abort(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
+}
+
+warn <- function(..., env = rlang::caller_env()) {
+  cli::cli_warn(gettext(..., domain = "R-tabnet")[[1]], .envir = env)
 }
