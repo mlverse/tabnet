@@ -38,9 +38,6 @@ binary classification.
 Install [{tabnet} from
 CRAN](https://cran.r-project.org/web/packages/tabnet/index.html) with:
 
-In the meantime, you can install the released version from r-universe
-with:
-
 ``` r
 install.packages('tabnet')
 ```
