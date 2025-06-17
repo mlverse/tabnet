@@ -19,26 +19,27 @@ status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org
 An R implementation of: [TabNet: Attentive Interpretable Tabular
 Learning](https://arxiv.org/abs/1908.07442) [(Sercan O. Arik, Tomas
 Pfister)](https://doi.org/10.48550/arXiv.1908.07442).  
-The code in this repository is an R port using the
+The code in this repository started by an R port using the
 [torch](https://github.com/mlverse/torch) package of
 [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet)
-PyTorch’s implementation.  
-TabNet is augmented with [Coherent Hierarchical Multi-label
-Classification
-Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
-[(Eleonora Giunchiglia et
-Al.)](https://doi.org/10.48550/arXiv.2010.10151) for hierarchical
-outcomes and [Optimizing ROC Curves with a Sort-Based Surrogate Loss for
-Binary Classification and Changepoint Detection (J Hillman, TD
-Hocking)](https://jmlr.org/papers/v24/21-0751.html) for imbalanced
-binary classification.
+implementation.
+
+TabNet is now augmented with
+
+- [Coherent Hierarchical Multi-label Classification
+  Networks](https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf)
+  [(Eleonora Giunchiglia et
+  Al.)](https://doi.org/10.48550/arXiv.2010.10151) for hierarchical
+  outcomes
+
+- [Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary
+  Classification and Changepoint Detection (J Hillman, TD
+  Hocking)](https://jmlr.org/papers/v24/21-0751.html) for imbalanced
+  binary classification.
 
 ## Installation
 
 Install [{tabnet} from CRAN](https://CRAN.R-project.org/package=tabnet)
-with:
-
-In the meantime, you can install the released version from r-universe
 with:
 
 ``` r
