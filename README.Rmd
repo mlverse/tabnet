@@ -27,7 +27,7 @@ TabNet is augmented with [Coherent Hierarchical Multi-label Classification Netwo
 
 ## Installation
 
-Install [{tabnet} from CRAN](https://cran.r-project.org/web/packages/tabnet/index.html) with:
+Install [{tabnet} from CRAN](https://CRAN.R-project.org/package=tabnet) with:
 
 In the meantime, you can install the released version from r-universe with:
 

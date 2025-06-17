@@ -35,8 +35,11 @@ binary classification.
 
 ## Installation
 
-Install [{tabnet} from
-CRAN](https://cran.r-project.org/web/packages/tabnet/index.html) with:
+Install [{tabnet} from CRAN](https://CRAN.R-project.org/package=tabnet)
+with:
+
+In the meantime, you can install the released version from r-universe
+with:
 
 ``` r
 install.packages('tabnet')
@@ -108,7 +111,7 @@ cbind(test, predict(fit, test, type = "prob")) %>%
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.544
+#> 1 roc_auc binary         0.466
 ```
 
 ## Explain model on test-set with attention map
@@ -131,15 +134,6 @@ autoplot(explain, type = "steps")
 
 <img src="man/figures/README-step-explain-1.png" width="100%" />
 
-## {tidymodels} integration
-
-The integration within tidymodels workflows offers you unlimited
-opportunity to compare {tabnet} models with its challengers.
-
-Don’t miss the
-[`vignette("tidymodels-interface")`](articles/tidymodels-interface.html)
-for that.
-
 ## Self-supervised pretraining
 
 For cases when a consistent part of your dataset has no outcome, TabNet
@@ -158,6 +152,15 @@ The example here is a toy example as the `train` dataset does actually
 contain outcomes. The vignette
 [`vignette("selfsupervised_training")`](articles/selfsupervised_training.html)
 will gives you the complete correct workflow step-by-step.
+
+## {tidymodels} integration
+
+The integration within tidymodels workflows offers you unlimited
+opportunity to compare {tabnet} models with challengers.
+
+Don’t miss the
+[`vignette("tidymodels-interface")`](articles/tidymodels-interface.html)
+for that.
 
 ## Missing data in predictors
 
