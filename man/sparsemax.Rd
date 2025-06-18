@@ -19,7 +19,7 @@ this function is recursively called with a 2*k schedule. If \code{NULL}, full
 sorting is performed from the beginning.}
 }
 \value{
-The projection result, such that \eqn{P$sum(dim=dim) ==1} elementwise.
+The projection result, such that \eqn{\sum_{dim} P = 1 \forall dim} elementwise.
 }
 \description{
 Normalizing sparse transform (a la softmax).

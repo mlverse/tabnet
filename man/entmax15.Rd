@@ -20,7 +20,7 @@ sorting is performed from the beginning.}
 }
 \value{
 The projection result P  of the same shape as input, such that
-\eqn{P$sum(dim=dim) == 1} elementwise.
+\eqn{\sum_{dim} P = 1 \forall dim} elementwise.
 }
 \description{
 With alpha = 1.5 and normalizing sparse transform (a la softmax).

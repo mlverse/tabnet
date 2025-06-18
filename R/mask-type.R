@@ -115,7 +115,7 @@ sparsemax_function <- torch::autograd_function(
 #' this function is recursively called with a 2*k schedule. If `NULL`, full
 #' sorting is performed from the beginning.
 #'
-#' @return The projection result, such that \eqn{P$sum(dim=dim) ==1} elementwise.
+#' @return The projection result, such that \eqn{\sum_{dim} P = 1 \forall dim} elementwise.
 #'
 #' @examples
 #' input <- torch::torch_randn(10, 5, requires_grad = TRUE)
@@ -295,7 +295,7 @@ entmax_15_function <- torch::autograd_function(
 #' sorting is performed from the beginning.
 #'
 #' @return The projection result P  of the same shape as input, such that
-#'   \eqn{P$sum(dim=dim) == 1} elementwise.
+#'   \eqn{\sum_{dim} P = 1 \forall dim} elementwise.
 #'
 #' @examples
 #' input <- torch::torch_randn(10,5, requires_grad = TRUE)

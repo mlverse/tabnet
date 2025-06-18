@@ -22,6 +22,7 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 An R implementation of: [TabNet: Attentive Interpretable Tabular Learning](https://arxiv.org/abs/1908.07442) [(Sercan O. Arik, Tomas Pfister)](https://doi.org/10.48550/arXiv.1908.07442).\
+
 The code in this repository started by an R port using the [torch](https://github.com/mlverse/torch) package of [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet) implementation.
 
 TabNet is now augmented with
