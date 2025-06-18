@@ -64,12 +64,16 @@
 
 <!-- badges: end -->
 <p>An R implementation of: <a href="https://arxiv.org/abs/1908.07442" class="external-link">TabNet: Attentive Interpretable Tabular Learning</a> <a href="https://doi.org/10.48550/arXiv.1908.07442" class="external-link">(Sercan O. Arik, Tomas Pfister)</a>.<br>
-The code in this repository is an R port using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> PyTorch’s implementation.<br>
-TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf" class="external-link">Coherent Hierarchical Multi-label Classification Networks</a> <a href="https://doi.org/10.48550/arXiv.2010.10151" class="external-link">(Eleonora Giunchiglia et Al.)</a> for hierarchical outcomes and <a href="https://jmlr.org/papers/v24/21-0751.html" class="external-link">Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection (J Hillman, TD Hocking)</a> for imbalanced binary classification.</p>
+The code in this repository started by an R port using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> implementation.</p>
+<p>TabNet is now augmented with</p>
+<ul>
+<li><p><a href="https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf" class="external-link">Coherent Hierarchical Multi-label Classification Networks</a> <a href="https://doi.org/10.48550/arXiv.2010.10151" class="external-link">(Eleonora Giunchiglia et Al.)</a> for hierarchical outcomes</p></li>
+<li><p><a href="https://jmlr.org/papers/v24/21-0751.html" class="external-link">Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection (J Hillman, TD Hocking)</a> for imbalanced binary classification.</p></li>
+</ul>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Install <a href="https://cran.r-project.org/web/packages/tabnet/index.html" class="external-link">{tabnet} from CRAN</a> with:</p>
+<p>Install <a href="https://CRAN.R-project.org/package=tabnet" class="external-link">{tabnet} from CRAN</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'tabnet'</span><span class="op">)</span></span></code></pre></div>
 <p>The development version can be installed from <a href="https://github.com/mlverse/tabnet" class="external-link">GitHub</a> with:</p>
@@ -123,7 +127,7 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
 <span><span class="co">#&gt;   .metric .estimator .estimate</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 roc_auc binary         0.544</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 roc_auc binary         0.466</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="explain-model-on-test-set-with-attention-map">Explain model on test-set with attention map<a class="anchor" aria-label="anchor" href="#explain-model-on-test-set-with-attention-map"></a>
@@ -139,12 +143,6 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <p><img src="reference/figures/README-step-explain-1.png" width="100%"></p>
 </div>
 <div class="section level2">
-<h2 id="tidymodels-integration">{tidymodels} integration<a class="anchor" aria-label="anchor" href="#tidymodels-integration"></a>
-</h2>
-<p>The integration within tidymodels workflows offers you unlimited opportunity to compare {tabnet} models with its challengers.</p>
-<p>Don’t miss the <a href="articles/tidymodels-interface.html"><code>vignette("tidymodels-interface")</code></a> for that.</p>
-</div>
-<div class="section level2">
 <h2 id="self-supervised-pretraining">Self-supervised pretraining<a class="anchor" aria-label="anchor" href="#self-supervised-pretraining"></a>
 </h2>
 <p>For cases when a consistent part of your dataset has no outcome, TabNet offers a self-supervised training step allowing to model to capture predictors intrinsic features and predictors interactions, upfront the supervised task.</p>
@@ -153,6 +151,12 @@ TabNet is augmented with <a href="https://proceedings.neurips.cc//paper/2020/fil
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pretrain</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-step-pretrain-1.png" width="100%"></p>
 <p>The example here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette <a href="articles/selfsupervised_training.html"><code>vignette("selfsupervised_training")</code></a> will gives you the complete correct workflow step-by-step.</p>
+</div>
+<div class="section level2">
+<h2 id="tidymodels-integration">{tidymodels} integration<a class="anchor" aria-label="anchor" href="#tidymodels-integration"></a>
+</h2>
+<p>The integration within tidymodels workflows offers you unlimited opportunity to compare {tabnet} models with challengers.</p>
+<p>Don’t miss the <a href="articles/tidymodels-interface.html"><code>vignette("tidymodels-interface")</code></a> for that.</p>
 </div>
 <div class="section level2">
 <h2 id="missing-data-in-predictors">Missing data in predictors<a class="anchor" aria-label="anchor" href="#missing-data-in-predictors"></a>
