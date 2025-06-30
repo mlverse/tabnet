@@ -297,11 +297,13 @@ entmax_15_function <- torch::autograd_function(
 #' @return The projection result P  of the same shape as input, such that
 #'   \eqn{\sum_{dim} P = 1 \forall dim} elementwise.
 #'
-#' @examples
+#' @examplesIf torch::torch_is_installed()
+#' \dontrun{
 #' input <- torch::torch_randn(10,5, requires_grad = TRUE)
 #' # create a top3 alpha=1.5 entmax on last input dimension
 #' nn_entmax <- entmax15(dim=-1L, k = 3)
 #' result <- nn_entmax(input)
+#' }
 #' @export
 entmax15 <- torch::nn_module(
   "entmax_15",

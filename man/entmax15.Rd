@@ -31,8 +31,12 @@ Solves the optimization problem:
 where \eqn{H_{1.5}(P)} is the Tsallis alpha-entropy with \eqn{\alpha=1.5}.
 }
 \examples{
+\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 input <- torch::torch_randn(10,5, requires_grad = TRUE)
 # create a top3 alpha=1.5 entmax on last input dimension
 nn_entmax <- entmax15(dim=-1L, k = 3)
 result <- nn_entmax(input)
+}
+\dontshow{\}) # examplesIf}
 }
