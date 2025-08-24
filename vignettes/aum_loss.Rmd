@@ -1,17 +1,19 @@
 ---
 title: "Using ROC AUM loss for imbalanced binary classification"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using ROC AUM loss for imbalanced binary classification}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
-format: 
-  html:
+editor_options: 
+  markdown: 
     fig-width: 9
     fig-height: 6
     fig-cap-location: "top"
 ---
 
-```{r, include = FALSE}
+```{r}
+#| include: false
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -19,12 +21,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r}
+#| label: setup
 library(tabnet)
 suppressPackageStartupMessages(library(tidymodels))
 library(modeldata)
 data("lending_club", package = "modeldata")
-set.seed(20250409)
+set.seed(20250809)
 ```
 
 ::: callout-note
