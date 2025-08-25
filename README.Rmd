@@ -51,6 +51,7 @@ pak::pak("mlverse/tabnet")
 Here we show a **binary classification** example of the `attrition` dataset, using a **recipe** for dataset input specification.
 
 ```{r model-fit}
+#| fig.alt: "A training loss line-plot along training epochs. Both validation loss and training loss are shown. Training loss line includes regular dots at epochs where a checkpoint is recorded."
 library(tabnet)
 suppressPackageStartupMessages(library(recipes))
 library(yardstick)
@@ -92,6 +93,7 @@ cbind(test, predict(fit, test, type = "prob")) %>%
 TabNet has intrinsic explainability feature through the visualization of attention map, either **aggregated**:
 
 ```{r model-explain}
+#| fig.alt: "An expainability plot showing for each variable of the test-set on the y axis the importance along each observation on the x axis. The value is a mask agggregate."
 explain <- tabnet_explain(fit, test)
 autoplot(explain)
 ```
@@ -99,6 +101,7 @@ autoplot(explain)
 or at **each layer** through the `type = "steps"` option:
 
 ```{r step-explain}
+#| fig.alt: "An small-multiple expainability plot for each step of the Tabnet network. Each plot shows for each variable of the test-set on the y axis the importance along each observation on the x axis."
 autoplot(explain, type = "steps")
 ```
 
@@ -107,6 +110,7 @@ autoplot(explain, type = "steps")
 For cases when a consistent part of your dataset has no outcome, TabNet offers a self-supervised training step allowing to model to capture predictors intrinsic features and predictors interactions, upfront the supervised task.
 
 ```{r step-pretrain}
+#| fig.alt: "A training loss line-plot along pre-training epochs. Both validation loss and training loss are shown. Training loss line includes regular dots at epochs where a checkpoint is recorded."
 pretrain <- tabnet_pretrain(rec, train, epochs = 50, valid_split=0.1, learn_rate = 1e-2)
 autoplot(pretrain)
 ```

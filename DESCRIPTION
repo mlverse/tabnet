@@ -62,8 +62,7 @@ Suggests:
     workflows,
     xgboost,
     yardstick
-VignetteBuilder: 
-    quarto
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/testthat/parallel: false
 Config/testthat/start-first: interface, explain, params
@@ -71,5 +70,3 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Language: en-US
-SystemRequirements: Quarto command line tool
-    (<https://github.com/quarto-dev/quarto-cli>).
