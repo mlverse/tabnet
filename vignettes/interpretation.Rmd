@@ -105,13 +105,14 @@ Let's fit a TabNet model to the `syn2` dataset and analyze the
 interpretation metrics.
 
 ```{r}
-fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 10, verbose = TRUE, device = "cpu")
+fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 45, learn_rate = 0.06, verbose = TRUE, device = "cpu")
 ```
 
 In the feature importance plot we can see that, as expected, features
 `V03-V06` are by far the most important ones.
 
 ```{r}
+#| fig.alt: "A variable importance plot of the fitted model on syn2 dataset showing V03 then V06, V04, v10 and V5 as the 5 most important features, in that order."
 vip::vip(fit_syn2)
 ```
 
@@ -121,10 +122,11 @@ colors represent the importance of the feature in predicting the value
 for each observation.
 
 ```{r}
+#| fig.alt: "A tabnet explaination plot of the fitted model on syn2 dataset. The plot shows numerous important observations in V03 then V06 and V04. the other variables are shown with low importance points or sparse observations with importance"
 library(tidyverse)
 ex_syn2 <- tabnet_explain(fit_syn2, syn2)
 
-autoplot(ex_syn2)
+autoplot(ex_syn2, quantile = 0.99)
 ```
 
 We can see that the region between V03 and V06 concentrates most of the
@@ -136,6 +138,7 @@ Next, we can visualize the attention masks for each step in the
 architecture.
 
 ```{r}
+#| fig.alt: "3 tabnet explaination plots, one for each step of the fitted model on syn2 dataset. The Step 1 plot shows numerous important observations with V03 and V03 having high importance, step 2 plot highlight the importance of V03 and V06. Third step plot highlight V03 and V10 as important variables"
 autoplot(ex_syn2, type="steps")
 ```
 
@@ -152,7 +155,7 @@ create the response variable and we expect to see this in the masks.
 First we fit the model for 10 epochs.
 
 ```{r}
-fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 10, verbose = TRUE, device = "cpu")
+fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 50, verbose = TRUE, device = "cpu", learn_rate = 0.08)
 ```
 
 In the feature importance plot we have, as expected, strong importance
@@ -160,19 +163,21 @@ for `V10`, and the other features that are used conditionally - either
 `V01-V02` or `V05-V06`.
 
 ```{r}
+#| fig.alt: "A variable importance plot of the fitted model on syn4 dataset"
 vip::vip(fit_syn4)
 ```
 
 Now let's visualize the attention masks. Notice that we arranged the
 dataset by `V10` so we can easily visualize the interaction effects.
 
-We also trimmed to the 99th percentile so the colors shows the
+We also trimmed to the 98th percentile so the colors shows the
 importance even if there are strong outliers.
 
 ```{r}
+#| fig.alt: "A tabnet explaination plot of the fitted model on syn4 dataset. The plot shows numerous important observations in V06 for low values of V10, and importance of V01 and V02 for high values of V10."
 ex_syn4 <- tabnet_explain(fit_syn4, arrange(syn4, V10))
 
-autoplot(ex_syn4, quantile=.995)
+autoplot(ex_syn4, quantile=.98)
 ```
 
 From the figure we see that V10 is important for all observations. We
@@ -183,6 +188,7 @@ the important ones.
 We can also visualize the masks at each step in the architecture.
 
 ```{r}
+#| fig.alt: "3 tabnet explaination plots, one for each step of the fitted model on syn4 dataset."
 autoplot(ex_syn4, type="steps", quantile=.995)
 ```
 
