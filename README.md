@@ -19,6 +19,7 @@ status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org
 An R implementation of: [TabNet: Attentive Interpretable Tabular
 Learning](https://arxiv.org/abs/1908.07442) [(Sercan O. Arik, Tomas
 Pfister)](https://doi.org/10.48550/arXiv.1908.07442).  
+
 The code in this repository started by an R port using the
 [torch](https://github.com/mlverse/torch) package of
 [dreamquark-ai/tabnet](https://github.com/dreamquark-ai/tabnet)
@@ -79,7 +80,7 @@ fit <- tabnet_fit(rec, train, epochs = 30, valid_split=0.1, learn_rate = 5e-3)
 autoplot(fit)
 ```
 
-<img src="man/figures/README-model-fit-1.png" width="100%" />
+<img src="man/figures/README-model-fit-1.png" alt="A training loss line-plot along training epochs. Both validation loss and training loss are shown. Training loss line includes regular dots at epochs where a checkpoint is recorded." width="100%" />
 
 The plots gives you an immediate insight about model over-fitting, and
 if any, the available model checkpoints available before the
@@ -125,7 +126,7 @@ explain <- tabnet_explain(fit, test)
 autoplot(explain)
 ```
 
-<img src="man/figures/README-model-explain-1.png" width="100%" />
+<img src="man/figures/README-model-explain-1.png" alt="An expainability plot showing for each variable of the test-set on the y axis the importance along each observation on the x axis. The value is a mask agggregate." width="100%" />
 
 or at **each layer** through the `type = "steps"` option:
 
@@ -133,7 +134,7 @@ or at **each layer** through the `type = "steps"` option:
 autoplot(explain, type = "steps")
 ```
 
-<img src="man/figures/README-step-explain-1.png" width="100%" />
+<img src="man/figures/README-step-explain-1.png" alt="An small-multiple expainability plot for each step of the Tabnet network. Each plot shows for each variable of the test-set on the y axis the importance along each observation on the x axis." width="100%" />
 
 ## Self-supervised pretraining
 
@@ -147,7 +148,7 @@ pretrain <- tabnet_pretrain(rec, train, epochs = 50, valid_split=0.1, learn_rate
 autoplot(pretrain)
 ```
 
-<img src="man/figures/README-step-pretrain-1.png" width="100%" />
+<img src="man/figures/README-step-pretrain-1.png" alt="A training loss line-plot along pre-training epochs. Both validation loss and training loss are shown. Training loss line includes regular dots at epochs where a checkpoint is recorded." width="100%" />
 
 The example here is a toy example as the `train` dataset does actually
 contain outcomes. The vignette

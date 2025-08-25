@@ -105,7 +105,7 @@ Let's fit a TabNet model to the `syn2` dataset and analyze the
 interpretation metrics.
 
 ```{r}
-fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 45, learn_rate = 0.06, verbose = TRUE, device = "cpu")
+fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 45, learn_rate = 0.06, device = "cpu")
 ```
 
 In the feature importance plot we can see that, as expected, features
@@ -138,7 +138,7 @@ Next, we can visualize the attention masks for each step in the
 architecture.
 
 ```{r}
-#| fig.alt: "3 tabnet explaination plots, one for each step of the fitted model on syn2 dataset. The Step 1 plot shows numerous important observations with V03 and V03 having high importance, step 2 plot highlight the importance of V03 and V06. Third step plot highlight V03 and V10 as important variables"
+#| fig.alt: "3 tabnet explaination plots, one for each step of the fitted model on syn2 dataset. The Step 1 plot shows numerous important observations with V02 and V03 having high importance, step 2 plot highlight the importance of V03 and V06. Third step plot highlight V03 and V10 as important variables"
 autoplot(ex_syn2, type="steps")
 ```
 
@@ -155,7 +155,7 @@ create the response variable and we expect to see this in the masks.
 First we fit the model for 10 epochs.
 
 ```{r}
-fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 50, verbose = TRUE, device = "cpu", learn_rate = 0.08)
+fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 50, device = "cpu", learn_rate = 0.08)
 ```
 
 In the feature importance plot we have, as expected, strong importance
