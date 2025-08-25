@@ -63,8 +63,8 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p>An R implementation of: <a href="https://arxiv.org/abs/1908.07442" class="external-link">TabNet: Attentive Interpretable Tabular Learning</a> <a href="https://doi.org/10.48550/arXiv.1908.07442" class="external-link">(Sercan O. Arik, Tomas Pfister)</a>.<br>
-The code in this repository started by an R port using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> implementation.</p>
+<p>An R implementation of: <a href="https://arxiv.org/abs/1908.07442" class="external-link">TabNet: Attentive Interpretable Tabular Learning</a> <a href="https://doi.org/10.48550/arXiv.1908.07442" class="external-link">(Sercan O. Arik, Tomas Pfister)</a>.</p>
+<p>The code in this repository started by an R port using the <a href="https://github.com/mlverse/torch" class="external-link">torch</a> package of <a href="https://github.com/dreamquark-ai/tabnet" class="external-link">dreamquark-ai/tabnet</a> implementation.</p>
 <p>TabNet is now augmented with</p>
 <ul>
 <li><p><a href="https://proceedings.neurips.cc//paper/2020/file/6dd4e10e3296fa63738371ec0d5df818-Paper.pdf" class="external-link">Coherent Hierarchical Multi-label Classification Networks</a> <a href="https://doi.org/10.48550/arXiv.2010.10151" class="external-link">(Eleonora Giunchiglia et Al.)</a> for hierarchical outcomes</p></li>
@@ -103,7 +103,7 @@ The code in this repository started by an R port using the <a href="https://gith
 <span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_fit.html">tabnet_fit</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">30</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">5e-3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-model-fit-1.png" width="100%"></p>
+<p><img src="reference/figures/README-model-fit-1.png" alt="A training loss line-plot along training epochs. Both validation loss and training loss are shown. Training loss line includes regular dots at epochs where a checkpoint is recorded." width="100%"></p>
 <p>The plots gives you an immediate insight about model over-fitting, and if any, the available model checkpoints available before the over-fitting</p>
 <p>Keep in mind that <strong>regression</strong> as well as <strong>multi-class classification</strong> are also available, and that you can specify dataset through <strong>data.frame</strong> and <strong>formula</strong> as well. You will find them in the package vignettes.</p>
 </div>
@@ -136,11 +136,11 @@ The code in this repository started by an R port using the <a href="https://gith
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">explain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">explain</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-model-explain-1.png" width="100%"></p>
+<p><img src="reference/figures/README-model-explain-1.png" alt="An expainability plot showing for each variable of the test-set on the y axis the importance along each observation on the x axis. The value is a mask agggregate." width="100%"></p>
 <p>or at <strong>each layer</strong> through the <code>type = "steps"</code> option:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">explain</span>, type <span class="op">=</span> <span class="st">"steps"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-step-explain-1.png" width="100%"></p>
+<p><img src="reference/figures/README-step-explain-1.png" alt="An small-multiple expainability plot for each step of the Tabnet network. Each plot shows for each variable of the test-set on the y axis the importance along each observation on the x axis." width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="self-supervised-pretraining">Self-supervised pretraining<a class="anchor" aria-label="anchor" href="#self-supervised-pretraining"></a>
@@ -149,7 +149,7 @@ The code in this repository started by an R port using the <a href="https://gith
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pretrain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pretrain</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-step-pretrain-1.png" width="100%"></p>
+<p><img src="reference/figures/README-step-pretrain-1.png" alt="A training loss line-plot along pre-training epochs. Both validation loss and training loss are shown. Training loss line includes regular dots at epochs where a checkpoint is recorded." width="100%"></p>
 <p>The example here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette <a href="articles/selfsupervised_training.html"><code>vignette("selfsupervised_training")</code></a> will gives you the complete correct workflow step-by-step.</p>
 </div>
 <div class="section level2">
