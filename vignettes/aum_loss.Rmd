@@ -3,7 +3,7 @@ title: "Using ROC AUM loss for imbalanced binary classification"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using ROC AUM loss for imbalanced binary classification}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 editor_options: 
   markdown: 
@@ -12,8 +12,7 @@ editor_options:
     fig-cap-location: "top"
 ---
 
-```{r}
-#| include: false
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -21,8 +20,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r}
-#| label: setup
+```{r setup}
 library(tabnet)
 suppressPackageStartupMessages(library(tidymodels))
 library(modeldata)
@@ -118,8 +116,8 @@ We can now `fit()` each model and plot the precision-recall curve on the test-se
 
 ```{r}
 #| label: "vanilia_models_fitting"
-#| layout-ncol: 2
-#| fig-cap: 
+#| layout.ncol: 2
+#| fig.cap: 
 #|   - "Tabnet, no case-weight, default loss"
 #|   - "XGBoost, no case-weight"
 #| 
@@ -153,8 +151,8 @@ Let's proceed
 
 ```{r}
 #| label: "case-weights_prediction"
-#| layout-ncol: 2
-#| fig-cap: 
+#| layout.ncol: 2
+#| fig.cap: 
 #|   - "Tabnet, with case-weight, default loss"
 #|   - "XGBoost, with case-weight"
 #| 
@@ -197,8 +195,8 @@ Now let's compare the result on the PR curve with the default loss side by side:
 
 ```{r}
 #| label: "AUM_model_pr_curve"
-#| layout-ncol: 2
-#| fig-cap: 
+#| layout.ncol: 2
+#| fig.cap: 
 #|   - "Tabnet, no case-weight, default loss"
 #|   - "Tabnet, no case-weight, ROC_AUM loss"
 #|   
@@ -221,8 +219,8 @@ Nothing prevent us to use both features, as they are independent. That is what w
 
 ```{r}
 #| label: "AUM_and_case-weights_prediction"
-#| layout-ncol: 2
-#| fig-cap: 
+#| layout.ncol: 2
+#| fig.cap: 
 #|   - "Tabnet, with case-weight, default loss"
 #|   - "Tabnet, with case-weight, ROC_AUM loss"
 #| 
