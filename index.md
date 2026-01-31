@@ -114,9 +114,10 @@ explain <- tabnet_explain(fit, test)
 autoplot(explain)
 ```
 
-![An expainability plot showing for each variable of the test-set on the
-y axis the importance along each observation on the x axis. The value is
-a mask agggregate.](reference/figures/README-model-explain-1.png)
+![An heatmap as explainability plot showing for each variable of the
+test-set on the y axis the importance along each observation on the x
+axis. The value is a mask
+agggregate.](reference/figures/README-model-explain-1.png)
 
 or at **each layer** through the `type = "steps"` option:
 
@@ -124,9 +125,9 @@ or at **each layer** through the `type = "steps"` option:
 autoplot(explain, type = "steps")
 ```
 
-![An small-multiple expainability plot for each step of the Tabnet
-network. Each plot shows for each variable of the test-set on the y axis
-the importance along each observation on the x
+![An small-multiple heatmap as explainability plot for each step of the
+Tabnet network. Each plot shows for each variable of the test-set on the
+y axis the importance along each observation on the x
 axis.](reference/figures/README-step-explain-1.png)
 
 ## Self-supervised pretraining
@@ -148,7 +149,7 @@ recorded.](reference/figures/README-step-pretrain-1.png)
 
 The example here is a toy example as the `train` dataset does actually
 contain outcomes. The vignette
-[`vignette("selfsupervised_training")`](articles/selfsupervised_training.md)
+[`vignette("selfsupervised_training")`](https://mlverse.github.io/tabnet/articles/selfsupervised_training.html)
 will gives you the complete correct workflow step-by-step.
 
 ## {tidymodels} integration
@@ -157,7 +158,7 @@ The integration within tidymodels workflows offers you unlimited
 opportunity to compare {tabnet} models with challengers.
 
 Don’t miss the
-[`vignette("tidymodels-interface")`](articles/tidymodels-interface.md)
+[`vignette("tidymodels-interface")`](https://mlverse.github.io/tabnet/articles/tidymodels-interface.html)
 for that.
 
 ## Missing data in predictors
@@ -167,7 +168,7 @@ you don’t have to remove the entries in your dataset with some missing
 values in the predictors variables.
 
 See
-[`vignette("Missing_data_predictors")`](articles/Missing_data_predictors.md)
+[`vignette("Missing_data_predictors")`](https://mlverse.github.io/tabnet/articles/Missing_data_predictors.html)
 
 ## Imbalanced binary classification
 
@@ -175,7 +176,8 @@ See
 [`nn_aum_loss()`](reference/nn_aum_loss.md) dedicated to your imbalanced
 binary classification tasks.
 
-Try it out in [`vignette("aum_loss")`](articles/aum_loss.md)
+Try it out in
+[`vignette("aum_loss")`](https://mlverse.github.io/tabnet/articles/aum_loss.html)
 
 # Comparison with other implementations
 

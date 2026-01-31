@@ -136,11 +136,11 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">explain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_explain.html">tabnet_explain</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">explain</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-model-explain-1.png" alt="An expainability plot showing for each variable of the test-set on the y axis the importance along each observation on the x axis. The value is a mask agggregate." width="100%"></p>
+<p><img src="reference/figures/README-model-explain-1.png" alt="An heatmap as explainability plot showing for each variable of the test-set on the y axis the importance along each observation on the x axis. The value is a mask agggregate." width="100%"></p>
 <p>or at <strong>each layer</strong> through the <code>type = "steps"</code> option:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">explain</span>, type <span class="op">=</span> <span class="st">"steps"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-step-explain-1.png" alt="An small-multiple expainability plot for each step of the Tabnet network. Each plot shows for each variable of the test-set on the y axis the importance along each observation on the x axis." width="100%"></p>
+<p><img src="reference/figures/README-step-explain-1.png" alt="An small-multiple heatmap as explainability plot for each step of the Tabnet network. Each plot shows for each variable of the test-set on the y axis the importance along each observation on the x axis." width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="self-supervised-pretraining">Self-supervised pretraining<a class="anchor" aria-label="anchor" href="#self-supervised-pretraining"></a>
@@ -150,25 +150,25 @@
 <code class="sourceCode R"><span><span class="va">pretrain</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tabnet_pretrain.html">tabnet_pretrain</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">train</span>, epochs <span class="op">=</span> <span class="fl">50</span>, valid_split<span class="op">=</span><span class="fl">0.1</span>, learn_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pretrain</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-step-pretrain-1.png" alt="A training loss line-plot along pre-training epochs. Both validation loss and training loss are shown. Training loss line includes regular dots at epochs where a checkpoint is recorded." width="100%"></p>
-<p>The example here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette <a href="articles/selfsupervised_training.html"><code>vignette("selfsupervised_training")</code></a> will gives you the complete correct workflow step-by-step.</p>
+<p>The example here is a toy example as the <code>train</code> dataset does actually contain outcomes. The vignette <a href="https://mlverse.github.io/tabnet/articles/selfsupervised_training.html" class="external-link"><code>vignette("selfsupervised_training")</code></a> will gives you the complete correct workflow step-by-step.</p>
 </div>
 <div class="section level2">
 <h2 id="tidymodels-integration">{tidymodels} integration<a class="anchor" aria-label="anchor" href="#tidymodels-integration"></a>
 </h2>
 <p>The integration within tidymodels workflows offers you unlimited opportunity to compare {tabnet} models with challengers.</p>
-<p>Don’t miss the <a href="articles/tidymodels-interface.html"><code>vignette("tidymodels-interface")</code></a> for that.</p>
+<p>Don’t miss the <a href="https://mlverse.github.io/tabnet/articles/tidymodels-interface.html" class="external-link"><code>vignette("tidymodels-interface")</code></a> for that.</p>
 </div>
 <div class="section level2">
 <h2 id="missing-data-in-predictors">Missing data in predictors<a class="anchor" aria-label="anchor" href="#missing-data-in-predictors"></a>
 </h2>
 <p>{tabnet} leverage the masking mechanism to deal with missing data, so you don’t have to remove the entries in your dataset with some missing values in the predictors variables.</p>
-<p>See <a href="articles/Missing_data_predictors.html"><code>vignette("Missing_data_predictors")</code></a></p>
+<p>See <a href="https://mlverse.github.io/tabnet/articles/Missing_data_predictors.html" class="external-link"><code>vignette("Missing_data_predictors")</code></a></p>
 </div>
 <div class="section level2">
 <h2 id="imbalanced-binary-classification">Imbalanced binary classification<a class="anchor" aria-label="anchor" href="#imbalanced-binary-classification"></a>
 </h2>
 <p>{tabnet} includes a Area under the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>i</mi><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>F</mi><mi>P</mi><mi>R</mi><mo>,</mo><mi>F</mi><mi>N</mi><mi>R</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Min(FPR,FNR)</annotation></semantics></math> (AUM) loss function <code><a href="reference/nn_aum_loss.html">nn_aum_loss()</a></code> dedicated to your imbalanced binary classification tasks.</p>
-<p>Try it out in <a href="articles/aum_loss.html"><code>vignette("aum_loss")</code></a></p>
+<p>Try it out in <a href="https://mlverse.github.io/tabnet/articles/aum_loss.html" class="external-link"><code>vignette("aum_loss")</code></a></p>
 </div>
 </div>
 <div class="section level1">
