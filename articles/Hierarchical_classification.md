@@ -1,0 +1,242 @@
+# Hierarchical Classification
+
+``` r
+library(tabnet)
+library(dplyr)
+library(data.tree)
+library(ggplot2)
+library(rsample)
+library(tibble)
+set.seed(202307)
+```
+
+## Data preparation
+
+The supported data format for hierarchical classification is the `Node`
+object format from package
+[data.tree](https://github.com/gluc/data.tree).
+
+This is a general purpose format that fits generic hierarchical tree
+encoding needs. Each node of the tree is associated with predictor
+values through the `attributes` in the data `Node` object.
+
+- A very basic example is the `acme` dataset to show you how the two
+  predictors values `cost` and `p` are associates attributes of each
+  node in the hierarchy :
+
+``` r
+data(acme, package = "data.tree")
+acme$attributesAll
+print(acme, "cost", "p" , limit = 8)
+```
+
+- Multiple manual or programmatic methods are available to create or
+  update predictors. They are detailled in the
+  [`vignette("data.tree", package = "data.tree")`](https://cran.rstudio.com/web/packages/data.tree/vignettes/data.tree.html).
+
+- a lot of native hierarchical data-format conversion from files to
+  `Node` are covered by
+  the[data.tree](https://github.com/gluc/data.tree) package. You can
+  find them in the “Create tree from a file” section of the same
+  vignette. If needed, the [ape](https://github.com/emmanuelparadis/ape)
+  package covers a lot of conversion format to the `philo` format. Thus
+  you can reach the `Node` format in maybe two transformation steps…
+
+- A quick way to achieve `Node` format from a data frame with columns
+  being the different levels of the hierarchy consist in pasting the
+  columns into a single string with `"/"` separator into a `pathString`
+  column. This will be turn into the expected hierarchy by the
+  [`data.tree::as.Node()`](https://rdrr.io/pkg/data.tree/man/as.Node.html)
+  command.
+
+Let’s do it with `starwars` dataset as a toy example :
+
+``` r
+data(starwars, package = "dplyr")
+head(starwars, 4)
+
+# erroneous Node construction
+starwars_tree <- starwars %>% 
+  mutate(pathString = paste("StarWars_characters", species, sex, `name`, sep = "/")) %>%
+  as.Node()
+print(starwars_tree, "name","height", "mass", "eye_color", limit = 8)
+```
+
+You may have noticed that `name` and `height` have unexpected values
+according to the original data: `Human` is not part of the `name` in
+orginal dataset, and `height` values have been changed into the local
+height of the tree. This is due to some rules we will have to follow to
+create the Node from data frame.
+
+## `Node` preparation rules for {tabnet} models
+
+### Avoid `factor` predictors
+
+As [`as.Node()`](https://rdrr.io/pkg/data.tree/man/as.Node.html) will
+only consider the as.numeric() values of a factor(), you should turn
+them into characters before applying the
+[`as.Node()`](https://rdrr.io/pkg/data.tree/man/as.Node.html) function
+in order for {tabnet} to properly embed them.
+
+### Avoid column name collision with reserved {data.tree} names
+
+`name` and `height` are both part of the `NODE_RESERVED_NAMES_CONST`
+reserved list of names for `Node` attributes. So they must **not be
+used** as predictor names, or the
+[`as.Node()`](https://rdrr.io/pkg/data.tree/man/as.Node.html) function
+will silently discard them.
+
+### Avoid column named `level_*` to avoid collision with output data.tree names
+
+Your dataset hierarchy will be turn internally into multi-outcomes named
+`level_1` to `level_n`, n beeing the depth of your tree. Thus column
+names starting with `level_` should be avoided.
+
+### Ensure the last hierarchy of the tree is the observation id
+
+The tree only keeps a single row of attributes per tree leaf. Thus in
+order to transfer your complete predictors dataset into the Node object,
+you must keep the last level of the hierarchy to be a unique observation
+identifier (last resort beeing
+[`rowid_to_column()`](https://tibble.tidyverse.org/reference/rownames.html)
+to achieve it).
+
+The classification will be done **removing the last level of hierarchy**
+in any case.
+
+### Ensure there is a root level in the hierarchy
+
+The tree should have a single root for all nodes to be consistent. Thus
+you have to use a constant prefix to all `pathString`.
+
+The classification will be done **removing the first level of
+hierarchy** in any case.
+
+Now let’s have all those rules applied to the `starwars_tree` :
+
+``` r
+# demonstration of reserved column modification in Node construction
+starwars_tree <- starwars %>% 
+  rename(`_name` = "name", `_height` = "height") %>% 
+  mutate(pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
+  as.Node()
+print(starwars_tree, "name", "_name","_height", "mass", "eye_color", limit = 8)
+```
+
+We can see that the reserved `name` column contains slightly different
+content that the original `_name` column.
+
+## Model building
+
+### Data set split
+
+The `starwars` dataset contains list columns, hosting some variability
+in the predictor values. Thus we decide here to `unnest_longer` every
+list column to each of its values. This will triple the size of the
+`starwars` dataset.  
+The dataset split here will be done upfront of the transformation into
+[`as.Node()`](https://rdrr.io/pkg/data.tree/man/as.Node.html). We will
+use
+[`rsample::initial_split()`](https://rsample.tidymodels.org/reference/initial_split.html)
+to split with a stratification on the parent category of the first level
+of our hierarchy which is `species`.
+
+``` r
+starw_split <- starwars %>% 
+  tidyr::unnest_longer(films) %>% 
+  tidyr::unnest_longer(vehicles, keep_empty = TRUE) %>% 
+  tidyr::unnest_longer(starships, keep_empty = TRUE) %>% 
+  initial_split( prop = .8, strata = "species")
+```
+
+In order to train a model properly, we should prevent the outcomes to be
+part of the predictor columns. For the sake of demonstration, the
+`_name` column was present in `starwars_tree` but must now be dropped.
+
+``` r
+# correct Node construction for hierarchical modeling
+starwars_train_tree <- starw_split %>% 
+  training() %>% 
+  # avoid reserved column names
+  rename(`_name` = "name", `_height` = "height") %>% 
+  rowid_to_column() %>% 
+  mutate(pathString = paste("StarWars_characters", species, sex, rowid, sep = "/")) %>%
+  # remove outcomes labels from predictors
+  select(-species, -sex, -`_name`, -rowid) %>% 
+  # turn it as hierarchical Node
+  as.Node()
+
+starwars_test_tree <- starw_split %>% 
+  testing() %>% 
+  rename(`_name` = "name", `_height` = "height") %>% 
+  rowid_to_column() %>% 
+  mutate(pathString = paste("StarWars_characters", species, sex, rowid, sep = "/")) %>%
+  select(-species, -sex, -`_name`, -rowid) %>% 
+  as.Node()
+
+starwars_train_tree$attributesAll
+```
+
+Now we can see that none of the predictor leaks the outcome hierarchy
+information.
+
+## Model building
+
+This `starwars_tree` can now be used as an input for
+[`tabnet_fit()`](../reference/tabnet_fit.md) :
+
+``` r
+config <- tabnet_config(decision_width = 8, attention_width = 8, num_steps = 3, penalty = .003, cat_emb_dim = 2, valid_split = 0.2, learn_rate = 1e-3, lr_scheduler = "reduce_on_plateau", early_stopping_monitor = "valid_loss", early_stopping_patience = 4, verbose = FALSE)
+
+starw_model <- tabnet_fit(starwars_train_tree, config = config, epoch = 170, checkpoint_epochs = 25)
+```
+
+## Model diagnostic
+
+We have avoid the verbose output of the model, thus very first
+diagnostic is the check for model over-fitting though the training loss
+plot.
+
+``` r
+autoplot(starw_model)
+```
+
+Then global feature importance gives us a clue of model quality
+
+``` r
+vip::vip(starw_model)
+```
+
+## Model inference
+
+We can infer on the test-set
+
+``` r
+starwars_hat <- bind_cols(
+    predict(starw_model, starwars_test_tree),
+    node_to_df(starwars_test_tree)$y
+  )
+tail(starwars_hat, n = 5)
+```
+
+We can see in the Warnings that the dataset is a challenge as many new
+levels are found in a lot of predictors in the test set.  
+The model also here is very poor on the `level_2` ( `species` ) and on
+`level_3` ( `sex` ) as this is definitively not a model-intended
+dataset. The reason is that the input dataset not collecting large
+samples of distinctive observation per leaf, but rather a very diverse
+but limited number of characters compatible with watching a movie saga.
+
+Despite the performance, we do have local feature importance on the
+complete dataset here :
+
+``` r
+starwars_explain <- tabnet_explain(starw_model, starwars_test_tree)
+autoplot(starwars_explain)
+autoplot(starwars_explain, type = "steps")
+```
+
+Hopefully your own hierarchical outcome will have a better success than
+the one here with `starwars` dataset. But in this journey, you have
+learned a lot in the data format constraints and solutions, and you now
+have a new performing solution in your toolbox.
