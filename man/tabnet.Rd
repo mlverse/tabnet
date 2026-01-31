@@ -170,7 +170,7 @@ torch::torch_set_num_interop_threads(1)
 }
 
 \examples{
-\dontshow{if (torch::torch_is_installed()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (torch::torch_is_installed()) withAutoprint(\{ # examplesIf}
 library(parsnip)
 data("ames", package = "modeldata")
 model <- tabnet() \%>\%

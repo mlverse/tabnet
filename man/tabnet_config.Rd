@@ -161,7 +161,7 @@ A named list with all hyperparameters of the TabNet implementation.
 Configuration for TabNet models
 }
 \examples{
-\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) withAutoprint(\{ # examplesIf}
 data("ames", package = "modeldata")
 
 # change the model config for an faster ignite optimizer

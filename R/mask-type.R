@@ -117,12 +117,14 @@ sparsemax_function <- torch::autograd_function(
 #'
 #' @return The projection result, such that \eqn{\sum_{dim} P = 1 \forall dim} elementwise.
 #'
-#' @examples
+#' @examplesIf torch::torch_is_installed()
+#' \dontrun{
 #' input <- torch::torch_randn(10, 5, requires_grad = TRUE)
 #' # create a top3 alpha=1.5 sparsemax on last input dimension
 #' nn_sparsemax <- sparsemax15(dim=1, k=3)
 #' result <- nn_sparsemax(input)
 #' print(result)
+#' }
 #' @export
 sparsemax <- torch::nn_module(
   "sparsemax",

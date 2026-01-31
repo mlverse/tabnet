@@ -37,7 +37,7 @@ Plot the \code{tabnet_explain} object mask importance per variable along the pre
 low values. \code{quantile=1}, the default, do not clip any values.
 }
 \examples{
-\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((torch::torch_is_installed() && require("modeldata"))) withAutoprint(\{ # examplesIf}
  \dontrun{
 library(ggplot2)
 data("attrition", package = "modeldata")

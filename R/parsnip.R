@@ -597,7 +597,7 @@ update.tabnet <- function(object, parameters = NULL, epochs = NULL, penalty = NU
 #' @return A tibble with the minimum tuning parameters to fit and an additional
 #' list column with the parameter combinations used for prediction.
 #' @keywords internal
-#' @examples
+#' @examplesIf torch::torch_is_installed()
 #' library(dials)
 #' library(tune)
 #' library(parsnip)

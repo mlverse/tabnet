@@ -16,7 +16,7 @@ node if it is compliant, else an Error with the column names to fix
 Check that Node object names are compliant
 }
 \examples{
-\dontshow{if ((require("data.tree") || require("dplyr"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((require("data.tree") || require("dplyr"))) withAutoprint(\{ # examplesIf}
 library(dplyr)
 library(data.tree)
 data(starwars)

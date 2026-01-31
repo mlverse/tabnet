@@ -27,6 +27,7 @@ internal use only and the API may change in the near future.
 method.
 }
 \examples{
+\dontshow{if (torch::torch_is_installed()) withAutoprint(\{ # examplesIf}
 library(dials)
 library(tune)
 library(parsnip)
@@ -41,6 +42,6 @@ tabnet_grid <-
   grid_regular(levels = 3)
 
 min_grid(tabnet_spec, tabnet_grid)
-
+\dontshow{\}) # examplesIf}
 }
 \keyword{internal}

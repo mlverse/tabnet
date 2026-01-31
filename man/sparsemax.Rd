@@ -30,9 +30,13 @@ Solves the projection:
 \eqn{\min_P ||input - P||_2 \text{ s.t. } P \geq0, \sum(P) ==1}
 }
 \examples{
+\dontshow{if (torch::torch_is_installed()) withAutoprint(\{ # examplesIf}
+\dontrun{
 input <- torch::torch_randn(10, 5, requires_grad = TRUE)
 # create a top3 alpha=1.5 sparsemax on last input dimension
 nn_sparsemax <- sparsemax15(dim=1, k=3)
 result <- nn_sparsemax(input)
 print(result)
+}
+\dontshow{\}) # examplesIf}
 }

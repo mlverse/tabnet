@@ -22,7 +22,7 @@ Prune \code{head_size} last layers of a tabnet network in order to
 use the pruned module as a sequential embedding module.
 }
 \examples{
-\dontshow{if ((torch::torch_is_installed())) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if ((torch::torch_is_installed())) withAutoprint(\{ # examplesIf}
 data("ames", package = "modeldata")
 x <- ames[,-which(names(ames) == "Sale_Price")]
 y <- ames$Sale_Price
