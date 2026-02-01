@@ -2,6 +2,8 @@
 
 ## tabnet 0.8.0
 
+CRAN release: 2026-01-31
+
 ### New features
 
 - messaging is now improved with {cli}
