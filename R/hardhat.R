@@ -325,30 +325,147 @@ new_tabnet_pretrain <- function(pretrain, blueprint) {
   )
 }
 
-#' Triple dispatch on task, resume training and resume epoch
+#' S7 Task Classes for Double Dispatch: supervised learning task
+#' @noRd
+supervised_task <- S7::new_class("supervised_task", package = "tabnet")
+
+#' S7 Task Classes for Double Dispatch: unsupervised learning task
+#' @noRd
+unsupervised_task <- S7::new_class("unsupervised_task", package = "tabnet")
+
+#' S7 Task Classes for Double Dispatch: wrapper for NULL tabnet_model
+#' @noRd
+tabnet_null <- S7::new_class("tabnet_null", package = "tabnet")
+
+#' S7 Task Classes for Double Dispatch: convert task string to S7 task object
+#' @noRd
+as_task <- function(task) {
+  switch(task,
+    supervised = supervised_task(),
+    unsupervised = unsupervised_task(),
+    runtime_error("Unknown task type: {.val {task}}")
+  )
+}
+
+#' S7 Task Classes for Double Dispatch: wrap tabnet_model for S7 dispatch
+#' @noRd
+wrap_model <- function(tabnet_model) {
+  if (is.null(tabnet_model)) {
+    tabnet_null()
+  } else {
+    tabnet_model
+  }
+}
+
+#' S7 Generic for tabnet_bridge_impl: double-dispatch on task and model type
+#' @noRd
+tabnet_bridge_impl <- S7::new_generic("tabnet_bridge_impl", dispatch_args = c("task", "model"))
+
+#' S7 Methods Supervised Task: new supervised model (NULL -> tabnet_fit)
+#' @noRd
+S7::method(tabnet_bridge_impl, list(supervised_task, tabnet_null)) <- function(task, model, processed, config, epoch_shift) {
+  predictors <- processed$predictors
+  outcomes <- processed$outcomes
+
+  if (sum(is.na(outcomes)) > 0) {
+    value_error("Found missing values in the {.var {names(outcomes)}} outcome column.")
+  }
+
+  # new supervised model needs network initialization
+  tabnet_model_lst <- tabnet_initialize(predictors, outcomes, config = config)
+  tabnet_model <- new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
+
+  fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
+  new_tabnet_fit(fit_lst, blueprint = processed$blueprint)
+}
+
+#' S7 Methods Supervised Task: resume supervised training (tabnet_fit -> tabnet_fit)
+#' @noRd
+S7::method(tabnet_bridge_impl, list(supervised_task, S7::class_any)) <- function(task, model, processed, config, epoch_shift) {
+  predictors <- processed$predictors
+  outcomes <- processed$outcomes
+
+  if (sum(is.na(outcomes)) > 0) {
+    value_error("Found missing values in the {.var {names(outcomes)}} outcome column.")
+  }
+
+  # Default handler - check what type of model we have
+  if (inherits(model, "tabnet_fit")) {
+    # Resume training from supervised
+    if (!check_net_is_empty_ptr(model) && inherits(model, "tabnet_fit")) {
+      if (!identical(processed$blueprint, model$blueprint))
+        runtime_error("Model dimensions don't match.")
+
+      # model is available from model$serialized_net
+      m <- reload_model(model$serialized_net)
+
+      # this modifies 'model' in-place so subsequent predicts won't need to reload.
+      model$fit$network$load_state_dict(m$state_dict())
+      epoch_shift <- length(model$fit$metrics)
+
+    } else if (length(model$fit$checkpoints)) {
+      # model is loaded from the last available checkpoint
+      last_checkpoint <- length(model$fit$checkpoints)
+
+      model$fit$network <- reload_model(model$fit$checkpoints[[last_checkpoint]])
+      epoch_shift <- last_checkpoint * model$fit$config$checkpoint_epoch
+
+    } else {
+      runtime_error("No model serialized weight can be found in {.var {model}}, check the model history")
+    }
+
+    fit_lst <- tabnet_train_supervised(model, predictors, outcomes, config = config, epoch_shift)
+    return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
+
+  } else if (inherits(model, "tabnet_pretrain")) {
+    # Transfer from pretrain to supervised
+    tabnet_model_lst <- model_pretrain_to_fit(model, predictors, outcomes, config)
+    tabnet_model <- new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
+
+    fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
+    return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
+
+  } else {
+    type_error("{.var {model}} is not recognised as a proper TabNet model")
+  }
+}
+
+#' S7 Methods Unsupervised Task: new unsupervised pretraining (any -> tabnet_pretrain)
+#' @noRd
+S7::method(tabnet_bridge_impl, list(unsupervised_task, S7::class_any)) <- function(task, model, processed, config, epoch_shift) {
+  predictors <- processed$predictors
+
+  if (!S7::S7_inherits(model, tabnet_null)) {
+    warn("Using {.fn tabnet_pretrain} from a model is not currently supported.",
+         "Pretraining will start from a new network initialization")
+  }
+
+  pretrain_lst <- tabnet_train_unsupervised(predictors, config = config, epoch_shift)
+  new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint)
+}
+
+#' Main tabnet_bridge Function (Coordinator): double-dispatch bridge on task and model type
 #'
-#' Perform the triple dispatch and initialize the model (if needed) or
-#'  resume the model network weight to the right epoch
+#' Coordinates the training workflow by handling checkpoint restoration,
+#' then dispatching to appropriate S7 method based on task type and model type.
 #'
-#' @param processed the hardhat prerocessed dataset
+#' @param processed the hardhat preprocessed dataset
 #' @param config the tabnet network config list of parameters
-#' @param tabnet_model the tabnet model to resume training on
+#' @param tabnet_model the tabnet model to resume training on (NULL, tabnet_fit, or tabnet_pretrain)
 #' @param from_epoch the epoch to resume training from
 #' @param task "supervised" or "unsupervised"
 #'
 #' @return a fitted tabnet_model/tabnet_pretrain object list
 #' @noRd
-tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, from_epoch, task="supervised") {
-  predictors <- processed$predictors
-  outcomes <- processed$outcomes
+tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, from_epoch, task = "supervised") {
   epoch_shift <- 0L
 
+  # Validate model type
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
     type_error("{.var {tabnet_model}} is not recognised as a proper TabNet model")
 
+  # Handle checkpoint restoration (common to all paths)
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
-    # model must be loaded from checkpoint
-
     if (from_epoch > (length(tabnet_model$fit$checkpoints) * tabnet_model$fit$config$checkpoint_epoch))
       value_error("The model was trained for less than {.val {from_epoch}} epochs")
 
@@ -358,60 +475,14 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
     epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
     tabnet_model$fit$metrics <- tabnet_model$fit$metrics[seq(epoch_shift)]
-
   }
-  if (task == "supervised") {
-    if (sum(is.na(outcomes)) > 0) {
-      value_error("Found missing values in the {.var {names(outcomes)}} outcome column.")
-    }
-    if (is.null(tabnet_model)) {
-      # new supervised model needs network initialization
-      tabnet_model_lst <- tabnet_initialize(predictors, outcomes, config = config)
-      tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
 
-    } else if (!check_net_is_empty_ptr(tabnet_model) && inherits(tabnet_model, "tabnet_fit")) {
-      # resume training from supervised
-      if (!identical(processed$blueprint, tabnet_model$blueprint))
-        runtime_error("Model dimensions don't match.")
+  # Convert to S7 objects for double-dispatch
+  task_obj <- as_task(task)
+  model_obj <- wrap_model(tabnet_model)
 
-      # model is available from tabnet_model$serialized_net
-      m <- reload_model(tabnet_model$serialized_net)
-
-      # this modifies 'tabnet_model' in-place so subsequent predicts won't
-      # need to reload.
-      tabnet_model$fit$network$load_state_dict(m$state_dict())
-      epoch_shift <- length(tabnet_model$fit$metrics)
-
-
-    } else if (inherits(tabnet_model, "tabnet_pretrain")) {
-      # resume training from unsupervised
-
-      tabnet_model_lst <- model_pretrain_to_fit(tabnet_model, predictors, outcomes, config)
-      tabnet_model <-  new_tabnet_fit(tabnet_model_lst, blueprint = processed$blueprint)
-
-    }  else if (length(tabnet_model$fit$checkpoints)) {
-      # model is loaded from the last available checkpoint
-
-      last_checkpoint <- length(tabnet_model$fit$checkpoints)
-
-      tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
-      epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
-
-    } else runtime_error("No model serialized weight can be found in {.var {tabnet_model}}, check the model history")
-
-    fit_lst <- tabnet_train_supervised(tabnet_model, predictors, outcomes, config = config, epoch_shift)
-    return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
-
-  } else if (task == "unsupervised") {
-
-    if (!is.null(tabnet_model)) {
-      warn("Using {.fn tabnet_pretrain} from a model is not currently supported.",
-           "Pretraining will start from a new network initialization")
-    }
-    pretrain_lst <- tabnet_train_unsupervised( predictors, config = config, epoch_shift)
-    return(new_tabnet_pretrain(pretrain_lst, blueprint = processed$blueprint))
-
-  }
+  # Dispatch to appropriate method
+  tabnet_bridge_impl(task_obj, model_obj, processed, config, epoch_shift)
 }
 
 

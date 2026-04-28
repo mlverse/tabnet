@@ -20,7 +20,7 @@ URL: https://mlverse.github.io/tabnet/, https://github.com/mlverse/tabnet
 BugReports: https://github.com/mlverse/tabnet/issues
 Depends:
     R (>= 3.6)
-Imports: 
+Imports:
     coro,
     data.tree,
     dials,
@@ -34,6 +34,7 @@ Imports:
     progress,
     purrr,
     rlang,
+    S7,
     stats,
     stringr,
     tibble,
