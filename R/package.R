@@ -8,6 +8,7 @@
   vctrs::s3_register("torch::nn_prune_head", "tabnet_fit")
   vctrs::s3_register("torch::nn_prune_head", "tabnet_pretrain")
   vctrs::s3_register("tune::min_grid", "tabnet")
+  S7::methods_register()
 }
 
 

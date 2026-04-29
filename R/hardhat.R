@@ -272,7 +272,7 @@ tabnet_pretrain.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_pretrain
-tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+tabnet_pretrain.data.frame <- function(x, y = NULL, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
 
   config <- merge_config_and_dots(config, ...)
@@ -309,7 +309,7 @@ tabnet_pretrain.Node <- function(x, tabnet_model = NULL, config = tabnet_config(
   check_compliant_node(x)
   # get tree leaves and extract attributes into data.frames
   xy_df <- node_to_df(x)
-  tabnet_pretrain(xy_df$x, xy_df$y, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
+  tabnet_pretrain(xy_df$x, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
 
 }
 
@@ -337,6 +337,26 @@ unsupervised_task <- S7::new_class("unsupervised_task", package = "tabnet")
 #' @noRd
 tabnet_null <- S7::new_class("tabnet_null", package = "tabnet")
 
+#' S7 Prediction Classes for Double Dispatch: prediction type - numeric
+#' @noRd
+prediction_numeric <- S7::new_class("prediction_numeric", package = "tabnet")
+
+#' S7 Prediction Classes for Double Dispatch: prediction type - probability
+#' @noRd
+prediction_prob <- S7::new_class("prediction_prob", package = "tabnet")
+
+#' S7 Prediction Classes for Double Dispatch: prediction type - class
+#' @noRd
+prediction_class <- S7::new_class("prediction_class", package = "tabnet")
+
+#' S7 Prediction Classes for Double Dispatch: single outcome
+#' @noRd
+single_outcome <- S7::new_class("single_outcome", package = "tabnet")
+
+#' S7 Prediction Classes for Double Dispatch: multiple outcomes
+#' @noRd
+multi_outcome <- S7::new_class("multi_outcome", package = "tabnet")
+
 #' S7 Task Classes for Double Dispatch: convert task string to S7 task object
 #' @noRd
 as_task <- function(task) {
@@ -347,7 +367,29 @@ as_task <- function(task) {
   )
 }
 
+#' S7 Prediction Classes for Double Dispatch: convert prediction type to S7 object
+#' @noRd
+as_prediction_type <- function(type) {
+  switch(type,
+    numeric = prediction_numeric(),
+    prob = prediction_prob(),
+    class = prediction_class(),
+    runtime_error("Unknown prediction type: {.val {type}}")
+  )
+}
+
+#' S7 Prediction Classes for Double Dispatch: convert outcome cardinality to S7 object
+#' @noRd
+as_outcome_type <- function(is_multi) {
+  if (is_multi) multi_outcome() else single_outcome()
+}
+
 #' S7 Task Classes for Double Dispatch: wrap tabnet_model for S7 dispatch
+#'
+#' Converts NULL to a tabnet_null S7 object for type-safe dispatch.
+#' Non-NULL models are S3 objects (tabnet_fit or tabnet_pretrain from hardhat::new_model)
+#' which S7 handles natively. Type validation happens in tabnet_bridge() before dispatch.
+#'
 #' @noRd
 wrap_model <- function(tabnet_model) {
   if (is.null(tabnet_model)) {
@@ -426,7 +468,7 @@ S7::method(tabnet_bridge_impl, list(supervised_task, S7::class_any)) <- function
     return(new_tabnet_fit(fit_lst, blueprint = processed$blueprint))
 
   } else {
-    type_error("{.var {model}} is not recognised as a proper TabNet model")
+    type_error("Expected {.cls tabnet_fit} or {.cls tabnet_pretrain}, got {.cls {class(model)[1]}}")
   }
 }
 
@@ -462,7 +504,7 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
   # Validate model type
   if (!(is.null(tabnet_model) || inherits(tabnet_model, "tabnet_fit") || inherits(tabnet_model, "tabnet_pretrain")))
-    type_error("{.var {tabnet_model}} is not recognised as a proper TabNet model")
+    type_error("Expected NULL, {.cls tabnet_fit}, or {.cls tabnet_pretrain}, got {.cls {class(tabnet_model)[1]}}")
 
   # Handle checkpoint restoration (common to all paths)
   if (!is.null(from_epoch) && !is.null(tabnet_model)) {
@@ -485,6 +527,58 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   tabnet_bridge_impl(task_obj, model_obj, processed, config, epoch_shift)
 }
 
+#' S7 Generic for predict_impl_dispatch: double-dispatch on prediction type and outcome cardinality
+#'
+#' Replaces the previous string concatenation + switch pattern with type-safe S7 dispatch.
+#' Dispatches on 2 dimensions:
+#'   - Prediction type: numeric, prob, class
+#'   - Outcome cardinality: single_outcome, multi_outcome
+#' This creates 6 possible method combinations.
+#'
+#' @noRd
+predict_impl_dispatch <- S7::new_generic("predict_impl_dispatch", dispatch_args = c("pred_type", "outcome_type"))
+
+#' S7 Method: numeric prediction, single outcome
+#' @noRd
+S7::method(predict_impl_dispatch, list(prediction_numeric, single_outcome)) <-
+  function(pred_type, outcome_type, object, predictors, batch_size, outcome_nlevels = NULL) {
+    predict_impl_numeric(object, predictors, batch_size)
+  }
+
+#' S7 Method: numeric prediction, multiple outcomes
+#' @noRd
+S7::method(predict_impl_dispatch, list(prediction_numeric, multi_outcome)) <-
+  function(pred_type, outcome_type, object, predictors, batch_size, outcome_nlevels = NULL) {
+    predict_impl_numeric_multiple(object, predictors, batch_size)
+  }
+
+#' S7 Method: probability prediction, single outcome
+#' @noRd
+S7::method(predict_impl_dispatch, list(prediction_prob, single_outcome)) <-
+  function(pred_type, outcome_type, object, predictors, batch_size, outcome_nlevels = NULL) {
+    predict_impl_prob(object, predictors, batch_size)
+  }
+
+#' S7 Method: probability prediction, multiple outcomes
+#' @noRd
+S7::method(predict_impl_dispatch, list(prediction_prob, multi_outcome)) <-
+  function(pred_type, outcome_type, object, predictors, batch_size, outcome_nlevels = NULL) {
+    predict_impl_prob_multiple(object, predictors, batch_size, outcome_nlevels)
+  }
+
+#' S7 Method: class prediction, single outcome
+#' @noRd
+S7::method(predict_impl_dispatch, list(prediction_class, single_outcome)) <-
+  function(pred_type, outcome_type, object, predictors, batch_size, outcome_nlevels = NULL) {
+    predict_impl_class(object, predictors, batch_size)
+  }
+
+#' S7 Method: class prediction, multiple outcomes
+#' @noRd
+S7::method(predict_impl_dispatch, list(prediction_class, multi_outcome)) <-
+  function(pred_type, outcome_type, object, predictors, batch_size, outcome_nlevels = NULL) {
+    predict_impl_class_multiple(object, predictors, batch_size, outcome_nlevels)
+  }
 
 #' @importFrom stats predict
 #' @export
@@ -529,16 +623,12 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
     object$fit$network$load_state_dict(m$state_dict())
   }
 
-  type_multioutcome <- paste0(type, "_", is_multi_outcome)
-  switch(
-    type_multioutcome,
-    numeric_FALSE = predict_impl_numeric(object, predictors, batch_size),
-    numeric_TRUE  = predict_impl_numeric_multiple(object, predictors, batch_size),
-    prob_FALSE    = predict_impl_prob(object, predictors, batch_size),
-    prob_TRUE     = predict_impl_prob_multiple(object, predictors, batch_size, outcome_nlevels),
-    class_FALSE   = predict_impl_class(object, predictors, batch_size),
-    class_TRUE    = predict_impl_class_multiple(object, predictors, batch_size, outcome_nlevels)
-  )
+  # Convert to S7 objects for double-dispatch
+  pred_type <- as_prediction_type(type)
+  outcome_type <- as_outcome_type(is_multi_outcome)
+
+  # Dispatch to appropriate S7 method
+  predict_impl_dispatch(pred_type, outcome_type, object, predictors, batch_size, outcome_nlevels)
 }
 
 
