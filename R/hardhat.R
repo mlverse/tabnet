@@ -272,9 +272,7 @@ tabnet_pretrain.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_pretrain
-tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
-  processed <- hardhat::mold(x, y)
-
+tabnet_pretrain.data.frame <- function(x, y = NULL, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }
@@ -309,8 +307,7 @@ tabnet_pretrain.Node <- function(x, tabnet_model = NULL, config = tabnet_config(
   check_compliant_node(x)
   # get tree leaves and extract attributes into data.frames
   xy_df <- node_to_df(x)
-  tabnet_pretrain(xy_df$x, xy_df$y, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
-
+  tabnet_pretrain(xy_df$x, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
 }
 
 new_tabnet_pretrain <- function(pretrain, blueprint) {

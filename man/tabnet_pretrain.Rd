@@ -15,7 +15,7 @@ tabnet_pretrain(x, ...)
 
 \method{tabnet_pretrain}{data.frame}(
   x,
-  y,
+  y = NULL,
   tabnet_model = NULL,
   config = tabnet_config(),
   ...,
