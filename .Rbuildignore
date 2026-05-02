@@ -15,3 +15,4 @@
 ^revdep$
 ^vignettes/*_files$
 ^\.claude$
+^\.positai$

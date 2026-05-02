@@ -175,7 +175,8 @@ tabnet_config <- function(batch_size = 1024^2,
                           early_stopping_tolerance = 0,
                           early_stopping_patience = 0L,
                           num_workers=0L,
-                          skip_importance = FALSE) {
+                          skip_importance = FALSE
+                          ) {
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
   }
@@ -249,7 +250,7 @@ resolve_loss <- function(config, dtype) {
     loss_fn <- loss
   else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
     loss_fn <- torch::nn_mse_loss()
-  else if ((loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long()) || !is.null(config$ancestor_tt))
+  else if ((loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long()) || !is.null(config$.ancestor_tt))
     # cross entropy loss is required
     loss_fn <- torch::nn_cross_entropy_loss()
   else
@@ -278,14 +279,14 @@ train_batch <- function(network, optimizer, batch, config) {
   if (max(batch$output_dim$shape) > 1) {
     # multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    if (!is.null(config$ancestor_tt)) {
+    if (!is.null(config$.ancestor_tt)) {
       # hierarchical mandates use of `max_constraint_output`
       loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
         list(
           torch::torch_split(out, outcome_nlevels, dim = 2),
           torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
         ),
-        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor_tt))
+        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$.ancestor_tt))
       )),
       dim = 1)
     } else {
@@ -332,14 +333,14 @@ valid_batch <- function(network, batch, config) {
   if (max(batch$output_dim$shape) > 1) {
     # multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    if (!is.null(config$ancestor_tt)) {
+    if (!is.null(config$.ancestor_tt)) {
       # hierarchical mandates use of `max_constraint_output`
       loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
         list(
           torch::torch_split(out, outcome_nlevels, dim = 2),
           torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
         ),
-        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor_tt))
+        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$.ancestor_tt))
       )),
       dim = 1)
     } else {
@@ -513,7 +514,12 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # provide ancestor to torch tensor in case of hierarchical classification
   if (!is.null(config$ancestor)) {
-    config$ancestor_tt <- torch::torch_tensor(config$ancestor)$to(torch::torch_bool(), device = device)
+    if (config$ancestor$is_spase()) {
+      # config is expected to carry the sparse tensor
+      config$.ancestor_tt <- config$ancestor
+    } else {
+    config$.ancestor_tt <- NULL
+    }
   }
 
   # instantiate optimizer

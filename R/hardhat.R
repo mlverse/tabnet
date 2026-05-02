@@ -164,14 +164,17 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   processed <- hardhat::mold(xy_df$x, xy_df$y)
   # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
   ancestor <- data.tree::ToDataFrameNetwork(x) %>%
-   mutate_if(is.character, ~.x %>% as.factor %>% as.numeric)
-  # TODO check correctness
-  # embed the M matrix in the config$ancestor variable
-  dims <- c(max(ancestor), max(ancestor))
-  ancestor_m <- Matrix::sparseMatrix(ancestor$from, ancestor$to, dims = dims, x = 1)
+   mutate_if(is.character, ~.x %>% as.factor %>% as.integer)
+
+  # embed the M matrix in the config$ancestor_tt variable
+  ancestor_tt <- torch::torch_sparse_coo_tensor(
+    matrix(c(ancestor$from, ancestor$to), nrow = 2), 
+    rep(TRUE, length(ancestor$from)))
+  
   check_type(processed$outcomes)
 
   config <- merge_config_and_dots(config, ...)
+  config$ancestor <- ancestor_tt
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -273,6 +276,8 @@ tabnet_pretrain.default <- function(x, ...) {
 #' @export
 #' @rdname tabnet_pretrain
 tabnet_pretrain.data.frame <- function(x, y = NULL, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+  processed <- hardhat::mold(x, y)
+
   config <- merge_config_and_dots(config, ...)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "unsupervised")
 }

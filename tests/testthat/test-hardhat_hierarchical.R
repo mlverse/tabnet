@@ -20,7 +20,7 @@ test_that("C-HMCNN get_constr_output works ", {
 test_that("C-HMCNN max_constraint_output works ", {
   output <- torch::torch_rand(c(3, 5))
   labels <- torch::torch_diag(rep(1,5))[1:3, ]$to(dtype = torch::torch_bool())
-  ancestor <- torch::torch_tril(torch::torch_zeros(c(5, 5))$bernoulli(p = 0.2) )$to(dtype = torch::torch_bool())
+  ancestor <- torch::torch_triu(torch::torch_zeros(c(5, 5))$bernoulli(p = 0.2) )$to(dtype = torch::torch_bool())
 
   expect_no_error(
     MC_output <- max_constraint_output(output, labels, ancestor)
@@ -34,7 +34,7 @@ test_that("C-HMCNN max_constraint_output works ", {
   )
   # max_constraint_output provides more than 35% null values
   expect_gte(
-    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .30 * output$shape[1] * output$shape[2]
+    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .30 * prod(output$shape)
   )
 })
 
@@ -69,12 +69,13 @@ test_that("Training hierarchical classification for {data.tree} Node", {
   expect_no_error(
     fit <- tabnet_fit(acme, epochs = 1)
   )
+  expect_named(fit$fit$config, "ancestor")
   expect_no_error(
     result <- predict(fit, acme_df, type = "prob")
   )
 
   expect_equal(ncol(result), 3)
-  outcome_levels <-levels(fit$blueprint$ptypes$outcomes[[1]])
+  outcome_levels <- levels(fit$blueprint$ptypes$outcomes[[1]])
   # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), outcome_levels)
   expect_no_error(
@@ -106,7 +107,8 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
   expect_no_error(
     fit <- tabnet_fit(attrition_tree, valid_split = 0.2, epochs = 1)
   )
-
+  expect_named(fit$fit$config, "ancestor")
+  
   expect_no_error(
     result <- predict(fit, attrition_tree, type = "prob")
   )
