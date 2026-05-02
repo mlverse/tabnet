@@ -438,7 +438,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   type <- check_type(object$blueprint$ptypes$outcomes, type)
   is_multi_outcome <- ncol(object$blueprint$ptypes$outcomes) > 1
   outcome_nlevels <- NULL
-  if (is_multi_outcome & type != "numeric") {
+  if (is_multi_outcome && type != "numeric") {
     outcome_nlevels <- purrr::map_dbl(object$blueprint$ptypes$outcomes, ~nlevels(.x))
   }
 
