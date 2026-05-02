@@ -25,20 +25,32 @@ library(tibble)
 set.seed(202307)
 ```
 
-## Data preparation
+## Data format
 
 The supported data format for hierarchical classification is the `Node` object format from package `{data.tree}`.
 
 This is a general purpose format that fits generic hierarchical tree encoding needs. Each node of the tree is associated with predictor values through the `attributes` in the data `Node` object.
 
- - A very basic example is the `acme` dataset to show you how the two predictors values `cost` and `p` are associates attributes of each node in the hierarchy : 
+|{tabnet} concept| {data.tree} concept |see command|
+|---|---|---|
+|dataset predictor| Node `attributesAll` |  acme example |
+|dataset multi-label target| Node hierarchy | print(acme) |
+
+
+A very basic example is the `acme` dataset to show you how the two predictors values `cost` and `p` are associates attributes of each node in the hierarchy : 
 ```{r}
 data(acme, package = "data.tree")
 acme$attributesAll
 print(acme, "cost", "p" , limit = 8)
 ```
+So printing Node objects reverse the usual ordering, as target is printed first in column `levelName`, and predictors printed right of it. 
 
-- Multiple manual or programmatic methods are available to create or update predictors. They are detailled in the `vignette("data.tree", package = "data.tree")`.
+As you can see, only leaf nodes of the tree gets predictors value. {tabnet} will take this into account via an `ancestor` square sparse tensor registering all possible parent-child relation among the target labels.
+
+
+## Data preparation
+
+Multiple manual or programmatic methods are available to create or update predictors. They are detailled in the `vignette("data.tree", package = "data.tree")`.
 
 - a lot of native hierarchical data-format conversion from files to `Node` are covered by the`{data.tree}` package. You can find them in the "Create tree from a file" section of the same vignette. If needed, the `{ape}` package covers a lot of conversion format to the `philo` format. Thus you can reach the `Node` format in maybe two transformation steps...
 
@@ -74,13 +86,13 @@ As `as.Node()` will only consider the as.numeric() values of a factor(), you sho
 
 Your dataset hierarchy will be turn internally into multi-outcomes named `level_1` to `level_n`, n beeing the depth of your tree. Thus column names starting with `level_` should be avoided.
 
-### Ensure the last hierarchy of the tree is the observation id
+### Ensure the last hierarchy of the tree is the **observation id**
 
 The tree only keeps a single row of attributes per tree leaf. Thus in order to transfer your complete predictors dataset into the Node object, you must keep the last level of the hierarchy to be a unique observation identifier (last resort beeing `rowid_to_column()` to achieve it).
 
 The classification will be done **removing the last level of hierarchy** in any case.
 
-### Ensure there is a root level in the hierarchy
+### Ensure there is a **root level** in the hierarchy
 
 The tree should have a single root for all nodes to be consistent. Thus you have to use a constant prefix to all `pathString`.
 

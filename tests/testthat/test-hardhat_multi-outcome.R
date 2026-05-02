@@ -54,7 +54,7 @@ test_that("Training multilabel classification from data.frame", {
   )
 
   expect_equal(ncol(result), 3)
-  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~nlevels(.x))
   # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
 
@@ -82,7 +82,7 @@ test_that("Training multilabel classification from formula", {
   )
 
   expect_equal(ncol(result), 2)
-  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~nlevels(.x))
   # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
 
@@ -108,7 +108,7 @@ test_that("Training multilabel classification from recipe", {
   )
   expect_equal(ncol(result), 2)
 
-  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~nlevels(.x))
   expect_equal(stringr::str_remove(names(result), ".pred_class_"), names(outcome_nlevels))
 
 })
@@ -126,7 +126,7 @@ test_that("Training multilabel classification from data.frame with validation sp
 
   expect_equal(ncol(result), 3)
 
-  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~nlevels(.x))
   # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
 

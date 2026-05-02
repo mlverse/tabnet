@@ -34,7 +34,7 @@ test_that("C-HMCNN max_constraint_output works ", {
   )
   # max_constraint_output provides more than 35% null values
   expect_gte(
-    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), .30 * prod(output$shape)
+    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), 0.30 * prod(output$shape)
   )
 })
 
@@ -70,6 +70,8 @@ test_that("Training hierarchical classification for {data.tree} Node", {
     fit <- tabnet_fit(acme, epochs = 1)
   )
   expect_named(fit$fit$config, "ancestor")
+  expect_true(fit$fit$config$ancestor$is_sparse())
+
   expect_no_error(
     result <- predict(fit, acme_df, type = "prob")
   )
@@ -92,7 +94,7 @@ test_that("Training hierarchical classification for {data.tree} Node", {
 
   expect_equal(ncol(result), 2) # 2 outcomes levels_
 
-  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~nlevels(.x))
   # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
 
@@ -108,6 +110,7 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
     fit <- tabnet_fit(attrition_tree, valid_split = 0.2, epochs = 1)
   )
   expect_named(fit$fit$config, "ancestor")
+  expect_true(fit$fit$config$ancestor$is_sparse())
   
   expect_no_error(
     result <- predict(fit, attrition_tree, type = "prob")
@@ -115,7 +118,7 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
 
   expect_equal(ncol(result), 2) # 2 outcomes levels_
 
-  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  outcome_nlevels <- purrr::map_dbl(fit$blueprint$ptypes$outcomes, ~nlevels(.x))
   # we get back outcomes vars with a `.pred_` prefix
   expect_equal(stringr::str_remove(names(result), ".pred_"), names(outcome_nlevels))
 
