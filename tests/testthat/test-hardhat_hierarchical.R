@@ -18,9 +18,9 @@ test_that("C-HMCNN get_constr_output works ", {
 })
 
 test_that("C-HMCNN max_constraint_output works ", {
-  output <- torch::torch_rand(c(3, 5))
-  labels <- torch::torch_diag(rep(1,5))[1:3, ]$to(dtype = torch::torch_bool())
-  ancestor <- torch::torch_triu(torch::torch_zeros(c(5, 5))$bernoulli(p = 0.2) )$to(dtype = torch::torch_bool())
+  output <- torch::torch_rand(c(5, 7))
+  labels <- torch::torch_diag(rep(1,7))[1:5, ]$to(dtype = torch::torch_bool())
+  ancestor <- torch::torch_triu(torch::torch_zeros(c(7, 7))$bernoulli(p = 0.1) )$to(dtype = torch::torch_bool())
 
   expect_no_error(
     MC_output <- max_constraint_output(output, labels, ancestor)
@@ -32,9 +32,9 @@ test_that("C-HMCNN max_constraint_output works ", {
   expect_not_equal_to_tensor(
     MC_output, output
   )
-  # max_constraint_output provides more than 35% null values
+  # max_constraint_output provides more than 50% null values
   expect_gte(
-    as.matrix(torch::torch_sum(MC_output == 0), device="cpu"), 0.30 * prod(output$shape)
+    as.numeric((MC_output == 0)$sum()), 0.50 * prod(output$shape)
   )
 })
 

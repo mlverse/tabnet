@@ -166,15 +166,15 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   ancestor <- data.tree::ToDataFrameNetwork(x) %>%
    mutate_if(is.character, ~.x %>% as.factor %>% as.integer)
 
-  # embed the M matrix in the config$ancestor_tt variable
-  ancestor_tt <- torch::torch_sparse_coo_tensor(
+  # embed the M matrix in the config$ancestor variable
+  ancestor <- torch::torch_sparse_coo_tensor(
     matrix(c(ancestor$from, ancestor$to), nrow = 2), 
     rep(TRUE, length(ancestor$from)))
   
   check_type(processed$outcomes)
 
   config <- merge_config_and_dots(config, ...)
-  config$ancestor <- ancestor_tt
+  config$ancestor <- ancestor
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
