@@ -162,19 +162,17 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   # get tree leaves and extract attributes into data.frames
   xy_df <- node_to_df(x)
   processed <- hardhat::mold(xy_df$x, xy_df$y)
+  check_type(processed$outcomes)
+
   # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
-  ancestor <- data.tree::ToDataFrameNetwork(x) %>%
+  edges <- data.tree::ToDataFrameNetwork(x) %>%
    mutate_if(is.character, ~.x %>% as.factor %>% as.integer)
 
   # embed the M matrix in the config$ancestor variable
-  ancestor <- torch::torch_sparse_coo_tensor(
-    matrix(c(ancestor$from, ancestor$to), nrow = 2), 
-    rep(TRUE, length(ancestor$from)))
+  ancestor_tt <- build_ancestor_matrix(edges)
   
-  check_type(processed$outcomes)
-
   config <- merge_config_and_dots(config, ...)
-  config$ancestor <- ancestor
+  config$ancestor <- ancestor_tt
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -606,4 +604,112 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
     nn_prune_head(x$fit$network, head_size=head_size)
   }
 
+}
+
+#' Build a sparse ancestor-descendant matrix from a hierarchy edge list
+#'
+#' Given a directed graph where edges point from descendant to ancestor,
+#' computes the full transitive closure via BFS, then transposes so that
+#' the resulting sparse matrix R satisfies R\[i, j\] = 1 whenever class j
+#' is a descendant of class i (including i itself).  This is the
+#' orientation expected by \code{get_constr_output} and the
+#' max-constraint-margin (MCM) loss.
+#'
+#' @param edges A \code{data.frame} with exactly two integer columns
+#'   named \code{"from"} and \code{"to"}.  Each row represents a
+#'   directed edge from a descendant node to one of its ancestors.
+#'   Node IDs must be positive integers.  Self-loops (e.g. \code{1 -> 1})
+#'   are allowed but not required; the diagonal is always set to 1
+#'   for every node in \code{1:n_classes}.
+#' @param n_classes `integer(1)` or `code{NULL}`.  Total number of
+#'   classes.  When \code{NULL} (the default), it is computed as
+#'   \code{max(edges$from, edges$to)} so that every node appearing in
+#'   the edge list is represented.  Supply an explicit value when there
+#'   are classes with no edges at all that must still appear in the
+#'   matrix.
+#'
+#' @return A \code{torch_sparse_coo_tensor} of shape
+#'   \code{(n_classes, n_classes)} and dtype \code{torch_double()}.
+#'   Entry \code{R[i, j] = 1} means class \code{j} is a descendant of
+#'   class \code{i}.  Indices follow torch's 0-based convention.
+#'
+#' @details
+#' The algorithm proceeds in three stages:
+#' \enumerate{
+#'   \item Build an adjacency list from the edge \code{data.frame} using
+#'     \code{split()}, grouping by the \code{from} column.  Each entry
+#'     \code{adj[[i]]} contains the direct ancestors reachable from node
+#'     \code{i} in one hop.
+#'   \item Run a breadth-first search from every node \code{i = 1, ...,
+#'     n_classes}, following outgoing edges to discover the full set of
+#'     ancestors (the transitive closure).  A logical \code{visited}
+#'     vector provides O(1) membership tests and prevents infinite loops
+#'     when cycles are present.
+#'   \item Transpose the collected COO index pairs so that the final
+#'     matrix is oriented for MCM: \code{R[i, j] = 1} means "j is a
+#'     descendant of i".
+#' }
+#' Because the diagonal is always filled, every class is its own
+#' descendant, ensuring that the MCM constraint is at least as
+#' permissive as the unconstrained prediction.
+#'
+#' @examples
+#' \dontrun{
+#' edges <- data.frame(
+#'   from = c(1L, 1L, 2L, 2L, 3L),
+#'   to   = c(2L, 3L, 4L, 5L, 5L)
+#' )
+#' R <- build_ancestor_matrix(edges, n_classes = 5L)
+#' }
+#'
+#' @importFrom torch  torch_ones torch_int64 torch_sparse_coo_tensor
+#' @noRd
+build_ancestor_matrix <- function(edges, n_classes = NULL) {
+  
+  if (is.null(n_classes)) {
+    n_classes <- max(c(edges$from, edges$to))
+  }
+
+  # Build adjacency list efficiently: adj[[i]] = direct ancestors of i
+  adj <- vector("list", n_classes)
+  by_from <- split(edges$to, edges$from)
+  for (nm in names(by_from)) {
+    adj[[as.integer(nm)]] <- as.integer(by_from[[nm]])
+  }
+  
+  # BFS from each node to find all reachable nodes via outgoing edges
+  # (i.e., all ancestors). Collect COO indices.
+  idx_list <- lapply(seq_len(n_classes), function(i) {
+    visited <- rep(FALSE, n_classes)
+    visited[i] <- TRUE
+    frontier <- adj[[i]]
+    
+    while (length(frontier) > 0L) {
+      next_frontier <- integer(0)
+      for (node in frontier) {
+        if (!visited[node]) {
+          visited[node] <- TRUE
+          next_frontier <- c(next_frontier, adj[[node]])
+        }
+      }
+      frontier <- next_frontier
+    }
+    
+    reached <- which(visited)
+    cbind(rep(i, length(reached)), reached)
+  })
+  
+  # Combine all pairs: before transpose, (i, j) means j is ancestor of i
+  idx_mat <- do.call(rbind, idx_list)
+  
+  # Transpose: swap columns so that (i, j) means j is descendant of i
+  idx_mat <- cbind(idx_mat[, 2L], idx_mat[, 1L])
+  
+  # idx <- torch::torch_tensor(
+  #   matrix(idx_mat - 1L, nrow = 2L),
+  #   dtype = torch::torch_int64()
+  # )
+  # vals <- torch::torch_ones(nrow(idx_mat), dtype = torch::torch_double())
+  
+  torch::torch_sparse_coo_tensor(t(idx_mat), rep(TRUE, nrow(idx_mat)), c(n_classes, n_classes))
 }

@@ -229,8 +229,8 @@ tabnet_config <- function(batch_size = 1024^2,
 
 get_constr_output <- function(x, R) {
     # MCM of the prediction given the hierarchy constraint expressed in the matrix R """
-    c_out <- x$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
-    R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+    c_out <- x$to(dtype = torch::torch_double())$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+    R_batch <- R$unsqueeze(1)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
     final_out <- torch::torch_max(R_batch * c_out, dim = 3)
     final_out[[1]]
 }
@@ -238,7 +238,7 @@ get_constr_output <- function(x, R) {
 max_constraint_output <- function(output, labels, ancestor) {
   constr_output <-  get_constr_output(output, ancestor)
   train_output <-  get_constr_output(labels * output, ancestor)
-  labels$bitwise_not() * constr_output + labels * train_output
+  torch::torch_logical_not(labels) * constr_output + labels * train_output
 }
 
 resolve_loss <- function(config, dtype) {
@@ -271,7 +271,7 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 }
 
 train_batch <- function(network, optimizer, batch, config) {
-  # NULLing values to avoid a R-CMD Check Note "No visible binding for global variable"
+  # NULL-ing values to avoid a R-CMD Check Note "No visible binding for global variable"
   out <- M_loss <- NULL
   # forward pass
   c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
@@ -516,7 +516,7 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
   if (!is.null(config$ancestor)) {
     if (!config$ancestor$is_sparse()) {
       # config is expected to carry the sparse tensor
-      runtime_error("ancestor was configured. Expecting a sparse tensor but got {.class {class(config$ancestor)}}")
+      runtime_error("ancestor was configured. Expecting a sparse tensor but got {.cls {class(config$ancestor)}}")
     }
   }
 

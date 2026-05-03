@@ -38,7 +38,7 @@ expect_no_error <- function(object, ...) {
 
 expect_tensor <- function(object) {
   expect_true(torch:::is_torch_tensor(object))
-  expect_no_error(torch::as_array(object$to(device = "cpu")))
+  expect_no_error(torch::as_array(object$to_dense()$to(device = "cpu")))
 }
 
 expect_equal_to_r <- function(object, expected, ...) {
@@ -49,6 +49,13 @@ expect_tensor_shape <- function(object, expected) {
   expect_tensor(object)
   expect_equal(object$shape, expected)
 }
+
+
+expect_tensor_dtype <- function(object, expected_dtype) {
+  expect_tensor(object)
+  expect_true(object$dtype == expected_dtype)
+}
+
 
 expect_undefined_tensor <- function(object) {
   # TODO
