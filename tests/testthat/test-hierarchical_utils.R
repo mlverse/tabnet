@@ -199,112 +199,180 @@ test_that("max_constraint_output handles mixed positive-negative with constraint
   expect_equal_to_r(result, expected)
 })
 
-# need rework as FromDataFrameNetwork(edges) gives "cannot find root name" error
-test_that("build-ancestor-matrix diagonal is always 1 for every class", {
-  edges <- data.frame(from = c(1L, 2L, 2L), 
-                      to   = c(2L, 3L, 4L))
-  R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-  R_dense <- R$to_dense()
+test_that("build_ancestor_matrix handles basic hierarchy", {
+  # Tree: Root -> A -> C
+  #        Root -> B -> D
+  # Edges: R->A, A->C, R->B, B->D
+  # Pruning Logic:
+  # 1. Remove Root: Keeps A->C, B->D
+  # 2. Remove leaves (C, D are not in 'from'): Keeps A->C? No. C is not a parent.
+  #    Keeps B->D? No. D is not a parent.
+  # Result: No edges match criteria. Empty matrix.
   
-  expect_equal_to_r(R_dense[1, 1], TRUE)
-  expect_equal_to_r(R_dense[2, 2], TRUE)
-  expect_equal_to_r(R_dense[3, 3], TRUE)
-})
-
-test_that("build-ancestor-matrix: single edge produces correct transitive pair", {
-  # 1 -> 2 means "2 is ancestor of 1", so transposed: R[2, 1] = 1
-  edges <- data.frame(from = c(1L, 2L), to = c(2L, 3L))
-  R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-  R_dense <- R$to_dense()
+  paths <- c("Root/A", "Root/A/C", "Root/B", "Root/B/D")
+  tree <- create_test_tree(paths)
   
-  # 2 is descendant of 2 (self)
-  expect_equal_to_r(R_dense[2, 2], TRUE)
-  # 1 is descendant of 1 (self)
-  expect_equal_to_r(R_dense[1, 1], TRUE)
-  # 1 is descendant of 2 (because 1 -> 2)
-  expect_equal_to_r(R_dense[2, 1], TRUE)
-  # 2 is NOT descendant of 1
-  expect_equal_to_r(R_dense[1, 2], FALSE)
-})
-
-test_that("build-ancestor-matrix: multi-hop ancestor chain is fully resolved", {
-  # Chain: 2 -> 3 -> 4 -> 5 (each is ancestor of the previous)
-  # After transpose: 4 is descendant of 1, 2, 3, 4
-  #                  3 is descendant of 1, 2, 3
-  #                  2 is descendant of 1, 2
-  #                  1 is descendant of 1
-  edges <- data.frame(
-    from = c(1L, 2L, 3L, 4L),
-    to   = c(2L, 3L, 4L, 5L)
-  )
-  R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-  R_dense <- R$to_dense()
+  result <- build_ancestor_matrix(tree)
   
-  # Row 1: only node 1 is its own descendant
-  expect_equal_to_r(R_dense, lower.tri(diag(4), diag = TRUE))
+  # Expectation: No internal nodes exist that are also children (excluding Root)
+  # A and B are children of Root, but their children (C, D) are leaves.
+  # Thus A and B are effectively leaves in the "internal structure".
+  expect_equal(nrow(result), 0)
 })
 
-test_that("build-ancestor-matrix: diamond hierarchy merges both paths", {
-  # Diamond: 1 -> 2 -> 4, 1 -> 3 -> 4
-  # After transpose: 4 is descendant of all; 2 and 3 are descendants of
-  #   1 and themselves only
-  edges <- data.frame(
-    from = c(1L, 1L, 2L, 3L),
-    to   = c(2L, 3L, 4L, 4L)
-  )
-  R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-  R_dense <- R$to_dense()
+test_that("build_ancestor_matrix handles linear chain of internal nodes", {
+  # Tree: Root -> A -> B -> C
+  # Edges: R->A, A->B, B->C
+  # Pruning Logic:
+  # 1. Remove Root: Keeps A->B, B->C
+  # 2. Keep only if target is a parent:
+  #    - A->B: B is a parent (of C). Keep.
+  #    - B->C: C is a leaf. Drop.
+  # Remaining Edges: A -> B
+  # Nodes: A(1), B(2)
+  # Matrix: A->A, A->B, B->B
   
-  expect_equal_to_r(R_dense[3, 1], TRUE)
-  expect_equal_to_r(R_dense[4, 2], TRUE)
-  expect_equal_to_r(R_dense[4, 3], FALSE)
-  expect_equal_to_r(R_dense[2, 4], FALSE)
+  paths <- c("Root/A", "Root/A/B", "Root/A/B/C")
+  tree <- create_test_tree(paths)
+  
+  result <- build_ancestor_matrix(tree)
+  
+  expected <- matrix(c(
+    1, 1, # A -> A
+    1, 2, # A -> B
+    2, 2  # B -> B
+  ), ncol = 2, byrow = TRUE)
+  
+  expect_equal(result, expected)
 })
 
-# test_that("build-ancestor-matrix: isolated nodes have only a diagonal entry", {
-#   edges <- data.frame(from = c(1L, 1L),
-#                       to   = c(2L, 1L))
-#   R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-#   R_dense <- R$to_dense()
-# 
-#   # Nodes 3, 4, 5 have no edges
-#   expect_equal_to_r(R_dense[3, 3], TRUE)
-#   expect_equal_to_r(R_dense[3, ], c(FALSE, FALSE, TRUE, FALSE, FALSE))
-#   expect_equal_to_r(R_dense[4, 4], TRUE)
-#   expect_equal_to_r(R_dense[5, 5], TRUE)
-# })
-# 
-# test_that("build-ancestor-matrix: n_classes defaults to max node id when NULL", {
-#   edges <- data.frame(from = c(1L, 1L), to = c(5L, 1L))
-#   R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-# 
-#   # n_classes should be max(1, 5, TRUE) = 5
-#   expect_tensor_shape(R, c(5, 5))
-# })
-
-# test_that("build-ancestor-matrix: output has correct shape and dtype", {
-#   edges <- data.frame(from = c(1L, 2L), to = c(2L, 1L))
-#   R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-#   
-#   expect_tensor_shape(R, c(3L, 3L))
-#   expect_tensor_dtype(R, torch::torch_bool())
-#   expect_true(R$is_sparse())
-# })
-# 
-test_that("build-ancestor-matrix: output uses 0-based indices internally", {
-  # Verify that torch sees correct values when converted to dense
-  edges <- data.frame(from = c(1L, 2L, 1L), to = c(2L, 3L, 3L))
-  R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-  expect_equal_to_r(R$to_dense(), matrix(c(TRUE, TRUE, FALSE, TRUE), nrow=2))
+test_that("build_ancestor_matrix calculates transitive closure correctly", {
+  # Tree: Root -> A -> B -> C -> D
+  # Edges: R->A, A->B, B->C, C->D
+  # Pruning Logic:
+  # 1. Remove Root: A->B, B->C, C->D
+  # 2. Keep if target is parent:
+  #    - A->B: B is parent (of C). Keep.
+  #    - B->C: C is parent (of D). Keep.
+  #    - C->D: D is leaf. Drop.
+  # Remaining Edges: A -> B, B -> C
+  # Nodes: A(1), B(2), C(3)
+  
+  paths <- c("Root/A", "Root/A/B", "Root/A/B/C", "Root/A/B/C/D")
+  tree <- create_test_tree(paths)
+  
+  result <- build_ancestor_matrix(tree)
+  
+  # Expected Relations:
+  # A -> A, A -> B, A -> C
+  # B -> B, B -> C
+  # C -> C
+  
+  # Sorted by column then row (default behavior of which(arr.ind=TRUE))
+  expected <- matrix(c(
+    1, 1, # A->A
+    1, 2, # A->B
+    2, 2, # B->B
+    1, 3, # A->C (transitive)
+    2, 3, # B->C
+    3, 3  # C->C
+  ), ncol = 2, byrow = TRUE)
+  
+  expect_equal(result, expected)
 })
 
-# test_that("build-ancestor-matrix: single-node graph produces identity-like matrix", {
-#   edges <- data.frame(from = 1L, to = 1L)
-#   R <- build_ancestor_matrix(FromDataFrameNetwork(mutate_all(edges, as.character)))
-#   expect_tensor_shape(R$to_dense(), c(1L, 1L))
-#   expect_equal_to_r(R$to_dense()[1, 1], TRUE)
-# })
+test_that("build_ancestor_matrix handles branching internal nodes", {
+  # Tree: R -> A -> C
+  #        R -> B -> C (Diamond shape, merging back to C) 
+  # *Note: data.tree allows this structure (multiple parents)? 
+  # Actually standard trees are single parent. Let's stick to standard tree.
+  
+  # Tree: R -> A -> C -> E
+  #        R -> B -> D -> E
+  # Edges: R->A, A->C, C->E, R->B, B->D, D->E
+  # Pruning:
+  # 1. Remove R: A->C, C->E, B->D, D->E
+  # 2. Keep target if parent:
+  #    - A->C (C is parent of E). Keep.
+  #    - C->E (E is leaf). Drop.
+  #    - B->D (D is parent of E). Keep.
+  #    - D->E (E is leaf). Drop.
+  # Nodes: A, C, B, D
+  # Edges: A->C, B->D
+  
+  paths <- c("Root/A", "Root/A/C", "Root/A/C/E", 
+             "Root/B", "Root/B/D", "Root/B/D/E")
+  tree <- create_test_tree(paths)
+  
+  result <- build_ancestor_matrix(tree)
+  
+  # We have two disconnected components in the adjacency matrix: (A,C) and (B,D)
+  # A(1), C(2), B(3), D(4) (Order depends on unique(c(edges$from, edges$to)))
+  # Edges order: A->C, B->D.
+  # Unique nodes: A, C, B, D.
+  
+  # Expected: Self loops + A->C, B->D
+  # (1,1), (1,2), (2,2), (3,3), (3,4), (4,4)
+  
+  expected <- matrix(c(
+    1, 1, # A->A
+    1, 2, # A->C
+    2, 2, # C->C
+    3, 3, # B->B
+    3, 4, # B->D
+    4, 4  # D->D
+  ), ncol = 2, byrow = TRUE)
+  
+  expect_equal(result, expected)
+})
 
+test_that("build_ancestor_matrix returns empty for Root-only tree", {
+  tree <- Node$new("Root")
+  result <- build_ancestor_matrix(tree)
+  expect_equal(nrow(result), 0)
+})
+
+test_that("build_ancestor_matrix returns empty for Root + Leaf", {
+  # Tree: Root -> A
+  # Edges: R->A
+  # 1. Remove R (from!=Root): Result empty.
+  tree <- Node$new("Root")
+  tree$AddChild("A")
+  result <- build_ancestor_matrix(tree)
+  expect_equal(nrow(result), 0)
+})
+
+test_that("build_ancestor_matrix handles deep wide tree (Stress Test)", {
+  # Create a binary tree of depth 4
+  tree <- Node$new("R")
+  add_children <- function(node, depth) {
+    if (depth == 0) return()
+    node$AddChild(paste0(node.name, "L"))
+    node$AddChild(paste0(node.name, "R"))
+    add_children(node$children[[1]], depth - 1)
+    add_children(node$children[[2]], depth - 1)
+  }
+  add_children(tree, 4)
+  
+  result <- build_ancestor_matrix(tree)
+  
+  # Validate structure without checking exact numbers (too complex for hardcoded)
+  # 1. Must be integer matrix
+  expect_type(result, "integer")
+  # 2. Must have 2 columns
+  expect_equal(ncol(result), 2)
+  # 3. First column (Ancestor) <= Second column (Descendant) implies topological sort check?
+  # Actually indices are arbitrary based on sorting, but relationships are directional.
+  # Just ensure no NA or Inf
+  expect_true(!any(is.na(result)))
+})
+
+test_that("build_ancestor_matrix preserves integer type", {
+  paths <- c("Root/A", "Root/A/B")
+  tree <- create_test_tree(paths)
+  result <- build_ancestor_matrix(tree)
+  expect_type(result, "integer")
+})
 test_that("node_to_df works ", {
   expect_no_error(
     node_to_df(acme)

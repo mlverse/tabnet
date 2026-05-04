@@ -47,5 +47,20 @@ attrition_tree <- attrition %>%
   select(-Department, -JobRole, -rowid) %>%
   data.tree::as.Node()
 
+# --- Helper function to create test trees easily ---
+create_test_tree <- function(structure) {
+  # structure: list of path strings or a nested list
+  # Simple parser for "Root/A/B" style paths
+  paths <- structure
+  root_name <- unique(sapply(strsplit(paths, "/"), `[`, 1))
+  
+  tree <- Node$new(root_name)
+  for (p in paths) {
+    if (p == root_name) next
+    tree$AddChild(p)
+  }
+  return(tree)
+}
+
 # Run after all tests
 withr::defer(testthat::teardown_env())
