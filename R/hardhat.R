@@ -164,12 +164,7 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   processed <- hardhat::mold(xy_df$x, xy_df$y)
   check_type(processed$outcomes)
 
-  # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
-  edges <- data.tree::ToDataFrameNetwork(x) %>%
-   mutate_if(is.character, ~.x %>% as.factor %>% as.integer)
-
-  # embed the M matrix in the config$ancestor variable
-  ancestor_tt <- build_ancestor_matrix(edges)
+  ancestor_tt <- build_ancestor_matrix(x)
   
   config <- merge_config_and_dots(config, ...)
   config$ancestor <- ancestor_tt
@@ -615,101 +610,67 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
 #' orientation expected by \code{get_constr_output} and the
 #' max-constraint-margin (MCM) loss.
 #'
-#' @param edges A \code{data.frame} with exactly two integer columns
-#'   named \code{"from"} and \code{"to"}.  Each row represents a
-#'   directed edge from a descendant node to one of its ancestors.
-#'   Node IDs must be positive integers.  Self-loops (e.g. \code{1 -> 1})
-#'   are allowed but not required; the diagonal is always set to 1
-#'   for every node in \code{1:n_classes}.
-#' @param n_classes `integer(1)` or `code{NULL}`.  Total number of
-#'   classes.  When \code{NULL} (the default), it is computed as
-#'   \code{max(edges$from, edges$to)} so that every node appearing in
-#'   the edge list is represented.  Supply an explicit value when there
-#'   are classes with no edges at all that must still appear in the
-#'   matrix.
-#'
+#' @param x a Node object.
 #' @return A \code{torch_sparse_coo_tensor} of shape
 #'   \code{(n_classes, n_classes)} and dtype \code{torch_double()}.
 #'   Entry \code{R[i, j] = 1} means class \code{j} is a descendant of
 #'   class \code{i}.  Indices follow torch's 0-based convention.
 #'
-#' @details
-#' The algorithm proceeds in three stages:
-#' \enumerate{
-#'   \item Build an adjacency list from the edge \code{data.frame} using
-#'     \code{split()}, grouping by the \code{from} column.  Each entry
-#'     \code{adj[[i]]} contains the direct ancestors reachable from node
-#'     \code{i} in one hop.
-#'   \item Run a breadth-first search from every node \code{i = 1, ...,
-#'     n_classes}, following outgoing edges to discover the full set of
-#'     ancestors (the transitive closure).  A logical \code{visited}
-#'     vector provides O(1) membership tests and prevents infinite loops
-#'     when cycles are present.
-#'   \item Transpose the collected COO index pairs so that the final
-#'     matrix is oriented for MCM: \code{R[i, j] = 1} means "j is a
-#'     descendant of i".
-#' }
-#' Because the diagonal is always filled, every class is its own
-#' descendant, ensuring that the MCM constraint is at least as
-#' permissive as the unconstrained prediction.
-#'
-#' @examples
-#' \dontrun{
-#' edges <- data.frame(
-#'   from = c(1L, 1L, 2L, 2L, 3L),
-#'   to   = c(2L, 3L, 4L, 5L, 5L)
-#' )
-#' R <- build_ancestor_matrix(edges, n_classes = 5L)
-#' }
 #'
 #' @importFrom torch  torch_ones torch_int64 torch_sparse_coo_tensor
 #' @noRd
-build_ancestor_matrix <- function(edges, n_classes = NULL) {
+build_ancestor_matrix <- function(x) {
+  # 1. Extract edges
+  edges <- data.tree::ToDataFrameNetwork(x)
+  # 2. prune tree from root and from leafs
+  non_root_edges <- edges$from != x$path
+  non_leaf_targets <- edges$to %in% unique(edges$from)
   
-  if (is.null(n_classes)) {
-    n_classes <- max(c(edges$from, edges$to))
-  }
-
-  # Build adjacency list efficiently: adj[[i]] = direct ancestors of i
-  adj <- vector("list", n_classes)
-  by_from <- split(edges$to, edges$from)
-  for (nm in names(by_from)) {
-    adj[[as.integer(nm)]] <- as.integer(by_from[[nm]])
+  edges <- edges[non_root_edges & non_leaf_targets, ]
+  
+  # 3. Map node names to integer indices
+  all_nodes <- unique(c(edges$from, edges$to))
+  n <- length(all_nodes)
+  # Handle case where no edges match the filter
+  if (n == 0) {
+    return(matrix(nrow = 0, ncol = 2))
   }
   
-  # BFS from each node to find all reachable nodes via outgoing edges
-  # (i.e., all ancestors). Collect COO indices.
-  idx_list <- lapply(seq_len(n_classes), function(i) {
-    visited <- rep(FALSE, n_classes)
-    visited[i] <- TRUE
-    frontier <- adj[[i]]
+  # Create a lookup map: name -> index
+  node_map <- setNames(seq_along(all_nodes), all_nodes)
+  
+  # Conversion of edges to integer indices
+  from_idx <- node_map[edges$from]
+  to_idx <- node_map[edges$to]
+  
+  # 4. Build Adjacency Matrix 
+  # adj_mat[i, j] = 1 means i is a direct parent of j
+  adj_mat <- matrix(0L, nrow = n, ncol = n)
+  adj_mat[cbind(from_idx, to_idx)] <- 1L
+  
+  # 5. Compute Transitive Closure (Ancestors)
+  # Initialize reachability matrix with self-loops (Identity) + direct connections
+  reachability <- adj_mat + diag(n)
+  
+  # Use Boolean Matrix Multiplication to find all reachable nodes
+  # (i, j) = 1 if j is reachable from i (i is ancestor of j)
+  repeat {
+    # reachability %*% reachability finds paths of length 2*k
+    # Multiplying the matrix by itself effectively extends the reachable frontier
+    next_reachability <- (reachability %*% reachability) > 0
     
-    while (length(frontier) > 0L) {
-      next_frontier <- integer(0)
-      for (node in frontier) {
-        if (!visited[node]) {
-          visited[node] <- TRUE
-          next_frontier <- c(next_frontier, adj[[node]])
-        }
-      }
-      frontier <- next_frontier
+    # Check for convergence
+    if (identical(next_reachability, reachability)) {
+      break
     }
     
-    reached <- which(visited)
-    cbind(rep(i, length(reached)), reached)
-  })
+    # Convert back to integer/numeric for next iteration
+    reachability <- next_reachability * 1L
+  }
   
-  # Combine all pairs: before transpose, (i, j) means j is ancestor of i
-  idx_mat <- do.call(rbind, idx_list)
-  
-  # Transpose: swap columns so that (i, j) means j is descendant of i
-  idx_mat <- cbind(idx_mat[, 2L], idx_mat[, 1L])
-  
-  # idx <- torch::torch_tensor(
-  #   matrix(idx_mat - 1L, nrow = 2L),
-  #   dtype = torch::torch_int64()
-  # )
-  # vals <- torch::torch_ones(nrow(idx_mat), dtype = torch::torch_double())
+  # 6. Extract indices (COO format)
+  # which(arr.ind = TRUE) returns a matrix where col 1 is row (Ancestor) and col 2 is column (Descendant)
+  idx_mat <- which(reachability == 1L, arr.ind = TRUE)
   
   torch::torch_sparse_coo_tensor(t(idx_mat), rep(TRUE, nrow(idx_mat)), c(n_classes, n_classes))
 }

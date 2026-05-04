@@ -286,7 +286,7 @@ train_batch <- function(network, optimizer, batch, config) {
           torch::torch_split(out, outcome_nlevels, dim = 2),
           torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
         ),
-        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor))
+        ~config$loss_fn(max_constraint_output(.x, .y, config$ancestor), .y$squeeze(2))
       )),
       dim = 1)
     } else {
