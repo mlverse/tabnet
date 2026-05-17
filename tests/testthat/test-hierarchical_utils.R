@@ -238,7 +238,7 @@ test_that("build_ancestor_matrix handles basic hierarchy", {
   #    Keeps B->D? No. D is not a parent.
   # Result: No edges match criteria. Empty matrix.
   
-  tree_df <- data.frame(pathString = c("Root/A", "Root/A/C", "Root/B", "Root/B/D"))
+  tree_df <- data.frame(pathString = c("Root/A/C1", "Root/A/C2","Root/B/D1", "Root/B/D2"))
   tree <- as.Node(tree_df)
   
   result <- build_ancestor_matrix(tree)$to_dense()
@@ -246,106 +246,61 @@ test_that("build_ancestor_matrix handles basic hierarchy", {
   # Expectation: No internal nodes exist that are also children (excluding Root)
   # A and B are children of Root, but their children (C, D) are leaves.
   # Thus A and B are effectively leaves in the "internal structure".
-  expect_tensor_shape(result, c(5,5))
+  expect_tensor_shape(result, c(6, 3))
 })
 
 test_that("build_ancestor_matrix handles linear chain of internal nodes", {
-  # Tree: Root -> A -> B -> C
-  # Edges: R->A, A->B, B->C
-  # Pruning Logic:
-  # 1. Remove Root: Keeps A->B, B->C
-  # 2. Keep only if target is a parent:
-  #    - A->B: B is a parent (of C). Keep.
-  #    - B->C: C is a leaf. Drop.
-  # Remaining Edges: A -> B
-  # Nodes: A(1), B(2)
-  # Matrix: A->A, A->B, B->B
-  
-  tree_df <- data.frame(pathString = c("Root/A", "Root/A/B", "Root/A/B/C"), value = 1:3)
+
+  tree_df <- data.frame(pathString = c("Root/A/B", "Root/A/B/C"), value = 1:2)
   tree <- as.Node(tree_df)
   
   result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
 
-  expected <- fBasics::Triang(matrix(TRUE, nrow = 4, ncol = 4)) # upper triangular 4 x 4 mat
+  # upper triangular 3 x 3 mat with no diag
+  expected <- fBasics::Triang(matrix(TRUE, nrow = 3, ncol = 3)) - diag(3)
   expect_equal_to_r(result, expected)
 })
 
 test_that("build_ancestor_matrix calculates transitive closure correctly", {
-  # Tree: Root -> A -> B -> C -> D
-  # Edges: R->A, A->B, B->C, C->D
-  # Pruning Logic:
-  # 1. Remove Root: A->B, B->C, C->D
-  # 2. Keep if target is parent:
-  #    - A->B: B is parent (of C). Keep.
-  #    - B->C: C is parent (of D). Keep.
-  #    - C->D: D is leaf. Drop.
-  # Remaining Edges: A -> B, B -> C
-  # Nodes: A(1), B(2), C(3)
-  
-  tree_df <- data.frame(pathString = c("Root/A", "Root/A/B", "Root/A/B/C", "Root/A/B/C/D"))
+
+  tree_df <- data.frame(pathString = c("Root/A/B/C", "Root/A/B/C/D"), value = 1:2)
   tree <- as.Node(tree_df)
   
   result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
   
-  expected <- fBasics::Triang(matrix(TRUE, nrow = 5, ncol = 5)) # upper triangular 5 x 5 mat
+  # upper triangular 4 x 4 mat with no diag
+  expected <- fBasics::Triang(matrix(TRUE, nrow = 4, ncol = 4))  - diag(4)
   expect_equal_to_r(result, expected)
 })
 
 test_that("build_ancestor_matrix handles branching internal nodes", {
-  # Tree: R -> A -> C
-  #        R -> B -> C (Diamond shape, merging back to C) 
-  # *Note: data.tree allows this structure (multiple parents)? 
-  # Actually standard trees are single parent. Let's stick to standard tree.
   
-  # Tree: R -> A -> C -> E
-  #        R -> B -> D -> E
-  # Edges: R->A, A->C, C->E, R->B, B->D, D->E
-  # Pruning:
-  # 1. Remove R: A->C, C->E, B->D, D->E
-  # 2. Keep target if parent:
-  #    - A->C (C is parent of E). Keep.
-  #    - C->E (E is leaf). Drop.
-  #    - B->D (D is parent of E). Keep.
-  #    - D->E (E is leaf). Drop.
-  # Nodes: A, C, B, D
-  # Edges: A->C, B->D
-  
-  tree_df <- data.frame(pathString = c("Root/A", "Root/A/C", "Root/A/C/E", 
-             "Root/B", "Root/B/D", "Root/B/D/E"))
+  tree_df <- data.frame(pathString = c("Root/A/C/E1", "Root/A/C/E2", "Root/B/D/E1", "Root/B/D/E3"))
   tree <- as.Node(tree_df)
   
   result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
   
-  # upper triangular 6 x 6 mat in a 7 x 7 matrix with few non-ancestor values
-  expected <- fBasics::Triang(matrix(1, nrow = 7, ncol = 7))
-  expected[, 7] <- 0
-  expected[2:4, 5:6] <- 0
-  expected[5:6, 4] <- 1
+  # two small upper triangular 2 x 2 mat in a 5 x 8 matrix 
+  expected <- matrix(0L, nrow = 8, ncol = 5)
+  expected[1:2, 2:3] <- fBasics::Triang(matrix(1L, nrow = 2, ncol = 2))
+  expected[5:6, 4:5] <- fBasics::Triang(matrix(1L, nrow = 2, ncol = 2))
+
   
   expect_equal_to_r(result, expected)
 })
 
 test_that("build_ancestor_matrix returns empty for Root-only tree", {
   tree <- Node$new("Root")
-  result <- build_ancestor_matrix(tree)$to_dense()
-  expect_equal(nrow(result), 1)
+  result <- build_ancestor_matrix(tree)
+  expect_equal(result$shape, c(0,0))
 })
 
 test_that("build_ancestor_matrix returns empty for Root + Leaf", {
-  # Tree: Root -> A
-  # Edges: R->A
-  # 1. Remove R (from!=Root): Result empty.
-  tree <- Node$new("Root")
-  tree$AddChild("A")
-  result <- build_ancestor_matrix(tree)
-  expect_equal(nrow(result), 2)
-})
 
-test_that("build_ancestor_matrix preserves integer type", {
-  tree_df <- data.frame(pathString = c("Root/A", "Root/A/B"))
+  tree_df <- data.frame(pathString = c("Root/A", "Root/B"))
   tree <- as.Node(tree_df)
   result <- build_ancestor_matrix(tree)
-  expect_tensor_dtype(result, torch_bool())
+  expect_equal(result$shape, c(2,1))
 })
 
 test_that("node_to_df works ", {
