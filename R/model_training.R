@@ -230,7 +230,7 @@ tabnet_config <- function(batch_size = 1024^2,
 get_constr_output <- function(x, R) {
     # MCM of the prediction given the hierarchy constraint expressed in the matrix R """
     c_out <- x$to(dtype = torch::torch_double())$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
-    R_batch <- R$unsqueeze(1)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+    R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
     final_out <- torch::torch_max(R_batch * c_out, dim = 3)
     final_out[[1]]
 }

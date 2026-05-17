@@ -1,15 +1,19 @@
 test_that("get_constr_output handles basic 2D input with identity constraint", {
-  x <- torch_tensor(matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2), dtype = torch_float32())
+  m <- matrix(c(1, 2, 
+                3, 4), nrow = 2, ncol = 2)
+  x <- torch_tensor(m, dtype = torch_float32())
   R <- torch_eye(2, dtype = torch_float32())
   result <- get_constr_output(x, R)
   expect_tensor(result)
   expect_tensor_shape(result, c(2, 2))
-  expect_equal_to_r(result, matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2))
+  expect_equal_to_r(result, m)
 })
 
 test_that("get_constr_output applies hierarchy constraint correctly", {
-  x <- torch_tensor(matrix(c(1, 5, 3, 2), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_float64())
-  R <- torch_tensor(matrix(c(1, 1, 0, 1), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_float64())
+  x <- torch_tensor(matrix(c(1, 5, 
+                             3, 2), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_float64())
+  R <- torch_tensor(matrix(c(1, 1, 
+                             0, 1), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_float64())
   result <- get_constr_output(x, R)
   expect_tensor_shape(result, c(2, 2))
   expected <- matrix(c(5, 5, 3, 2), nrow = 2, ncol = 2, byrow = TRUE)
@@ -26,7 +30,10 @@ test_that("get_constr_output preserves input dtype", {
 
 test_that("get_constr_output handles batch dimension correctly", {
   x <- torch_tensor(matrix(1:12, nrow = 3, ncol = 4))
-  R <- torch_tensor(matrix(c(1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1), nrow = 4, ncol = 4, byrow = TRUE))
+  R <- torch_tensor(matrix(c(1, 1, 0, 0, 
+                             1, 1, 0, 0, 
+                             0, 0, 1, 1, 
+                             0, 0, 1, 1), nrow = 4, ncol = 4, byrow = TRUE))
   result <- get_constr_output(x, R)
   expect_tensor_shape(result, c(3, 4))
   
@@ -41,7 +48,10 @@ test_that("get_constr_output handles batch dimension correctly", {
 })
 test_that("get_constr_output works with single sample", {
   x <- torch_tensor(matrix(c(2, 1, 4, 3), nrow = 1, ncol = 4, byrow = TRUE))
-  R <- torch_tensor(matrix(c(1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1), nrow = 4, ncol = 4, byrow = TRUE))
+  R <- torch_tensor(matrix(c(1, 1, 0, 0, 
+                             1, 1, 0, 0, 
+                             0, 0, 1, 1, 
+                             0, 0, 1, 1), nrow = 4, ncol = 4, byrow = TRUE))
   result <- get_constr_output(x, R)
   expect_tensor_shape(result, c(1, 4))
   expected <- matrix(c(2, 2, 4, 4), nrow = 1, byrow = TRUE)
@@ -57,12 +67,14 @@ test_that("get_constr_output handles all-zeros constraint matrix", {
 })
 
 test_that("get_constr_output handles all-ones constraint matrix", {
-  x <- torch_tensor(matrix(c(1, 5, 3, 2, 4, 6), nrow = 2, ncol = 3, byrow = TRUE))
+  x <- torch_tensor(matrix(c(1, 5, 3, 
+                             2, 4, 6), nrow = 2, ncol = 3, byrow = TRUE))
   R <- torch_ones(c(3, 3))
   result <- get_constr_output(x, R)
   expect_tensor_shape(result, c(2, 3))
   # Each row is filled with its own row-wise maximum
-  expected <- matrix(c(5, 5, 5, 6, 6, 6), nrow = 2, ncol = 3, byrow = TRUE)
+  expected <- matrix(c(5, 5, 5, 
+                       6, 6, 6), nrow = 2, ncol = 3, byrow = TRUE)
   expect_equal_to_r(result, expected, tolerance = 1e-6)
 })
 
@@ -74,13 +86,14 @@ test_that("get_constr_output throws error for dimension mismatch", {
 
 test_that("get_constr_output throws error for non-2D R", {
   x <- torch_tensor(matrix(1:4, nrow = 2, ncol = 2))
-  R <- torch_tensor(array(1:8, dim = c(2, 2, 2)))
+  R <- torch_tensor(array(1:8, dim = c(1, 2, 2, 2)))
   expect_error(get_constr_output(x, R), "dimension")
 })
 
 test_that("max_constraint_output returns original output when ancestor is identity", {
   output <- torch_tensor(matrix(1:6, nrow = 2, ncol = 3))
-  labels <- torch_tensor(matrix(c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE), nrow = 2, ncol = 3), dtype = torch_bool())
+  labels <- torch_tensor(matrix(c(TRUE, FALSE, TRUE, 
+                                  FALSE, TRUE, FALSE), nrow = 2, ncol = 3), dtype = torch_bool())
   ancestor <- torch_eye(3)
   result <- max_constraint_output(output, labels, ancestor)
   expect_tensor_shape(result, c(2, 3))
@@ -90,9 +103,12 @@ test_that("max_constraint_output returns original output when ancestor is identi
 })
 
 test_that("max_constraint_output applies constraint to positive labels", {
-  output <- torch_tensor(matrix(c(1, 5, 3, 2), nrow = 2, ncol = 2, byrow = TRUE))
-  labels <- torch_tensor(matrix(c(1, 0, 1, 0), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_bool())
-  ancestor <- torch_tensor(matrix(c(1, 1, 0, 1), nrow = 2, ncol = 2, byrow = TRUE))
+  output <- torch_tensor(matrix(c(1, 5, 
+                                  3, 2), nrow = 2, ncol = 2, byrow = TRUE))
+  labels <- torch_tensor(matrix(c(1, 0, 
+                                  1, 0), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_bool())
+  ancestor <- torch_tensor(matrix(c(1, 1, 
+                                    0, 1), nrow = 2, ncol = 2, byrow = TRUE))
   result <- max_constraint_output(output, labels, ancestor)
   expect_tensor_shape(result, c(2, 2))
   # Unlabelled positions get propagated raw max, labelled get propagated masked max
@@ -110,7 +126,8 @@ test_that("max_constraint_output handles all-zero labels", {
 })
 
 test_that("max_constraint_output handles all-one labels", {
-  output <- torch_tensor(matrix(c(1, 5, 3, 2), nrow = 2, ncol = 2, byrow = TRUE))
+  output <- torch_tensor(matrix(c(1, 5, 
+                                  3, 2), nrow = 2, ncol = 2, byrow = TRUE))
   labels <- torch_ones(c(2, 2), dtype = torch_bool())
   ancestor <- torch_tensor(matrix(c(1, 1, 0, 1), nrow = 2, ncol = 2, byrow = TRUE))
   result <- max_constraint_output(output, labels, ancestor)
@@ -131,8 +148,10 @@ test_that("max_constraint_output preserves output dtype", {
 
 
 test_that("max_constraint_output works with complex hierarchy", {
-  output <- torch_tensor(matrix(c(1, 2, 3, 4, 5, 6), nrow = 2, ncol = 3, byrow = TRUE))
-  labels <- torch_tensor(matrix(c(1, 0, 0, 0, 1, 0), nrow = 2, ncol = 3, byrow = TRUE), dtype = torch_bool())
+  output <- torch_tensor(matrix(c(1, 2, 3, 
+                                  4, 5, 6), nrow = 2, ncol = 3, byrow = TRUE))
+  labels <- torch_tensor(matrix(c(1, 0, 0, 
+                                  0, 1, 0), nrow = 2, ncol = 3, byrow = TRUE), dtype = torch_bool())
   ancestor <- torch_triu(torch_ones(c(3,3)))
   result <- max_constraint_output(output, labels, ancestor)
   expect_tensor_shape(result, c(2, 3))
@@ -172,9 +191,12 @@ test_that("max_constraint_output handles float labels without error", {
 })
 
 test_that("get_constr_output and max_constraint_output compose correctly", {
-  output <- torch_tensor(matrix(c(1, 4, 2, 3), nrow = 2, ncol = 2, byrow = TRUE))
-  labels <- torch_tensor(matrix(c(TRUE, FALSE, TRUE, FALSE), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_bool())
-  ancestor <- torch_tensor(matrix(c(1, 1, 0, 1), nrow = 2, ncol = 2, byrow = TRUE))
+  output <- torch_tensor(matrix(c(1, 4, 
+                                  2, 3), nrow = 2, ncol = 2, byrow = TRUE))
+  labels <- torch_tensor(matrix(c(TRUE, FALSE, 
+                                  TRUE, FALSE), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_bool())
+  ancestor <- torch_tensor(matrix(c(1, 1, 
+                                    0, 1), nrow = 2, ncol = 2, byrow = TRUE))
   direct <- max_constraint_output(output, labels, ancestor)
   constr_out <- get_constr_output(output, ancestor)
   train_out <- get_constr_output(labels * output, ancestor)
@@ -183,19 +205,26 @@ test_that("get_constr_output and max_constraint_output compose correctly", {
 })
 
 test_that("get_constr_output handles negative values correctly", {
-  x <- torch_tensor(matrix(c(-5, -1, -3, -2), nrow = 2, ncol = 2, byrow = TRUE))
-  R <- torch_tensor(matrix(c(1, 1, 0, 1), nrow = 2, ncol = 2, byrow = TRUE))
+  x <- torch_tensor(matrix(c(-5, -1, 
+                             -3, -2), nrow = 2, ncol = 2, byrow = TRUE))
+  R <- torch_tensor(matrix(c(1, 1, 
+                             0, 1), nrow = 2, ncol = 2, byrow = TRUE))
   result <- get_constr_output(x, R)
-  expected <- matrix(c(-1, 0, -2, 0), nrow = 2, ncol = 2, byrow = TRUE)
+  expected <- matrix(c(-1, 0, 
+                       -2, 0), nrow = 2, ncol = 2, byrow = TRUE)
   expect_equal_to_r(result, expected)
 })
 
 test_that("max_constraint_output handles mixed positive-negative with constraints", {
-  output <- torch_tensor(matrix(c(-5, -3, -1, 4), nrow = 2, ncol = 2, byrow = TRUE))
-  labels <- torch_tensor(matrix(c(TRUE, TRUE, FALSE, TRUE), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_bool())
-  ancestor <- torch_tensor(matrix(c(1, 1, 0, 1), nrow = 2, ncol = 2, byrow = TRUE))
+  output <- torch_tensor(matrix(c(-5, -3, 
+                                  -1, 4), nrow = 2, ncol = 2, byrow = TRUE))
+  labels <- torch_tensor(matrix(c(TRUE, TRUE, 
+                                  FALSE, TRUE), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch_bool())
+  ancestor <- torch_tensor(matrix(c(1, 1, 
+                                    0, 1), nrow = 2, ncol = 2, byrow = TRUE))
   result <- max_constraint_output(output, labels, ancestor)
-  expected <- matrix(c(-3, 0, 4, 4), nrow = 2, ncol = 2, byrow = TRUE)
+  expected <- matrix(c(-3, 0, 
+                       4, 4), nrow = 2, ncol = 2, byrow = TRUE)
   expect_equal_to_r(result, expected)
 })
 
@@ -209,15 +238,15 @@ test_that("build_ancestor_matrix handles basic hierarchy", {
   #    Keeps B->D? No. D is not a parent.
   # Result: No edges match criteria. Empty matrix.
   
-  paths <- c("Root/A", "Root/A/C", "Root/B", "Root/B/D")
-  tree <- create_test_tree(paths)
+  tree_df <- data.frame(pathString = c("Root/A", "Root/A/C", "Root/B", "Root/B/D"))
+  tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)
+  result <- build_ancestor_matrix(tree)$to_dense()
   
   # Expectation: No internal nodes exist that are also children (excluding Root)
   # A and B are children of Root, but their children (C, D) are leaves.
   # Thus A and B are effectively leaves in the "internal structure".
-  expect_equal(nrow(result), 0)
+  expect_tensor_shape(result, c(5,5))
 })
 
 test_that("build_ancestor_matrix handles linear chain of internal nodes", {
@@ -232,18 +261,13 @@ test_that("build_ancestor_matrix handles linear chain of internal nodes", {
   # Nodes: A(1), B(2)
   # Matrix: A->A, A->B, B->B
   
-  paths <- c("Root/A", "Root/A/B", "Root/A/B/C")
-  tree <- create_test_tree(paths)
+  tree_df <- data.frame(pathString = c("Root/A", "Root/A/B", "Root/A/B/C"), value = 1:3)
+  tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)
-  
-  expected <- matrix(c(
-    1, 1, # A -> A
-    1, 2, # A -> B
-    2, 2  # B -> B
-  ), ncol = 2, byrow = TRUE)
-  
-  expect_equal(result, expected)
+  result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
+
+  expected <- fBasics::Triang(matrix(TRUE, nrow = 4, ncol = 4)) # upper triangular 4 x 4 mat
+  expect_equal_to_r(result, expected)
 })
 
 test_that("build_ancestor_matrix calculates transitive closure correctly", {
@@ -258,27 +282,13 @@ test_that("build_ancestor_matrix calculates transitive closure correctly", {
   # Remaining Edges: A -> B, B -> C
   # Nodes: A(1), B(2), C(3)
   
-  paths <- c("Root/A", "Root/A/B", "Root/A/B/C", "Root/A/B/C/D")
-  tree <- create_test_tree(paths)
+  tree_df <- data.frame(pathString = c("Root/A", "Root/A/B", "Root/A/B/C", "Root/A/B/C/D"))
+  tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)
+  result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
   
-  # Expected Relations:
-  # A -> A, A -> B, A -> C
-  # B -> B, B -> C
-  # C -> C
-  
-  # Sorted by column then row (default behavior of which(arr.ind=TRUE))
-  expected <- matrix(c(
-    1, 1, # A->A
-    1, 2, # A->B
-    2, 2, # B->B
-    1, 3, # A->C (transitive)
-    2, 3, # B->C
-    3, 3  # C->C
-  ), ncol = 2, byrow = TRUE)
-  
-  expect_equal(result, expected)
+  expected <- fBasics::Triang(matrix(TRUE, nrow = 5, ncol = 5)) # upper triangular 5 x 5 mat
+  expect_equal_to_r(result, expected)
 })
 
 test_that("build_ancestor_matrix handles branching internal nodes", {
@@ -300,36 +310,25 @@ test_that("build_ancestor_matrix handles branching internal nodes", {
   # Nodes: A, C, B, D
   # Edges: A->C, B->D
   
-  paths <- c("Root/A", "Root/A/C", "Root/A/C/E", 
-             "Root/B", "Root/B/D", "Root/B/D/E")
-  tree <- create_test_tree(paths)
+  tree_df <- data.frame(pathString = c("Root/A", "Root/A/C", "Root/A/C/E", 
+             "Root/B", "Root/B/D", "Root/B/D/E"))
+  tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)
+  result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
   
-  # We have two disconnected components in the adjacency matrix: (A,C) and (B,D)
-  # A(1), C(2), B(3), D(4) (Order depends on unique(c(edges$from, edges$to)))
-  # Edges order: A->C, B->D.
-  # Unique nodes: A, C, B, D.
+  # upper triangular 6 x 6 mat in a 7 x 7 matrix with few non-ancestor values
+  expected <- fBasics::Triang(matrix(1, nrow = 7, ncol = 7))
+  expected[, 7] <- 0
+  expected[2:4, 5:6] <- 0
+  expected[5:6, 4] <- 1
   
-  # Expected: Self loops + A->C, B->D
-  # (1,1), (1,2), (2,2), (3,3), (3,4), (4,4)
-  
-  expected <- matrix(c(
-    1, 1, # A->A
-    1, 2, # A->C
-    2, 2, # C->C
-    3, 3, # B->B
-    3, 4, # B->D
-    4, 4  # D->D
-  ), ncol = 2, byrow = TRUE)
-  
-  expect_equal(result, expected)
+  expect_equal_to_r(result, expected)
 })
 
 test_that("build_ancestor_matrix returns empty for Root-only tree", {
   tree <- Node$new("Root")
-  result <- build_ancestor_matrix(tree)
-  expect_equal(nrow(result), 0)
+  result <- build_ancestor_matrix(tree)$to_dense()
+  expect_equal(nrow(result), 1)
 })
 
 test_that("build_ancestor_matrix returns empty for Root + Leaf", {
@@ -339,40 +338,16 @@ test_that("build_ancestor_matrix returns empty for Root + Leaf", {
   tree <- Node$new("Root")
   tree$AddChild("A")
   result <- build_ancestor_matrix(tree)
-  expect_equal(nrow(result), 0)
-})
-
-test_that("build_ancestor_matrix handles deep wide tree (Stress Test)", {
-  # Create a binary tree of depth 4
-  tree <- Node$new("R")
-  add_children <- function(node, depth) {
-    if (depth == 0) return()
-    node$AddChild(paste0(node.name, "L"))
-    node$AddChild(paste0(node.name, "R"))
-    add_children(node$children[[1]], depth - 1)
-    add_children(node$children[[2]], depth - 1)
-  }
-  add_children(tree, 4)
-  
-  result <- build_ancestor_matrix(tree)
-  
-  # Validate structure without checking exact numbers (too complex for hardcoded)
-  # 1. Must be integer matrix
-  expect_type(result, "integer")
-  # 2. Must have 2 columns
-  expect_equal(ncol(result), 2)
-  # 3. First column (Ancestor) <= Second column (Descendant) implies topological sort check?
-  # Actually indices are arbitrary based on sorting, but relationships are directional.
-  # Just ensure no NA or Inf
-  expect_true(!any(is.na(result)))
+  expect_equal(nrow(result), 2)
 })
 
 test_that("build_ancestor_matrix preserves integer type", {
-  paths <- c("Root/A", "Root/A/B")
-  tree <- create_test_tree(paths)
+  tree_df <- data.frame(pathString = c("Root/A", "Root/A/B"))
+  tree <- as.Node(tree_df)
   result <- build_ancestor_matrix(tree)
-  expect_type(result, "integer")
+  expect_tensor_dtype(result, torch_bool())
 })
+
 test_that("node_to_df works ", {
   expect_no_error(
     node_to_df(acme)

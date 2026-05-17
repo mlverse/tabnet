@@ -620,57 +620,105 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
 #' @importFrom torch  torch_ones torch_int64 torch_sparse_coo_tensor
 #' @noRd
 build_ancestor_matrix <- function(x) {
-  # 1. Extract edges
-  edges <- data.tree::ToDataFrameNetwork(x)
-  # 2. prune tree from root and from leafs
-  non_root_edges <- edges$from != x$path
-  non_leaf_targets <- edges$to %in% unique(edges$from)
+  # 1. Get all nodes
+  all_nodes <- data.tree::Traverse(x, traversal = "pre-order")
+  all_nodes <- unname(all_nodes)
+  n_classes <- length(all_nodes)
   
-  edges <- edges[non_root_edges & non_leaf_targets, ]
-  
-  # 3. Map node names to integer indices
-  all_nodes <- unique(c(edges$from, edges$to))
-  n <- length(all_nodes)
-  # Handle case where no edges match the filter
-  if (n == 0) {
-    return(matrix(nrow = 0, ncol = 2))
+  if (n_classes == 0) {
+    return(torch::torch_sparse_coo_tensor(
+      torch::torch_int64()$view(c(2L, 0L)),
+      torch::torch_logical()$view(0L),
+      c(0L, 0L)
+    ))
   }
   
-  # Create a lookup map: name -> index
-  node_map <- setNames(seq_along(all_nodes), all_nodes)
+  # 2. Create mapping
+  node_names <- vapply(all_nodes, function(node) node$name, character(1))
+  node_map <- setNames(seq_len(n_classes), node_names)
   
-  # Conversion of edges to integer indices
-  from_idx <- node_map[edges$from]
-  to_idx <- node_map[edges$to]
+  # 3. Pre-allocate lists for efficiency
+  row_list <- vector("list", n_classes)
+  col_list <- vector("list", n_classes)
   
-  # 4. Build Adjacency Matrix 
-  # adj_mat[i, j] = 1 means i is a direct parent of j
-  adj_mat <- matrix(0L, nrow = n, ncol = n)
-  adj_mat[cbind(from_idx, to_idx)] <- 1L
-  
-  # 5. Compute Transitive Closure (Ancestors)
-  # Initialize reachability matrix with self-loops (Identity) + direct connections
-  reachability <- adj_mat + diag(n)
-  
-  # Use Boolean Matrix Multiplication to find all reachable nodes
-  # (i, j) = 1 if j is reachable from i (i is ancestor of j)
-  repeat {
-    # reachability %*% reachability finds paths of length 2*k
-    # Multiplying the matrix by itself effectively extends the reachable frontier
-    next_reachability <- (reachability %*% reachability) > 0
+  for (i in seq_along(all_nodes)) {
+    node <- all_nodes[[i]]
+    ancestor_idx <- node_map[[node$name]]
     
-    # Check for convergence
-    if (identical(next_reachability, reachability)) {
-      break
-    }
+    # Get descendants using data.tree Traverse
+    descendants <- data.tree::Traverse(node, traversal = "pre-order")
+    descendant_names <- vapply(descendants, function(n) n$name, character(1))
+    descendant_indices <- node_map[descendant_names]
     
-    # Convert back to integer/numeric for next iteration
-    reachability <- next_reachability * 1L
+    row_list[[i]] <- rep(ancestor_idx, length(descendant_indices))
+    col_list[[i]] <- descendant_indices
   }
   
-  # 6. Extract indices (COO format)
-  # which(arr.ind = TRUE) returns a matrix where col 1 is row (Ancestor) and col 2 is column (Descendant)
-  idx_mat <- which(reachability == 1L, arr.ind = TRUE)
+  # 4. Combine all at once
+  rows <- unlist(row_list, use.names = FALSE)
+  cols <- unlist(col_list, use.names = FALSE)
   
-  torch::torch_sparse_coo_tensor(t(idx_mat), rep(TRUE, nrow(idx_mat)), c(n_classes, n_classes))
+  # 5. Create sparse tensor
+  torch::torch_sparse_coo_tensor(
+    rbind(rows, cols),
+    rep(TRUE, length(rows)),
+    c(n_classes, n_classes)
+  )
 }
+
+
+# build_ancestor_matrix_slow <- function(x) {
+#   # 1. Extract edges
+#   edges <- data.tree::ToDataFrameNetwork(x)
+#   # 2. prune tree from root and from leafs
+#   non_root_edges <- edges$from != x$path
+#   non_leaf_targets <- edges$to %in% unique(edges$from)
+#   
+#   edges <- edges[non_root_edges & non_leaf_targets, ]
+#   
+#   # 3. Map node names to integer indices
+#   all_nodes <- unique(c(edges$from, edges$to))
+#   n <- length(all_nodes)
+#   # Handle case where no edges match the filter
+#   if (n == 0) {
+#     return(matrix(nrow = 0, ncol = 2))
+#   }
+#   
+#   # Create a lookup map: name -> index
+#   node_map <- setNames(seq_along(all_nodes), all_nodes)
+#   
+#   # Conversion of edges to integer indices
+#   from_idx <- node_map[edges$from]
+#   to_idx <- node_map[edges$to]
+#   
+#   # 4. Build Adjacency Matrix 
+#   # adj_mat[i, j] = 1 means i is a direct parent of j
+#   adj_mat <- matrix(0L, nrow = n, ncol = n)
+#   adj_mat[cbind(from_idx, to_idx)] <- 1L
+#   
+#   # 5. Compute Transitive Closure (Ancestors)
+#   # Initialize reachability matrix with self-loops (Identity) + direct connections
+#   reachability <- adj_mat + diag(n)
+#   
+#   # Use Boolean Matrix Multiplication to find all reachable nodes
+#   # (i, j) = 1 if j is reachable from i (i is ancestor of j)
+#   repeat {
+#     # reachability %*% reachability finds paths of length 2*k
+#     # Multiplying the matrix by itself effectively extends the reachable frontier
+#     next_reachability <- (reachability %*% reachability) > 0
+#     
+#     # Check for convergence
+#     if (identical(next_reachability, reachability)) {
+#       break
+#     }
+#     
+#     # Convert back to integer/numeric for next iteration
+#     reachability <- next_reachability * 1L
+#   }
+#   
+#   # 6. Extract indices (COO format)
+#   # which(arr.ind = TRUE) returns a matrix where col 1 is row (Ancestor) and col 2 is column (Descendant)
+#   idx_mat <- which(reachability == 1L, arr.ind = TRUE)
+#   
+#   torch::torch_sparse_coo_tensor(t(idx_mat), rep(TRUE, nrow(idx_mat)), c(n_classes, n_classes))
+# }
