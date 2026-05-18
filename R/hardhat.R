@@ -601,103 +601,88 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
 
 }
 
-#' Build a sparse ancestor-descendant matrix from a hierarchy edge list
+#' Build ancestor-descendant matrix for class hierarchy from data.tree Node
 #'
-#' Given a directed graph where edges point from descendant to ancestor,
-#' computes the full transitive closure via BFS, then transposes so that
-#' the resulting sparse matrix R satisfies R\[i, j\] = 1 whenever class j
-#' is a descendant of class i (including i itself).  This is the
-#' orientation expected by \code{get_constr_output} and the
-#' max-constraint-margin (MCM) loss.
+#' Extracts class nodes (non-root, non-leaf) from a hierarchical tree where
+#' leaves contain observations and intermediate nodes represent class categories.
+#' Computes the transitive closure: R[i, j] = 1 if class i is a descendant 
+#' of class j (including self-loops). Matches the output orientation of the
+#' provided Python/NetworkX snippet.
 #'
-#' @param x a Node object.
-#' @return A \code{torch_sparse_coo_tensor} of shape
-#'   \code{(n_classes, n_classes)} and dtype \code{torch_double()}.
-#'   Entry \code{R[i, j] = 1} means class \code{j} is a descendant of
-#'   class \code{i}.  Indices follow torch's 0-based convention.
-#'
-#'
-#' @importFrom torch  torch_ones torch_int64 torch_sparse_coo_tensor
-#' @noRd
-build_ancestor_matrix <- function(x) {
-  # 1. Get all nodes via Traverse 
-  all_nodes <- data.tree::Traverse(x, traversal = "pre-order")
-  all_nodes <- unname(all_nodes)
-  n_classes <- length(all_nodes)
+#' @param x A `data.tree::Node` object representing the hierarchy.
+#'   Leaves should contain individual observations; intermediate nodes
+#'   represent class categories (e.g., Department, JobRole).
+#' @param device Target device for the output tensor (e.g., "cpu", "cuda").
+#' @return A `torch_tensor` of shape `(1, n_classes, n_classes)` with dtype 
+#'   `torch_double`, where `R[i, j] <- 1` if class `i` is a descendant of 
+#'   class `j` (including when `i == j`).
+#' @importFrom torch torch_tensor torch_double
+#' @export
+build_ancestor_matrix <- function(x, device = "cpu") {
+  # 1. Extract CLASS nodes using data.tree's filtering to exclude root and leaves
+  class_nodes <- data.tree::Traverse(
+    x,
+    traversal = "pre-order",
+    filterFun = function(node) !node$isRoot & !node$isLeaf
+  )
+  class_nodes <- unname(class_nodes)
+  n_classes <- length(class_nodes)
   
-  # Handle edge case
-  if (n_classes == 0) {
-    return(torch::torch_sparse_coo_tensor(
-      torch::torch_int64()$view(c(2L, 0L)),
-      torch::torch_logical()$view(0L),
-      c(0L, 0L)
+  # Handle edge case: no class nodes found
+  if (n_classes == 0L) {
+    return(torch::torch_zeros(
+      1L, 0L, 0L, 
+      dtype = torch::torch_double(), 
+      device = device
     ))
   }
   
-  # 2. Create name to index mapping 
-  node_names <- vapply(all_nodes, function(node) node$name, character(1))
-  node_map <- setNames(seq_len(n_classes), node_names)
+  # 2. Create 1-based index mapping + O(1) named lookup for class names
+  class_names <- vapply(class_nodes, `[[`, "name", FUN.VALUE = character(1))
+  class_map <- setNames(seq_len(n_classes), class_names)
   
-  # 3. Identify root and leaves 
-  root_node <- all_nodes[[which(vapply(all_nodes, function(n) n$isRoot, logical(1)))[1]]]
-  root_idx <- node_map[[root_node$name]]
-  
-  # Find all leaves
-  is_leaf <- vapply(all_nodes, function(n) n$isLeaf, logical(1))
-  leaf_nodes <- all_nodes[is_leaf]
-  leaf_indices <- node_map[vapply(leaf_nodes, function(n) n$name, character(1))]
-  
-  # 4. Pre-allocate lists
+  # 3. Collect (descendant, ancestor) index pairs via tree climbing 
   row_list <- vector("list", n_classes)
   col_list <- vector("list", n_classes)
   
-  for (i in seq_along(all_nodes)) {
-    node <- all_nodes[[i]]
-    ancestor_idx <- node_map[[node$name]]
+  for (i in seq_len(n_classes)) {
+    node <- class_nodes[[i]]
+    desc_idx <- i
     
-    # Skip root node 
-    if (ancestor_idx == root_idx) {
-      row_list[[i]] <- 0L
-      col_list[[i]] <- 0L
-      next
+    # Climb up the tree to collect all ancestor CLASS nodes (including self)
+    anc_indices <- integer()
+    current <- node
+    
+    repeat {
+      # O(1) lookup: check if current node is in our class set
+      anc_idx <- class_map[current$name]
+      if (!is.na(anc_idx) && !is.null(anc_idx)) {
+        anc_indices <- c(anc_indices, anc_idx)
+      }
+      # Stop climbing if we reached root or have no parent
+      if (current$isRoot || is.null(current$parent)) break
+      current <- current$parent
     }
     
-    # Get descendants including self
-    descendants <- data.tree::Traverse(node, traversal = "pre-order")
-    descendant_names <- vapply(descendants, function(n) n$name, character(1))
-    descendant_indices <- node_map[descendant_names]
-    
-    # Filter out leaf columns
-    non_leaf_descendants <- descendant_indices[!descendant_indices %in% leaf_indices]
-    
-    row_list[[i]] <- rep(ancestor_idx, length(non_leaf_descendants))
-    col_list[[i]] <- non_leaf_descendants
+    row_list[[i]] <- rep(desc_idx, length(anc_indices))
+    col_list[[i]] <- anc_indices
   }
   
-  # 5. Combine all at once
+  # 4. Fill matrix 
+  R <- matrix(0L, nrow = n_classes, ncol = n_classes)
   rows <- unlist(row_list, use.names = FALSE)
   cols <- unlist(col_list, use.names = FALSE)
   
-  # 6. Re-index to account for removed root row and leaf columns
-  # Map rows excluding root
-  valid_rows <- setdiff(seq_len(n_classes), root_idx)
-  row_remap <- setNames(seq_along(valid_rows), valid_rows)
+  if (length(rows) > 0) {
+    R[cbind(rows, cols)] <- 1L
+  }
   
-  # Map cols excluding leaves
-  valid_cols <- setdiff(seq_len(n_classes), leaf_indices)
-  col_remap <- setNames(seq_along(valid_cols), valid_cols)
-  
-  # Apply remapping
-  rows_reindexed <- row_remap[as.character(rows)]
-  cols_reindexed <- col_remap[as.character(cols)]
-  
-  # 7. Create sparse tensor with new dimensions: (n_classes - 1) x (n_classes - n_leaves)
-  nrow <- n_classes - 1L
-  ncol <- n_classes - length(leaf_indices)
-  
-  torch::torch_sparse_coo_tensor(
-    rbind(rows_reindexed, cols_reindexed),
-    rep(TRUE, length(rows)),
-    c(nrow, ncol)
+  # 5. Convert to torch tensor
+  R_torch <- torch::torch_tensor(
+    R, 
+    dtype = torch::torch_double(), 
+    device = device
   )
+  
+  R_torch$unsqueeze(1)
 }

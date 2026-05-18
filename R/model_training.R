@@ -514,9 +514,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # provide ancestor to torch tensor in case of hierarchical classification
   if (!is.null(config$ancestor)) {
-    if (!config$ancestor$is_sparse()) {
-      # config is expected to carry the sparse tensor
-      runtime_error("ancestor was configured. Expecting a sparse tensor but got {.cls {class(config$ancestor)}}")
+    if (!inherits(config$ancestor, "torch_tensor")) {
+      # config is expected to carry the tensor
+      runtime_error("ancestor was configured. Expecting a tensor but got {.cls {class(config$ancestor)}}")
     }
   }
 

@@ -228,25 +228,14 @@ test_that("max_constraint_output handles mixed positive-negative with constraint
   expect_equal_to_r(result, expected)
 })
 
-test_that("build_ancestor_matrix handles basic hierarchy", {
-  # Tree: Root -> A -> C
-  #        Root -> B -> D
-  # Edges: R->A, A->C, R->B, B->D
-  # Pruning Logic:
-  # 1. Remove Root: Keeps A->C, B->D
-  # 2. Remove leaves (C, D are not in 'from'): Keeps A->C? No. C is not a parent.
-  #    Keeps B->D? No. D is not a parent.
-  # Result: No edges match criteria. Empty matrix.
-  
+test_that("build_ancestor_matrix handles basic unrelated hierarchy as a diag matrix", {
   tree_df <- data.frame(pathString = c("Root/A/C1", "Root/A/C2","Root/B/D1", "Root/B/D2"))
   tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)$to_dense()
-  
-  # Expectation: No internal nodes exist that are also children (excluding Root)
-  # A and B are children of Root, but their children (C, D) are leaves.
-  # Thus A and B are effectively leaves in the "internal structure".
-  expect_tensor_shape(result, c(6, 3))
+  result <- build_ancestor_matrix(tree)
+
+  expect_tensor_shape(result, c(1,2,2))
+  expect_equal_to_r(result$squeeze(), diag(2))
 })
 
 test_that("build_ancestor_matrix handles linear chain of internal nodes", {
@@ -254,11 +243,11 @@ test_that("build_ancestor_matrix handles linear chain of internal nodes", {
   tree_df <- data.frame(pathString = c("Root/A/B", "Root/A/B/C"), value = 1:2)
   tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
+  result <- build_ancestor_matrix(tree)
 
-  # upper triangular 3 x 3 mat with no diag
-  expected <- fBasics::Triang(matrix(TRUE, nrow = 3, ncol = 3)) - diag(3)
-  expect_equal_to_r(result, expected)
+  # lower triangular 2 x 2 mat
+  expected <- fBasics::triang(matrix(1, nrow = 2, ncol = 2))
+  expect_equal_to_r(result$squeeze(), expected)
 })
 
 test_that("build_ancestor_matrix calculates transitive closure correctly", {
@@ -266,11 +255,11 @@ test_that("build_ancestor_matrix calculates transitive closure correctly", {
   tree_df <- data.frame(pathString = c("Root/A/B/C", "Root/A/B/C/D"), value = 1:2)
   tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
+  result <- build_ancestor_matrix(tree)
   
-  # upper triangular 4 x 4 mat with no diag
-  expected <- fBasics::Triang(matrix(TRUE, nrow = 4, ncol = 4))  - diag(4)
-  expect_equal_to_r(result, expected)
+  # lower triangular 3 x 3 mat
+  expected <- fBasics::triang(matrix(TRUE, nrow = 3, ncol = 3))
+  expect_equal_to_r(result$squeeze(), expected)
 })
 
 test_that("build_ancestor_matrix handles branching internal nodes", {
@@ -278,21 +267,20 @@ test_that("build_ancestor_matrix handles branching internal nodes", {
   tree_df <- data.frame(pathString = c("Root/A/C/E1", "Root/A/C/E2", "Root/B/D/E1", "Root/B/D/E3"))
   tree <- as.Node(tree_df)
   
-  result <- build_ancestor_matrix(tree)$to_dense()$to(torch_long())
+  result <- build_ancestor_matrix(tree)
   
-  # two small upper triangular 2 x 2 mat in a 5 x 8 matrix 
-  expected <- matrix(0L, nrow = 8, ncol = 5)
-  expected[1:2, 2:3] <- fBasics::Triang(matrix(1L, nrow = 2, ncol = 2))
-  expected[5:6, 4:5] <- fBasics::Triang(matrix(1L, nrow = 2, ncol = 2))
+  # diagonal matrix with 2 ancestors
+  expected <- diag(4)
+  expected[2,1] <- 1L
+  expected[4,3] <- 1L
 
-  
-  expect_equal_to_r(result, expected)
+  expect_equal_to_r(result$squeeze(), expected)
 })
 
 test_that("build_ancestor_matrix returns empty for Root-only tree", {
   tree <- Node$new("Root")
   result <- build_ancestor_matrix(tree)
-  expect_equal(result$shape, c(0,0))
+  expect_equal(result$shape, c(1,0,0))
 })
 
 test_that("build_ancestor_matrix returns empty for Root + Leaf", {
@@ -300,7 +288,7 @@ test_that("build_ancestor_matrix returns empty for Root + Leaf", {
   tree_df <- data.frame(pathString = c("Root/A", "Root/B"))
   tree <- as.Node(tree_df)
   result <- build_ancestor_matrix(tree)
-  expect_equal(result$shape, c(2,1))
+  expect_equal(result$shape, c(1,0,0))
 })
 
 test_that("node_to_df works ", {
