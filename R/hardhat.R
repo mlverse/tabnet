@@ -416,14 +416,13 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
   if (inherits(new_data, "Node") && !is.null(object$fit$config$ancestor)) {
     new_data_df <- node_to_df(new_data)$x
-    require_contraint_output <- TRUE
+    processed <- hardhat::forge(new_data_df, object$blueprint)
+    # Enforces column order, type, column names, etc
+    processed$predictors <- get_constr_output(processed$predictors, object$fit$config$ancestor)
+    
   } else {
     new_data_df <- new_data
-  }
-  # Enforces column order, type, column names, etc
-  processed <- hardhat::forge(new_data_df, object$blueprint)
-  if (require_contraint_output) {
-    processed$predictors <- get_constr_output(processed$predictors, object$fit$config$ancestor)
+    processed <- hardhat::forge(new_data, object$blueprint)
   }
   batch_size <- object$fit$config$batch_size
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
