@@ -135,7 +135,7 @@ nn_aum_loss <- nn_module(
 #' @return A scalar `torch_tensor` containing the computed loss, or a tensor 
 #'   of shape `(batch_size, n_classes)` if `reduction = "none"`.
 #'
-#' @seealso [nn_mc_loss()], [get_constr_out()]
+#' @seealso [nn_mc_loss()], [get_constr_output()]
 #' @export
 nnf_mc_loss <- function(output, target, R, to_eval = NULL, 
                         criterion = nnf_binary_cross_entropy_with_logits,
@@ -144,11 +144,11 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
   output_d <- output$double()
   
   # 1. Constrained output from raw predictions: max-pool over descendants
-  constr_output <- get_constr_out(output_d, R)  # (batch, n_classes)
+  constr_output <- get_constr_output(output_d, R)  # (batch, n_classes)
   
   # 2. Label-weighted output, then constrained (for positive label handling)
   labeled_output <- target * output_d
-  train_output <- get_constr_out(labeled_output, R)
+  train_output <- get_constr_output(labeled_output, R)
   
   # 3. Blend outputs based on ground-truth labels:
   #    - Positive labels: use constrained label-weighted output
@@ -204,7 +204,7 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
 #' loss$backward()
 #' }
 #'
-#' @seealso [nnf_mc_loss()], [build_ancestor_matrix()], [get_constr_out()]
+#' @seealso [nnf_mc_loss()], [build_ancestor_matrix()], [get_constr_output()]
 #' @export
 nn_mc_loss <- nn_module(
   "nn_mc_loss",

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{node_to_df}
 \alias{node_to_df}
-\title{Turn a Node object into predictor and outcome.}
+\title{Check that the multi outcomes makes a DAG}
 \usage{
 node_to_df(x, drop_last_level = TRUE)
 }
@@ -10,15 +10,29 @@ node_to_df(x, drop_last_level = TRUE)
 \item{x}{Node object}
 
 \item{drop_last_level}{TRUE unused}
+
+\item{y}{the y dataframe as the result of  \code{node_to_df(x)$y}}
 }
 \value{
+y if it is compliant, else an Error with the column names to fix
+
 a named list of x and y, being respectively the predictor data-frame and the outcomes data-frame,
 as expected inputs for \code{hardhat::mold()} function.
 }
 \description{
-Turn a Node object into predictor and outcome.
+Check that the multi outcomes makes a DAG
 }
 \examples{
+\dontshow{if ((require("data.tree") || require("dplyr"))) withAutoprint(\{ # examplesIf}
+library(dplyr)
+library(data.tree)
+data(starwars)
+starwars_tree_y <- starwars \%>\% select(species, homeworld)
+
+try(check_dag_compliance(starwars_tree_y))
+
+Turn a Node object into predictor and outcome.
+\dontshow{\}) # examplesIf}
 \dontshow{if ((require("data.tree") || require("dplyr"))) withAutoprint(\{ # examplesIf}
 library(dplyr)
 library(data.tree)

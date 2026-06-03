@@ -231,25 +231,25 @@ tabnet_config <- function(batch_size = 1024^2,
 #'
 #' Given neural network outputs x and ancestor matrix R, enforces that
 #' if a class is predicted positive, all its ancestors must also be positive.
-#' Implements: final_out[i] = max{x[j] : R[i,j] = 1}
+#' Implements: `final_out[i] = max{x[j] : R[i,j] = 1}`
 #'
 #' @param x A `torch_tensor` of shape `(batch_size, n_classes)`.
 #' @param R A `torch_tensor` of shape `(1, n_classes, n_classes)` where 
 #'   `R[1, i, j] = 1` iff class `i` is a descendant of class `j`.
 #' @return A `torch_tensor` of shape `(batch_size, n_classes)` with constrained outputs.
 #' @importFrom torch torch_max torch_double
-get_constr_out <- function(x, R) {
+get_constr_output <- function(x, R) {
     c_out <- x$to(dtype = torch_double())$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
     R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
     final_out <- torch_max(R_batch * c_out, dim = 3)
     final_out[[1]]
 }
 
-max_constraint_output <- function(output, labels, ancestor) {
-  constr_output <-  get_constr_output(output, ancestor)
-  train_output <-  get_constr_output(labels * output, ancestor)
-  torch::torch_logical_not(labels) * constr_output + labels * train_output
-}
+# max_constraint_output <- function(output, labels, ancestor) {
+#   constr_output <-  get_constr_output(output, ancestor)
+#   train_output <-  get_constr_output(labels * output, ancestor)
+#   torch::torch_logical_not(labels) * constr_output + labels * train_output
+# }
 
 resolve_loss <- function(config, dtype) {
   loss <- config$loss
@@ -287,8 +287,9 @@ train_batch <- function(network, optimizer, batch, config) {
   out <- M_loss <- NULL
   # forward pass
   c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
-  # if target is multi-outcome, loss has to be applied to each label-group
-  if (max(batch$output_dim$shape) > 1) {
+
+  # if target is multi-outcome but not max_constraint loss, loss has to be applied to each label-group
+  if (max(batch$output_dim$shape) > 1 && is.null(config$ancestor)) {
     # multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
 
@@ -301,13 +302,11 @@ train_batch <- function(network, optimizer, batch, config) {
       ~config$loss_fn(.x, .y$squeeze(2))
     )),
     dim = 1)
+  } else if (batch$y$dtype == torch::torch_long()) {
+    # classifier needs a squeeze for bce loss
+    loss <- config$loss_fn(out, batch$y$squeeze(2))
   } else {
-    if (batch$y$dtype == torch::torch_long()) {
-      # classifier needs a squeeze for bce loss
-      loss <- config$loss_fn(out, batch$y$squeeze(2))
-    } else {
-      loss <- config$loss_fn(out, batch$y)
-    }
+    loss <- config$loss_fn(out, batch$y)
   }
   # Add the overall sparsity loss
   loss <- loss - config$lambda_sparse * M_loss
@@ -334,27 +333,16 @@ valid_batch <- function(network, batch, config) {
   if (max(batch$output_dim$shape) > 1) {
     # multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    if (!is.null(config$ancestor)) {
-      # hierarchical mandates use of `max_constraint_output`
-      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
-        list(
-          torch::torch_split(out, outcome_nlevels, dim = 2),
-          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
-        ),
-        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor))
-      )),
-      dim = 1)
-    } else {
-      # use `resolved_loss`
-      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
-        list(
-          torch::torch_split(out, outcome_nlevels, dim = 2),
-          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
-        ),
-        ~config$loss_fn(.x, .y$squeeze(2))
-      )),
-      dim = 1)
-    }
+    # use `resolved_loss`
+    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+      list(
+        torch::torch_split(out, outcome_nlevels, dim = 2),
+        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+      ),
+      ~config$loss_fn(.x, .y$squeeze(2))
+    )),
+    dim = 1)
+    
   } else {
     if (batch$y$dtype == torch::torch_long()) {
       # classifier needs a squeeze for bce loss

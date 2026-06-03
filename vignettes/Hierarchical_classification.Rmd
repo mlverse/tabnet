@@ -98,13 +98,21 @@ The tree should have a single root for all nodes to be consistent. Thus you have
 
 The classification will be done **removing the first level of hierarchy** in any case.
 
+### Ensure there is no **missing values** in the hierarchical classes
+
+Missing values should be replaced. Turning them  by an explicit "Unknown_something" is a good approach.
+
+
 Now let's have all those rules applied to the `starwars_tree` : 
 
 ```{r}
 # demonstration of reserved column modification in Node construction
 starwars_tree <- starwars %>% 
   rename(`_name` = "name", `_height` = "height") %>% 
-  mutate(pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
+  mutate(
+    species = coalesce(species, "Unknown_Species"),
+    sex     = coalesce(sex, "Unknown_Sex"),
+    pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
   as.Node()
 print(starwars_tree, "name", "_name","_height", "mass", "eye_color", limit = 8)
 ```

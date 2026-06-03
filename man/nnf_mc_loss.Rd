@@ -50,5 +50,5 @@ labels:
 }
 }
 \seealso{
-\code{\link[=nn_mc_loss]{nn_mc_loss()}}, \code{\link[=get_constr_out]{get_constr_out()}}
+\code{\link[=nn_mc_loss]{nn_mc_loss()}}, \code{\link[=get_constr_output]{get_constr_output()}}
 }

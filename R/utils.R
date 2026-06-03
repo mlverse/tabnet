@@ -74,8 +74,39 @@ check_compliant_node <- function(node) {
                 Please change those names as they will lead to unexpected tabnet behavior.")
   }
   
+
+  
+  
   invisible(node)
 }
+#' Check that the multi outcomes makes a DAG 
+#'
+#' @param y the y dataframe as the result of  `node_to_df(x)$y`
+#'
+#' @return y if it is compliant, else an Error with the column names to fix
+#' @export
+#'
+#' @examplesIf (require("data.tree") || require("dplyr"))
+#' library(dplyr)
+#' library(data.tree)
+#' data(starwars)
+#' starwars_tree_y <- starwars %>% select(species, homeworld)
+#'
+#' try(check_dag_compliance(starwars_tree_y))
+#'
+# check_dag_compliance <- function(y) {
+#   actual_names <- names(y)
+#   if (any(actual_names %in% reserved_names)) {
+#     value_error("The attributes or colnames in the provided hierarchical object use the following reserved names:
+#                 {.vars {actual_names[actual_names %in% reserved_names]}}. 
+#                 Please change those names as they will lead to unexpected tabnet behavior.")
+#   }
+#   
+# 
+#   
+#   
+#   invisible(node)
+# }
 
 #' Turn a Node object into predictor and outcome.
 #'

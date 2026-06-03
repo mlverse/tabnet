@@ -52,5 +52,5 @@ loss$backward()
 
 }
 \seealso{
-\code{\link[=nnf_mc_loss]{nnf_mc_loss()}}, \code{\link[=build_ancestor_matrix]{build_ancestor_matrix()}}, \code{\link[=get_constr_out]{get_constr_out()}}
+\code{\link[=nnf_mc_loss]{nnf_mc_loss()}}, \code{\link[=build_ancestor_matrix]{build_ancestor_matrix()}}, \code{\link[=get_constr_output]{get_constr_output()}}
 }

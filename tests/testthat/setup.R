@@ -42,6 +42,8 @@ acme_df <-  data.tree::ToDataFrameTypeCol(acme, acme$attributesAll) %>%
 # acme2$RemoveAttribute("level_3")
 
 attrition_tree <- attrition %>%
+  # ensure pure tree
+  filter(!(Department %in% c("Sales", "Research_Development") & JobRole == "Manager")) %>%
   tibble::rowid_to_column() %>%
   mutate(pathString = paste("attrition", Department, JobRole, rowid, sep = "/")) %>%
   select(-Department, -JobRole, -rowid) %>%

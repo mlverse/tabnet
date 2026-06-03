@@ -63,11 +63,30 @@ test_that("hierarchical classification for {data.tree} Node is explainable", {
 
 })
 
+test_that("Training hierarchical classification for {data.tree} Node for starwars", {
+
+  # try to use starwars dataset with two forbidden column name
+  starwars_tree <- starwars %>% 
+    rename(`_name` = "name", `_height` = "height") %>% 
+    mutate(species = coalesce(species, "Unknown_Species"),
+           sex     = coalesce(sex, "Unknown_Sex"),
+           pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
+    as.Node()
+  
+  expect_error(
+    check_compliant_node(starwars_tree)
+    ,"reserved names")
+
+  fit <- tabnet_fit(starwars_tree, epochs = 1)
+})
+
 test_that("we properly check non-compliant colnames", {
 
   # try to use starwars dataset with two forbidden column name
   starwars_tree <- starwars %>%
-    mutate(pathString = paste("tree", species, homeworld, `name`, sep = "/"))
+    mutate(species = coalesce(species, "Unknown_Species"),
+           sex     = coalesce(sex, "Unknown_Sex"),
+           pathString = paste("tree", species, homeworld, `name`, sep = "/"))
   expect_error(
     check_compliant_node(starwars_tree)
     ,"reserved names")
