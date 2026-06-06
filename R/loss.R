@@ -193,7 +193,7 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
 #' @examples
 #' \dontrun{
 #' # Build ancestor matrix from hierarchy
-#' R <- build_ancestor_matrix(my_tree, device = "cuda")
+#' R <- build_ancestor_matrix_from_outcomes(my_tree, processed$outcomes, device = "cuda")
 #' 
 #' # Create loss module
 #' loss_fn <- nn_mc_loss(R = R, reduction = "mean")
@@ -204,7 +204,7 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
 #' loss$backward()
 #' }
 #'
-#' @seealso [nnf_mc_loss()], [build_ancestor_matrix()], [get_constr_output()]
+#' @seealso [nnf_mc_loss()], [build_ancestor_matrix_from_outcomes()], [get_constr_output()]
 #' @export
 nn_mc_loss <- nn_module(
   "nn_mc_loss",
@@ -240,3 +240,60 @@ nn_mc_loss <- nn_module(
     )
   }
 )
+
+#' Apply hierarchy constraints via max-pooling over descendants (MCM)
+#'
+#' Given neural network outputs x and ancestor matrix R, enforces that
+#' if a class is predicted positive, all its ancestors must also be positive.
+#' Implements: `final_out[i] = max{x[j] : R[i,j] = 1}`
+#'
+#' @param x A `torch_tensor` of shape `(batch_size, n_classes)`.
+#' @param R A `torch_tensor` of shape `(1, n_classes, n_classes)` where 
+#'   `R[1, i, j] = 1` iff class `i` is a descendant of class `j`.
+#' @return A `torch_tensor` of shape `(batch_size, n_classes)` with constrained outputs.
+#' @importFrom torch torch_max torch_double
+get_constr_output <- function(x, R) {
+  c_out <- x$to(dtype = torch_double())$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+  R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+  final_out <- torch_max(torch_matmul(R_batch, c_out), dim = 3)
+  final_out[[1]]
+}
+
+
+#' Convert class_id tensor to binary one-hot tensor
+#'
+#' Transforms a tensor of class indices (one column per hierarchy level)
+#' into a binary tensor where each column corresponds to a class.
+#'
+#' @param y A `torch_tensor` of shape `(batch_size, n_levels)` containing
+#'   1-based class indices.
+#' @param outcomes A tibble with factor columns (as from `hardhat::mold()$outcomes`).
+#' @param device Torch device.
+#' @return A `torch_tensor` of shape `(batch_size, n_classes)` with binary values.
+#' @export
+nnf_multilabel_one_hot <- function(y, outcomes, device = "cpu") {
+  batch_size <- y$shape[1]
+  n_levels <- y$shape[2]
+  
+  # Number of classes per level
+  n_per_level <- lengths(lapply(outcomes, levels))
+  n_classes <- sum(n_per_level)
+  
+  one_hot_list <- vector("list", n_levels)
+  
+  for (lvl in seq_len(n_levels)) {
+    level_ids <- y[, lvl]$to(dtype = torch::torch_long())
+    
+    # Encode one-hot of each levels
+    one_hot_list[[lvl]] <- torch::nnf_one_hot(
+      level_ids, 
+      num_classes = n_per_level[lvl]
+    )
+  }
+  # concatenate along the columns axis)
+  torch::torch_cat(one_hot_list, dim = 2)$to(
+    dtype = torch::torch_double(), 
+    device = device
+  )
+}
+

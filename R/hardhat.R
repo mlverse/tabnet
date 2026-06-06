@@ -168,7 +168,8 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   # add ancestor boolean sparse matrix to config
   # check_dag_compliance(xy_df$y)
   config$ancestor <- build_ancestor_matrix(x)
-
+  # make outcomes levels available so that batched y could be one-hot encoded.
+  config$outcomes <- processed$outcomes
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -606,49 +607,51 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
 
 }
 
-#' Build ancestor-descendant matrix for class hierarchy from data.tree Node
+
+#' Build ancestor matrix aligned with observed outcome classes
 #'
-#' Extracts class nodes (non-root, non-leaf) from a hierarchical tree where
-#' leaves contain observations and intermediate nodes represent class categories.
-#' Computes the transitive closure: `R[i, j] = 1` if class i is a descendant 
-#' of class j (including self-loops). Matches the output orientation of the
-#' provided Python/NetworkX snippet.
+#' Extracts class names from the outcome tibble (factor levels) and builds
+#' the ancestor matrix only for classes that actually appear in the data.
 #'
-#' @param x A `data.tree::Node` object representing the hierarchy.
-#'   Leaves should contain individual observations; intermediate nodes
-#'   represent class categories (e.g., Department, JobRole).
-#' @param device Target device for the output tensor (e.g., "cpu", "cuda").
-#' @param keep_levels Optional integer vector. If provided, only nodes at 
-#'   these levels are treated as classes. If `NULL`, all non-root/non-leaf 
-#'   nodes are kept.
-#' @return A `torch_tensor` of shape `(1, n_classes, n_classes)` with dtype 
-#'   `torch_double`, where `R[i, j] <- 1` if class `i` is a descendant of 
-#'   class `j` (including when `i == j`).
-#' @importFrom torch torch_tensor torch_double
+#' @param x A `data.tree::Node` object.
+#' @param outcomes A tibble with factor columns (one per hierarchy level),
+#'   as returned by `hardhat::mold()$outcomes`.
+#' @param device Torch device ("cpu" or "cuda").
+#' @return A `torch_tensor` of shape `(1, n_classes, n_classes)`.
 #' @export
-build_ancestor_matrix <- function(x, device = "cpu", keep_levels = NULL) {
-  # 1. Traverse all nodes
-  all_nodes <- data.tree::Traverse(x, traversal = "pre-order")
-  all_nodes <- unname(all_nodes)
-  
-  # 2. Filter nodes
-  is_class <- vapply(all_nodes, function(n) {
-    !n$isRoot && !n$isLeaf && 
-      (is.null(keep_levels) || n$level %in% keep_levels)
-  }, logical(1))
-  
-  class_nodes <- all_nodes[is_class]
-  n_classes <- length(class_nodes)
+build_ancestor_matrix_from_outcomes <- function(x, outcomes, device = "cpu") {
+  # 1. Extract all class names from factor levels (preserving order)
+  #    outcomes is a tibble with one factor column per hierarchy level
+  level_cols <- names(outcomes)
+  all_class_names <- unlist(lapply(outcomes, levels), use.names = FALSE)
+  n_classes <- length(all_class_names)
   
   if (n_classes == 0L) {
-    return(torch::torch_zeros(1L, 0L, 0L, dtype = torch::torch_double(), device = device))
+    runtime_error("No factor levels found in outcomes : {str(outcomes)}")
   }
   
-  # 3. safe mapping using pathString as unique key
-  class_paths <- vapply(class_nodes, `[[`, "pathString", FUN.VALUE = character(1))
-  class_map <- setNames(seq_len(n_classes), class_paths)
+  # 2. Build a lookup: class_name -> data.tree Node
+  all_nodes <- data.tree::Traverse(x, traversal = "pre-order")
+  all_nodes <- unname(all_nodes)
+  level_lengths <- lengths(lapply(outcomes, levels))
+  lvl_vector <- rep(seq_along(level_cols) + 1L, level_lengths)
   
-  # 4. Collect (descendant, ancestor) pairs
+  # 3. Resolve each class name to its Node
+  class_nodes <- lapply(seq_along(all_class_names), function(k) {
+    nm <- all_class_names[k]
+    lvl <- lvl_vector[k]
+    
+    candidates <- Filter(function(n) n$level == lvl && n$name == nm, all_nodes)
+    if (length(candidates) == 0) {
+      runtime_error("Factor level {.var {nm}} not found at tree level {lvl} (outcomes column {.var {level_cols[lvl - 1L]}})")
+    }
+    candidates[[1]]
+  })
+  
+  # 4. Create 1-based index mapping
+  class_map <- setNames(seq_len(n_classes), all_class_names)
+  
+  # 5. Collect (descendant, ancestor) pairs by climbing up
   row_list <- vector("list", n_classes)
   col_list <- vector("list", n_classes)
   
@@ -657,9 +660,8 @@ build_ancestor_matrix <- function(x, device = "cpu", keep_levels = NULL) {
     anc_indices <- integer()
     
     repeat {
-      # Lookup using unique pathString
-      idx <- class_map[current$pathString]
-      if (!is.na(idx)) {
+      idx <- class_map[current$name]
+      if (!is.null(idx)) {
         anc_indices <- c(anc_indices, idx)
       }
       if (current$isRoot || is.null(current$parent)) break
@@ -670,13 +672,14 @@ build_ancestor_matrix <- function(x, device = "cpu", keep_levels = NULL) {
     col_list[[i]] <- anc_indices
   }
   
-  # 5. Fill matrix
+  # 6. Fill matrix
   R <- matrix(0L, nrow = n_classes, ncol = n_classes)
   rows <- unlist(row_list, use.names = FALSE)
   cols <- unlist(col_list, use.names = FALSE)
   if (length(rows) > 0) R[cbind(rows, cols)] <- 1L
   
-  # 6. Convert to torch
+  # 7. Convert to torch
   R_torch <- torch::torch_tensor(R, dtype = torch::torch_double(), device = device)
   R_torch$unsqueeze(1)
 }
+

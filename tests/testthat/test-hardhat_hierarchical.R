@@ -73,9 +73,7 @@ test_that("Training hierarchical classification for {data.tree} Node for starwar
            pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
     as.Node()
   
-  expect_error(
-    check_compliant_node(starwars_tree)
-    ,"reserved names")
+  expect_no_error(check_compliant_node(starwars_tree))
 
   fit <- tabnet_fit(starwars_tree, epochs = 1)
 })

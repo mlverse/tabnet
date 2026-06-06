@@ -46,6 +46,7 @@ Imports:
     zeallot
 Suggests: 
     cli,
+    fBasics,
     knitr,
     modeldata,
     patchwork,

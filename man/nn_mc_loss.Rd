@@ -39,7 +39,7 @@ where C' is the number of evaluated classes
 \examples{
 \dontrun{
 # Build ancestor matrix from hierarchy
-R <- build_ancestor_matrix(my_tree, device = "cuda")
+R <- build_ancestor_matrix_from_outcomes(my_tree, processed$outcomes, device = "cuda")
 
 # Create loss module
 loss_fn <- nn_mc_loss(R = R, reduction = "mean")
@@ -52,5 +52,5 @@ loss$backward()
 
 }
 \seealso{
-\code{\link[=nnf_mc_loss]{nnf_mc_loss()}}, \code{\link[=build_ancestor_matrix]{build_ancestor_matrix()}}, \code{\link[=get_constr_output]{get_constr_output()}}
+\code{\link[=nnf_mc_loss]{nnf_mc_loss()}}, \code{\link[=build_ancestor_matrix_from_outcomes]{build_ancestor_matrix_from_outcomes()}}, \code{\link[=get_constr_output]{get_constr_output()}}
 }
