@@ -41,7 +41,7 @@ autoplot.tabnet_fit <- function(object, ...) {
 
   if ("checkpoint" %in% names(collect_metrics)) {
     checkpoints <- collect_metrics %>%
-      dplyr::filter(checkpoint == TRUE, dataset == "train") %>%
+      dplyr::filter(checkpoint, dataset == "train") %>%
       dplyr::select(-checkpoint) %>%
       dplyr::mutate(size = 2)
     p +

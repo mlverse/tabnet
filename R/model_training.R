@@ -175,7 +175,8 @@ tabnet_config <- function(batch_size = 1024^2,
                           early_stopping_tolerance = 0,
                           early_stopping_patience = 0L,
                           num_workers=0L,
-                          skip_importance = FALSE) {
+                          skip_importance = FALSE
+                          ) {
   if (is.null(decision_width) && is.null(attention_width)) {
     decision_width <- 8 # default is 8
   }
@@ -226,20 +227,6 @@ tabnet_config <- function(batch_size = 1024^2,
   )
 }
 
-get_constr_output <- function(x, R) {
-    # MCM of the prediction given the hierarchy constraint expressed in the matrix R """
-    c_out <- x$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
-    R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
-    final_out <- torch::torch_max(R_batch * c_out, dim = 3)
-    final_out[[1]]
-}
-
-max_constraint_output <- function(output, labels, ancestor) {
-  constr_output <-  get_constr_output(output, ancestor)
-  train_output <-  get_constr_output(labels * output, ancestor)
-  labels$bitwise_not() * constr_output + labels * train_output
-}
-
 resolve_loss <- function(config, dtype) {
   loss <- config$loss
 
@@ -249,7 +236,9 @@ resolve_loss <- function(config, dtype) {
     loss_fn <- loss
   else if (loss %in% c("mse", "auto") && !dtype == torch::torch_long())
     loss_fn <- torch::nn_mse_loss()
-  else if ((loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long()) || !is.null(config$ancestor_tt))
+  else if (!is.null(config$ancestor))
+    loss_fn <- nn_mc_loss(R = config$ancestor)
+  else if ((loss %in% c("bce", "cross_entropy", "auto") && dtype == torch::torch_long()))
     # cross entropy loss is required
     loss_fn <- torch::nn_cross_entropy_loss()
   else
@@ -270,42 +259,37 @@ resolve_early_stop_monitor <- function(early_stopping_monitor, valid_split) {
 }
 
 train_batch <- function(network, optimizer, batch, config) {
-  # NULLing values to avoid a R-CMD Check Note "No visible binding for global variable"
+  # NULL-ing values to avoid a R-CMD Check Note "No visible binding for global variable"
   out <- M_loss <- NULL
   # forward pass
   c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
-  # if target is multi-outcome, loss has to be applied to each label-group
-  if (max(batch$output_dim$shape) > 1) {
-    # multi-outcome
+
+  # if target is multi-outcome but not max_constraint loss, loss has to be applied to each label-group
+  if (max(batch$output_dim$shape) > 1 && is.null(config$ancestor)) {
+    # standard multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    if (!is.null(config$ancestor_tt)) {
-      # hierarchical mandates use of `max_constraint_output`
-      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
-        list(
-          torch::torch_split(out, outcome_nlevels, dim = 2),
-          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
-        ),
-        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor_tt))
-      )),
-      dim = 1)
-    } else {
-      # use `resolved_loss`
-      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
-        list(
-          torch::torch_split(out, outcome_nlevels, dim = 2),
-          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
-        ),
-        ~config$loss_fn(.x, .y$squeeze(2))
-      )),
-      dim = 1)
-    }
+
+    # use `resolved_loss`
+    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+      list(
+        torch::torch_split(out, outcome_nlevels, dim = 2),
+        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+      ),
+      ~config$loss_fn(.x, .y$squeeze(2))
+    )),
+    dim = 1)
+  } else if (!is.null(config$ancestor)) {
+    # multi-outcome max_constraint loss ned one-hot encoding of targets
+    loss <- config$loss_fn(out, nnf_multilabel_one_hot(
+      y = batch$y,
+      outcomes = config$outcomes,
+      device = out$device
+    ))
+  } else if (batch$y$dtype == torch::torch_long()) {
+    # classifier needs a squeeze for bce loss
+    loss <- config$loss_fn(out, batch$y$squeeze(2))
   } else {
-    if (batch$y$dtype == torch::torch_long()) {
-      # classifier needs a squeeze for bce loss
-      loss <- config$loss_fn(out, batch$y$squeeze(2))
-    } else {
-      loss <- config$loss_fn(out, batch$y)
-    }
+    loss <- config$loss_fn(out, batch$y)
   }
   # Add the overall sparsity loss
   loss <- loss - config$lambda_sparse * M_loss
@@ -329,30 +313,26 @@ valid_batch <- function(network, batch, config) {
   # forward pass
   c(out, M_loss) %<-% network(batch$x, batch$x_na_mask)
   # loss has to be applied to each label-group when output_dim is a vector
-  if (max(batch$output_dim$shape) > 1) {
-    # multi-outcome
+  if (max(batch$output_dim$shape) > 1 && is.null(config$ancestor)) {
+    # standard multi-outcome
     outcome_nlevels <- as.numeric(batch$output_dim$to(device="cpu"))
-    if (!is.null(config$ancestor_tt)) {
-      # hierarchical mandates use of `max_constraint_output`
-      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
-        list(
-          torch::torch_split(out, outcome_nlevels, dim = 2),
-          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
-        ),
-        ~config$loss_fn(max_constraint_output(.x, .y$squeeze(2), config$ancestor_tt))
-      )),
-      dim = 1)
-    } else {
-      # use `resolved_loss`
-      loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
-        list(
-          torch::torch_split(out, outcome_nlevels, dim = 2),
-          torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
-        ),
-        ~config$loss_fn(.x, .y$squeeze(2))
-      )),
-      dim = 1)
-    }
+    # use `resolved_loss`
+    loss <- torch::torch_sum(torch::torch_stack(purrr::pmap(
+      list(
+        torch::torch_split(out, outcome_nlevels, dim = 2),
+        torch::torch_split(batch$y, rep(1, length(outcome_nlevels)), dim = 2)
+      ),
+      ~config$loss_fn(.x, .y$squeeze(2))
+    )),
+    dim = 1)
+    
+  } else if (!is.null(config$ancestor)) {
+    # multi-outcome max_constraint loss ned one-hot encoding of targets
+    loss <- config$loss_fn(out, nnf_multilabel_one_hot(
+      y = batch$y,
+      outcomes = config$outcomes,
+      device = out$device
+    ))
   } else {
     if (batch$y$dtype == torch::torch_long()) {
       # classifier needs a squeeze for bce loss
@@ -513,7 +493,10 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
 
   # provide ancestor to torch tensor in case of hierarchical classification
   if (!is.null(config$ancestor)) {
-    config$ancestor_tt <- torch::torch_tensor(config$ancestor)$to(torch::torch_bool(), device = device)
+    if (!inherits(config$ancestor, "torch_tensor")) {
+      # config is expected to carry the tensor
+      runtime_error("ancestor was configured. Expecting a tensor but got {.cls {class(config$ancestor)}}")
+    }
   }
 
   # instantiate optimizer
@@ -579,9 +562,9 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)$loss
     }
 
-    if (config$verbose & !has_valid)
+    if (config$verbose && !has_valid)
       message(gettextf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train)))
-    if (config$verbose & has_valid)
+    if (config$verbose && has_valid)
       message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3f", epoch, mean(metrics[[epoch]]$train), mean(metrics[[epoch]]$valid)))
 
 
@@ -690,7 +673,7 @@ predict_impl_numeric <- function(obj, x, batch_size) {
 predict_impl_numeric_multiple <- function(obj, x, batch_size) {
   p <- as.matrix(predict_impl(obj, x, batch_size))
   # TODO use a cleaner function to turn matrix into vectors
-  hardhat::spruce_numeric_multiple(!!!purrr::map(1:ncol(p), ~p[,.x]))
+  hardhat::spruce_numeric_multiple(!!!purrr::map(seq_len(ncol(p)), ~p[,.x]))
 }
 
 #' single-outcome level blueprint

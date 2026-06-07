@@ -13,7 +13,7 @@ y <- ames[ids,]$Sale_Price
 
 # ames common models
 ames_pretrain <- tabnet_pretrain(x, y, epoch = 2, checkpoint_epochs = 1)
-ames_pretrain_vsplit <- tabnet_pretrain(x, y, epochs = 3, valid_split=.2,
+ames_pretrain_vsplit <- tabnet_pretrain(x, y, epochs = 3, valid_split=0.2,
                                         num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
 ames_fit <- tabnet_fit(x, y, epochs = 5 , checkpoint_epochs = 2)
 ames_fit_vsplit <- tabnet_fit(x, y, tabnet_model=ames_pretrain_vsplit, epochs = 3,
@@ -38,8 +38,12 @@ attr_fitted_vsplit <- tabnet_fit(attrix, attriy, epochs = 12, valid_split=0.3)
 utils::data("acme", package = "data.tree")
 acme_df <-  data.tree::ToDataFrameTypeCol(acme, acme$attributesAll) %>%
   select(-starts_with("level_"))
+# acme2 <- acme$clone()
+# acme2$RemoveAttribute("level_3")
 
 attrition_tree <- attrition %>%
+  # ensure pure tree
+  filter(!(Department %in% c("Sales", "Research_Development") & JobRole == "Manager")) %>%
   tibble::rowid_to_column() %>%
   mutate(pathString = paste("attrition", Department, JobRole, rowid, sep = "/")) %>%
   select(-Department, -JobRole, -rowid) %>%

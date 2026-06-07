@@ -52,7 +52,7 @@ test_that("explain works for dataframe, formula and recipe", {
 
 
   # formula
-  tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 3, valid_split=.2,
+  tabnet_pretrain <- tabnet_pretrain(Sale_Price ~., data=small_ames, epochs = 3, valid_split=0.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_no_error(
     tabnet_explain(tabnet_pretrain, new_data=small_ames)
@@ -69,7 +69,7 @@ test_that("explain works for dataframe, formula and recipe", {
     step_zv(all_predictors()) %>%
     step_normalize(all_numeric_predictors())
 
-  tabnet_pretrain <- tabnet_pretrain(rec, data=small_ames, epochs = 3, valid_split=.2,
+  tabnet_pretrain <- tabnet_pretrain(rec, data=small_ames, epochs = 3, valid_split=0.2,
                                      num_steps = 1, attention_width = 1, num_shared = 1, num_independent = 1)
   expect_no_error(
     tabnet_explain(tabnet_pretrain, new_data=small_ames)

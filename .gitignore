@@ -15,3 +15,5 @@ tabnet_*.tar.gz
 tabnet.Rproj
 po/glossary.csv
 inst/IMPORTLIST
+.positai
+tools

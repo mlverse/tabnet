@@ -162,16 +162,14 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   # get tree leaves and extract attributes into data.frames
   xy_df <- node_to_df(x)
   processed <- hardhat::mold(xy_df$x, xy_df$y)
-  # Given n classes, M is an (n x n) matrix where M_ij = 1 if class i is descendant of class j
-  ancestor <- data.tree::ToDataFrameNetwork(x) %>%
-   mutate_if(is.character, ~.x %>% as.factor %>% as.numeric)
-  # TODO check correctness
-  # embed the M matrix in the config$ancestor variable
-  dims <- c(max(ancestor), max(ancestor))
-  ancestor_m <- Matrix::sparseMatrix(ancestor$from, ancestor$to, dims = dims, x = 1)
   check_type(processed$outcomes)
-
+  
   config <- merge_config_and_dots(config, ...)
+  # add ancestor boolean sparse matrix to config
+  # check_dag_compliance(xy_df$y)
+  config$ancestor <- build_ancestor_matrix_from_outcomes(x, processed$outcomes)
+  # make outcomes levels available so that batched y could be one-hot encoded.
+  config$outcomes <- processed$outcomes
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -272,7 +270,7 @@ tabnet_pretrain.default <- function(x, ...) {
 
 #' @export
 #' @rdname tabnet_pretrain
-tabnet_pretrain.data.frame <- function(x, y, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
+tabnet_pretrain.data.frame <- function(x, y = NULL, tabnet_model = NULL, config = tabnet_config(), ..., from_epoch = NULL) {
   processed <- hardhat::mold(x, y)
 
   config <- merge_config_and_dots(config, ...)
@@ -309,8 +307,7 @@ tabnet_pretrain.Node <- function(x, tabnet_model = NULL, config = tabnet_config(
   check_compliant_node(x)
   # get tree leaves and extract attributes into data.frames
   xy_df <- node_to_df(x)
-  tabnet_pretrain(xy_df$x, xy_df$y, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
-
+  tabnet_pretrain(xy_df$x, tabnet_model = tabnet_model, config = config, ..., from_epoch = from_epoch)
 }
 
 new_tabnet_pretrain <- function(pretrain, blueprint) {
@@ -418,13 +415,15 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 #' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
-  if (inherits(new_data, "Node")) {
+  if (inherits(new_data, "Node") && !is.null(object$fit$config$ancestor)) {
     new_data_df <- node_to_df(new_data)$x
+    # Enforces column order, type, column names, etc
+    processed <- hardhat::forge(new_data_df, object$blueprint)
+    
   } else {
     new_data_df <- new_data
+    processed <- hardhat::forge(new_data, object$blueprint)
   }
-  # Enforces column order, type, column names, etc
-  processed <- hardhat::forge(new_data_df, object$blueprint)
   batch_size <- object$fit$config$batch_size
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
   hardhat::validate_prediction_size(out, new_data_df)
@@ -436,8 +435,8 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
   type <- check_type(object$blueprint$ptypes$outcomes, type)
   is_multi_outcome <- ncol(object$blueprint$ptypes$outcomes) > 1
   outcome_nlevels <- NULL
-  if (is_multi_outcome & type != "numeric") {
-    outcome_nlevels <- purrr::map_dbl(object$blueprint$ptypes$outcomes, ~length(levels(.x)))
+  if (is_multi_outcome && type != "numeric") {
+    outcome_nlevels <- purrr::map_dbl(object$blueprint$ptypes$outcomes, ~nlevels(.x))
   }
 
   if (!is.null(epoch)) {
@@ -458,6 +457,7 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
     object$fit$network$load_state_dict(m$state_dict())
   }
 
+  
   type_multioutcome <- paste0(type, "_", is_multi_outcome)
   switch(
     type_multioutcome,
@@ -605,3 +605,80 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
   }
 
 }
+
+
+#' Build ancestor matrix aligned with observed outcome classes
+#'
+#' Extracts class names from the outcome tibble (factor levels) and builds
+#' the ancestor matrix only for classes that actually appear in the data.
+#'
+#' @param x A `data.tree::Node` object.
+#' @param outcomes A tibble with factor columns (one per hierarchy level),
+#'   as returned by `hardhat::mold()$outcomes`.
+#' @param device Torch device ("cpu" or "cuda").
+#' @return A `torch_tensor` of shape `(1, n_classes, n_classes)`.
+#' @export
+build_ancestor_matrix_from_outcomes <- function(x, outcomes, device = "cpu") {
+  # 1. Extract all class names from factor levels (preserving order)
+  #    outcomes is a tibble with one factor column per hierarchy level
+  level_cols <- names(outcomes)
+  all_class_names <- unlist(lapply(outcomes, levels), use.names = FALSE)
+  n_classes <- length(all_class_names)
+  
+  if (n_classes == 0L) {
+    runtime_error("No factor levels found in outcomes : {str(outcomes)}")
+  }
+  
+  # 2. Build a lookup: class_name -> data.tree Node
+  all_nodes <- data.tree::Traverse(x, traversal = "pre-order")
+  all_nodes <- unname(all_nodes)
+  level_lengths <- lengths(lapply(outcomes, levels))
+  lvl_vector <- rep(seq_along(level_cols) + 1L, level_lengths)
+  
+  # 3. Resolve each class name to its Node
+  class_nodes <- lapply(seq_along(all_class_names), function(k) {
+    nm <- all_class_names[k]
+    lvl <- lvl_vector[k]
+    
+    candidates <- Filter(function(n) n$level == lvl && n$name == nm, all_nodes)
+    if (length(candidates) == 0) {
+      runtime_error("Factor level {.var {nm}} not found at tree level {lvl} (outcomes column {.var {level_cols[lvl - 1L]}})")
+    }
+    candidates[[1]]
+  })
+  
+  # 4. Create 1-based index mapping
+  class_map <- setNames(seq_len(n_classes), all_class_names)
+  
+  # 5. Collect (descendant, ancestor) pairs by climbing up
+  row_list <- vector("list", n_classes)
+  col_list <- vector("list", n_classes)
+  
+  for (i in seq_len(n_classes)) {
+    current <- class_nodes[[i]]
+    anc_indices <- integer()
+    
+    repeat {
+      idx <- class_map[current$name]
+      if (!is.null(idx)) {
+        anc_indices <- c(anc_indices, idx)
+      }
+      if (current$isRoot || is.null(current$parent)) break
+      current <- current$parent
+    }
+    
+    row_list[[i]] <- rep(i, length(anc_indices))
+    col_list[[i]] <- anc_indices
+  }
+  
+  # 6. Fill matrix
+  R <- matrix(0L, nrow = n_classes, ncol = n_classes)
+  rows <- unlist(row_list, use.names = FALSE)
+  cols <- unlist(col_list, use.names = FALSE)
+  if (length(rows) > 0) R[cbind(rows, cols)] <- 1L
+  
+  # 7. Convert to torch
+  R_torch <- torch::torch_tensor(R, dtype = torch::torch_double(), device = device)
+  R_torch$unsqueeze(1)
+}
+

@@ -178,9 +178,9 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
       metrics[[epoch]][["valid"]] <- transpose_metrics(valid_metrics)$loss
     }
 
-    if (config$verbose & !has_valid)
+    if (config$verbose && !has_valid)
       message(gettextf("[Epoch %03d] Loss: %3f", epoch, mean(metrics[[epoch]]$train)))
-    if (config$verbose & has_valid)
+    if (config$verbose && has_valid)
       message(gettextf("[Epoch %03d] Loss: %3f, Valid loss: %3f", epoch, mean(metrics[[epoch]]$train), mean(metrics[[epoch]]$valid)))
 
     # Early-stopping checks

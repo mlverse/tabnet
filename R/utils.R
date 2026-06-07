@@ -74,6 +74,9 @@ check_compliant_node <- function(node) {
                 Please change those names as they will lead to unexpected tabnet behavior.")
   }
   
+
+  
+  
   invisible(node)
 }
 
