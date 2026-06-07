@@ -62,12 +62,10 @@ test_that("nn_aum_loss works as expected with {n, 2} shape prediction", {
   output <- aum_loss(pred_tensor, label_tensor)
   output$backward()
   
-  
   expect_tensor(output)
   expect_equal_to_r(output >= 0, TRUE) 
   expect_false(rlang::is_null(output$grad_fn))
   expect_equal(output$dim(), 0)
-  
 })
 
 
@@ -76,7 +74,7 @@ test_that("get_constr_output handles basic 2D input with identity constraint", {
                 3, 4), nrow = 2, ncol = 2)
   x <- torch_tensor(m, dtype = torch::torch_float32())
   R <- torch::torch_eye(2)
-  result <-get_constr_output(x, R)
+  result <- get_constr_output(x, R)
   expect_tensor(result)
   expect_tensor_shape(result, c(2, 2))
   expect_equal_to_r(result, m)
@@ -248,4 +246,23 @@ test_that("nn_mc_loss warns on reduction mismatch for module criterion", {
     ),
     "The criterion module has reduction"
   )
+})
+
+test_that("nn_mc_loss backward pass works without inplace errors", {
+  R <- torch::torch_eye(3)$unsqueeze(1)$to(dtype = torch::torch_double())
+  
+  loss_fn <- nn_mc_loss(R = R, reduction = "mean")
+  
+  output <- torch::torch_randn(2, 3, requires_grad = TRUE)
+  target <- torch::torch_randint(0, 2, c(2, 3))$to(dtype = torch::torch_double())
+  
+  # Forward
+  loss <- loss_fn(output, target)
+  
+  # Backward should not throw inplace error
+  expect_no_error(loss$backward())
+  
+  # Gradients should be computed
+  expect_true(!is.null(output$grad))
+  expect_tensor_shape(output$grad, output$shape)
 })

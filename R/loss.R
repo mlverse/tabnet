@@ -106,6 +106,25 @@ nn_aum_loss <- nn_module(
   }
 )
 
+
+#' Apply hierarchy constraints via max-pooling over descendants (MCM)
+#'
+#' Given neural network outputs x and ancestor matrix R, enforces that
+#' if a class is predicted positive, all its ancestors must also be positive.
+#' Implements: `final_out[i] = max{x[j] : R[i,j] = 1}`
+#'
+#' @param x A `torch_tensor` of shape `(batch_size, n_classes)`.
+#' @param R A `torch_tensor` of shape `(1, n_classes, n_classes)` where 
+#'   `R[1, i, j] = 1` iff class `i` is a descendant of class `j`.
+#' @return A `torch_tensor` of shape `(batch_size, n_classes)` with constrained outputs.
+get_constr_output <- function(x, R) {
+  c_out <- x$double()$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+  R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+  final_out <- (R_batch * c_out)$clone()$max(dim = 3)
+  final_out[[1]]
+}
+
+
 #' Max-Constraint Margin Loss (functional)
 #'
 #' Computes the hierarchy-constrained loss for multi-label classification.
@@ -231,6 +250,7 @@ nn_mc_loss <- nn_module(
 
 #' Resolve criterion into a callable function(input, target, reduction)
 #' @keywords internal
+#' @noRd
 .resolve_mc_criterion <- function(criterion, reduction) {
   # Case 1: Already an nn_module instance
   if (inherits(criterion, "nn_module")) {
@@ -280,25 +300,6 @@ nn_mc_loss <- nn_module(
     class = "mc_loss_invalid_criterion"
   )
 }
-
-#' Apply hierarchy constraints via max-pooling over descendants (MCM)
-#'
-#' Given neural network outputs x and ancestor matrix R, enforces that
-#' if a class is predicted positive, all its ancestors must also be positive.
-#' Implements: `final_out[i] = max{x[j] : R[i,j] = 1}`
-#'
-#' @param x A `torch_tensor` of shape `(batch_size, n_classes)`.
-#' @param R A `torch_tensor` of shape `(1, n_classes, n_classes)` where 
-#'   `R[1, i, j] = 1` iff class `i` is a descendant of class `j`.
-#' @return A `torch_tensor` of shape `(batch_size, n_classes)` with constrained outputs.
-#' @importFrom torch torch_max torch_double
-get_constr_output <- function(x, R) {
-  c_out <- x$to(dtype = torch_double())$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
-  R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
-  final_out <- torch_max(R_batch * c_out, dim = 3)
-  final_out[[1]]
-}
-
 
 #' Convert class_id tensor to binary one-hot tensor
 #'
