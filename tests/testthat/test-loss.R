@@ -75,7 +75,7 @@ test_that("get_constr_output handles basic 2D input with identity constraint", {
   m <- matrix(c(1, 2, 
                 3, 4), nrow = 2, ncol = 2)
   x <- torch_tensor(m, dtype = torch::torch_float32())
-  R <- torch::torch_eye(2, dtype = torch::torch_float32())
+  R <- torch::torch_eye(2)
   result <-get_constr_output(x, R)
   expect_tensor(result)
   expect_tensor_shape(result, c(2, 2))

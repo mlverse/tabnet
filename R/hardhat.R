@@ -167,7 +167,7 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   config <- merge_config_and_dots(config, ...)
   # add ancestor boolean sparse matrix to config
   # check_dag_compliance(xy_df$y)
-  config$ancestor <- build_ancestor_matrix(x)
+  config$ancestor <- build_ancestor_matrix_from_outcomes(x, processed$outcomes)
   # make outcomes levels available so that batched y could be one-hot encoded.
   config$outcomes <- processed$outcomes
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")

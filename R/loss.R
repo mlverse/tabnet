@@ -255,7 +255,7 @@ nn_mc_loss <- nn_module(
 get_constr_output <- function(x, R) {
   c_out <- x$to(dtype = torch_double())$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
   R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
-  final_out <- torch_max(torch_matmul(R_batch, c_out), dim = 3)
+  final_out <- torch_max(R_batch * c_out, dim = 3)
   final_out[[1]]
 }
 
