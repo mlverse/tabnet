@@ -15,7 +15,7 @@ tabnet_pretrain(x, ...)
 # S3 method for class 'data.frame'
 tabnet_pretrain(
   x,
-  y,
+  y = NULL,
   tabnet_model = NULL,
   config = tabnet_config(),
   ...,

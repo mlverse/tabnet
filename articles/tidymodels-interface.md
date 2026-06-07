@@ -1,6 +1,7 @@
 # Fitting tabnet with tidymodels
 
 ``` r
+
 library(tabnet)
 library(tidymodels)
 library(modeldata)
@@ -16,6 +17,7 @@ First let’s split our dataset into training and testing so we can later
 access performance of our model:
 
 ``` r
+
 set.seed(123)
 data("lending_club", package = "modeldata")
 split <- initial_split(lending_club, strata = Class)
@@ -28,6 +30,7 @@ categorical variables, so we don’t need to do any kind of transformation
 to them. Normalizing the numeric variables is a good idea though.
 
 ``` r
+
 rec <- recipe(Class ~ ., train) %>%
   step_normalize(all_numeric())
 ```
@@ -37,6 +40,7 @@ batch size of 128. There are other hyperparameters but, we are going to
 use the defaults.
 
 ``` r
+
 mod <- tabnet(epochs = 50) %>%
   set_engine("torch", verbose = TRUE) %>%
   set_mode("classification")
@@ -45,6 +49,7 @@ mod <- tabnet(epochs = 50) %>%
 We also define our `workflow` object:
 
 ``` r
+
 wf <- workflow() %>%
   add_model(mod) %>%
   add_recipe(rec)
@@ -53,18 +58,21 @@ wf <- workflow() %>%
 We can now define our cross-validation strategy:
 
 ``` r
+
 folds <- vfold_cv(train, v = 5)
 ```
 
 And finally, fit the model:
 
 ``` r
+
 fit_rs <- wf %>% fit_resamples(folds)
 ```
 
 After a few minutes we can get the results:
 
 ``` r
+
 collect_metrics(fit_rs)
 ```
 
@@ -78,6 +86,7 @@ collect_metrics(fit_rs)
 And finally, we can verify the results in our test set:
 
 ``` r
+
 model <- wf %>% fit(train)
 model %>%
   augment( test) %>% 

@@ -1,6 +1,7 @@
 # Self-supervised training and fine-tuning
 
 ``` r
+
 library(tabnet)
 library(tidymodels)
 library(modeldata)
@@ -18,6 +19,7 @@ First, let’s split our dataset into `unlabeled` and `labeled` datasets,
 so we can later on train the supervised step of the model:
 
 ``` r
+
 set.seed(123)
 data("lending_club", package = "modeldata")
 split <- initial_split(lending_club, strata = Class, prop = 9/10)
@@ -29,6 +31,7 @@ Then we proceed with the usual random split of the labeled dataset into
 `train` and `test` so that we can evaluate performance of our model:
 
 ``` r
+
 set.seed(123)
 labeled_split <- initial_split(labeled, strata = Class)
 train <- training(labeled_split) 
@@ -47,6 +50,7 @@ any kind of transformation to them. Normalizing the numeric variables is
 a good idea though.
 
 ``` r
+
 rec <- recipe(Class ~ ., lending_club) %>%
   step_normalize(all_numeric())
 unlabeled_baked_df <- rec %>% prep %>% bake(new_data=unlabeled)
@@ -67,6 +71,7 @@ other hyperparameters available, but we are going to use the default
 values here.
 
 ``` r
+
 mod <- tabnet_pretrain(rec, unlabeled, epochs = 50, valid_split = 0.2, batch_size = 5000, verbose = TRUE)
 ```
 
@@ -98,6 +103,7 @@ mod <- tabnet_pretrain(rec, unlabeled, epochs = 50, valid_split = 0.2, batch_siz
 After a few minutes we can get the results:
 
 ``` r
+
 autoplot(mod)
 ```
 
@@ -117,6 +123,7 @@ Now, we reuse our pre-processing steps recipe and feed it directly in a
 supervised fitting task on top of our pre-trained model.
 
 ``` r
+
 model_fit <- tabnet_fit(rec, train , tabnet_model = mod, from_epoch=40, valid_split = 0.2, epochs = 50, verbose=TRUE)
 ```
 
@@ -147,6 +154,7 @@ Now let’s diagnose the model training with a new
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html):
 
 ``` r
+
 autoplot(model_fit)
 ```
 
@@ -157,6 +165,7 @@ consider epoch 54 to be the epoch to move to production, we can redo the
 training from checkpoint 50 for 4 epochs :
 
 ``` r
+
 model_fit <- tabnet_fit(rec, train , tabnet_model = model_fit, from_epoch=50, epochs = 4, valid_split = 0.2, verbose=TRUE)
 ```
 
@@ -166,6 +175,7 @@ the model from last epoch, being here epoch 54.
 Finally, we can measure the results against our test set:
 
 ``` r
+
 test %>% 
   bind_cols(
     predict(model_fit, test, type = "prob")
@@ -184,6 +194,7 @@ The question now is “what if we did not pretrain the model ?” We can
 build a vanilla tabnet model on the `train` dataset for comparison :
 
 ``` r
+
 vanilla_model_fit <- tabnet_fit(rec, train , valid_split = 0.2, epochs = 50, verbose=TRUE)
 ```
 
@@ -214,6 +225,7 @@ vanilla_model_fit <- tabnet_fit(rec, train , valid_split = 0.2, epochs = 50, ver
     [Epoch 050] Loss: 0.129994 Valid loss: 0.154256                                          
 
 ``` r
+
 autoplot(vanilla_model_fit)
 ```
 
@@ -223,6 +235,7 @@ restore it at checkpoint epoch 20 and retrain for 1 epoch , and proceed
 to prediction :
 
 ``` r
+
 vanilla_model_fit <- tabnet_fit(rec, train , tabnet_model= vanilla_model_fit, from_epoch=20, valid_split = 0.2, epochs = 1, verbose=TRUE)
 test %>% 
   bind_cols(

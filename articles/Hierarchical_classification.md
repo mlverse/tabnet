@@ -1,6 +1,7 @@
 # Hierarchical Classification
 
 ``` r
+
 library(tabnet)
 library(dplyr)
 library(data.tree)
@@ -10,7 +11,7 @@ library(tibble)
 set.seed(202307)
 ```
 
-## Data preparation
+## Data format
 
 The supported data format for hierarchical classification is the `Node`
 object format from package
@@ -20,19 +21,35 @@ This is a general purpose format that fits generic hierarchical tree
 encoding needs. Each node of the tree is associated with predictor
 values through the `attributes` in the data `Node` object.
 
-- A very basic example is the `acme` dataset to show you how the two
-  predictors values `cost` and `p` are associates attributes of each
-  node in the hierarchy :
+| {tabnet} concept           | {data.tree} concept  | see command  |
+|----------------------------|----------------------|--------------|
+| dataset predictor          | Node `attributesAll` | acme example |
+| dataset multi-label target | Node hierarchy       | print(acme)  |
+
+A very basic example is the `acme` dataset to show you how the two
+predictors values `cost` and `p` are associates attributes of each node
+in the hierarchy :
 
 ``` r
+
 data(acme, package = "data.tree")
 acme$attributesAll
 print(acme, "cost", "p" , limit = 8)
 ```
 
-- Multiple manual or programmatic methods are available to create or
-  update predictors. They are detailled in the
-  [`vignette("data.tree", package = "data.tree")`](https://cran.rstudio.com/web/packages/data.tree/vignettes/data.tree.html).
+So printing Node objects reverse the usual ordering, as target is
+printed first in column `levelName`, and predictors printed right of it.
+
+As you can see, only leaf nodes of the tree gets predictors value.
+{tabnet} will take this into account via an `ancestor` square sparse
+tensor registering all possible parent-child relation among the target
+labels.
+
+## Data preparation
+
+Multiple manual or programmatic methods are available to create or
+update predictors. They are detailled in the
+[`vignette("data.tree", package = "data.tree")`](https://cran.rstudio.com/web/packages/data.tree/vignettes/data.tree.html).
 
 - a lot of native hierarchical data-format conversion from files to
   `Node` are covered by
@@ -52,6 +69,7 @@ print(acme, "cost", "p" , limit = 8)
 Let’s do it with `starwars` dataset as a toy example :
 
 ``` r
+
 data(starwars, package = "dplyr")
 head(starwars, 4)
 
@@ -92,7 +110,7 @@ Your dataset hierarchy will be turn internally into multi-outcomes named
 `level_1` to `level_n`, n beeing the depth of your tree. Thus column
 names starting with `level_` should be avoided.
 
-### Ensure the last hierarchy of the tree is the observation id
+### Ensure the last hierarchy of the tree is the **observation id**
 
 The tree only keeps a single row of attributes per tree leaf. Thus in
 order to transfer your complete predictors dataset into the Node object,
@@ -104,7 +122,7 @@ to achieve it).
 The classification will be done **removing the last level of hierarchy**
 in any case.
 
-### Ensure there is a root level in the hierarchy
+### Ensure there is a **root level** in the hierarchy
 
 The tree should have a single root for all nodes to be consistent. Thus
 you have to use a constant prefix to all `pathString`.
@@ -112,13 +130,22 @@ you have to use a constant prefix to all `pathString`.
 The classification will be done **removing the first level of
 hierarchy** in any case.
 
+### Ensure there is no **missing values** in the hierarchical classes
+
+Missing values should be replaced. Turning them by an explicit
+“Unknown_something” is a good approach.
+
 Now let’s have all those rules applied to the `starwars_tree` :
 
 ``` r
+
 # demonstration of reserved column modification in Node construction
 starwars_tree <- starwars %>% 
   rename(`_name` = "name", `_height` = "height") %>% 
-  mutate(pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
+  mutate(
+    species = coalesce(species, "Unknown_Species"),
+    sex     = coalesce(sex, "Unknown_Sex"),
+    pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
   as.Node()
 print(starwars_tree, "name", "_name","_height", "mass", "eye_color", limit = 8)
 ```
@@ -142,6 +169,7 @@ to split with a stratification on the parent category of the first level
 of our hierarchy which is `species`.
 
 ``` r
+
 starw_split <- starwars %>% 
   tidyr::unnest_longer(films) %>% 
   tidyr::unnest_longer(vehicles, keep_empty = TRUE) %>% 
@@ -154,6 +182,7 @@ part of the predictor columns. For the sake of demonstration, the
 `_name` column was present in `starwars_tree` but must now be dropped.
 
 ``` r
+
 # correct Node construction for hierarchical modeling
 starwars_train_tree <- starw_split %>% 
   training() %>% 
@@ -186,6 +215,7 @@ This `starwars_tree` can now be used as an input for
 [`tabnet_fit()`](../reference/tabnet_fit.md) :
 
 ``` r
+
 config <- tabnet_config(decision_width = 8, attention_width = 8, num_steps = 3, penalty = .003, cat_emb_dim = 2, valid_split = 0.2, learn_rate = 1e-3, lr_scheduler = "reduce_on_plateau", early_stopping_monitor = "valid_loss", early_stopping_patience = 4, verbose = FALSE)
 
 starw_model <- tabnet_fit(starwars_train_tree, config = config, epoch = 170, checkpoint_epochs = 25)
@@ -198,12 +228,14 @@ diagnostic is the check for model over-fitting though the training loss
 plot.
 
 ``` r
+
 autoplot(starw_model)
 ```
 
 Then global feature importance gives us a clue of model quality
 
 ``` r
+
 vip::vip(starw_model)
 ```
 
@@ -212,6 +244,7 @@ vip::vip(starw_model)
 We can infer on the test-set
 
 ``` r
+
 starwars_hat <- bind_cols(
     predict(starw_model, starwars_test_tree),
     node_to_df(starwars_test_tree)$y
@@ -231,6 +264,7 @@ Despite the performance, we do have local feature importance on the
 complete dataset here :
 
 ``` r
+
 starwars_explain <- tabnet_explain(starw_model, starwars_test_tree)
 autoplot(starwars_explain)
 autoplot(starwars_explain, type = "steps")

@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Fit TabNet Models for Classification and Regression • tabnet</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fit TabNet Models for Classification and Regression">
 <meta name="description" content="Implements the TabNet model by Sercan O. Arik et al. (2019) &lt;doi:10.48550/arXiv.1908.07442&gt; with Coherent Hierarchical Multi-label Classification Networks by Giunchiglia et al. &lt;doi:10.48550/arXiv.2010.10151&gt; and provides a consistent interface for fitting and creating predictions. Its also fully compatible with the tidymodels' ecosystem.">
@@ -167,7 +167,7 @@
 <div class="section level2">
 <h2 id="imbalanced-binary-classification">Imbalanced binary classification<a class="anchor" aria-label="anchor" href="#imbalanced-binary-classification"></a>
 </h2>
-<p>{tabnet} includes a Area under the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>i</mi><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>F</mi><mi>P</mi><mi>R</mi><mo>,</mo><mi>F</mi><mi>N</mi><mi>R</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Min(FPR,FNR)</annotation></semantics></math> (AUM) loss function <code><a href="reference/nn_aum_loss.html">nn_aum_loss()</a></code> dedicated to your imbalanced binary classification tasks.</p>
+<p>{tabnet} includes a Area under the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>i</mi><mi>n</mi><mo stretchy="false" form="prefix">(</mo><mi>F</mi><mi>P</mi><mi>R</mi><mo>,</mo><mi>F</mi><mi>N</mi><mi>R</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Min(FPR,FNR)</annotation></semantics></math> (AUM) loss function <code><a href="reference/nn_aum_loss.html">nn_aum_loss()</a></code> dedicated to your imbalanced binary classification tasks.</p>
 <p>Try it out in <a href="https://mlverse.github.io/tabnet/articles/aum_loss.html" class="external-link"><code>vignette("aum_loss")</code></a></p>
 </div>
 </div>
@@ -175,7 +175,7 @@
 <h1 id="comparison-with-other-implementations">Comparison with other implementations<a class="anchor" aria-label="anchor" href="#comparison-with-other-implementations"></a>
 </h1>
 <table class="table">
-<thead><tr class="header">
+<thead><tr>
 <th>Group</th>
 <th>Feature</th>
 <th align="center">{tabnet}</th>
@@ -183,140 +183,140 @@
 <th align="center">fast-tabnet</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Input format</td>
 <td>data-frame</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
-<tr class="even">
+<tr>
 <td></td>
 <td>formula</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="odd">
+<tr>
 <td></td>
 <td>recipe</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="even">
+<tr>
 <td></td>
 <td>Node</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="odd">
+<tr>
 <td></td>
 <td>missings in predictor</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Output format</td>
 <td>data-frame</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
-<tr class="odd">
+<tr>
 <td></td>
 <td>workflow</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="even">
+<tr>
 <td>ML Tasks</td>
 <td>self-supervised learning</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center"></td>
 </tr>
-<tr class="odd">
+<tr>
 <td></td>
 <td>classification (binary, multi-class)</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
-<tr class="even">
+<tr>
 <td></td>
 <td>unbalanced binary classification</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="odd">
+<tr>
 <td></td>
 <td>regression</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
-<tr class="even">
+<tr>
 <td></td>
 <td>multi-outcome</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center"></td>
 </tr>
-<tr class="odd">
+<tr>
 <td></td>
 <td>hierarchical multi-label classif.</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Model management</td>
 <td>from / to file</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">v</td>
 </tr>
-<tr class="odd">
+<tr>
 <td></td>
 <td>resume from snapshot</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="even">
+<tr>
 <td></td>
 <td>training diagnostic</td>
 <td align="center">✅</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Interpretability</td>
 <td></td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Performance</td>
 <td></td>
 <td align="center">1 x</td>
 <td align="center">2 - 4 x</td>
 <td align="center"></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Code quality</td>
 <td>test coverage</td>
 <td align="center">85%</td>
 <td align="center"></td>
 <td align="center"></td>
 </tr>
-<tr class="even">
+<tr>
 <td></td>
 <td>continuous integration</td>
 <td align="center">4 OS including GPU</td>

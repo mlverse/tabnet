@@ -7,15 +7,24 @@
 - [`autoplot.tabnet_fit()`](autoplot.tabnet_fit.md)
   [`autoplot.tabnet_pretrain()`](autoplot.tabnet_fit.md) : Plot
   tabnet_fit model loss along epochs
+- [`build_ancestor_matrix_from_outcomes()`](build_ancestor_matrix_from_outcomes.md)
+  : Build ancestor matrix aligned with observed outcome classes
 - [`check_compliant_node()`](check_compliant_node.md) : Check that Node
   object names are compliant
 - [`entmax()`](entmax15.md) [`entmax15()`](entmax15.md) : Alpha-entmax
+- [`get_constr_output()`](get_constr_output.md) : Apply hierarchy
+  constraints via max-pooling over descendants (MCM)
 - [`get_tau()`](get_tau.md) : Optimal threshold (tau) computation for
   1.5-entmax
 - [`nn_aum_loss()`](nn_aum_loss.md) : AUM loss
+- [`nn_mc_loss()`](nn_mc_loss.md) : Max-Constraint Margin Loss (module)
 - [`nn_prune_head(`*`<tabnet_fit>`*`)`](nn_prune_head.md)
   [`nn_prune_head(`*`<tabnet_pretrain>`*`)`](nn_prune_head.md) : Prune
   top layer(s) of a tabnet network
+- [`nnf_mc_loss()`](nnf_mc_loss.md) : Max-Constraint Margin Loss
+  (functional)
+- [`nnf_multilabel_one_hot()`](nnf_multilabel_one_hot.md) : Convert
+  class_id tensor to binary one-hot tensor
 - [`node_to_df()`](node_to_df.md) : Turn a Node object into predictor
   and outcome.
 - [`sparsemax()`](sparsemax.md) [`sparsemax15()`](sparsemax.md) :

@@ -2,6 +2,12 @@
 
 ## tabnet (development version)
 
+### Bugfixes
+
+- Ancestor matrix is now taken into account for hierarchical
+  classification
+  ([\#188](https://github.com/mlverse/tabnet/issues/188)).
+
 ## tabnet 0.8.0
 
 CRAN release: 2026-01-31
@@ -18,7 +24,7 @@ CRAN release: 2026-01-31
   Result is 30% faster pretraining and fitting tasks
   ([\#178](https://github.com/mlverse/tabnet/issues/178)).
 - add [`nn_aum_loss()`](../reference/nn_aum_loss.md) function for area
-  under the $Min(FPR,FNR)$ optimization for cases of unbalanced binary
+  under the $`Min(FPR,FNR)`$ optimization for cases of unbalanced binary
   classification
   ([\#178](https://github.com/mlverse/tabnet/issues/178)).
 - add a vignette on imbalanced binary classification with

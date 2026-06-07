@@ -28,6 +28,7 @@ Install [{tabnet} from CRAN](https://CRAN.R-project.org/package=tabnet)
 with:
 
 ``` r
+
 install.packages('tabnet')
 ```
 
@@ -35,6 +36,7 @@ The development version can be installed from
 [GitHub](https://github.com/mlverse/tabnet) with:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("mlverse/tabnet")
 ```
@@ -45,6 +47,7 @@ Here we show a **binary classification** example of the `attrition`
 dataset, using a **recipe** for dataset input specification.
 
 ``` r
+
 library(tabnet)
 suppressPackageStartupMessages(library(recipes))
 library(yardstick)
@@ -86,6 +89,7 @@ rely on your usual metric functions for model performance results. Here
 we use {yardstick} :
 
 ``` r
+
 metrics <- metric_set(accuracy, precision, recall)
 cbind(test, predict(fit, test)) %>% 
   metrics(Attrition, estimate = .pred_class)
@@ -110,6 +114,7 @@ TabNet has intrinsic explainability feature through the visualization of
 attention map, either **aggregated**:
 
 ``` r
+
 explain <- tabnet_explain(fit, test)
 autoplot(explain)
 ```
@@ -122,6 +127,7 @@ agggregate.](reference/figures/README-model-explain-1.png)
 or at **each layer** through the `type = "steps"` option:
 
 ``` r
+
 autoplot(explain, type = "steps")
 ```
 
@@ -138,6 +144,7 @@ predictors intrinsic features and predictors interactions, upfront the
 supervised task.
 
 ``` r
+
 pretrain <- tabnet_pretrain(rec, train, epochs = 50, valid_split=0.1, learn_rate = 1e-2)
 autoplot(pretrain)
 ```
@@ -172,7 +179,7 @@ See
 
 ## Imbalanced binary classification
 
-{tabnet} includes a Area under the $Min(FPR,FNR)$ (AUM) loss function
+{tabnet} includes a Area under the $`Min(FPR,FNR)`$ (AUM) loss function
 [`nn_aum_loss()`](reference/nn_aum_loss.md) dedicated to your imbalanced
 binary classification tasks.
 
@@ -181,27 +188,27 @@ Try it out in
 
 # Comparison with other implementations
 
-| Group            | Feature                              |      {tabnet}      | dreamquark-ai | fast-tabnet |
-|------------------|--------------------------------------|:------------------:|:-------------:|:-----------:|
-| Input format     | data-frame                           |         ✅         |      ✅       |     ✅      |
-|                  | formula                              |         ✅         |               |             |
-|                  | recipe                               |         ✅         |               |             |
-|                  | Node                                 |         ✅         |               |             |
-|                  | missings in predictor                |         ✅         |               |             |
-| Output format    | data-frame                           |         ✅         |      ✅       |     ✅      |
-|                  | workflow                             |         ✅         |               |             |
-| ML Tasks         | self-supervised learning             |         ✅         |      ✅       |             |
-|                  | classification (binary, multi-class) |         ✅         |      ✅       |     ✅      |
-|                  | unbalanced binary classification     |         ✅         |               |             |
-|                  | regression                           |         ✅         |      ✅       |     ✅      |
-|                  | multi-outcome                        |         ✅         |      ✅       |             |
-|                  | hierarchical multi-label classif.    |         ✅         |               |             |
-| Model management | from / to file                       |         ✅         |      ✅       |      v      |
-|                  | resume from snapshot                 |         ✅         |               |             |
-|                  | training diagnostic                  |         ✅         |               |             |
-| Interpretability |                                      |         ✅         |      ✅       |     ✅      |
-| Performance      |                                      |        1 x         |    2 - 4 x    |             |
-| Code quality     | test coverage                        |        85%         |               |             |
-|                  | continuous integration               | 4 OS including GPU |               |             |
+| Group | Feature | {tabnet} | dreamquark-ai | fast-tabnet |
+|----|----|:--:|:--:|:--:|
+| Input format | data-frame | ✅ | ✅ | ✅ |
+|  | formula | ✅ |  |  |
+|  | recipe | ✅ |  |  |
+|  | Node | ✅ |  |  |
+|  | missings in predictor | ✅ |  |  |
+| Output format | data-frame | ✅ | ✅ | ✅ |
+|  | workflow | ✅ |  |  |
+| ML Tasks | self-supervised learning | ✅ | ✅ |  |
+|  | classification (binary, multi-class) | ✅ | ✅ | ✅ |
+|  | unbalanced binary classification | ✅ |  |  |
+|  | regression | ✅ | ✅ | ✅ |
+|  | multi-outcome | ✅ | ✅ |  |
+|  | hierarchical multi-label classif. | ✅ |  |  |
+| Model management | from / to file | ✅ | ✅ | v |
+|  | resume from snapshot | ✅ |  |  |
+|  | training diagnostic | ✅ |  |  |
+| Interpretability |  | ✅ | ✅ | ✅ |
+| Performance |  | 1 x | 2 - 4 x |  |
+| Code quality | test coverage | 85% |  |  |
+|  | continuous integration | 4 OS including GPU |  |  |
 
 Alternative TabNet implementation features

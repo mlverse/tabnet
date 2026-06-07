@@ -1,6 +1,7 @@
 # Using ROC AUM loss for imbalanced binary classification
 
 ``` r
+
 library(tabnet)
 suppressPackageStartupMessages(library(tidymodels))
 library(modeldata)
@@ -30,6 +31,7 @@ The target variable `Class` imbalance can be evaluated through the class
 imbalance Ratio :
 
 ``` r
+
 class_ratio <- lending_club |> 
   summarise(sum( Class == "good") / sum( Class == "bad")) |> 
   pull() 
@@ -72,6 +74,7 @@ the other for XGBoost. This is a big chunk of code, but it is mainly a
 copy of the previous vignette.
 
 ``` r
+
 lending_club <- lending_club |>
   mutate(
     case_wts = if_else(Class == "bad", class_ratio, 1),
@@ -123,6 +126,7 @@ We can now [`fit()`](https://generics.r-lib.org/reference/fit.html) each
 model and plot the precision-recall curve on the test-set :
 
 ``` r
+
 tab_fit <- tab_wf |> fit(train)
 xgb_fit <- xgb_wf |> fit(train)
 
@@ -140,6 +144,7 @@ loss](aum_loss_files/figure-html/vanilia_models_fitting-1.png)
 Tabnet, no case-weight, default loss
 
 ``` r
+
 
 xgb_test |>
   pr_curve(Class, .pred_good) |>
@@ -167,6 +172,7 @@ available in {tabnet} through
 Let’s proceed
 
 ``` r
+
 tab_test |> 
   pr_curve(Class, .pred_good, case_weights = case_wts) |> 
   autoplot() 
@@ -178,6 +184,7 @@ loss](aum_loss_files/figure-html/case-weights_prediction-1.png)
 Tabnet, with case-weight, default loss
 
 ``` r
+
 
 xgb_test |>
   pr_curve(Class, .pred_good, case_weights = case_wts) |>
@@ -191,8 +198,7 @@ XGBoost, with case-weight
 
 The boost on the
 [`pr_curve()`](https://yardstick.tidymodels.org/reference/pr_curve.html)
-is impressive for both models, Tabnet remains behind XGBoost
-here[¹](#fn1).
+is impressive for both models, Tabnet remains behind XGBoost here[^1].
 
 ## ROC_AUM loss
 
@@ -200,6 +206,7 @@ here[¹](#fn1).
 to the best possible AUC. Let’s use it to compare to previous models :
 
 ``` r
+
 # configure the AUM loss
 tab_aum_mod <- tabnet(epochs = 100, loss = tabnet::nn_aum_loss, learn_rate = 0.02) |> 
   set_engine("torch", device = "cpu") |> 
@@ -220,6 +227,7 @@ Now let’s compare the result on the PR curve with the default loss side
 by side:
 
 ``` r
+
 tab_test |> 
   pr_curve(Class, .pred_good) |> 
   autoplot() 
@@ -232,6 +240,7 @@ Tabnet, no case-weight, default loss
 
 ``` r
 
+
 tab_aum_test |> 
   pr_curve(Class, .pred_good) |> 
   autoplot() 
@@ -242,8 +251,8 @@ loss](aum_loss_files/figure-html/AUM_model_pr_curve-2.png)
 
 Tabnet, no case-weight, ROC_AUM loss
 
-We can see a real[²](#fn2) improvement with the AUM loss, compared to
-the default `nn_bce_loss()` but globally still a poor recall.
+We can see a real[^2] improvement with the AUM loss, compared to the
+default `nn_bce_loss()` but globally still a poor recall.
 
 ## All together
 
@@ -252,6 +261,7 @@ is what we do here. Moreover, it is here without additional computation,
 as it is done post inference.
 
 ``` r
+
 tab_test |> 
   pr_curve(Class, .pred_good, case_weights = case_wts) |> 
   autoplot() 
@@ -265,6 +275,7 @@ Tabnet, with case-weight, default loss
 ``` r
 
 
+
 tab_aum_test |> 
   pr_curve(Class, .pred_good, case_weights = case_wts) |> 
   autoplot() 
@@ -276,12 +287,10 @@ loss](aum_loss_files/figure-html/AUM_and_case-weights_prediction-2.png)
 Tabnet, with case-weight, ROC_AUM loss
 
 Here the boost in recall is impressive, making Tabnet model far above
-any experimented challenger model[³](#fn3).
+any experimented challenger model[^3].
 
-------------------------------------------------------------------------
+[^1]: Or may become leader if you change the initial random seed.
 
-1.  Or may become leader if you change the initial random seed.
+[^2]: With improvement level being sensitive to the random seed.
 
-2.  With improvement level being sensitive to the random seed.
-
-3.  Within an educational and reproducible intend only.
+[^3]: Within an educational and reproducible intend only.

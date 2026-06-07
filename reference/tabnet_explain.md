@@ -42,6 +42,7 @@ Returns a list with
 ## Examples
 
 ``` r
+
 set.seed(2021)
 
 n <- 256

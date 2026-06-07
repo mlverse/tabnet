@@ -31,6 +31,7 @@ distribution of the values like, for example, the `Masonry veneer area`
 predictor :
 
 ``` r
+
 library(tidymodels, quietly = TRUE)
 library(tabnet)
 data("ames", package = "modeldata")
@@ -69,6 +70,7 @@ Then, according to the keep room for freedom rule, do it carefully on
 the matching categorical predictors
 
 ``` r
+
 col_with_zero_as_na <- ames %>% 
   select(where(is.numeric)) %>% 
   select(matches("_SF|Area|Misc_Val|[Pp]orch$")) %>% 
@@ -108,6 +110,7 @@ step:
 ### Variable importance with raw `ames` dataset
 
 ``` r
+
 ames_rec <- recipe(Sale_Price ~ ., data=ames) %>% 
   step_normalize(all_numeric())
 
@@ -148,6 +151,7 @@ function to color the
 output according to the missingness quality of the column
 
 ``` r
+
 col_with_missings <- ames_missing %>%
   summarise_all(~sum(is.na(.)) > 0) %>%
   t %>% enframe(name = "Variable") %>% 
@@ -184,6 +188,7 @@ In order to compensate the 13% missingness already present in the
 `0.5 - 0.13 = 0.37`
 
 ``` r
+
 ames_missing_rec <- recipe(Sale_Price ~ ., data = ames_missing) %>% 
   step_normalize(all_numeric())
 ames_missing_pretrain <- tabnet_pretrain(ames_missing_rec, data = ames_missing, epoch = 50, 
@@ -224,6 +229,7 @@ captured proper interactions between variables.
 ### Variable importance with raw `ames` dataset
 
 ``` r
+
 ames_fit <- tabnet_fit(ames_rec, data = ames,  tabnet_model = ames_pretrain, 
                             epoch = 50, cat_emb_dim = cat_emb_dim,
                             valid_split = 0.2, verbose = TRUE, batch = 2930, 
@@ -243,6 +249,7 @@ Here again, the model uses two predictors `BasmFin_SF_2` and
 ### Variable importance with `ames_missing` dataset
 
 ``` r
+
 ames_missing_fit <- tabnet_fit(ames_rec, data = ames_missing,  tabnet_model = ames_missing_pretrain, 
                             epoch = 50, cat_emb_dim = cat_emb_dim,
                             valid_split = 0.2, verbose = TRUE, batch = 2930, 

@@ -1,14 +1,15 @@
 # Interpretation tools
 
 ``` r
+
 library(tabnet)
 library(tidyverse, warn.conflicts = FALSE)
 #> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-#> ✔ dplyr     1.1.4     ✔ readr     2.1.6
+#> ✔ dplyr     1.2.1     ✔ readr     2.2.0
 #> ✔ forcats   1.0.1     ✔ stringr   1.6.0
-#> ✔ ggplot2   4.0.1     ✔ tibble    3.3.1
-#> ✔ lubridate 1.9.4     ✔ tidyr     1.3.2
-#> ✔ purrr     1.2.1     
+#> ✔ ggplot2   4.0.3     ✔ tibble    3.3.1
+#> ✔ lubridate 1.9.5     ✔ tidyr     1.3.2
+#> ✔ purrr     1.2.2     
 #> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
@@ -49,6 +50,7 @@ First, let’s define the functions that we will use to generate data:
   columns 1-2 to compute the logits, otherwise we use columns 5-6.
 
 ``` r
+
 logit_to_y <- function(logits) {
   p <- exp(logits)/(1 + exp(logits))
   y <- factor(ifelse(p > 0.5, "yes", "no"), levels = c("yes", "no"))
@@ -84,6 +86,7 @@ make_syn4 <- function(n = 5000) {
 Now let’s generate the datasets:
 
 ``` r
+
 syn2 <- make_syn2()
 syn4 <- make_syn4()
 ```
@@ -94,6 +97,7 @@ Let’s fit a TabNet model to the `syn2` dataset and analyze the
 interpretation metrics.
 
 ``` r
+
 fit_syn2 <- tabnet_fit(y ~ ., syn2, epochs = 45, learn_rate = 0.06, device = "cpu")
 ```
 
@@ -101,6 +105,7 @@ In the feature importance plot we can see that, as expected, features
 `V03-V06` are by far the most important ones.
 
 ``` r
+
 vip::vip(fit_syn2)
 ```
 
@@ -114,6 +119,7 @@ colors represent the importance of the feature in predicting the value
 for each observation.
 
 ``` r
+
 library(tidyverse)
 ex_syn2 <- tabnet_explain(fit_syn2, syn2)
 
@@ -135,6 +141,7 @@ Next, we can visualize the attention masks for each step in the
 architecture.
 
 ``` r
+
 autoplot(ex_syn2, type="steps")
 ```
 
@@ -157,6 +164,7 @@ create the response variable and we expect to see this in the masks.
 First we fit the model for 10 epochs.
 
 ``` r
+
 fit_syn4 <- tabnet_fit(y ~ ., syn4, epochs = 50, device = "cpu", learn_rate = 0.08)
 ```
 
@@ -165,6 +173,7 @@ for `V10`, and the other features that are used conditionally - either
 `V01-V02` or `V05-V06`.
 
 ``` r
+
 vip::vip(fit_syn4)
 ```
 
@@ -178,6 +187,7 @@ We also trimmed to the 98th percentile so the colors shows the
 importance even if there are strong outliers.
 
 ``` r
+
 ex_syn4 <- tabnet_explain(fit_syn4, arrange(syn4, V10))
 
 autoplot(ex_syn4, quantile=.98)
@@ -196,6 +206,7 @@ the important ones.
 We can also visualize the masks at each step in the architecture.
 
 ``` r
+
 autoplot(ex_syn4, type="steps", quantile=.995)
 ```
 
