@@ -129,8 +129,6 @@ nn_aum_loss <- nn_module(
 #'   are evaluated.
 #' @param criterion Loss function to apply after constraint propagation. 
 #'   Default: `nnf_binary_cross_entropy_with_logits` (expects raw logits).
-#' @param reduction (string, optional): Specifies the reduction to apply to 
-#'   the output: `'none'` | `'mean'` | `'sum'`. Passed to `criterion`.
 #'
 #' @return A scalar `torch_tensor` containing the computed loss, or a tensor 
 #'   of shape `(batch_size, n_classes)` if `reduction = "none"`.
@@ -138,8 +136,7 @@ nn_aum_loss <- nn_module(
 #' @seealso [nn_mc_loss()], [get_constr_output()]
 #' @export
 nnf_mc_loss <- function(output, target, R, to_eval = NULL, 
-                        criterion = nnf_binary_cross_entropy_with_logits,
-                        reduction = "mean") {
+                        criterion = nnf_binary_cross_entropy_with_logits) {
   # Ensure double precision for numerical stability during constraint propagation
   output_d <- output$double()
   
@@ -164,8 +161,7 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
   # 5. Apply the base loss function (e.g., BCE with logits)
   loss <- criterion(
     blended_output, 
-    target$double(),
-    reduction = reduction
+    target$double()
   )
   
   return(loss)
@@ -211,14 +207,15 @@ nn_mc_loss <- nn_module(
   inherit = torch::nn_l1_loss,
   
   initialize = function(R, to_eval = NULL, 
-                        criterion = torch::nn_bce_with_logits_loss(),
+                        criterion = torch::nnf_binary_cross_entropy_with_logits,
                         reduction = "mean") {
     super$initialize(reduction = reduction)
     
     # Store ancestor matrix (move to device if needed)
     self$R <- R
     self$to_eval <- to_eval
-    self$criterion <- criterion
+    # Resolve criterion based on its type
+    self$criterion_fn <- .resolve_mc_criterion(criterion, reduction)
   },
   
   forward = function(output, target) {
@@ -227,19 +224,62 @@ nn_mc_loss <- nn_module(
       target = target,
       R = self$R,
       to_eval = self$to_eval,
-      criterion = function(input, target, reduction) {
-        # Handle both module and functional criterion
-        if (inherits(self$criterion, "nn_module")) {
-          self$criterion(input, target, reduction = reduction)
-        } else {
-          # Assume functional
-          self$criterion(input, target, reduction = reduction)
-        }
-      },
-      reduction = self$reduction
+      criterion = self$criterion_fn
     )
   }
 )
+
+#' Resolve criterion into a callable function(input, target, reduction)
+#' @keywords internal
+.resolve_mc_criterion <- function(criterion, reduction) {
+  # Case 1: Already an nn_module instance
+  if (inherits(criterion, "nn_module")) {
+    module_reduction <- criterion$reduction
+    if (!is.null(module_reduction) && module_reduction != reduction) {
+      warn(
+        c(
+          "The criterion module has reduction={.val {module_reduction}}",
+          "but nn_mc_loss was called with reduction={.val {reduction}}.",
+          "i" = "The module's reduction will be used."
+        ),
+        class = "mc_loss_reduction_mismatch"
+      )
+    }
+    return(function(input, target) criterion(input, target))
+  }
+  
+  # Case 2: A function (could be functional nnf_* or constructor nn_*)
+  if (rlang::is_function(criterion)) {
+    # Try to detect if it's a constructor by calling with just reduction
+    # Constructors return nn_module, functionals need input/target
+    maybe_module <- tryCatch(
+      {
+        result <- criterion(reduction = reduction)
+        if (inherits(result, "nn_module")) result else NULL
+      },
+      error = function(e) NULL
+    )
+    
+    if (!is.null(maybe_module)) {
+      # It's a constructor (e.g., nn_bce_with_logits_loss)
+      return(function(input, target) maybe_module(input, target))
+    }
+    
+    # It's a functional (e.g., nnf_binary_cross_entropy_with_logits)
+    return(function(input, target) {
+      criterion(input, target, reduction = reduction)
+    })
+  }
+  
+  # Invalid type
+  value_error(
+    c(
+      "`criterion` must be a function or an `nn_module`.",
+      "x" = "Got: {.class {class(criterion)[1]}}"
+    ),
+    class = "mc_loss_invalid_criterion"
+  )
+}
 
 #' Apply hierarchy constraints via max-pooling over descendants (MCM)
 #'

@@ -9,8 +9,7 @@ nnf_mc_loss(
   target,
   R,
   to_eval = NULL,
-  criterion = nnf_binary_cross_entropy_with_logits,
-  reduction = "mean"
+  criterion = nnf_binary_cross_entropy_with_logits
 )
 }
 \arguments{
@@ -28,9 +27,6 @@ are evaluated.}
 
 \item{criterion}{Loss function to apply after constraint propagation.
 Default: \code{nnf_binary_cross_entropy_with_logits} (expects raw logits).}
-
-\item{reduction}{(string, optional): Specifies the reduction to apply to
-the output: \code{'none'} | \code{'mean'} | \code{'sum'}. Passed to \code{criterion}.}
 }
 \value{
 A scalar \code{torch_tensor} containing the computed loss, or a tensor
