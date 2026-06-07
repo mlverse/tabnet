@@ -165,11 +165,10 @@ tabnet_fit.Node <- function(x, tabnet_model = NULL, config = tabnet_config(), ..
   check_type(processed$outcomes)
   
   config <- merge_config_and_dots(config, ...)
-  # add ancestor boolean sparse matrix to config
-  # check_dag_compliance(xy_df$y)
-  config$ancestor <- build_ancestor_matrix_from_outcomes(x, processed$outcomes)
   # make outcomes levels available so that batched y could be one-hot encoded.
-  config$outcomes <- processed$outcomes
+  config$outcomes <- processed$blueprint$ptypes$outcomes
+  # add ancestor boolean sparse matrix to config
+  config$ancestor <- build_ancestor_matrix_from_outcomes(x, config$outcomes)
   tabnet_bridge(processed, config = config, tabnet_model, from_epoch, task = "supervised")
 }
 
@@ -616,28 +615,29 @@ nn_prune_head.tabnet_pretrain <- function(x, head_size) {
 #' @param outcomes A tibble with factor columns (one per hierarchy level),
 #'   as returned by `hardhat::mold()$outcomes`.
 #' @param device Torch device ("cpu" or "cuda").
-#' @return A `torch_tensor` of shape `(1, n_classes, n_classes)`.
+#' @return A `torch_tensor` of shape `(1, tot_levels, tot_levels)`.
 #' @export
+#' @importFrom stats setNames
 build_ancestor_matrix_from_outcomes <- function(x, outcomes, device = "cpu") {
   # 1. Extract all class names from factor levels (preserving order)
   #    outcomes is a tibble with one factor column per hierarchy level
   level_cols <- names(outcomes)
-  all_class_names <- unlist(lapply(outcomes, levels), use.names = FALSE)
-  n_classes <- length(all_class_names)
+  all_levels <- unlist(lapply(outcomes, levels), use.names = FALSE)
+  tot_levels <- length(all_levels)
   
-  if (n_classes == 0L) {
+  if (tot_levels == 0L) {
     runtime_error("No factor levels found in outcomes : {str(outcomes)}")
   }
   
   # 2. Build a lookup: class_name -> data.tree Node
   all_nodes <- data.tree::Traverse(x, traversal = "pre-order")
   all_nodes <- unname(all_nodes)
-  level_lengths <- lengths(lapply(outcomes, levels))
-  lvl_vector <- rep(seq_along(level_cols) + 1L, level_lengths)
+  n_levels <- sapply(outcomes, nlevels)
+  lvl_vector <- rep(seq_along(level_cols) + 1L, n_levels)
   
   # 3. Resolve each class name to its Node
-  class_nodes <- lapply(seq_along(all_class_names), function(k) {
-    nm <- all_class_names[k]
+  class_nodes <- lapply(seq_along(all_levels), function(k) {
+    nm <- all_levels[k]
     lvl <- lvl_vector[k]
     
     candidates <- Filter(function(n) n$level == lvl && n$name == nm, all_nodes)
@@ -648,13 +648,13 @@ build_ancestor_matrix_from_outcomes <- function(x, outcomes, device = "cpu") {
   })
   
   # 4. Create 1-based index mapping
-  class_map <- setNames(seq_len(n_classes), all_class_names)
+  class_map <- setNames(seq_len(tot_levels), all_levels)
   
   # 5. Collect (descendant, ancestor) pairs by climbing up
-  row_list <- vector("list", n_classes)
-  col_list <- vector("list", n_classes)
+  row_list <- vector("list", tot_levels)
+  col_list <- vector("list", tot_levels)
   
-  for (i in seq_len(n_classes)) {
+  for (i in seq_len(tot_levels)) {
     current <- class_nodes[[i]]
     anc_indices <- integer()
     
@@ -672,7 +672,7 @@ build_ancestor_matrix_from_outcomes <- function(x, outcomes, device = "cpu") {
   }
   
   # 6. Fill matrix
-  R <- matrix(0L, nrow = n_classes, ncol = n_classes)
+  R <- matrix(0L, nrow = tot_levels, ncol = tot_levels)
   rows <- unlist(row_list, use.names = FALSE)
   cols <- unlist(col_list, use.names = FALSE)
   if (length(rows) > 0) R[cbind(rows, cols)] <- 1L

@@ -113,10 +113,10 @@ nn_aum_loss <- nn_module(
 #' if a class is predicted positive, all its ancestors must also be positive.
 #' Implements: `final_out[i] = max{x[j] : R[i,j] = 1}`
 #'
-#' @param x A `torch_tensor` of shape `(batch_size, n_classes)`.
-#' @param R A `torch_tensor` of shape `(1, n_classes, n_classes)` where 
+#' @param x A `torch_tensor` of shape `(batch_size, tot_levels)`.
+#' @param R A `torch_tensor` of shape `(1, tot_levels, tot_levels)` where 
 #'   `R[1, i, j] = 1` iff class `i` is a descendant of class `j`.
-#' @return A `torch_tensor` of shape `(batch_size, n_classes)` with constrained outputs.
+#' @return A `torch_tensor` of shape `(batch_size, tot_levels)` with constrained outputs.
 get_constr_output <- function(x, R) {
   c_out <- x$double()$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
   R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
@@ -139,28 +139,29 @@ get_constr_output <- function(x, R) {
 #' }
 #'
 #' @param output A `torch_tensor` of raw network outputs (pre-sigmoid), 
-#'   shape `(batch_size, n_classes)`.
-#' @param target Binary target labels, shape `(batch_size, n_classes)`.
-#' @param R Ancestor matrix tensor of shape `(1, n_classes, n_classes)` where 
+#'   shape `(batch_size, tot_levels)`.
+#' @param target Binary target labels, shape `(batch_size, tot_levels)`.
+#' @param R Ancestor matrix tensor of shape `(1, tot_levels, tot_levels)` where 
 #'   `R[1, i, j] = 1` iff class `i` is a descendant of class `j`.
-#' @param to_eval Optional logical tensor of shape `(n_classes,)` indicating 
+#' @param to_eval Optional logical tensor of shape `(tot_levels,)` indicating 
 #'   which classes to include in the loss computation. If `NULL`, all classes 
 #'   are evaluated.
 #' @param criterion Loss function to apply after constraint propagation. 
 #'   Default: `nnf_binary_cross_entropy_with_logits` (expects raw logits).
 #'
 #' @return A scalar `torch_tensor` containing the computed loss, or a tensor 
-#'   of shape `(batch_size, n_classes)` if `reduction = "none"`.
+#'   of shape `(batch_size, tot_levels)` if `reduction = "none"`.
 #'
 #' @seealso [nn_mc_loss()], [get_constr_output()]
 #' @export
+#' @importFrom torch nnf_binary_cross_entropy_with_logits
 nnf_mc_loss <- function(output, target, R, to_eval = NULL, 
                         criterion = nnf_binary_cross_entropy_with_logits) {
   # Ensure double precision for numerical stability during constraint propagation
   output_d <- output$double()
   
   # 1. Constrained output from raw predictions: max-pool over descendants
-  constr_output <- get_constr_output(output_d, R)  # (batch, n_classes)
+  constr_output <- get_constr_output(output_d, R)  # (batch, tot_levels)
   
   # 2. Label-weighted output, then constrained (for positive label handling)
   labeled_output <- target * output_d
@@ -192,8 +193,8 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
 #' Module wrapper for [nnf_mc_loss()] with configurable parameters.
 #' Stores the ancestor matrix R and evaluation mask for reuse across batches.
 #'
-#' @param R Ancestor matrix tensor of shape `(1, n_classes, n_classes)`.
-#' @param to_eval Optional logical tensor of shape `(n_classes,)` indicating 
+#' @param R Ancestor matrix tensor of shape `(1, tot_levels, tot_levels)`.
+#' @param to_eval Optional logical tensor of shape `(tot_levels,)` indicating 
 #'   which classes to include in loss computation.
 #' @param criterion Loss function module or functional to apply after constraint 
 #'   propagation. Default: `nn_binary_cross_entropy_with_logits()`.
@@ -214,7 +215,7 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
 #' loss_fn <- nn_mc_loss(R = R, reduction = "mean")
 #' 
 #' # Forward pass
-#' output <- model(x)  # (batch, n_classes)
+#' output <- model(x)  # (batch, tot_levels)
 #' loss <- loss_fn(output, labels)
 #' loss$backward()
 #' }
@@ -306,29 +307,29 @@ nn_mc_loss <- nn_module(
 #' Transforms a tensor of class indices (one column per hierarchy level)
 #' into a binary tensor where each column corresponds to a class.
 #'
-#' @param y A `torch_tensor` of shape `(batch_size, n_levels)` containing
+#' @param y A `torch_tensor` of shape `(batch_size, n_outcome)` containing
 #'   1-based class indices.
 #' @param outcomes A tibble with factor columns (as from `hardhat::mold()$outcomes`).
 #' @param device Torch device.
-#' @return A `torch_tensor` of shape `(batch_size, n_classes)` with binary values.
+#' @return A `torch_tensor` of shape `(batch_size, tot_levels)` with binary values.
 #' @export
 nnf_multilabel_one_hot <- function(y, outcomes, device = "cpu") {
   batch_size <- y$shape[1]
-  n_levels <- y$shape[2]
+  n_outcome <- y$shape[2]
   
   # Number of classes per level
-  n_per_level <- lengths(lapply(outcomes, levels))
-  n_classes <- sum(n_per_level)
+  n_levels <- sapply(outcomes, nlevels)
+  tot_levels <- sum(n_levels)
   
-  one_hot_list <- vector("list", n_levels)
+  one_hot_list <- vector("list", n_outcome)
   
-  for (lvl in seq_len(n_levels)) {
-    level_ids <- y[, lvl]$to(dtype = torch::torch_long())
+  for (outcome in seq_len(n_outcome)) {
+    level_ids <- y[, outcome]$to(dtype = torch::torch_long())
     
     # Encode one-hot of each levels
-    one_hot_list[[lvl]] <- torch::nnf_one_hot(
+    one_hot_list[[outcome]] <- torch::nnf_one_hot(
       level_ids, 
-      num_classes = n_per_level[lvl]
+      num_classes = n_levels[outcome]
     )
   }
   # concatenate along the columns axis)

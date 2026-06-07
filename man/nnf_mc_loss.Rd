@@ -14,14 +14,14 @@ nnf_mc_loss(
 }
 \arguments{
 \item{output}{A \code{torch_tensor} of raw network outputs (pre-sigmoid),
-shape \verb{(batch_size, n_classes)}.}
+shape \verb{(batch_size, tot_levels)}.}
 
-\item{target}{Binary target labels, shape \verb{(batch_size, n_classes)}.}
+\item{target}{Binary target labels, shape \verb{(batch_size, tot_levels)}.}
 
-\item{R}{Ancestor matrix tensor of shape \verb{(1, n_classes, n_classes)} where
+\item{R}{Ancestor matrix tensor of shape \verb{(1, tot_levels, tot_levels)} where
 \code{R[1, i, j] = 1} iff class \code{i} is a descendant of class \code{j}.}
 
-\item{to_eval}{Optional logical tensor of shape \verb{(n_classes,)} indicating
+\item{to_eval}{Optional logical tensor of shape \verb{(tot_levels,)} indicating
 which classes to include in the loss computation. If \code{NULL}, all classes
 are evaluated.}
 
@@ -30,7 +30,7 @@ Default: \code{nnf_binary_cross_entropy_with_logits} (expects raw logits).}
 }
 \value{
 A scalar \code{torch_tensor} containing the computed loss, or a tensor
-of shape \verb{(batch_size, n_classes)} if \code{reduction = "none"}.
+of shape \verb{(batch_size, tot_levels)} if \code{reduction = "none"}.
 }
 \description{
 Computes the hierarchy-constrained loss for multi-label classification.

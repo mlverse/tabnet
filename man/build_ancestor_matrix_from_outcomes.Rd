@@ -15,7 +15,7 @@ as returned by \code{hardhat::mold()$outcomes}.}
 \item{device}{Torch device ("cpu" or "cuda").}
 }
 \value{
-A \code{torch_tensor} of shape \verb{(1, n_classes, n_classes)}.
+A \code{torch_tensor} of shape \verb{(1, tot_levels, tot_levels)}.
 }
 \description{
 Extracts class names from the outcome tibble (factor levels) and builds

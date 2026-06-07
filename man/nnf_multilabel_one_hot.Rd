@@ -7,7 +7,7 @@
 nnf_multilabel_one_hot(y, outcomes, device = "cpu")
 }
 \arguments{
-\item{y}{A \code{torch_tensor} of shape \verb{(batch_size, n_levels)} containing
+\item{y}{A \code{torch_tensor} of shape \verb{(batch_size, n_outcome)} containing
 1-based class indices.}
 
 \item{outcomes}{A tibble with factor columns (as from \code{hardhat::mold()$outcomes}).}
@@ -15,7 +15,7 @@ nnf_multilabel_one_hot(y, outcomes, device = "cpu")
 \item{device}{Torch device.}
 }
 \value{
-A \code{torch_tensor} of shape \verb{(batch_size, n_classes)} with binary values.
+A \code{torch_tensor} of shape \verb{(batch_size, tot_levels)} with binary values.
 }
 \description{
 Transforms a tensor of class indices (one column per hierarchy level)

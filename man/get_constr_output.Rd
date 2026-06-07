@@ -7,13 +7,13 @@
 get_constr_output(x, R)
 }
 \arguments{
-\item{x}{A \code{torch_tensor} of shape \verb{(batch_size, n_classes)}.}
+\item{x}{A \code{torch_tensor} of shape \verb{(batch_size, tot_levels)}.}
 
-\item{R}{A \code{torch_tensor} of shape \verb{(1, n_classes, n_classes)} where
+\item{R}{A \code{torch_tensor} of shape \verb{(1, tot_levels, tot_levels)} where
 \code{R[1, i, j] = 1} iff class \code{i} is a descendant of class \code{j}.}
 }
 \value{
-A \code{torch_tensor} of shape \verb{(batch_size, n_classes)} with constrained outputs.
+A \code{torch_tensor} of shape \verb{(batch_size, tot_levels)} with constrained outputs.
 }
 \description{
 Given neural network outputs x and ancestor matrix R, enforces that

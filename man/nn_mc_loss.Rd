@@ -12,9 +12,9 @@ nn_mc_loss(
 )
 }
 \arguments{
-\item{R}{Ancestor matrix tensor of shape \verb{(1, n_classes, n_classes)}.}
+\item{R}{Ancestor matrix tensor of shape \verb{(1, tot_levels, tot_levels)}.}
 
-\item{to_eval}{Optional logical tensor of shape \verb{(n_classes,)} indicating
+\item{to_eval}{Optional logical tensor of shape \verb{(tot_levels,)} indicating
 which classes to include in loss computation.}
 
 \item{criterion}{Loss function module or functional to apply after constraint
@@ -45,7 +45,7 @@ R <- build_ancestor_matrix_from_outcomes(my_tree, processed$outcomes, device = "
 loss_fn <- nn_mc_loss(R = R, reduction = "mean")
 
 # Forward pass
-output <- model(x)  # (batch, n_classes)
+output <- model(x)  # (batch, tot_levels)
 loss <- loss_fn(output, labels)
 loss$backward()
 }
