@@ -15,7 +15,7 @@ test_that("returns correct shape and type for a simple 2-level hierarchy", {
   # 2 level_2 classes + 4 level_3 = 6 classes
   expect_tensor(result)
   expect_tensor_shape(result, c(1, 6, 6))
-  expect_tensor_dtype(result, torch_double())
+  expect_tensor_dtype(result, torch::torch_double())
 })
 
 test_that("handles ghost classes (present in tree but absent from outcomes)", {
@@ -172,5 +172,5 @@ test_that("computes full transitive closure for deep hierarchies (3+ levels)", {
   expect_equal_to_r(result[1, 7, 3], 1) # -> L3_A1b
   
   # Self-loops on the diagonal (substracting the eye don't go to negative values)
-  expect_true((result$squeeze() - torch_eye(9))$min()$item() >= 0)
+  expect_true((result$squeeze() - torch::torch_eye(9))$min()$item() >= 0)
 })

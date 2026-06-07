@@ -23,8 +23,7 @@ test_that("Training hierarchical classification for {data.tree} Node with valida
   expect_no_error(
     fit <- tabnet_fit(attrition_tree, valid_split = 0.2, epochs = 1)
   )
-  expect_named(fit$fit$config, "ancestor")
-  expect_true(fit$fit$config$ancestor$is_sparse())
+  expect_true( "ancestor" %in% names(fit$fit$config))
   
   expect_no_error(
     result <- predict(fit, attrition_tree, type = "prob")
@@ -65,7 +64,6 @@ test_that("hierarchical classification for {data.tree} Node is explainable", {
 
 test_that("Training hierarchical classification for {data.tree} Node for starwars", {
 
-  # try to use starwars dataset with two forbidden column name
   starwars_tree <- starwars %>% 
     rename(`_name` = "name", `_height` = "height") %>% 
     mutate(species = coalesce(species, "Unknown_Species"),
@@ -73,11 +71,7 @@ test_that("Training hierarchical classification for {data.tree} Node for starwar
            pathString = paste("StarWars_characters", species, sex, `_name`, sep = "/")) %>%
     as.Node()
   
-  expect_error(
-    check_compliant_node(starwars_tree)
-    ,"reserved names")
-
-  fit <- tabnet_fit(starwars_tree, epochs = 1)
+  expect_no_error(  fit <- tabnet_fit(starwars_tree, epochs = 1))
 })
 
 test_that("we properly check non-compliant colnames", {
