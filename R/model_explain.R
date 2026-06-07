@@ -81,7 +81,7 @@ tabnet_explain.model_fit <- function(object, new_data) {
 }
 
 convert_to_df <- function(x, nms) {
-  x <- as.data.frame(as.matrix(x$to(device = "cpu")$detach()))
+  x <- as.data.frame(as_array(x$to(device = "cpu")$detach()))
   colnames(x) <- nms
   tibble::as_tibble(x)
 }

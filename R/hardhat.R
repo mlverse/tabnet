@@ -410,7 +410,42 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
   }
 }
 
-
+#' Predict using `tabnet`
+#'
+#' @param object A `tabnet_fit` object.
+#'
+#' @param new_data A data frame or matrix of new predictors.
+#' @param type expected type within  `c("numeric", "prob", "class")` for respectively regression,
+#' class probabilities, or classification
+#' @param epoch predict using the model checkpoint of that epoch, if available.
+#' @param ... Not used, but required for extensibility.
+#'
+#' @return
+#'
+#' [predict()] returns a tibble of predictions and [augment()] appends the
+#' columns in `new_data`. In either case, the number of rows in the tibble is
+#' guaranteed to be the same as the number of rows in `new_data`.
+#'
+#' For regression data, the prediction is in the column `.pred`. For
+#' classification, the class predictions are in `.pred_class` and the
+#' probability estimates are in columns with the pattern `.pred_{level}` where
+#' `level` is the levels of the outcome factor vector.
+#'
+#' @examples
+#' car_split <- rsample::initial_split(mtcars)
+#'
+#' \dontrun{
+#' # Fit
+#' if (torch_is_installed() & interactive()) {
+#'  mod <- tabnet_fit(mpg ~ cyl + log(drat), training(car_split))
+#'
+#'  # Predict
+#'  predict(mod, testing(car_split))
+#'
+#'  # Augment
+#'  augment(mod, testing(car_split))
+#' }
+#' }
 #' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
@@ -427,6 +462,21 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
   out <- predict_tabnet_bridge(type, object, processed$predictors, epoch, batch_size)
   hardhat::validate_prediction_size(out, new_data_df)
   out
+}
+
+#' @export
+#' @rdname predict.tabnet_fit
+#' @inheritParams predict.tabnet_fit
+#' @importFrom dplyr bind_cols
+augment.tabnet_fit <- function(x, new_data, ...) {
+  res <- predict(x, new_data)
+  if (inherits(new_data, "Node") && !is.null(x$fit$config$ancestor)) {
+    truth <- node_to_df(new_data)$y
+    
+  } else {
+    truth <- new_data
+  }
+  bind_cols(res, truth)
 }
 
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
