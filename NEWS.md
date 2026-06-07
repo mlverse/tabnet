@@ -1,5 +1,9 @@
 # tabnet (development version)
 
+## Bugfixes
+
+* Ancestor matrix is now taken into account for hierarchical classification (#188).
+
 # tabnet 0.8.0
 
 ## New features
