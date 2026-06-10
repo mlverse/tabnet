@@ -430,6 +430,15 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
   out
 }
 
+#' @export
+#' @rdname predict.tabnet_fit
+augment.tabnet_fit <- function(x, new_data) {
+  res <- predict(x, new_data)
+  forged_truth <- hardhat::forge(new_data, blueprint = x$blueprint, outcomes = TRUE)$outcomes
+  res <- dplyr::bind_cols(res, forged_truth)
+}
+
+
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   type <- check_type(object$blueprint$ptypes$outcomes, type)

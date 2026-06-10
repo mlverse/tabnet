@@ -12,3 +12,7 @@
 #'
 #' @return Returns `rhs(lhs)`.
 NULL
+
+#' @importFrom generics augment
+#' @export
+generics::augment
