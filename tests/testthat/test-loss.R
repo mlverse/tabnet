@@ -185,7 +185,7 @@ test_that("nn_mc_loss resolves functional criterion at initialization", {
   expect_true(rlang::is_function(loss_fn$criterion_fn))
   
   output <- torch::torch_randn(2, 3, requires_grad = TRUE)
-  target <- torch::torch_randint(0, 2, c(2, 3))$to(dtype = torch::torch_double())
+  target <- torch::torch_randint(0, 2, c(2, 3))
   
   expect_no_error(loss <- loss_fn(output, target))
   expect_tensor(loss)
@@ -200,7 +200,7 @@ test_that("nn_mc_loss resolves nn_module criterion at initialization (default)",
   expect_true(rlang::is_function(loss_fn$criterion_fn))
   
   output <- torch::torch_randn(2, 3, requires_grad = TRUE)
-  target <- torch::torch_randint(0, 2, c(2, 3))$to(dtype = torch::torch_double())
+  target <- torch::torch_randint(0, 2, c(2, 3))
   
   expect_no_error(loss <- loss_fn(output, target))
   expect_tensor(loss)
@@ -219,14 +219,14 @@ test_that("nn_mc_loss can use already instanciated nn_module criterion", {
   expect_true(rlang::is_function(loss_fn$criterion_fn))
   
   output <- torch::torch_randn(2, 3, requires_grad = TRUE)
-  target <- torch::torch_randint(0, 2, c(2, 3))$to(dtype = torch::torch_double())
+  target <- torch::torch_randint(0, 2, c(2, 3))
   
   expect_no_error(loss <- loss_fn(output, target))
   expect_tensor(loss)
 })
 
 test_that("nn_mc_loss errors on invalid criterion type", {
-  R <- torch::torch_eye(3)$unsqueeze(1)$to(dtype = torch::torch_double())
+  R <- torch::torch_eye(3)$unsqueeze(1)
   
   expect_error(
     nn_mc_loss(R = R, criterion = "not_a_valid_criterion"),
@@ -235,7 +235,7 @@ test_that("nn_mc_loss errors on invalid criterion type", {
 })
 
 test_that("nn_mc_loss warns on reduction mismatch for module criterion", {
-  R <- torch::torch_eye(3)$unsqueeze(1)$to(dtype = torch::torch_double())
+  R <- torch::torch_eye(3)$unsqueeze(1)
   
   # Module with 'sum' reduction, but loss asks for 'mean'
   expect_warning(
@@ -249,12 +249,12 @@ test_that("nn_mc_loss warns on reduction mismatch for module criterion", {
 })
 
 test_that("nn_mc_loss backward pass works without inplace errors", {
-  R <- torch::torch_eye(3)$unsqueeze(1)$to(dtype = torch::torch_double())
+  R <- torch::torch_eye(3)$unsqueeze(1)
   
   loss_fn <- nn_mc_loss(R = R, reduction = "mean")
   
   output <- torch::torch_randn(2, 3, requires_grad = TRUE)
-  target <- torch::torch_randint(0, 2, c(2, 3))$to(dtype = torch::torch_double())
+  target <- torch::torch_randint(0, 2, c(2, 3))
   
   # Forward
   loss <- loss_fn(output, target)

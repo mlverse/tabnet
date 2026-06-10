@@ -15,8 +15,7 @@ test_that("returns correct shape and type for a simple 2-level hierarchy", {
   # 2 level_2 classes + 4 level_3 = 6 classes
   expect_tensor(result)
   expect_tensor_shape(result, c(1, 6, 6))
-  expect_tensor_dtype(result, torch::torch_double())
-})
+  })
 
 test_that("handles ghost classes (present in tree but absent from outcomes)", {
   # Tree with a "C" branch not in the outcomes

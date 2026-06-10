@@ -11,6 +11,9 @@ test_that("Training regression for data.frame and formula", {
   expect_no_error(
     predict(fit, x)
   )
+  expect_no_error(
+    augment(fit, x)
+  )
 
   expect_no_error(
     fit <- tabnet_fit(x, y, epochs = 2, verbose = TRUE)
@@ -29,6 +32,14 @@ test_that("Training classification for data.frame", {
 
   expect_no_error(
     predict(fit, attrix)
+  )
+
+  expect_no_error(
+    augment(fit, attrix, type = "prob")
+  )
+
+  expect_no_error(
+    augment(fit, attrix)
   )
 
 })
