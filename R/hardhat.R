@@ -412,6 +412,42 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 }
 
 
+#' Predict using `tabnet`
+#'
+#' @param object,x A `tabnet_fit` object.
+#'
+#' @param new_data A data frame or matrix of new predictors.
+#' @param type expected outcome type within  `c("numeric", "prob", "class")`.
+#' @param epoch the epoch of an existing checkpoint to infer from.
+#' 
+#' @param ... Not used, but required for extensibility.
+#'
+#' @return
+#'
+#' [predict()] returns a tibble of predictions and [augment()] appends the
+#' columns in `new_data`. In either case, the number of rows in the tibble is
+#' guaranteed to be the same as the number of rows in `new_data`.
+#'
+#' For regression data, the prediction is in the column `.pred`. For
+#' classification, the class predictions are in `.pred_class` and the
+#' probability estimates are in columns with the pattern `.pred_{level}` where
+#' `level` is the levels of the outcome factor vector.
+#'
+#' @examples
+#' # Minimal example for quick execution
+#' car_split <- rsample::initial_split(mtcars[ 1:6,   ])
+#'
+#' \dontrun{
+#' # Fit
+#' if (torch_is_installed() & interactive()) {
+#'  mod <- tabnet_fit(mpg ~ cyl + log(drat), training(car_split))
+#'
+#'  # Predict
+#'  predict(mod, testing(car_split))
+#'  augment(mod, testing(car_split))
+#' }
+#' }
+#'
 #' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
@@ -431,9 +467,10 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
 }
 
 #' @export
+#' @inheritParams predict.tabnet_fit
 #' @rdname predict.tabnet_fit
-augment.tabnet_fit <- function(x, new_data) {
-  res <- predict(x, new_data)
+augment.tabnet_fit <- function(x, new_data, ...) {
+  res <- predict(x, new_data, ...)
   forged_truth <- hardhat::forge(new_data, blueprint = x$blueprint, outcomes = TRUE)$outcomes
   res <- dplyr::bind_cols(res, forged_truth)
 }
@@ -516,7 +553,7 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
 #'
 #' @param outcome_ptype shall be `model$blueprint$ptypes$outcomes` when called from
 #'  a model object, or `processed$outcomes` from the result of a `mold()`
-#' @param type expected type within  `c("numeric", "prob", "class")`
+#' @param type expected outcome type within  `c("numeric", "prob", "class")`
 #'
 #' @return valid type within `c("numeric", "prob", "class")` for respectively regression,
 #' class probabilities, or classification

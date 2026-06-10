@@ -10,9 +10,11 @@
 ^CRAN-RELEASE$
 ^.V8*
 ^doc$
+^man_lang$
 ^Meta$
 ^CRAN-SUBMISSION$
 ^revdep$
 ^vignettes/*_files$
 ^\.claude$
+^\.CLAUDE$
 ^\.positai$

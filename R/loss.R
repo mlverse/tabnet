@@ -153,6 +153,7 @@ get_constr_output <- function(x, R) {
 #'   of shape `(batch_size, n_classes)` if `reduction = "none"`.
 #'
 #' @seealso [nn_mc_loss()], [get_constr_output()]
+#' @importFrom stats setNames
 #' @export
 nnf_mc_loss <- function(output, target, R, to_eval = NULL, 
                         criterion = nnf_binary_cross_entropy_with_logits) {
@@ -220,13 +221,14 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
 #' }
 #'
 #' @seealso [nnf_mc_loss()], [build_ancestor_matrix_from_outcomes()], [get_constr_output()]
+#' @importFrom torch nnf_binary_cross_entropy_with_logits
 #' @export
 nn_mc_loss <- nn_module(
   "nn_mc_loss",
   inherit = torch::nn_l1_loss,
   
   initialize = function(R, to_eval = NULL, 
-                        criterion = torch::nnf_binary_cross_entropy_with_logits,
+                        criterion = nnf_binary_cross_entropy_with_logits,
                         reduction = "mean") {
     super$initialize(reduction = reduction)
     

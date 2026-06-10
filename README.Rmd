@@ -81,10 +81,10 @@ As the standard method `predict()` is used, you can rely on your usual metric fu
 
 ```{r}
 metrics <- metric_set(accuracy, precision, recall)
-cbind(test, predict(fit, test)) %>% 
+augment(fit, test) %>% 
   metrics(Attrition, estimate = .pred_class)
   
-cbind(test, predict(fit, test, type = "prob")) %>% 
+augment(fit, test, type = "prob") %>% 
   roc_auc(Attrition, .pred_No)
 ```
 

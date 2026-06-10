@@ -99,21 +99,21 @@ metric functions for model performance results. Here we use {yardstick}
 
 ``` r
 metrics <- metric_set(accuracy, precision, recall)
-cbind(test, predict(fit, test)) %>% 
+augment(fit, test) %>% 
   metrics(Attrition, estimate = .pred_class)
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.840
+#> 1 accuracy  binary         0.813
 #> 2 precision binary         0.840
-#> 3 recall    binary         1
+#> 3 recall    binary         0.959
   
-cbind(test, predict(fit, test, type = "prob")) %>% 
+augment(fit, test, type = "prob") %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.466
+#> 1 roc_auc binary         0.452
 ```
 
 ## Explain model on test-set with attention map

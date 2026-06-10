@@ -7,7 +7,7 @@
 nn_mc_loss(
   R,
   to_eval = NULL,
-  criterion = torch::nnf_binary_cross_entropy_with_logits,
+  criterion = nnf_binary_cross_entropy_with_logits,
   reduction = "mean"
 )
 }

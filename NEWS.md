@@ -1,4 +1,8 @@
-# tabnet (development version)
+# tabnet 0.9.0
+
+## New features
+
+* add the `augment()` function and document the `predict()` function.
 
 ## Bugfixes
 
