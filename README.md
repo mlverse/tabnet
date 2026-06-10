@@ -44,7 +44,7 @@ Install [{tabnet} from CRAN](https://CRAN.R-project.org/package=tabnet)
 with:
 
 ``` r
-install.packages('tabnet')
+install.packages("tabnet")
 ```
 
 The development version can be installed from
@@ -65,7 +65,7 @@ library(tabnet)
 suppressPackageStartupMessages(library(recipes))
 library(yardstick)
 library(ggplot2)
-set.seed(1)
+set.seed(2026)
 
 data("attrition", package = "modeldata")
 test_idx <- sample.int(nrow(attrition), size = 0.2 * nrow(attrition))
@@ -104,16 +104,16 @@ augment(fit, test) %>%
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.813
-#> 2 precision binary         0.840
-#> 3 recall    binary         0.959
+#> 1 accuracy  binary         0.823
+#> 2 precision binary         0.825
+#> 3 recall    binary         0.996
   
 augment(fit, test, type = "prob") %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.452
+#> 1 roc_auc binary         0.476
 ```
 
 ## Explain model on test-set with attention map
