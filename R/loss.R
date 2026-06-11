@@ -164,7 +164,7 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
   constr_output <- get_constr_output(output, R)  # (batch, n_classes)
   
   # 2. Label-weighted output, then constrained (for positive label handling)
-  labeled_output <- target * output_d
+  labeled_output <- target * output
   train_output <- get_constr_output(labeled_output, R)
   
   # 3. Blend outputs based on ground-truth labels:
