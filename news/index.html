@@ -42,10 +42,16 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="tabnet-development-version">tabnet (development version)<a class="anchor" aria-label="anchor" href="#tabnet-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.9.0" id="tabnet-090">tabnet 0.9.0<a class="anchor" aria-label="anchor" href="#tabnet-090"></a></h2>
 <div class="section level3">
-<h3 id="bugfixes-development-version">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-development-version"></a></h3>
-<ul><li>Ancestor matrix is now taken into account for hierarchical classification (<a href="https://github.com/mlverse/tabnet/issues/188" class="external-link">#188</a>).</li>
+<h3 id="new-features-0-9-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-9-0"></a></h3>
+<ul><li>add the <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> function and document the <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> function (<a href="https://github.com/mlverse/tabnet/issues/190" class="external-link">#190</a>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-and-fixes-0-9-0">Improvements and fixes<a class="anchor" aria-label="anchor" href="#improvements-and-fixes-0-9-0"></a></h3>
+<ul><li>Ancestor matrix is now taken into account, making hierarchical classification now effective (<a href="https://github.com/mlverse/tabnet/issues/188" class="external-link">#188</a>).</li>
+<li>Fix steady loss due to frozen optimizer after checkpointing to disk when running on “cuda” and “mps” accelerators.</li>
+<li>multiple R files renamed to improve clarity.</li>
 </ul></div>
 </div>
     <div class="section level2">

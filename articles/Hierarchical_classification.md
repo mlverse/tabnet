@@ -245,10 +245,7 @@ We can infer on the test-set
 
 ``` r
 
-starwars_hat <- bind_cols(
-    predict(starw_model, starwars_test_tree),
-    node_to_df(starwars_test_tree)$y
-  )
+starwars_hat <- augment(starw_model, starwars_test_tree)
 tail(starwars_hat, n = 5)
 ```
 

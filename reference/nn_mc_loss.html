@@ -54,7 +54,7 @@ Stores the ancestor matrix R and evaluation mask for reuse across batches.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">nn_mc_loss</span><span class="op">(</span></span>
 <span>  <span class="va">R</span>,</span>
 <span>  to_eval <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  criterion <span class="op">=</span> <span class="fu">torch</span><span class="fu">::</span><span class="va"><a href="https://torch.mlverse.org/docs/reference/nnf_binary_cross_entropy_with_logits.html" class="external-link">nnf_binary_cross_entropy_with_logits</a></span>,</span>
+<span>  criterion <span class="op">=</span> <span class="va">nnf_binary_cross_entropy_with_logits</span>,</span>
 <span>  reduction <span class="op">=</span> <span class="st">"mean"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>

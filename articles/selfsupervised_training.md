@@ -176,10 +176,7 @@ Finally, we can measure the results against our test set:
 
 ``` r
 
-test %>% 
-  bind_cols(
-    predict(model_fit, test, type = "prob")
-  ) %>% 
+augment(model_fit, test, type = "prob") %>% 
   roc_auc(Class, .pred_bad)
 ```
 
@@ -237,10 +234,7 @@ to prediction :
 ``` r
 
 vanilla_model_fit <- tabnet_fit(rec, train , tabnet_model= vanilla_model_fit, from_epoch=20, valid_split = 0.2, epochs = 1, verbose=TRUE)
-test %>% 
-  bind_cols(
-    predict(vanilla_model_fit, test, type = "prob")
-  ) %>% 
+augment(vanilla_model_fit, test, type = "prob") %>% 
   roc_auc(Class, .pred_good)
 ```
 

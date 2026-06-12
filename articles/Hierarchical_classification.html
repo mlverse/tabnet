@@ -312,10 +312,7 @@ plot.</p>
 </h2>
 <p>We can infer on the test-set</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">starwars_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">bind_cols</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">starw_model</span>, <span class="va">starwars_test_tree</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="../reference/node_to_df.html">node_to_df</a></span><span class="op">(</span><span class="va">starwars_test_tree</span><span class="op">)</span><span class="op">$</span><span class="va">y</span></span>
-<span>  <span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">starwars_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">starw_model</span>, <span class="va">starwars_test_tree</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">starwars_hat</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p>We can see in the Warnings that the dataset is a challenge as many
 new levels are found in a lot of predictors in the test set.<br>
