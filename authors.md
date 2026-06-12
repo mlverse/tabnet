@@ -18,7 +18,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/mlverse/tabnet/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/mlverse/tabnet/blob/v0.9.0/DESCRIPTION)
 
 Falbel D (2026). *tabnet: Fit 'TabNet' Models for Classification and
 Regression*. R package version 0.9.0,
