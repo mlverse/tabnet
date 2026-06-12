@@ -5,6 +5,9 @@ test_that("Training hierarchical classification for {data.tree} Node attrition_t
   expect_no_error(
     result <- predict(fit, attrition_tree, type = "prob")
   )
+  expect_no_error(
+    augmented <- augment(fit, attrition_tree, type = "prob")
+  )
 
   expect_equal(ncol(result), 2) # 2 outcomes levels_
 

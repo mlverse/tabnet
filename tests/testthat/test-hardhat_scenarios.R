@@ -41,6 +41,42 @@ test_that("epoch counter is valid for retraining from a checkpoint", {
 
 })
 
+test_that("training loss keeps decreasing across a checkpoint boundary", {
+  # Default checkpoint_epochs = 10; training to epoch 12 crosses the first checkpoint.
+  # A broken device round-trip during checkpointing caused the optimizer to lose its
+  # parameter references, freezing the loss at an identical floating-point value for
+  # every epoch after the first checkpoint.
+  fit <- tabnet_fit(Attrition ~ ., data = attrition, epochs = 12, learn_rate = 1e-2)
+
+  expect_length(fit$fit$metrics, 12)
+  train_losses <- purrr::map_dbl(fit$fit$metrics, ~mean(.x$train))
+
+  # Loss must still be changing after the checkpoint at epoch 10: a frozen
+  # optimizer repeats an exact floating-point value every epoch
+  expect_false(train_losses[11] == train_losses[12])
+})
+
+test_that("training loss keeps decreasing when resuming from a disk-saved model", {
+  # attr_fitted has 12 epochs with checkpoint_epochs = 10 (one checkpoint saved).
+  # After disk restore, check_net_is_empty_ptr = TRUE and the code restores weights
+  # from serialized_net + apply_checkpoint, then resumes training with epoch_shift = 10.
+  # Before the fix, this code path could also freeze the optimizer.
+  tmp <- tempfile("model", fileext = "rds")
+  withr::local_file(saveRDS(attr_fitted, tmp))
+
+  fit_from_disk <- readRDS(tmp)
+  fit2 <- tabnet_fit(attrix, attriy, tabnet_model = fit_from_disk, epochs = 2)
+
+  train_losses <- purrr::map_dbl(fit2$fit$metrics, ~mean(.x$train))
+  n <- length(train_losses)
+
+  # After disk restore, the optimizer must still be updating parameters:
+  # a frozen optimizer would produce identical loss values every epoch
+  expect_false(train_losses[n - 1] == train_losses[n])
+  # Overall, loss after resumed training must be lower than at the very start
+  expect_lte(train_losses[n], train_losses[1])
+})
+
 test_that("trying to continue training with different dataset raise error", {
 
   pretrain_1 <- tabnet_pretrain(x, y, epochs = 1)

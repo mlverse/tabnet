@@ -10,8 +10,8 @@ GLU
 Giunchiglia
 Hillman
 Interpretability
-Interpretable
 Lifecycle
+MCM
 MNAR
 OOM
 Pfister
@@ -25,14 +25,12 @@ XGBoost
 ai
 al
 ames
-arXiv
 autoassociative
 autograd
 beeing
 callout
 classif
 cli
-config
 cpu
 cuda
 dataloading
@@ -42,8 +40,8 @@ dreamquark
 entmax
 et
 explainability
+extensibility
 ggplot
-interpretable
 mse
 nn
 num

@@ -1,8 +1,14 @@
-# tabnet (development version)
+# tabnet 0.9.0
 
-## Bugfixes
+## New features
 
-* Ancestor matrix is now taken into account for hierarchical classification (#188).
+* add the `augment()` function and document the `predict()` function (#190).
+
+## Improvements and fixes
+
+* Ancestor matrix is now taken into account, making hierarchical classification now effective (#188).
+* Fix steady loss due to frozen optimizer after checkpointing to disk when running on "cuda" and "mps" accelerators.
+* multiple R files renamed to improve clarity.
 
 # tabnet 0.8.0
 

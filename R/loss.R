@@ -118,7 +118,7 @@ nn_aum_loss <- nn_module(
 #'   `R[1, i, j] = 1` iff class `i` is a descendant of class `j`.
 #' @return A `torch_tensor` of shape `(batch_size, n_classes)` with constrained outputs.
 get_constr_output <- function(x, R) {
-  c_out <- x$double()$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
+  c_out <- x$unsqueeze(2)$expand(c(x$shape[1], R$shape[2], R$shape[2]))
   R_batch <- R$expand(c(x$shape[1], R$shape[2], R$shape[2]))
   final_out <- (R_batch * c_out)$clone()$max(dim = 3)
   final_out[[1]]
@@ -153,17 +153,18 @@ get_constr_output <- function(x, R) {
 #'   of shape `(batch_size, n_classes)` if `reduction = "none"`.
 #'
 #' @seealso [nn_mc_loss()], [get_constr_output()]
+#' @importFrom stats setNames
 #' @export
 nnf_mc_loss <- function(output, target, R, to_eval = NULL, 
                         criterion = nnf_binary_cross_entropy_with_logits) {
-  # Ensure double precision for numerical stability during constraint propagation
-  output_d <- output$double()
+  # Ensuring double precision for numerical stability during constraint propagation is not available on mps platform
+  # output_d <- output$double()
   
   # 1. Constrained output from raw predictions: max-pool over descendants
-  constr_output <- get_constr_output(output_d, R)  # (batch, n_classes)
+  constr_output <- get_constr_output(output, R)  # (batch, n_classes)
   
   # 2. Label-weighted output, then constrained (for positive label handling)
-  labeled_output <- target * output_d
+  labeled_output <- target * output
   train_output <- get_constr_output(labeled_output, R)
   
   # 3. Blend outputs based on ground-truth labels:
@@ -180,7 +181,7 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
   # 5. Apply the base loss function (e.g., BCE with logits)
   loss <- criterion(
     blended_output, 
-    target$double()
+    target
   )
   
   return(loss)
@@ -220,13 +221,14 @@ nnf_mc_loss <- function(output, target, R, to_eval = NULL,
 #' }
 #'
 #' @seealso [nnf_mc_loss()], [build_ancestor_matrix_from_outcomes()], [get_constr_output()]
+#' @importFrom torch nnf_binary_cross_entropy_with_logits
 #' @export
 nn_mc_loss <- nn_module(
   "nn_mc_loss",
   inherit = torch::nn_l1_loss,
   
   initialize = function(R, to_eval = NULL, 
-                        criterion = torch::nnf_binary_cross_entropy_with_logits,
+                        criterion = nnf_binary_cross_entropy_with_logits,
                         reduction = "mean") {
     super$initialize(reduction = reduction)
     
@@ -331,10 +333,7 @@ nnf_multilabel_one_hot <- function(y, outcomes, device = "cpu") {
       num_classes = n_per_level[lvl]
     )
   }
-  # concatenate along the columns axis)
-  torch::torch_cat(one_hot_list, dim = 2)$to(
-    dtype = torch::torch_double(), 
-    device = device
-  )
+  # concatenate along the columns axis; cast to float for BCE loss compatibility
+  torch::torch_cat(one_hot_list, dim = 2)$to(device = device, dtype = torch::torch_float())
 }
 

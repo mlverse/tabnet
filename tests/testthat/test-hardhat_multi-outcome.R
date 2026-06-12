@@ -10,6 +10,11 @@ test_that("Training multi-output regression from data.frame", {
   )
   expect_equal(ncol(result), 2)
 
+  expect_no_error(
+    augmented <- augment(fit, cbind(x, data.frame(y = y, z = y + 1)))
+  )
+  expect_equal(ncol(augmented), 4)
+  
 })
 
 test_that("Training multi-output regression from formula", {
@@ -22,6 +27,11 @@ test_that("Training multi-output regression from formula", {
     result <- predict(fit, ames)
   )
   expect_equal(ncol(result), 3)
+
+  expect_no_error(
+    augmented <- augment(fit, ames)
+  )
+  expect_equal(ncol(augmented), 6)
 
 })
 
@@ -40,6 +50,11 @@ test_that("Training multi-output regression from recipe", {
   )
   expect_equal(ncol(result), 3)
 
+  expect_no_error(
+    augmented <- augment(fit, ames)
+  )
+  expect_equal(ncol(augmented), 6)
+  
 })
 
 test_that("Training multilabel classification from data.frame", {

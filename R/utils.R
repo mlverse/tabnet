@@ -126,6 +126,17 @@ model_to_raw <- function(model) {
   r
 }
 
+# Serialize a CPU state dict without moving the live model.
+# Moving the model between devices during training breaks optimizer parameter
+# references on MPS/CUDA, causing the optimizer to stop updating weights.
+state_to_raw <- function(model) {
+  con <- rawConnection(raw(), open = "wr")
+  on.exit(close(con), add = TRUE)
+  cpu_state <- lapply(model$state_dict(), function(t) t$cpu())
+  torch::torch_save(cpu_state, con)
+  rawConnectionValue(con)
+}
+
 # generalize torch to_device to nested list of tensors
 to_device <- function(x, device) {
   lapply(x, function(x) {

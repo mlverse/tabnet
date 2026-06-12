@@ -352,7 +352,10 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
 
-    tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
+    if (check_net_is_empty_ptr(tabnet_model)) {
+      tabnet_model$fit$network <- reload_model(tabnet_model$serialized_net)
+    }
+    apply_checkpoint(tabnet_model$fit$network, tabnet_model$fit$checkpoints[[closest_checkpoint]])
     epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
     tabnet_model$fit$metrics <- tabnet_model$fit$metrics[seq(epoch_shift)]
 
@@ -391,7 +394,8 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
       last_checkpoint <- length(tabnet_model$fit$checkpoints)
 
-      tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
+      tabnet_model$fit$network <- reload_model(tabnet_model$serialized_net)
+      apply_checkpoint(tabnet_model$fit$network, tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
     } else runtime_error("No model serialized weight can be found in {.var {tabnet_model}}, check the model history")
@@ -412,6 +416,42 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 }
 
 
+#' Predict using `tabnet`
+#'
+#' @param object,x A `tabnet_fit` object.
+#'
+#' @param new_data A data frame or matrix of new predictors.
+#' @param type expected outcome type within  `c("numeric", "prob", "class")`.
+#' @param epoch the epoch of an existing checkpoint to infer from.
+#' 
+#' @param ... Not used, but required for extensibility.
+#'
+#' @return
+#'
+#' [predict()] returns a tibble of predictions and [augment()] appends the
+#' columns in `new_data`. In either case, the number of rows in the tibble is
+#' guaranteed to be the same as the number of rows in `new_data`.
+#'
+#' For regression data, the prediction is in the column `.pred`. For
+#' classification, the class predictions are in `.pred_class` and the
+#' probability estimates are in columns with the pattern `.pred_{level}` where
+#' `level` is the levels of the outcome factor vector.
+#'
+#' @examples
+#' # Minimal example for quick execution
+#' car_split <- rsample::initial_split(mtcars[ 1:6,   ])
+#'
+#' \dontrun{
+#' # Fit
+#' if (torch_is_installed() & interactive()) {
+#'  mod <- tabnet_fit(mpg ~ cyl + log(drat), training(car_split))
+#'
+#'  # Predict
+#'  predict(mod, testing(car_split))
+#'  augment(mod, testing(car_split))
+#' }
+#' }
+#'
 #' @importFrom stats predict
 #' @export
 predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL) {
@@ -430,6 +470,30 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
   out
 }
 
+#' @export
+#' @inheritParams predict.tabnet_fit
+#' @rdname predict.tabnet_fit
+augment.tabnet_fit <- function(x, new_data, ...) {
+  res <- predict(x, new_data, ...)
+  if (inherits(new_data, "Node") && !is.null(x$fit$config$ancestor)) {
+    new_data_df <- node_to_df(new_data)
+    # Enforces column order, type, outcomes column names, etc
+    forged_truth <- hardhat::forge(cbind(new_data_df$x, new_data_df$y), x$blueprint, outcomes = TRUE)$outcomes
+  } else {
+    # mold XY blueprint
+    # When mold() was called with a vector y, hardhat uses ".outcome" as the outcome column
+    # name. forge() with outcomes = TRUE then requires new_data to contain ".outcome", which
+    # won't be the case when the user passes a regular data frame.
+    if (inherits(x$blueprint, "xy_blueprint") && ncol(x$blueprint$ptypes$outcomes) == 1) {
+      outcome_name_col <- which(!names(new_data) %in% names(x$blueprint$ptypes$predictors))
+      names(new_data)[outcome_name_col] <- ".outcome"
+    } 
+    forged_truth <- hardhat::forge(new_data, blueprint = x$blueprint, outcomes = TRUE)$outcomes
+  }
+  dplyr::bind_cols(res, forged_truth)
+}
+
+
 predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
 
   type <- check_type(object$blueprint$ptypes$outcomes, type)
@@ -447,10 +511,14 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch
 
-    object$fit$network <- reload_model(object$fit$checkpoints[[ind]])
-  }
+    # Ensure network is live before applying checkpoint state dict
+    if (check_net_is_empty_ptr(object)) {
+      m <- reload_model(object$serialized_net)
+      object$fit$network$load_state_dict(m$state_dict())
+    }
+    apply_checkpoint(object$fit$network, object$fit$checkpoints[[ind]])
 
-  if (check_net_is_empty_ptr(object)) {
+  } else if (check_net_is_empty_ptr(object)) {
     m <- reload_model(object$serialized_net)
     # this modifies 'object' in-place so subsequent predicts won't
     # need to reload.
@@ -507,7 +575,7 @@ model_pretrain_to_fit <- function(obj, x, y, config = tabnet_config()) {
 #'
 #' @param outcome_ptype shall be `model$blueprint$ptypes$outcomes` when called from
 #'  a model object, or `processed$outcomes` from the result of a `mold()`
-#' @param type expected type within  `c("numeric", "prob", "class")`
+#' @param type expected outcome type within  `c("numeric", "prob", "class")`
 #'
 #' @return valid type within `c("numeric", "prob", "class")` for respectively regression,
 #' class probabilities, or classification
@@ -549,6 +617,20 @@ reload_model <- function(object) {
   on.exit({close(con)}, add = TRUE)
   module <- torch::torch_load(con)
   module
+}
+
+# Apply a checkpoint (raw bytes) to an existing live network.
+# Handles both old format (full nn_module) and new format (CPU state dict list).
+apply_checkpoint <- function(network, raw_bytes) {
+  con <- rawConnection(raw_bytes)
+  on.exit(close(con), add = TRUE)
+  loaded <- torch::torch_load(con)
+  if (inherits(loaded, "nn_module")) {
+    network$load_state_dict(loaded$state_dict())
+  } else {
+    network$load_state_dict(loaded)
+  }
+  invisible(network)
 }
 
 #' @export
@@ -678,7 +760,7 @@ build_ancestor_matrix_from_outcomes <- function(x, outcomes, device = "cpu") {
   if (length(rows) > 0) R[cbind(rows, cols)] <- 1L
   
   # 7. Convert to torch
-  R_torch <- torch::torch_tensor(R, dtype = torch::torch_double(), device = device)
+  R_torch <- torch::torch_tensor(R, device = device)
   R_torch$unsqueeze(1)
 }
 

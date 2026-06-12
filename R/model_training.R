@@ -483,6 +483,11 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     num_workers = config$num_workers
   )
 
+  # move ancestor matrix to training device before building the loss function
+  if (!is.null(config$ancestor)) {
+    config$ancestor <- config$ancestor$to(device = device)
+  }
+
   # resolve loss
   config$loss_fn <- resolve_loss(config, train_ds$.getbatch(batch = c(1:2))$y$dtype)
 
@@ -547,10 +552,8 @@ tabnet_train_supervised <- function(obj, x, y, config = tabnet_config(), epoch_s
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)$loss
 
     if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0) {
-      network$to(device = "cpu")
-      checkpoints[[length(checkpoints) + 1]] <- model_to_raw(network)
+      checkpoints[[length(checkpoints) + 1]] <- state_to_raw(network)
       metrics[[epoch]][["checkpoint"]] <- TRUE
-      network$to(device = device)
     }
 
     network$eval()
