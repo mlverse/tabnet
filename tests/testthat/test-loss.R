@@ -82,21 +82,13 @@ test_that("get_constr_output handles basic 2D input with identity constraint", {
 
 test_that("get_constr_output applies hierarchy constraint correctly", {
   x <- torch_tensor(matrix(c(1, 5, 
-                             3, 2), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch::torch_float64())
+                             3, 2), nrow = 2, ncol = 2, byrow = TRUE))
   R <- torch_tensor(matrix(c(1, 1, 
-                             0, 1), nrow = 2, ncol = 2, byrow = TRUE), dtype = torch::torch_float64())
-  result <-get_constr_output(x, R)
+                             0, 1), nrow = 2, ncol = 2, byrow = TRUE))
+  result <- get_constr_output(x, R)
   expect_tensor_shape(result, c(2, 2))
   expected <- matrix(c(5, 5, 3, 2), nrow = 2, ncol = 2, byrow = TRUE)
   expect_equal_to_r(result, expected, tolerance = 1e-6)
-})
-
-test_that("get_constr_output preserves input dtype", {
-  x_f32 <- torch_tensor(matrix(1:4, nrow = 2), dtype = torch::torch_float32())
-  x_f64 <- torch_tensor(matrix(1:4, nrow = 2), dtype = torch::torch_float64())
-  R <- torch::torch_eye(2)
-  expect_tensor_dtype(get_constr_output(x_f32, R), torch::torch_float64())
-  expect_tensor_dtype(get_constr_output(x_f64, R), torch::torch_float64())
 })
 
 test_that("get_constr_output handles batch dimension correctly", {

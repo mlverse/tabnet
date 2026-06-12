@@ -471,7 +471,14 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
 #' @rdname predict.tabnet_fit
 augment.tabnet_fit <- function(x, new_data, ...) {
   res <- predict(x, new_data, ...)
-  forged_truth <- hardhat::forge(new_data, blueprint = x$blueprint, outcomes = TRUE)$outcomes
+  if (inherits(new_data, "Node") && !is.null(x$fit$config$ancestor)) {
+    new_data_df <- node_to_df(new_data)$x
+    # Enforces column order, type, column names, etc
+    forged_truth <- hardhat::forge(new_data_df, x$blueprint, outcomes = TRUE)$outcomes
+    
+  } else {
+    forged_truth <- hardhat::forge(new_data, blueprint = x$blueprint, outcomes = TRUE)$outcomes
+  }
   res <- dplyr::bind_cols(res, forged_truth)
 }
 
@@ -724,7 +731,7 @@ build_ancestor_matrix_from_outcomes <- function(x, outcomes, device = "cpu") {
   if (length(rows) > 0) R[cbind(rows, cols)] <- 1L
   
   # 7. Convert to torch
-  R_torch <- torch::torch_tensor(R, dtype = torch::torch_double(), device = device)
+  R_torch <- torch::torch_tensor(R, device = device)
   R_torch$unsqueeze(1)
 }
 
