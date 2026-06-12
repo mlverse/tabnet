@@ -352,7 +352,10 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
     # find closest checkpoint for that epoch
     closest_checkpoint <- from_epoch %/% tabnet_model$fit$config$checkpoint_epoch
 
-    tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[closest_checkpoint]])
+    if (check_net_is_empty_ptr(tabnet_model)) {
+      tabnet_model$fit$network <- reload_model(tabnet_model$serialized_net)
+    }
+    apply_checkpoint(tabnet_model$fit$network, tabnet_model$fit$checkpoints[[closest_checkpoint]])
     epoch_shift <- closest_checkpoint * tabnet_model$fit$config$checkpoint_epoch
     tabnet_model$fit$metrics <- tabnet_model$fit$metrics[seq(epoch_shift)]
 
@@ -391,7 +394,8 @@ tabnet_bridge <- function(processed, config = tabnet_config(), tabnet_model, fro
 
       last_checkpoint <- length(tabnet_model$fit$checkpoints)
 
-      tabnet_model$fit$network <- reload_model(tabnet_model$fit$checkpoints[[last_checkpoint]])
+      tabnet_model$fit$network <- reload_model(tabnet_model$serialized_net)
+      apply_checkpoint(tabnet_model$fit$network, tabnet_model$fit$checkpoints[[last_checkpoint]])
       epoch_shift <- last_checkpoint * tabnet_model$fit$config$checkpoint_epoch
 
     } else runtime_error("No model serialized weight can be found in {.var {tabnet_model}}, check the model history")
@@ -507,10 +511,14 @@ predict_tabnet_bridge <- function(type, object, predictors, epoch, batch_size) {
     # find closest checkpoint for that epoch
     ind <- epoch %/% object$fit$config$checkpoint_epoch
 
-    object$fit$network <- reload_model(object$fit$checkpoints[[ind]])
-  }
+    # Ensure network is live before applying checkpoint state dict
+    if (check_net_is_empty_ptr(object)) {
+      m <- reload_model(object$serialized_net)
+      object$fit$network$load_state_dict(m$state_dict())
+    }
+    apply_checkpoint(object$fit$network, object$fit$checkpoints[[ind]])
 
-  if (check_net_is_empty_ptr(object)) {
+  } else if (check_net_is_empty_ptr(object)) {
     m <- reload_model(object$serialized_net)
     # this modifies 'object' in-place so subsequent predicts won't
     # need to reload.
@@ -609,6 +617,20 @@ reload_model <- function(object) {
   on.exit({close(con)}, add = TRUE)
   module <- torch::torch_load(con)
   module
+}
+
+# Apply a checkpoint (raw bytes) to an existing live network.
+# Handles both old format (full nn_module) and new format (CPU state dict list).
+apply_checkpoint <- function(network, raw_bytes) {
+  con <- rawConnection(raw_bytes)
+  on.exit(close(con), add = TRUE)
+  loaded <- torch::torch_load(con)
+  if (inherits(loaded, "nn_module")) {
+    network$load_state_dict(loaded$state_dict())
+  } else {
+    network$load_state_dict(loaded)
+  }
+  invisible(network)
 }
 
 #' @export

@@ -163,10 +163,8 @@ tabnet_train_unsupervised <- function(x, config = tabnet_config(), epoch_shift =
     metrics[[epoch]][["train"]] <- transpose_metrics(train_metrics)$loss
 
     if (config$checkpoint_epochs > 0 && epoch %% config$checkpoint_epochs == 0) {
-      network$to(device = "cpu")
-      checkpoints[[length(checkpoints) + 1]] <- model_to_raw(network)
+      checkpoints[[length(checkpoints) + 1]] <- state_to_raw(network)
       metrics[[epoch]][["checkpoint"]] <- TRUE
-      network$to(device = device)
     }
 
     network$eval()
