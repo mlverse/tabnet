@@ -65,7 +65,7 @@ library(tabnet)
 suppressPackageStartupMessages(library(recipes))
 library(yardstick)
 library(ggplot2)
-set.seed(2026)
+torch::torch_manual_seed(2026)
 
 data("attrition", package = "modeldata")
 test_idx <- sample.int(nrow(attrition), size = 0.2 * nrow(attrition))
@@ -99,21 +99,22 @@ metric functions for model performance results. Here we use {yardstick}
 
 ``` r
 metrics <- metric_set(accuracy, precision, recall)
+
 augment(fit, test) %>% 
   metrics(Attrition, estimate = .pred_class)
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.823
-#> 2 precision binary         0.825
-#> 3 recall    binary         0.996
+#> 1 accuracy  binary         0.847
+#> 2 precision binary         0.847
+#> 3 recall    binary         1
   
 augment(fit, test, type = "prob") %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.476
+#> 1 roc_auc binary         0.631
 ```
 
 ## Explain model on test-set with attention map
