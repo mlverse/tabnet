@@ -472,14 +472,21 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
 augment.tabnet_fit <- function(x, new_data, ...) {
   res <- predict(x, new_data, ...)
   if (inherits(new_data, "Node") && !is.null(x$fit$config$ancestor)) {
-    new_data_df <- node_to_df(new_data)$x
-    # Enforces column order, type, column names, etc
-    forged_truth <- hardhat::forge(new_data_df, x$blueprint, outcomes = TRUE)$outcomes
-    
+    new_data_df <- node_to_df(new_data)
+    # Enforces column order, type, outcomes column names, etc
+    forged_truth <- hardhat::forge(cbind(new_data_df$x, new_data_df$y), x$blueprint, outcomes = TRUE)$outcomes
   } else {
+    # mold XY blueprint
+    # When mold() was called with a vector y, hardhat uses ".outcome" as the outcome column
+    # name. forge() with outcomes = TRUE then requires new_data to contain ".outcome", which
+    # won't be the case when the user passes a regular data frame.
+    if (inherits(x$blueprint, "xy_blueprint") && ncol(x$blueprint$ptypes$outcomes) == 1) {
+      outcome_name_col <- which(!names(new_data) %in% names(x$blueprint$ptypes$predictors))
+      names(new_data)[outcome_name_col] <- ".outcome"
+    } 
     forged_truth <- hardhat::forge(new_data, blueprint = x$blueprint, outcomes = TRUE)$outcomes
   }
-  res <- dplyr::bind_cols(res, forged_truth)
+  dplyr::bind_cols(res, forged_truth)
 }
 
 

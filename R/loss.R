@@ -333,7 +333,7 @@ nnf_multilabel_one_hot <- function(y, outcomes, device = "cpu") {
       num_classes = n_per_level[lvl]
     )
   }
-  # concatenate along the columns axis)
-  torch::torch_cat(one_hot_list, dim = 2)$to(device = device)
+  # concatenate along the columns axis; cast to float for BCE loss compatibility
+  torch::torch_cat(one_hot_list, dim = 2)$to(device = device, dtype = torch::torch_float())
 }
 

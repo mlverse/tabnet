@@ -12,7 +12,7 @@ test_that("Training regression for data.frame and formula", {
     predict(fit, x)
   )
   expect_no_error(
-    augment(fit, x)
+    augment(fit, ames)
   )
 
   expect_no_error(
@@ -35,11 +35,11 @@ test_that("Training classification for data.frame", {
   )
 
   expect_no_error(
-    augment(fit, attrix, type = "prob")
+    augment(fit, attrition[ids,] , type = "prob")
   )
 
   expect_no_error(
-    augment(fit, attrix)
+    augment(fit, attrition[ids,] )
   )
 
 })
@@ -114,6 +114,7 @@ test_that("checkpoints works for inference", {
 
   expect_equal(p3, predict(fit, x))
 
+  expect_no_error(augment(fit, ames[ids,], epoch = 1))
 })
 
 test_that("print module works even after a reload from disk", {
