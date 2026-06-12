@@ -11,7 +11,8 @@ status](https://github.com/mlverse/tabnet/workflows/R-CMD-check/badge.svg)](http
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/tabnet)](https://CRAN.R-project.org/package=tabnet)
-[![](https://cranlogs.r-pkg.org/badges/tabnet)](https://cran.r-project.org/package=tabnet)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/tabnet)](https://cran.r-project.org/package=tabnet)
 [![Discord](https://img.shields.io/discord/837019024499277855?logo=discord)](https://discord.com/invite/s3D5cKhBkx)
 
 <!-- badges: end -->
@@ -106,15 +107,15 @@ augment(fit, test) %>%
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
 #> 1 accuracy  binary         0.847
-#> 2 precision binary         0.847
-#> 3 recall    binary         1
+#> 2 precision binary         0.853
+#> 3 recall    binary         0.992
   
 augment(fit, test, type = "prob") %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.631
+#> 1 roc_auc binary         0.384
 ```
 
 ## Explain model on test-set with attention map
