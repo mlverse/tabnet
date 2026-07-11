@@ -11,10 +11,11 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-5573-3952"))
   )
 Description: Implements the 'TabNet' model by Sercan O. Arik et al. (2019)
-    <doi:10.48550/arXiv.1908.07442> with 'Coherent Hierarchical Multi-label
-    Classification Networks' by Giunchiglia et al.  <doi:10.48550/arXiv.2010.10151> and
-    provides a consistent interface for fitting and creating predictions.
-    It's also fully compatible with the 'tidymodels' ecosystem.
+    <doi:10.48550/arXiv.1908.07442> with 'Coherent Hierarchical
+    Multi-label Classification Networks' by Giunchiglia et al.
+    <doi:10.48550/arXiv.2010.10151> and provides a consistent interface
+    for fitting and creating predictions.  It's also fully compatible with
+    the 'tidymodels' ecosystem.
 License: MIT + file LICENSE
 URL: https://mlverse.github.io/tabnet/, https://github.com/mlverse/tabnet
 BugReports: https://github.com/mlverse/tabnet/issues
@@ -62,11 +63,12 @@ Suggests:
     workflows,
     xgboost,
     yardstick
-VignetteBuilder: knitr
+VignetteBuilder: 
+    knitr
+Config/roxygen2/version: 8.0.0
 Config/testthat/edition: 3
 Config/testthat/parallel: false
 Config/testthat/start-first: interface, explain, params
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
 Language: en-US
-Config/roxygen2/version: 8.0.0
+Roxygen: list(markdown = TRUE)
