@@ -51,7 +51,7 @@ jobs:
       
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
-          version: 1.7.30
+          version: 1.9.38
         
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
