@@ -2,9 +2,11 @@
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
   release:
     types: [published]
   workflow_dispatch:
@@ -23,7 +25,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-          
+      
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         with:
@@ -37,16 +39,13 @@ jobs:
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
         with:
-          r-version: 'release'
-          extra-repositories: "https://bgreenwell.r-universe.dev"
           use-public-rspm: true
-
+          extra-repositories: "https://bgreenwell.r-universe.dev"
 
       - name: Setup R dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          cache-version: 2
-          extra-packages: any::rcmdcheck, local::.
+          extra-packages: any::pkgdown, local::.
           needs: website
           install-quarto: true
 
