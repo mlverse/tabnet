@@ -1,6 +1,6 @@
 # tabnet 0.9.1
 
-* {vip} is now loaded from r-universe.
+* {vip} is now distributed from r-universe.
 
 # tabnet 0.9.0
 
