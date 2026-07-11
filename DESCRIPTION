@@ -1,6 +1,6 @@
 Package: tabnet
 Title: Fit 'TabNet' Models for Classification and Regression
-Version: 0.9.0.9000
+Version: 0.9.1
 Authors@R: c(
     person("Daniel", "Falbel", , "daniel@rstudio.com", role = "aut"),
     person(, "RStudio", role = "cph"),
@@ -65,6 +65,7 @@ Suggests:
     yardstick
 VignetteBuilder: 
     knitr
+Additional_repositories: https://bgreenwell.r-universe.dev
 Config/roxygen2/version: 8.0.0
 Config/testthat/edition: 3
 Config/testthat/parallel: false
