@@ -471,7 +471,6 @@ predict.tabnet_fit <- function(object, new_data, type = NULL, ..., epoch = NULL)
 }
 
 #' @export
-#' @inheritParams predict.tabnet_fit
 #' @rdname predict.tabnet_fit
 augment.tabnet_fit <- function(x, new_data, ...) {
   res <- predict(x, new_data, ...)
