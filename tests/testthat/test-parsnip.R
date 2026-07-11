@@ -98,7 +98,6 @@ test_that("Check we can finalize a workflow from a tune_grid", {
 
   model <- tabnet(epochs = tune(), checkpoint_epochs = 1) %>%
     parsnip::set_mode("regression") %>%
-    parsnip::set_args(epochs = 2) %>%
     parsnip::set_engine("torch")
 
   wf <- workflows::workflow() %>%

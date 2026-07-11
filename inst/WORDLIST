@@ -29,6 +29,7 @@ autoassociative
 autograd
 beeing
 callout
+checkpointing
 classif
 cli
 cpu
@@ -42,6 +43,7 @@ et
 explainability
 extensibility
 ggplot
+mps
 mse
 nn
 num
@@ -60,4 +62,5 @@ th
 tibble
 tidymodels
 tunable
+vip
 zeallot
