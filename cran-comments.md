@@ -4,4 +4,4 @@
 
 * This is a new release.
 
-Note 1 : Example duration is inherent to fitting a model with the underlying torch framework.
+Note 1 : vip package in Suggests has been moved to an Additional repository specification.
