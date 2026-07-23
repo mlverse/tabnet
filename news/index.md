@@ -1,8 +1,14 @@
 # Changelog
 
-## tabnet (development version)
+## tabnet 0.9.1
+
+CRAN release: 2026-07-22
+
+- {vip} is now distributed from r-universe.
 
 ## tabnet 0.9.0
+
+CRAN release: 2026-06-12
 
 ### New features
 

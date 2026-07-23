@@ -147,7 +147,7 @@ ames_fit model training diagnostic plot
 
 Now we capture the columns with missings, and create a convenience
 function to color the
-[`vip::vip()`](https://koalaverse.github.io/vip/reference/vip.html) plot
+[`vip::vip()`](https://bgreenwell.github.io/vip/reference/vip.html) plot
 output according to the missingness quality of the column
 
 ``` r
@@ -158,7 +158,7 @@ col_with_missings <- ames_missing %>%
   rename(has_missing = "value")
 
 vip_color <- function(object, col_has_missing) {
-  vip_data <- vip::vip(object)$data %>% arrange(Importance)
+  vip_data <- vip::vi(object) %>% arrange(Importance)
   vis_miss_plus <- left_join(vip_data, col_has_missing , by = "Variable") %>%
     mutate(Variable = factor(Variable, levels = vip_data$Variable))
   vis_miss_plus

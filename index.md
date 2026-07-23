@@ -97,16 +97,16 @@ augment(fit, test) %>%
 #> # A tibble: 3 × 3
 #>   .metric   .estimator .estimate
 #>   <chr>     <chr>          <dbl>
-#> 1 accuracy  binary         0.847
-#> 2 precision binary         0.853
-#> 3 recall    binary         0.992
+#> 1 accuracy  binary         0.837
+#> 2 precision binary         0.845
+#> 3 recall    binary         0.988
   
 augment(fit, test, type = "prob") %>% 
   roc_auc(Attrition, .pred_No)
 #> # A tibble: 1 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 roc_auc binary         0.384
+#> 1 roc_auc binary         0.461
 ```
 
 ## Explain model on test-set with attention map

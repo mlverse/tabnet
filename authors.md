@@ -18,16 +18,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/mlverse/tabnet/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/mlverse/tabnet/blob/v0.9.1/DESCRIPTION)
 
 Falbel D (2026). *tabnet: Fit 'TabNet' Models for Classification and
-Regression*. R package version 0.9.0.9000,
+Regression*. R package version 0.9.1,
 <https://mlverse.github.io/tabnet/>.
 
     @Manual{,
       title = {tabnet: Fit 'TabNet' Models for Classification and Regression},
       author = {Daniel Falbel},
       year = {2026},
-      note = {R package version 0.9.0.9000},
+      note = {R package version 0.9.1},
       url = {https://mlverse.github.io/tabnet/},
     }

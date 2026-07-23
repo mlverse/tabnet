@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tabnet</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@
       <h1>Interpretation tools</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/main/vignettes/interpretation.Rmd" class="external-link"><code>vignettes/interpretation.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mlverse/tabnet/blob/v0.9.1/vignettes/interpretation.Rmd" class="external-link"><code>vignettes/interpretation.Rmd</code></a></small>
       <div class="d-none name"><code>interpretation.Rmd</code></div>
     </div>
 
@@ -161,7 +161,7 @@ the interpretation metrics.</p>
 <p>In the feature importance plot we can see that, as expected, features
 <code>V03-V06</code> are by far the most important ones.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://koalaverse.github.io/vip/reference/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://bgreenwell.github.io/vip/reference/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="A variable importance plot of the fitted model on syn2 dataset showing V03 then V06, V04, v10 and V5 as the 5 most important features, in that order." width="100%" height="300px"></p>
 <p>Now let’s visualize the aggregated-masks plot. In this figure we see
 each observation on the x axis and each variable on the y axis. The
@@ -200,7 +200,7 @@ create the response variable and we expect to see this in the masks.</p>
 importance for <code>V10</code>, and the other features that are used
 conditionally - either <code>V01-V02</code> or <code>V05-V06</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://koalaverse.github.io/vip/reference/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn4</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://bgreenwell.github.io/vip/reference/vip.html" class="external-link">vip</a></span><span class="op">(</span><span class="va">fit_syn4</span><span class="op">)</span></span></code></pre></div>
 <p><img src="interpretation_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="A variable importance plot of the fitted model on syn4 dataset" width="100%" height="300px"></p>
 <p>Now let’s visualize the attention masks. Notice that we arranged the
 dataset by <code>V10</code> so we can easily visualize the interaction
@@ -236,7 +236,7 @@ strongly on <code>V01-V02</code> and <code>V05-V06</code>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
