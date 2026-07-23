@@ -1,5 +1,7 @@
 # Changelog
 
+## tabnet (development version)
+
 ## tabnet 0.9.1
 
 CRAN release: 2026-07-22
