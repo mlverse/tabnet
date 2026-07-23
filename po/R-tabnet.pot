@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: tabnet 0.8.0.9000\n"
-"POT-Creation-Date: 2026-06-10 10:46+0200\n"
+"Project-Id-Version: tabnet 0.9.1.9000\n"
+"POT-Creation-Date: 2026-07-23 23:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,93 +35,93 @@ msgstr ""
 msgid "The model was trained for less than {.val {from_epoch}} epochs"
 msgstr ""
 
-#: hardhat.R:362
+#: hardhat.R:365
 msgid "Found missing values in the {.var {names(outcomes)}} outcome column."
 msgstr ""
 
-#: hardhat.R:372 hardhat.R:484
+#: hardhat.R:375 hardhat.R:551
 msgid "Model dimensions don't match."
 msgstr ""
 
-#: hardhat.R:397
+#: hardhat.R:401
 msgid ""
 "No model serialized weight can be found in {.var {tabnet_model}}, check the "
 "model history"
 msgstr ""
 
-#: hardhat.R:405
+#: hardhat.R:409
 msgid "Using {.fn tabnet_pretrain} from a model is not currently supported."
 msgstr ""
 
-#: hardhat.R:406
+#: hardhat.R:410
 msgid "Pretraining will start from a new network initialization"
 msgstr ""
 
-#: hardhat.R:445
+#: hardhat.R:508
 msgid "The model was trained for less than {.val {epoch}} epochs"
 msgstr ""
 
-#: hardhat.R:522
+#: hardhat.R:589
 msgid ""
 "Mixed multi-outcome type {.type {unique(purrr::map_chr(outcome_ptype, "
 "~class(.x)[[1]]))}} is not supported"
 msgstr ""
 
-#: hardhat.R:530
+#: hardhat.R:597
 msgid "Unknown outcome type {.type {class(outcome_ptype)}}"
 msgstr ""
 
-#: hardhat.R:537
+#: hardhat.R:604
 msgid "Outcome is factor and the prediction type is {.type {type}}."
 msgstr ""
 
-#: hardhat.R:540
+#: hardhat.R:607
 msgid "Outcome is numeric and the prediction type is {.type {type}}."
 msgstr ""
 
-#: hardhat.R:629
+#: hardhat.R:710
 msgid "No factor levels found in outcomes : {str(outcomes)}"
 msgstr ""
 
-#: hardhat.R:645
+#: hardhat.R:726
 msgid ""
 "Factor level {.var {nm}} not found at tree level {lvl} (outcomes column {."
 "var {level_cols[lvl - 1L]}})"
 msgstr ""
 
-#: loss.R:261
+#: loss.R:263
 msgid "The criterion module has reduction={.val {module_reduction}}"
 msgstr ""
 
-#: loss.R:262
+#: loss.R:264
 msgid "but nn_mc_loss was called with reduction={.val {reduction}}."
 msgstr ""
 
-#: loss.R:263
+#: loss.R:265
 msgid "i"
 msgstr ""
 
-#: loss.R:263
+#: loss.R:265
 msgid "The module's reduction will be used."
 msgstr ""
 
-#: loss.R:265
+#: loss.R:267
 msgid "mc_loss_reduction_mismatch"
 msgstr ""
 
-#: loss.R:297
+#: loss.R:299
 msgid "`criterion` must be a function or an `nn_module`."
 msgstr ""
 
-#: loss.R:298
+#: loss.R:300
 msgid "x"
 msgstr ""
 
-#: loss.R:298
+#: loss.R:300
 msgid "Got: {.class {class(criterion)[1]}}"
 msgstr ""
 
-#: loss.R:300
+#: loss.R:302
 msgid "mc_loss_invalid_criterion"
 msgstr ""
 
@@ -129,32 +129,32 @@ msgstr ""
 msgid "{.fn tabnet_explain} is not defined for a {.type {class(object)[1]}}."
 msgstr ""
 
-#: model_pretraining.R:121 model_training.R:506
+#: model_pretraining.R:121 model_training.R:511
 msgid "{.var optimizer} must be resolved into a torch optimizer generator."
 msgstr ""
 
-#: model_pretraining.R:135 model_training.R:519
+#: model_pretraining.R:135 model_training.R:524
 msgid ""
 "Currently only the {.str step} and {.str reduce_on_plateau} scheduler are "
 "supported."
 msgstr ""
 
-#: model_pretraining.R:182 model_training.R:566
+#: model_pretraining.R:180 model_training.R:569
 #, c-format
 msgid "[Epoch %03d] Loss: %3f"
 msgstr ""
 
-#: model_pretraining.R:184 model_training.R:568
+#: model_pretraining.R:182 model_training.R:571
 #, c-format
 msgid "[Epoch %03d] Loss: %3f, Valid loss: %3f"
 msgstr ""
 
-#: model_pretraining.R:199 model_training.R:584
+#: model_pretraining.R:197 model_training.R:587
 #, c-format
 msgid "Early-stopping at epoch {.val epoch}"
 msgstr ""
 
-#: model_pretraining.R:224 model_training.R:609
+#: model_pretraining.R:222 model_training.R:612
 msgid ""
 "Computing importances for a dataset with size {.val {train_ds$.length()}}. \n"
 "           This can consume too much memory. We are going to use a sample of "
@@ -173,7 +173,7 @@ msgid ""
 "monitor with {.val valid_split = {valid_split}}"
 msgstr ""
 
-#: model_training.R:498
+#: model_training.R:503
 msgid ""
 "ancestor was configured. Expecting a tensor but got {.cls "
 "{class(config$ancestor)}}"
@@ -226,7 +226,7 @@ msgid ""
 "tabnet behavior."
 msgstr ""
 
-#: utils.R:157 utils.R:160
+#: utils.R:168 utils.R:171
 msgid ""
 "Currently only {.val adam} is supported as character for {.var optimizer}."
 msgstr ""
