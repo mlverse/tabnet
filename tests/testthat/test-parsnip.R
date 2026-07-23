@@ -109,12 +109,15 @@ test_that("Check we can finalize a workflow from a tune_grid", {
   cv_folds <- small_ames %>%
     rsample::vfold_cv(v = 2, repeats = 1)
 
-  at <- tune::tune_grid(
+  expect_warning(
+    at <- tune::tune_grid(
     object = wf,
     resamples = cv_folds,
     grid = custom_grid,
     metrics = yardstick::metric_set(yardstick::rmse),
     control = tune::control_grid(verbose = F)
+    ),
+  regexp = "No tuning parameters"
   )
 
   best_rmse <- tune::select_best(at, metric = "rmse")
